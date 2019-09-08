@@ -124,3 +124,6 @@ dmypy.json
 
 # Ipython notebook
 .ipynb_checkpoints/
+
+# Dynamic compiled libraries
+*.so

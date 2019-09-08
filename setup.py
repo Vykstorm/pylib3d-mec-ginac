@@ -45,7 +45,7 @@ PACKAGE_DIR = 'src'
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     # Class System
-    Extension(f"{PACKAGE}.system", ["src/system.pyx"])
+    #Extension(f"{PACKAGE}.system", ["src/system.pyx"])
 
     # TODO
 ]
