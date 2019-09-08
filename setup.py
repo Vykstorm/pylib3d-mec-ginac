@@ -63,17 +63,17 @@ LIBRARIES = [
 ]
 
 
-def extension(name):
-    return Extension(
-        name=f"{PACKAGE}.system",
-        sources=["src/system.pyx"],
+# This list holds all the extensions defined by this library
+EXTENSIONS = [
+    Extension(
+        name=f'{PACKAGE}.main',
+        sources=['src/main.pyx'],
         include_dirs=INCLUDE_DIRS,
         library_dirs=LIBRARY_DIRS,
         libraries=LIBRARIES,
-        language='c++')
-
-# This list holds all the extensions defined by this library
-EXTENSIONS = [Extension(f'{PACKAGE}.main', ['src/main.pyx'])]
+        language='c++'
+    )
+]
 
 # Now invoke distutils setup
 setup(
