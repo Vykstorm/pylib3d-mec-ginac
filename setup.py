@@ -36,20 +36,44 @@ CLASSIFIERS = [
     'Programming Language :: C++'
 ]
 
+
 # Name of the library inside python
 PACKAGE = 'lib3d_mec_ginac'
 
 # Diretory where source files of the package can be found
 PACKAGE_DIR = 'src'
 
-# This list holds all the extensions defined by this library
-EXTENSIONS = [
-    # Class System
-    #Extension(f"{PACKAGE}.system", ["src/system.pyx"])
 
-    # TODO
+
+# Directories containing header files used to build the extensions
+INCLUDE_DIRS = [
+    '/usr/local/include',
+    '/usr/include',
+    '/usr/local/include/lib_3d_mec_ginac'
 ]
 
+# Directories to search for libraries at link time
+LIBRARY_DIRS = ['/usr/local/lib']
+
+# Name of the libraries for the extensions to link against
+LIBRARIES = [
+    'ginac',
+    'cln',
+    '_3d_mec_ginac-2.0'
+]
+
+
+def extension(name):
+    return Extension(
+        name=f"{PACKAGE}.system",
+        sources=["src/system.pyx"],
+        include_dirs=INCLUDE_DIRS,
+        library_dirs=LIBRARY_DIRS,
+        libraries=LIBRARIES,
+        language='c++')
+
+# This list holds all the extensions defined by this library
+EXTENSIONS = [Extension(f'{PACKAGE}.main', ['src/main.pyx'])]
 
 # Now invoke distutils setup
 setup(
