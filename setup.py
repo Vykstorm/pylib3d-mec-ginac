@@ -47,29 +47,35 @@ PACKAGE_DIR = 'src'
 
 # Directories containing header files used to build the extensions
 INCLUDE_DIRS = [
-    '/usr/local/include',
-    '/usr/include',
-    '/usr/local/include/lib_3d_mec_ginac'
+    '../lib3d-mec-ginac/include/lib_3d_mec_ginac'
 ]
 
 # Directories to search for libraries at link time
-LIBRARY_DIRS = ['/usr/local/lib']
+LIBRARY_DIRS = [
+    #'../lib3d-mec-ginac/lib'
+]
+
+# Direcotires to search for dynamic libraries at runtime
+RUNTIME_LIBRARY_DIRS = [
+    '../lib3d-mec-ginac/lib'
+]
 
 # Name of the libraries for the extensions to link against
 LIBRARIES = [
     'ginac',
     'cln',
-    '_3d_mec_ginac-2.0'
+    #'_3d_mec_ginac-2.0'
 ]
 
 
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     Extension(
-        name=f'{PACKAGE}.main',
-        sources=['src/main.pyx'],
+        name=f'{PACKAGE}_ext',
+        sources=['src/*.pyx'],
         include_dirs=INCLUDE_DIRS,
         library_dirs=LIBRARY_DIRS,
+        runtime_library_dirs=RUNTIME_LIBRARY_DIRS,
         libraries=LIBRARIES,
         language='c++'
     )
