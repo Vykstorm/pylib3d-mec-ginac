@@ -53,6 +53,7 @@ INCLUDE_DIRS = [
 # Directories to search for libraries at link time
 LIBRARY_DIRS = [
     #'../lib3d-mec-ginac/lib'
+    '/usr/local/lib'
 ]
 
 # Direcotires to search for dynamic libraries at runtime
