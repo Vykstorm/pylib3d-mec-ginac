@@ -63,27 +63,27 @@ INCLUDE_DIRS = [
 
 # Directories to search for libraries at link time
 LIBRARY_DIRS = [
-    #f'{LIB3D_MEC_GINAC_DIR}/lib'
+    f'{LIB3D_MEC_GINAC_DIR}/lib',
     '/usr/local/lib'
 ]
 
 # Directories to search for dynamic libraries at runtime
 RUNTIME_LIBRARY_DIRS = [
-    LIB3D_MEC_GINAC_DIR
+    f'{LIB3D_MEC_GINAC_DIR}/lib'
 ]
 
 # Name of the libraries for the extensions to link against
 LIBRARIES = [
-    'ginac',
     'cln',
-    #'_3d_mec_ginac-2.0'
+    'ginac',
+    '_3d_mec_ginac-2.0'
 ]
 
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     Extension(
         name=f'{PACKAGE}_ext',
-        sources=['src/*.pyx'],
+        sources=['src/system.pyx', 'src/extern.cpp'],
         include_dirs=INCLUDE_DIRS,
         library_dirs=LIBRARY_DIRS,
         runtime_library_dirs=RUNTIME_LIBRARY_DIRS,
