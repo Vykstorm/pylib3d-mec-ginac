@@ -98,5 +98,6 @@ setup(
 
     packages=[PACKAGE],
     package_dir={PACKAGE:PACKAGE_DIR},
-    ext_modules=cythonize(EXTENSIONS)
+    ext_modules=cythonize(EXTENSIONS),
+    zip_safe=False
 )
