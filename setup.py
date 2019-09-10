@@ -86,7 +86,7 @@ LIBRARIES = [
 # library
 source = StringIO()
 for filename in listdir('src'):
-    if not filename.endswith('.pyx') or filename.startswith('main'):
+    if not filename.endswith('.pyx') or filename.startswith('merged'):
         continue
     with open(join('src', filename), 'r') as file:
         source.write(file.read())
