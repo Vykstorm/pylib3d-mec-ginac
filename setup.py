@@ -111,6 +111,5 @@ setup(
 
     packages=[PACKAGE],
     package_dir={PACKAGE:PACKAGE_DIR},
-    zip_safe=False,
     ext_modules=cythonize(EXTENSIONS, compiler_directives={'language_level': 3}),
 )
