@@ -10,6 +10,8 @@ from distutils.extension import Extension
 from Cython.Build import cythonize
 
 
+######## PACKAGE DESCRIPTION ########
+
 # Name of this library
 NAME = 'pylib3d-mec-ginac'
 
@@ -37,6 +39,8 @@ CLASSIFIERS = [
 ]
 
 
+######## PYTHON PACKAGE SETUP ########
+
 # Name of the library inside python
 PACKAGE = 'lib3d_mec_ginac'
 
@@ -44,6 +48,8 @@ PACKAGE = 'lib3d_mec_ginac'
 PACKAGE_DIR = 'src'
 
 
+
+######## C EXTENSION CONFIGURATION VARIABLES ########
 
 # This variable points to the directory where lib3d-mec-ginac library lives
 LIB3D_MEC_GINAC_DIR = '../lib3d-mec-ginac'
@@ -73,7 +79,6 @@ LIBRARIES = [
     #'_3d_mec_ginac-2.0'
 ]
 
-
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     Extension(
@@ -86,6 +91,8 @@ EXTENSIONS = [
         language='c++'
     )
 ]
+
+
 
 # Now invoke distutils setup
 setup(
