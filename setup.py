@@ -8,6 +8,9 @@ Setup script to install pylib3d-mec-ginac library.
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
+from os import listdir
+from os.path import join
+from io import StringIO
 
 
 ######## PACKAGE DESCRIPTION ########
@@ -79,11 +82,27 @@ LIBRARIES = [
     '_3d_mec_ginac-2.0'
 ]
 
+# Here we merge all cython source (from .pyx files) to generate just 1 dynamic
+# library
+source = StringIO()
+for filename in listdir('src'):
+    if not filename.endswith('.pyx') or filename.startswith('main'):
+        continue
+    with open(join('src', filename), 'r') as file:
+        source.write(file.read())
+        source.write('\n')
+
+# Merged source code will be written in src/merged.pyx
+with open(join('src', 'merged.pyx'), 'w') as file:
+    file.write(source.getvalue())
+
+
+
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     Extension(
         name=f'{PACKAGE}_ext',
-        sources=['src/system.pyx', 'src/extern.cpp'],
+        sources=['src/merged.pyx', 'src/extern.cpp'],
         include_dirs=INCLUDE_DIRS,
         library_dirs=LIBRARY_DIRS,
         runtime_library_dirs=RUNTIME_LIBRARY_DIRS,
