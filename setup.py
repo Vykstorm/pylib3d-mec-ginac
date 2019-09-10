@@ -88,7 +88,8 @@ EXTENSIONS = [
         library_dirs=LIBRARY_DIRS,
         runtime_library_dirs=RUNTIME_LIBRARY_DIRS,
         libraries=LIBRARIES,
-        language='c++'
+        language='c++',
+        extra_compile_args=['-w']
     )
 ]
 
