@@ -14,4 +14,4 @@ cdef extern from "System.h":
     cdef cppclass System:
         System() except +
 
-        vector[symbol_numeric] parameters
+        vector[symbol_numeric*] parameters

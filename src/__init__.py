@@ -21,7 +21,4 @@ def __dir__():
 
 
 # Import extension definitions
-import lib3d_mec_ginac_ext as _ext
-
-# Class System
-System = _ext.SystemWrapper
+from lib3d_mec_ginac_ext import *
