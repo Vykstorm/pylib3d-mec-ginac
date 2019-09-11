@@ -18,6 +18,7 @@ from src.csystem cimport System as c_System
 
 # Python imports
 from collections.abc import Mapping
+from operator import attrgetter
 
 
 ## Wrapper of the symbol_numeric class for Python
@@ -68,26 +69,33 @@ cdef class System:
 
     cpdef Parameter new_parameter(self, unicode name):
         '''
-        Creates a new parameter.
-        @param name: Is the name of the parameter.
+        Creates a new parameter with the given name
         '''
-        try:
-            self.get_parameter(name)
-        except ValueError:
-            return Parameter(<Py_ssize_t>self.system.new_Parameter(name.encode()))
-        # Parameter already created
-        raise ValueError(f'Parameter "{name}" already created')
+        if self.has_parameter(name):
+            raise ValueError(f'Parameter "{name}" already created')
+        return Parameter(<Py_ssize_t>self.system.new_Parameter(name.encode()))
 
 
     cpdef Parameter get_parameter(self, unicode name):
         '''
         Get a parameter by name
-        @param name: Name of the parameter to fetch
         '''
-        cdef Py_ssize_t handler = <Py_ssize_t>self.system.get_Parameter(name.encode())
-        if handler == 0:
+        if not self.has_parameter(name):
             raise ValueError(f'Parameter "{name}" not created yet')
-        return Parameter(handler)
+        return Parameter(<Py_ssize_t>self.system.get_Parameter(name.encode()))
+
+
+    cdef bint has_parameter(self, unicode name):
+        '''
+        Check if a parameter with the given name exists.
+        '''
+        cdef vector[symbol_numeric*] ptrs = self.system.get_Parameters()
+        cdef symbol_numeric* ptr
+        for ptr in ptrs:
+            if ptr.get_name() == <string>name.encode():
+                return 1
+        return 0
+
 
     cpdef object get_parameters(self):
         '''
@@ -100,10 +108,12 @@ cdef class System:
             params.append(Parameter(<Py_ssize_t>ptr))
         return params
 
+
     @property
     def parameters(self):
         '''
-        This property (read only) retrieves all the parameters created. Its an alias of
-        get_parameters method
+        This property (read only) retrieves all the parameters created in a dictionary
+        where keys are the parameter names and the values, instances of the class Parameter.
         '''
-        return self.get_parameters()
+        params = self.get_parameters()
+        return dict(zip(map(attrgetter('name'), params), params))
