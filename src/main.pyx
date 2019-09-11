@@ -71,7 +71,13 @@ cdef class System:
         Creates a new parameter.
         @param name: Is the name of the parameter.
         '''
-        return Parameter(<Py_ssize_t>self.system.new_Parameter(name.encode()))
+        try:
+            self.get_parameter(name)
+        except ValueError:
+            return Parameter(<Py_ssize_t>self.system.new_Parameter(name.encode()))
+        # Parameter already created
+        raise ValueError(f'Parameter "{name}" already created')
+
 
     cpdef Parameter get_parameter(self, unicode name):
         '''
@@ -80,7 +86,7 @@ cdef class System:
         '''
         cdef Py_ssize_t handler = <Py_ssize_t>self.system.get_Parameter(name.encode())
         if handler == 0:
-            raise AttributeError(f'Parameter {name} not created yet in the system')
+            raise ValueError(f'Parameter "{name}" not created yet')
         return Parameter(handler)
 
     cpdef object get_parameters(self):
