@@ -9,3 +9,4 @@ from libcpp.string cimport string
 cdef extern from "symbol_numeric.h":
     cdef cppclass symbol_numeric:
         string get_name()
+        string print_TeX_name()
