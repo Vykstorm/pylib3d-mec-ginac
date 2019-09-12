@@ -51,25 +51,28 @@ PACKAGE_DIR = 'src'
 
 ######## C EXTENSION CONFIGURATION VARIABLES ########
 
-# This variable points to the directory where lib3d-mec-ginac library lives
-LIB3D_MEC_GINAC_DIR = '../lib3d-mec-ginac'
+# Directory that contains all lib3d-mec-ginac headers
+LIB3D_MEC_GINAC_INCLUDE_DIR = '../lib3d-mec-ginac/include/lib_3d_mec_ginac'
+
+# Directory where lib3d-mec-ginac libraries are located
+LIB3D_MEC_GINAC_LIBRARY_DIR = '../lib3d-mec-ginac/lib'
 
 # Directories containing header files used to build the extensions
 INCLUDE_DIRS = [
     '/usr/local/include',
     '/usr/include',
-    f'{LIB3D_MEC_GINAC_DIR}/include/lib_3d_mec_ginac'
+    LIB3D_MEC_GINAC_INCLUDE_DIR
 ]
 
 # Directories to search for libraries at link time
 LIBRARY_DIRS = [
-    f'{LIB3D_MEC_GINAC_DIR}/lib',
+    LIB3D_MEC_GINAC_LIBRARY_DIR,
     '/usr/local/lib'
 ]
 
 # Directories to search for dynamic libraries at runtime
 RUNTIME_LIBRARY_DIRS = [
-    f'{LIB3D_MEC_GINAC_DIR}/lib'
+    LIB3D_MEC_GINAC_LIBRARY_DIR
 ]
 
 # Name of the libraries for the extensions to link against
