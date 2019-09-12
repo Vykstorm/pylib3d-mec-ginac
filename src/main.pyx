@@ -66,11 +66,12 @@ cdef class System:
     def __dealloc__(self):
         del self.system
 
-
     cpdef Parameter new_parameter(self, unicode name):
         '''
         Creates a new parameter with the given name
         '''
+        if name is None:
+            raise TypeError('Parameter name must be a string')
         if self.has_parameter(name):
             raise ValueError(f'Parameter "{name}" already created')
         return Parameter(<Py_ssize_t>self.system.new_Parameter(name.encode()))
@@ -80,6 +81,8 @@ cdef class System:
         '''
         Get a parameter by name
         '''
+        if name is None:
+            raise TypeError('Parameter name must be a string')
         if not self.has_parameter(name):
             raise ValueError(f'Parameter "{name}" not created yet')
         return Parameter(<Py_ssize_t>self.system.get_Parameter(name.encode()))

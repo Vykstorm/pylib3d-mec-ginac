@@ -32,6 +32,11 @@ class TestSystem(TestCase):
         '''
         sys = System()
 
+        # new_parameter accepts a string (parameter name) as parameter, otherwise,
+        # raises an exception
+        for x in (1, None, False, b'a'):
+            self.assertRaises(TypeError, sys.new_parameter, x)
+
         a = sys.new_parameter('a')
         # You cant create two parameters with the same name
         self.assertRaises(ValueError, sys.new_parameter, 'a')
