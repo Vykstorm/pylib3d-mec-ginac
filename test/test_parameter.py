@@ -14,7 +14,25 @@ from unittest import TestCase
 from src import *
 
 class TestParameter(TestCase):
-    pass
+    def test_name(self):
+        # Parameter instances have the attribute 'name' which is a string with their names.
+        sys = System()
+        a = sys.new_parameter('a')
+        self.assertEqual(a.name, 'a')
+
+        # Property name is only-read
+        self.assertRaises(AttributeError, setattr, a, 'name', 'b')
+        self.assertRaises(AttributeError, delattr, a, 'name')
+
+
+    def test_str(self):
+        # Parameter class defines the metamethod __str__
+        self.assertIn('__str__', Parameter)
+
+
+    def test_repr(self):
+        # Parameter class defines the metamethod __repr__
+        self.assertIn('__repr__', Parameter)
 
 
 if __name__ == '__main__':
