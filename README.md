@@ -15,8 +15,10 @@ This module provides bindings to the Python language and additional features to 
 - Install now python>=3.7 and pip3
 
     e.g: In ubuntu 18.04 bionic, you can do:
-    ```bash
+    ```
     sudo apt install python3.7 pyhthon3.7-dev python3-pip
+    ```
+    ```
     pip install pip --upgrade
     ```
     For the rest of this document, it is assumed that the default version of python and pip are 3.7 and 3 respectively.
