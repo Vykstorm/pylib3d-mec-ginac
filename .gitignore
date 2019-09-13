@@ -127,3 +127,6 @@ dmypy.json
 
 # Dynamic compiled libraries
 *.so
+
+# Compiled Cython extensions
+src/main.cpp
