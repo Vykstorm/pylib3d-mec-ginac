@@ -27,7 +27,7 @@ AUTHOR_EMAIL = 'victorruizgomezdev@gmail.com'
 root_dir = dirname(__file__)
 
 # Library description
-DESCRIPTION = ''
+DESCRIPTION = 'Python extension for the library lib3d_mec_ginac'
 
 with open(join(root_dir, 'README.md'), 'r') as f:
     LONG_DESCRIPTION = f.read()
