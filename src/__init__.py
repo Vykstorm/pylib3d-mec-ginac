@@ -6,7 +6,7 @@ Public API of the pylib3d_mec_ginac library.
 
 
 # This variable lists all variables in the public API
-__all__ = ['System', 'Parameter']
+__all__ = ['System', 'SymbolNumeric',  'Parameter']
 
 
 # This only has effect with python>=3.7 (PEP 562)
@@ -21,4 +21,4 @@ def __dir__():
 
 
 # Import extension definitions
-from lib3d_mec_ginac_ext import System, Parameter
+from lib3d_mec_ginac_ext import System, SymbolNumeric, Parameter

@@ -21,8 +21,9 @@ from collections.abc import Mapping
 from operator import attrgetter
 
 
+
 ## Wrapper of the symbol_numeric class for Python
-cdef class NumericSymbol:
+cdef class SymbolNumeric:
     cdef symbol_numeric* handler
 
     def __cinit__(self, Py_ssize_t handler):
@@ -44,8 +45,9 @@ cdef class NumericSymbol:
 
 
 
+
 ## Wrapper of the symbol_numeric class for Python for parameters
-cdef class Parameter(NumericSymbol):
+cdef class Parameter(SymbolNumeric):
     def __str__(self):
         return f'Parameter {self.name}'
 
