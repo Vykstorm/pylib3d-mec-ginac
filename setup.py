@@ -23,12 +23,17 @@ VERSION = '1.0.0'
 AUTHOR = 'Victor Ruiz Gomez'
 AUTHOR_EMAIL = 'victorruizgomezdev@gmail.com'
 
+
+root_dir = dirname(__file__)
+
 # Library description
-DESCRIPTION=''
-LONG_DESCRIPTION=''
+DESCRIPTION = ''
+
+with open(join(root_dir, 'README.md'), 'r') as f:
+    LONG_DESCRIPTION = f.read()
 
 # License
-with open(join(dirname(__file__), 'LICENSE'), 'r') as f:
+with open(join(root_dir, 'LICENSE'), 'r') as f:
     LICENSE = f.read()
 
 # Classifiers
