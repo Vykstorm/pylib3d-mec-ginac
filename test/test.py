@@ -5,10 +5,7 @@ Execute all the tests for this library.
 The current working directory must be the same as the parent folder of this script.
 
 First you need to build the library extension:
-python setup.py install
-or
 python setup.py build_ext --inplace
-to build it locally.
 '''
 
 # Append proyect root directory to sys path
