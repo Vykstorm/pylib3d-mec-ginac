@@ -2,12 +2,19 @@
 Author: Víctor Ruiz Gómez
 
 Execute all the tests for this library.
+The current working directory must be the same as the parent folder of this script.
 
-But first, you need to:
-- Build the library extension locally with:
+First you need to build the library extension:
+python setup.py install
+or
 python setup.py build_ext --inplace
-- Set PYTHONPATH to the root directory of the library (parent directory of test)
+to build it locally.
 '''
+
+# Append proyect root directory to sys path
+import sys
+from os.path import dirname, join, abspath
+sys.path.append(abspath(join(dirname(__file__), '..')))
 
 
 import unittest
@@ -16,4 +23,7 @@ import unittest
 from test_system import TestSystem
 from test_parameter import TestParameter
 
-unittest.main()
+
+if __name__ == '__main__':
+    # Run all the tests
+    unittest.main()
