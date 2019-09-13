@@ -34,10 +34,16 @@ cdef class SymbolNumeric:
 
     @property
     def name(self):
+        '''
+        Only read property that returns the name of this symbol.
+        '''
         return (<bytes>self.handler.get_name()).decode()
 
     @property
     def tex_name(self):
+        '''
+        Only read property that returns the name in latex of this symbol.
+        '''
         return (<bytes>self.handler.print_TeX_name()).decode()
 
     def __str__(self):
