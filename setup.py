@@ -8,6 +8,7 @@ Setup script to install pylib3d-mec-ginac library.
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
+from os.path import dirname, join
 
 
 ######## PACKAGE DESCRIPTION ########
@@ -27,7 +28,7 @@ DESCRIPTION=''
 LONG_DESCRIPTION=''
 
 # License
-with open('LICENSE', 'r') as f:
+with open(join(dirname(__file__), 'LICENSE'), 'r') as f:
     LICENSE = f.read()
 
 # Classifiers
