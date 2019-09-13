@@ -13,6 +13,7 @@ import unittest
 from unittest import TestCase
 from src import *
 
+
 class TestParameter(TestCase):
     def test_name(self):
         # Parameter instances have the attribute 'name' which is a string with their names.
@@ -25,14 +26,9 @@ class TestParameter(TestCase):
         self.assertRaises(AttributeError, delattr, a, 'name')
 
 
-    def test_str(self):
-        # Parameter class defines the metamethod __str__
-        self.assertIn('__str__', Parameter)
-
-
-    def test_repr(self):
-        # Parameter class defines the metamethod __repr__
-        self.assertIn('__repr__', Parameter)
+    def test_mro(self):
+        # Parameter inherits from class SymbolNumeric
+        self.assertEqual(Parameter.__mro__[1], SymbolNumeric)
 
 
 if __name__ == '__main__':
