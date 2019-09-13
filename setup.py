@@ -44,6 +44,12 @@ CLASSIFIERS = [
     'Programming Language :: C++'
 ]
 
+# Keywords
+KEYWORDS = [
+    'cython', 'c++', 'bindings',
+    'extension', 'wrapper'
+]
+
 
 ######## PYTHON PACKAGE SETUP ########
 
@@ -117,6 +123,7 @@ if __name__ == '__main__':
         long_description=LONG_DESCRIPTION,
         license=LICENSE,
 
+        keywords=KEYWORDS,
         classifiers=CLASSIFIERS,
 
         packages=[PACKAGE],
