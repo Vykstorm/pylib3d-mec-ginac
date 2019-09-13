@@ -98,22 +98,22 @@ EXTENSIONS = [
 ]
 
 
+if __name__ == '__main__':
+    # Now invoke distutils setup
+    setup(
+        name=NAME,
+        version=VERSION,
 
-# Now invoke distutils setup
-setup(
-    name=NAME,
-    version=VERSION,
+        author=AUTHOR,
+        author_email=AUTHOR_EMAIL,
 
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
+        description=DESCRIPTION,
+        long_description=LONG_DESCRIPTION,
+        license=LICENSE,
 
-    description=DESCRIPTION,
-    long_description=LONG_DESCRIPTION,
-    license=LICENSE,
+        classifiers=CLASSIFIERS,
 
-    classifiers=CLASSIFIERS,
-
-    packages=[PACKAGE],
-    package_dir={PACKAGE:PACKAGE_DIR},
-    ext_modules=cythonize(EXTENSIONS, compiler_directives={'language_level': 3}),
-)
+        packages=[PACKAGE],
+        package_dir={PACKAGE:PACKAGE_DIR},
+        ext_modules=cythonize(EXTENSIONS, compiler_directives={'language_level': 3}),
+    )
