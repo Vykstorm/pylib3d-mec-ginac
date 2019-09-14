@@ -141,8 +141,10 @@ cdef class System:
     @property
     def parameters(self):
         '''
-        This property (read only) retrieves all the parameters created in a dictionary
-        where keys are the parameter names and the values, instances of the class Parameter.
+        This property (read only) retrieves all the parameters in the system.
+
+        :return: A dictionary where keys are parameter names and values, instances of the class Parameter
+        :rtype: Dict[str, Parameter]
         '''
         params = self._get_parameters()
         return dict(zip(map(attrgetter('name'), params), params))
