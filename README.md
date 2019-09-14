@@ -46,3 +46,22 @@ Note: You can also tune ```LD_LIBRARY_PATH``` and ```CFLAGS``` to indicate where
 ```bash
     python -c "import lib3d_mec_ginac"
 ```
+
+
+## Documentation
+
+Most of the classes and methods of this extension have docstrings. You can use the command ```help``` inside the Python interpreter to get information about them
+e.g:
+```python
+from lib3d_mec_ginac import System
+help(System)
+```
+
+Also, ```docs/``` directory contains documentation pages formatted with reStructuredText syntax. They can be rendered to html/pdf with sphinx (You need to install this library first or build the extension locally with ```python setup.py build_ext --inplace```)
+
+Use the Makefile in ```docs/``` for that task. To build html pages, you can do:
+```
+cd docs
+make html
+```
+The HTML index page will be in ```docs/_build/html/index.html```
