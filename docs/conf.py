@@ -52,5 +52,5 @@ if 'sphinx.ext.intersphinx' in extensions:
 
 ######## OPTIONS FOR HTML OUTPUT ########
 
-html_theme = 'alabaster'
+html_theme = 'classic'
 html_static_path = ['static']
