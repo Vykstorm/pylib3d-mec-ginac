@@ -126,7 +126,7 @@ cdef class System:
         return 0
 
 
-    cpdef object get_parameters(self):
+    cpdef _get_parameters(self):
         '''
         Retrieve a list with all the parameters created in the system.
         '''
@@ -144,5 +144,5 @@ cdef class System:
         This property (read only) retrieves all the parameters created in a dictionary
         where keys are the parameter names and the values, instances of the class Parameter.
         '''
-        params = self.get_parameters()
+        params = self._get_parameters()
         return dict(zip(map(attrgetter('name'), params), params))
