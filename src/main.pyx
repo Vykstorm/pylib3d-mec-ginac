@@ -36,6 +36,8 @@ cdef class SymbolNumeric:
     def name(self):
         '''
         Only read property that returns the name of this symbol.
+
+        :rtype: str
         '''
         return (<bytes>self.handler.get_name()).decode()
 
@@ -43,6 +45,8 @@ cdef class SymbolNumeric:
     def tex_name(self):
         '''
         Only read property that returns the name in latex of this symbol.
+
+        :rtype: str
         '''
         return (<bytes>self.handler.print_TeX_name()).decode()
 
