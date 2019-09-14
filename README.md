@@ -65,3 +65,6 @@ cd docs
 make html
 ```
 The HTML index page will be in ```docs/_build/html/index.html```
+
+
+If you dont want to generate documentation by hand, you can view it on [this page](http://vykstorm.pythonanywhere.com/).
