@@ -81,8 +81,14 @@ cdef class System:
         del self.system
 
     cpdef Parameter new_parameter(self, unicode name):
-        '''
-        Creates a new parameter with the given name
+        '''new_parameter(name: str) -> Parameter
+        Creates a new parameter with the given name.
+
+        :param str name: The name of the new parameter
+        :return: Returns the parameter created on success
+        :rtype: Parameter
+        :raises TypeError: If name is not a string
+        :raises ValueError: If a parameter with the given name already exists in the system
         '''
         if name is None:
             raise TypeError('Parameter name must be a string')
@@ -92,8 +98,14 @@ cdef class System:
 
 
     cpdef Parameter get_parameter(self, unicode name):
-        '''
-        Get a parameter by name
+        '''get_parameter(name: str) -> Parameter
+        Get a parameter by name.
+
+        :param str name: The name of the parameter to query
+        :return: The parameter on the system with the specified name
+        :rtype: Parameter
+        :raises TypeError: If name is not a string
+        :raises ValueError: If no parameter with the given name exists in the system
         '''
         if name is None:
             raise TypeError('Parameter name must be a string')
