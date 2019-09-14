@@ -130,3 +130,6 @@ dmypy.json
 
 # Compiled Cython extensions
 src/main.cpp
+
+# Sphinx doc build directory
+docs/_build
