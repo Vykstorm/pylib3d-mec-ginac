@@ -133,3 +133,6 @@ src/main.cpp
 
 # Sphinx doc build directory
 docs/_build
+
+# Sphinx doc build directory compressed
+docs/_build.*
