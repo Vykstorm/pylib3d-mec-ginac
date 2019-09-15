@@ -68,3 +68,12 @@ The HTML index page will be in ```docs/_build/html/index.html```
 
 
 If you dont want to generate documentation by hand, you can view it on [this page](http://vykstorm.pythonanywhere.com/).
+
+## Examples
+
+A few usage examples of this library are avaliable under the directory ```examples/```. They are python scripts & jupyter notebooks.
+
+
+## License
+
+This project is under [GPLv3 license](LICENSE)
