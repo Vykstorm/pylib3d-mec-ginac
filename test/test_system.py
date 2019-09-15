@@ -48,9 +48,6 @@ class TestSystem(TestCase):
         for param in (a, b, c):
             self.assertIsInstance(param, Parameter)
 
-        # the parameter's name is consistent with the argument passed to new_parameter
-        for name, param in zip(('a', 'b', 'c'), (a, b, c)):
-            self.assertEqual(name, param.name)
 
 
     def test_get_parameter(self):
