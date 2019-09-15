@@ -26,6 +26,17 @@ class TestParameter(TestCase):
         self.assertRaises(AttributeError, delattr, a, 'name')
 
 
+    def test_tex_name(self):
+        # Parameter instances have the attribute 'tex_name' which is a string with their names in latex
+        sys = System()
+        a = sys.new_parameter('a', '\\alpha')
+        self.assertEqual(a.tex_name, '\\alpha')
+
+        # Property tex_name is only-read
+        self.assertRaises(AttributeError, setattr, a, 'tex_name', 'theta')
+        self.assertRaises(AttributeError, delattr, a, 'tex_name')
+
+
     def test_mro(self):
         # Parameter inherits from class SymbolNumeric
         self.assertEqual(Parameter.__mro__[1], SymbolNumeric)

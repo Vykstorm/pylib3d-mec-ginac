@@ -84,21 +84,28 @@ cdef class System:
     def __dealloc__(self):
         del self.system
 
-    cpdef Parameter new_parameter(self, unicode name):
-        '''new_parameter(name: str) -> Parameter
+    cpdef Parameter new_parameter(self, unicode name, unicode tex_name=None):
+        '''new_parameter(name: str[, tex_name: str]) -> Parameter
         Creates a new parameter with the given name.
 
         :param str name: The name of the new parameter
+        :param str tex_name: The name of the new parameter in latex.
         :return: Returns the parameter created on success
         :rtype: Parameter
-        :raises TypeError: If name is not a string
+        :raises TypeError: If name or tex_name are not strings
         :raises ValueError: If a parameter with the given name already exists in the system
         '''
         if name is None:
             raise TypeError('Parameter name must be a string')
         if self.has_parameter(name):
             raise ValueError(f'Parameter "{name}" already created')
-        return Parameter(<Py_ssize_t>self.system.new_Parameter(name.encode()))
+
+        cdef symbol_numeric* handler
+        if tex_name is None:
+            handler = self.system.new_Parameter(name.encode())
+        else:
+            handler = self.system.new_Parameter(name.encode(), tex_name.encode())
+        return Parameter(<Py_ssize_t>handler)
 
 
     cpdef Parameter get_parameter(self, unicode name):

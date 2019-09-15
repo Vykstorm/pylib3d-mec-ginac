@@ -34,7 +34,7 @@ class TestSystem(TestCase):
 
         # new_parameter accepts a string (parameter name) as parameter, otherwise,
         # raises an exception
-        for x in (1, None, False, b'a'):
+        for x in (1, None, False, b''):
             self.assertRaises(TypeError, sys.new_parameter, x)
 
         a = sys.new_parameter('a')
@@ -48,6 +48,11 @@ class TestSystem(TestCase):
         for param in (a, b, c):
             self.assertIsInstance(param, Parameter)
 
+        # new_parameter accepts a 2nd string (name in Latex) which is optional
+        for x in (1, False, b''):
+            self.assertRaises(TypeError, sys.new_parameter, 'd', x)
+        d = sys.new_parameter('d', '\\delta')
+        e = sys.new_parameter('e', None)
 
 
     def test_get_parameter(self):

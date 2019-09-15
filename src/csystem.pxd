@@ -14,6 +14,7 @@ cdef extern from "System.h":
     # Public API for System class
     cdef cppclass System:
         System() except +
-        symbol_numeric* new_Parameter(string parameter_name)
-        symbol_numeric* get_Parameter(string parameter_name)
+        symbol_numeric* new_Parameter(string name)
+        symbol_numeric* new_Parameter(string name, string tex_name)
+        symbol_numeric* get_Parameter(string name)
         vector[symbol_numeric*] get_Parameters()
