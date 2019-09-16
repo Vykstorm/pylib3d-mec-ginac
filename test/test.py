@@ -20,7 +20,7 @@ import unittest
 
 # Import unitary tests
 from test_system import TestSystem
-from test_parameter import TestParameter
+from test_symbol_numeric import TestSymbolNumeric
 
 
 if __name__ == '__main__':
