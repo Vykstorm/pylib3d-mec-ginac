@@ -15,6 +15,5 @@ Classes
     :members:
 
 
-.. autoclass:: lib3d_mec_ginac.Parameter
+.. autoclass:: lib3d_mec_ginac.SymbolNumeric
     :members:
-    :inherited-members:

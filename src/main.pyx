@@ -57,10 +57,10 @@ cdef class SymbolNumeric:
     @property
     def value(self):
         '''
-        Property that returns the numeric value of this symbol. It also supports
+        Property that returns the numeric value of this symbol (as a float number). It also supports
         assignment.
 
-        :rtype: Numeric
+        :rtype: float
         '''
         return self.get_value()
 
@@ -84,7 +84,8 @@ cdef class SymbolNumeric:
         Assigns a new numeric value to this symbol.
 
         :param value: It must be the new numeric value to assign for this symbol
-        :raises TypeError: If value is not a int, float, complex or str object
+        :type value: int, float, complex, str
+        :raises TypeError: If value has an incorrect type.
         '''
         if not isinstance(value, (int, float, complex, str)):
             raise TypeError(f'Value must be a int, float, complex or str')
@@ -158,7 +159,7 @@ cdef class System:
         :param str tex_name: The name of the new parameter in latex.
         :return: Returns the parameter created on success
         :rtype: Parameter
-        :raises TypeError: If name or tex_name are not strings
+        :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If a parameter with the given name already exists in the system
         '''
         if name is None:
@@ -181,7 +182,7 @@ cdef class System:
         :param str name: The name of the parameter to query
         :return: The parameter on the system with the specified name
         :rtype: Parameter
-        :raises TypeError: If name is not a string
+        :raises TypeError: If input argument have invalid type
         :raises ValueError: If no parameter with the given name exists in the system
         '''
         if name is None:
@@ -222,7 +223,7 @@ cdef class System:
         :param str name: Name of the symbol
         :return: Return the symbol defined on the system with the specified name.
         :rtype: str
-        :raises TypeError: If name is not a string
+        :raises TypeError: If input argument have invalid type
         :raises ValueError: If no symbol with that name exists in the system.
         '''
         return self.get_parameter(name)
@@ -230,13 +231,13 @@ cdef class System:
 
     cpdef get_value(self, symbol):
         '''get_value(symbol: Union[str, SymbolNumeric]) -> float
-        Get the numeric value of a symbol
+        Get the numeric value of a symbol.
 
-        :param Union[str, SymbolNumeric] symbol: It must be either the name of the symbol or an instance
-        of the class SymbolNumeric
+        :param symbol: The symbol to fetch its numeric value
+        :type symbol: str or SymbolNumeric
         :return: The value of the symbol specified
         :rtype: float
-        :raises TypeError: if symbol is not an instance of the class SymbolNumeric or a string.
+        :raises TypeError: if input arguments have invalid types
         :raises ValueError: if the argument is a string and there not exists a symbol in the system with that name
         '''
         if isinstance(symbol, str):
@@ -250,11 +251,12 @@ cdef class System:
         '''set_value(symbol: Union[str, SymbolNumeric], value: Union[str, float, int, complex])
         Set the numeric value of a symbol.
 
-        :param Union[str, SymbolNumeric] symbol: It must be either the name of the symbol or an instance
-        of the class SymbolNumeric
-        :param Union[int, float, str, complex] value: The new numeric value for the symbol.
+        :param symbol: The symbol where to assign a new numeric value
+        :type symbol: str or SymbolNumeric
+        :param value: The new value
+        :type value: int, float, complex, str
 
-        :raises TypeError: If symbol is not an instance of SymbolNumeric or a string. Also if value is not a int, float, str or complex value.
+        :raises TypeError: If input arguments have invalid types
         :raises ValueError: If the first argument is a string and there not exists a symbol in the system with that name.
         '''
         if isinstance(symbol, str):
