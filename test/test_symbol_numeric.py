@@ -45,7 +45,7 @@ class TestSymbolNumeric(TestCase):
         self.assertRaises(AttributeError, delattr, a, 'tex_name')
 
 
-    def test_change_value(self):
+    def test_value(self):
         # set_value(x) changes the numeric value of a symbol to x and get_value() returns
         # its current value
         sys = System()
@@ -68,3 +68,22 @@ class TestSymbolNumeric(TestCase):
         # set_value raises TypeError if value is not float nor int
         for value in self._non_numeric_values:
             self.assertRaises(TypeError, a.set_value,  value)
+
+
+    def test_value_property(self):
+        # 'value' is a property on the class SymbolNumeric (it has setter and getter but
+        # not deleter)
+        sys = System()
+        a = sys.new_parameter('a')
+        self.assertRaises(Exception, delattr, a, 'value')
+
+        # 'value' property setter accepts int & floats as arguments
+        for value in self._numeric_values:
+            a.value = value
+
+            # 'value' getter is consistent with get_value() method
+            self.assertEqual(a.value, a.get_value())
+
+        # 'value' property setter raises TypeError if input argument is not int or float
+        for value in self._non_numeric_values:
+            self.assertRaises(TypeError, setattr, a, 'value', value)
