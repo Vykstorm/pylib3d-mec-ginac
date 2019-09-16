@@ -97,10 +97,9 @@ class TestSystem(TestCase):
         self.assertRaises(AttributeError, delattr, sys, 'parameters')
 
 
-    def test_predefined_parameters(self):
+    def test_predefined_symbols(self):
         '''
-        Parameter 'g' is defined by default in the system
+        Test predefined symbols in a System instance.
         '''
         sys = System()
-        sys.get_parameter('g')
-        self.assertIn('g', sys.parameters)
+        sys.get_symbol('g')
