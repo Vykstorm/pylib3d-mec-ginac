@@ -83,8 +83,11 @@ cdef class SymbolNumeric:
         '''set_value(value: Union[int, float, complex, str])
         Assigns a new numeric value to this symbol.
 
-        :param value: It must be the new numeric value to assign to this symbol.
+        :param value: It must be the new numeric value to assign for this symbol
+        :raises TypeError: If value is not a int, float, complex or str object
         '''
+        if not isinstance(value, (int, float, complex, str)):
+            raise TypeError(f'Value must be a int, float, complex or str')
         self.handler.set_value(c_numeric(value))
 
 
@@ -92,7 +95,7 @@ cdef class SymbolNumeric:
         '''
         Alias of get_value().
         '''
-        return float(self.get_value())
+        return self.get_value()
 
 
     def __int__(self):
@@ -102,6 +105,15 @@ cdef class SymbolNumeric:
         :rtype: int
         '''
         return int(self.get_value())
+
+
+    def __complex__(self):
+        '''
+        Returns the numeric value of this symbol as a complex number.
+
+        :rtype: complex
+        '''
+        return complex(self.handler.get_value().real().to_double(), self.handler.get_value().imag().to_double())
 
 
     def __str__(self):
@@ -201,6 +213,55 @@ cdef class System:
         for ptr in ptrs:
             params.append(Parameter(<Py_ssize_t>ptr))
         return params
+
+
+    cpdef get_symbol(self, unicode name):
+        '''get_symbol(name: str) -> SymbolNumeric
+        Get a symbol defined on this system by name
+
+        :param str name: Name of the symbol
+        :return: Return the symbol defined on the system with the specified name.
+        :rtype: str
+        :raises TypeError: If name is not a string
+        :raises ValueError: If no symbol with that name exists in the system.
+        '''
+        return self.get_parameter(name)
+
+
+    cpdef get_value(self, symbol):
+        '''get_value(symbol: Union[str, SymbolNumeric]) -> float
+        Get the numeric value of a symbol
+
+        :param Union[str, SymbolNumeric] symbol: It must be either the name of the symbol or an instance
+        of the class SymbolNumeric
+        :return: The value of the symbol specified
+        :rtype: float
+        :raises TypeError: if symbol is not an instance of the class SymbolNumeric or a string.
+        :raises ValueError: if the argument is a string and there not exists a symbol in the system with that name
+        '''
+        if isinstance(symbol, str):
+            symbol = self.get_symbol(symbol)
+        elif not isinstance(symbol, SymbolNumeric):
+            raise TypeError(f'Input argument must be a string or an instance of the class {SymbolNumeric.__name__}')
+        return symbol.get_value()
+
+
+    cpdef set_value(self, symbol, value):
+        '''set_value(symbol: Union[str, SymbolNumeric], value: Union[str, float, int, complex])
+        Set the numeric value of a symbol.
+
+        :param Union[str, SymbolNumeric] symbol: It must be either the name of the symbol or an instance
+        of the class SymbolNumeric
+        :param Union[int, float, str, complex] value: The new numeric value for the symbol.
+
+        :raises TypeError: If symbol is not an instance of SymbolNumeric or a string. Also if value is not a int, float, str or complex value.
+        :raises ValueError: If the first argument is a string and there not exists a symbol in the system with that name.
+        '''
+        if isinstance(symbol, str):
+            symbol = self.get_symbol(symbol)
+        elif not isinstance(symbol, SymbolNumeric):
+            raise TypeError(f'First argument must be a string or an instance of the class {SymbolNumeric.__name__}')
+        symbol.set_value(value)
 
 
     @property
