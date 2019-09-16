@@ -2,10 +2,6 @@
 Author: Víctor Ruiz Gómez
 
 Unitary test for class System.
-To execute this test, you need first:
-- Build the library extension locally with:
-python setup.py build_ext --inplace
-- Set PYTHONPATH to the root directory of the library (parent directory of test)
 '''
 
 
@@ -103,7 +99,3 @@ class TestSystem(TestCase):
         sys = System()
         sys.get_parameter('g')
         self.assertIn('g', sys.parameters)
-
-
-if __name__ == '__main__':
-    unittest.main()

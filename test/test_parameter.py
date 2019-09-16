@@ -2,10 +2,6 @@
 Author: Víctor Ruiz Gómez
 
 Unitary test for class Parameter.
-To execute this test, you need first:
-- Build the library extension locally with:
-python setup.py build_ext --inplace
-- Set PYTHONPATH to the root directory of the library (parent directory of test)
 '''
 
 
@@ -40,7 +36,3 @@ class TestParameter(TestCase):
     def test_mro(self):
         # Parameter inherits from class SymbolNumeric
         self.assertEqual(Parameter.__mro__[1], SymbolNumeric)
-
-
-if __name__ == '__main__':
-    unittest.main()
