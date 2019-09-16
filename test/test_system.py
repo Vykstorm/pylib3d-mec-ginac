@@ -14,6 +14,11 @@ from src import *
 
 
 class TestSystem(TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._non_strings = (1, None, False, 1.0, b'')
+
+
     def test_multiple_system(self):
         '''
         Test that System can be instantiated multiple times.
@@ -30,7 +35,7 @@ class TestSystem(TestCase):
 
         # new_parameter accepts a string (parameter name) as parameter, otherwise,
         # raises an exception
-        for x in (1, None, False, b''):
+        for x in self._non_strings:
             self.assertRaises(TypeError, sys.new_parameter, x)
 
         a = sys.new_parameter('a')
