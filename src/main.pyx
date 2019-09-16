@@ -15,10 +15,14 @@ cimport cython
 # Import .pxd declarations
 from src.csymbol_numeric cimport symbol_numeric
 from src.csystem cimport System as c_System
+from src.cnumeric cimport numeric as c_numeric
+
 
 # Python imports
 from collections.abc import Mapping
 from operator import attrgetter
+
+
 
 
 
@@ -50,8 +54,58 @@ cdef class SymbolNumeric:
         '''
         return (<bytes>self.handler.print_TeX_name()).decode()
 
+    @property
+    def value(self):
+        '''
+        Property that returns the numeric value of this symbol. It also supports
+        assignment.
+
+        :rtype: Numeric
+        '''
+        return self.get_value()
+
+
+    @value.setter
+    def value(self, value):
+        self.set_value(value)
+
+
+    cpdef float get_value(self):
+        '''get_value() -> float
+
+        :return: The numeric value of this symbol as a float value.
+        :rtype: float
+        '''
+        return self.handler.get_value().to_double()
+
+
+    cpdef set_value(self, float value):
+        '''set_value(value: Union[int, float, complex, str])
+        Assigns a new numeric value to this symbol.
+
+        :param value: It must be the new numeric value to assign to this symbol.
+        '''
+        self.handler.set_value(c_numeric(value))
+
+
+    def __float__(self):
+        '''
+        Alias of get_value().
+        '''
+        return float(self.get_value())
+
+
+    def __int__(self):
+        '''
+        Returns the numeric value of this symbol truncated (as an integer)
+
+        :rtype: int
+        '''
+        return int(self.get_value())
+
+
     def __str__(self):
-        return self.name
+        return f'Symbol {self.name}, value = {self.value}'
 
     def __repr__(self):
         return self.__str__()
@@ -65,7 +119,7 @@ cdef class Parameter(SymbolNumeric):
     Represents a parameter in a mechanical system.
     '''
     def __str__(self):
-        return f'Parameter {self.name}'
+        return f'Parameter {self.name}, value = {self.value}'
 
 
 
