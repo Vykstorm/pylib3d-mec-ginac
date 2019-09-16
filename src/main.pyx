@@ -79,17 +79,17 @@ cdef class SymbolNumeric:
         return self.handler.get_value().to_double()
 
 
-    cpdef set_value(self, float value):
-        '''set_value(value: Union[int, float, complex, str])
+    cpdef set_value(self, value):
+        '''set_value(value: Union[int, float, complex])
         Assigns a new numeric value to this symbol.
 
         :param value: It must be the new numeric value to assign for this symbol
-        :type value: int, float, complex, str
+        :type value: int, float
         :raises TypeError: If value has an incorrect type.
         '''
-        if not isinstance(value, (int, float, complex, str)):
-            raise TypeError(f'Value must be a int, float, complex or str')
-        self.handler.set_value(c_numeric(value))
+        if not isinstance(value, (int, float)):
+            raise TypeError(f'Value must be a int or float')
+        self.handler.set_value(c_numeric(float(value)))
 
 
     def __float__(self):
@@ -248,13 +248,13 @@ cdef class System:
 
 
     cpdef set_value(self, symbol, value):
-        '''set_value(symbol: Union[str, SymbolNumeric], value: Union[str, float, int, complex])
+        '''set_value(symbol: Union[str, SymbolNumeric], value: Union[float, int])
         Set the numeric value of a symbol.
 
         :param symbol: The symbol where to assign a new numeric value
         :type symbol: str or SymbolNumeric
         :param value: The new value
-        :type value: int, float, complex, str
+        :type value: int, float
 
         :raises TypeError: If input arguments have invalid types
         :raises ValueError: If the first argument is a string and there not exists a symbol in the system with that name.
