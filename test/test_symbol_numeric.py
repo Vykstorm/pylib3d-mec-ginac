@@ -7,10 +7,22 @@ Unitary test for class SymbolNumeric.
 
 import unittest
 from unittest import TestCase
+from itertools import chain
+from random import random, randint
 from src import *
 
 
+
+
 class TestSymbolNumeric(TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._float_values = [random() for i in range(0, 100)]
+        self._int_values = [randint(-100, 100) for i in range(0, 100)]
+        self._numeric_values = self._float_values + self._int_values
+        self._non_numeric_values = [None, '', b'']
+
+
     def test_name(self):
         # SymbolNumeric instances have the attribute 'name' which is a string with their names.
         sys = System()
@@ -31,3 +43,28 @@ class TestSymbolNumeric(TestCase):
         # Property tex_name is only-read
         self.assertRaises(AttributeError, setattr, a, 'tex_name', 'theta')
         self.assertRaises(AttributeError, delattr, a, 'tex_name')
+
+
+    def test_change_value(self):
+        # set_value(x) changes the numeric value of a symbol to x and get_value() returns
+        # its current value
+        sys = System()
+        a = sys.new_parameter('a')
+
+        # set_value accepts int or float
+        for value in self._numeric_values:
+            a.set_value(value)
+            # get_value always returns a float object
+            self.assertIsInstance(a.get_value(), float)
+
+            # get_value returns the current numeric value
+            if isinstance(value, float):
+                # Precision loss between C-Python floats. Why?
+                # TODO
+                self.assertAlmostEqual(a.get_value(), value)
+            else:
+                self.assertEqual(int(a.get_value()), value)
+
+        # set_value raises TypeError if value is not float nor int
+        for value in self._non_numeric_values:
+            self.assertRaises(TypeError, a.set_value,  value)
