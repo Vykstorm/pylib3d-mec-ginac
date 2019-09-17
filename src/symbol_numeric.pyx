@@ -1,3 +1,7 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This module defines the wrapper class SymbolNumeric and all its subclasses.
+'''
 
 
 ## Wrapper of the symbol_numeric class for Python

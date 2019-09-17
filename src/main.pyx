@@ -1,6 +1,10 @@
 
 '''
 Author: Víctor Ruiz Gómez
+Description: This is the Cython module for the extension (it merges the source
+code of all .pyx definition files)
+It also performs all needed import statements to the C++ standard library and the .pxd
+declaration files.
 '''
 
 ## Import statements
