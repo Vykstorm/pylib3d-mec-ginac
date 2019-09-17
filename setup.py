@@ -128,5 +128,7 @@ if __name__ == '__main__':
 
         packages=[PACKAGE],
         package_dir={PACKAGE:PACKAGE_DIR},
-        ext_modules=cythonize(EXTENSIONS, compiler_directives={'language_level': 3}),
+        ext_modules=cythonize(EXTENSIONS,
+            compiler_directives={'language_level': 3},
+            nthreads=2, force=True),
     )
