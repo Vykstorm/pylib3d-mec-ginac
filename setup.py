@@ -5,9 +5,7 @@ Setup script to install pylib3d-mec-ginac library.
 '''
 
 # Import statements
-from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Build import cythonize
 from os.path import dirname, join
 
 
@@ -111,7 +109,10 @@ EXTENSIONS = [
 
 
 if __name__ == '__main__':
-    # Now invoke distutils setup
+    from Cython.Build import cythonize
+    from distutils.core import setup
+
+    # Invoke distutils setup
     setup(
         name=NAME,
         version=VERSION,
