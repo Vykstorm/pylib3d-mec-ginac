@@ -5,8 +5,12 @@ Setup script to install pylib3d-mec-ginac library.
 '''
 
 # Import statements
+from distutils.core import setup
 from distutils.extension import Extension
+from os import listdir
 from os.path import dirname, join
+from functools import reduce, partial
+
 
 
 ######## PACKAGE DESCRIPTION ########
@@ -108,18 +112,46 @@ EXTENSIONS = [
 ]
 
 
-if __name__ == '__main__':
-    from distutils.core import setup
 
+######## INSTALLATION PROCEDURE ########
+
+if __name__ == '__main__':
+    ## Import statements
     try:
         from Cython.Build import cythonize
+        from jinja2 import Template
     except ImportError as e:
+        # Generate error message if missing dependencies
         print(f'Failed to import "{e.name}" module')
         print('Make sure to install dependencies with "pip install -r requirements.txt"')
         exit(-1)
 
 
-    # Invoke distutils setup
+    ## Parse .pyx modules and merge them into one single source
+
+    # Get the list of .pyx modules
+    modules = [join('src', filename) for filename in listdir('src') if filename.endswith('.pyx') and not filename.startswith('main')]
+
+    with open('src/main.pyx', 'w') as f_out: # All source code will be merged to this file
+        for module in modules:
+            print(f'Parsing {module}')
+            with open(module, 'r') as f_in:
+                # Read .pyx source code
+                source = f_in.read()
+
+                # Parse .pyx as jinja templates
+                template = Template(source)
+                context = {}
+                source = template.render(**context)
+
+                # Store the result in the output .pyx file
+                f_out.write(source)
+                f_out.write('\n')
+
+    print(f"Files {', '.join(modules)} merged to src/main.pyx")
+
+
+    ## Invoke distutils setup
     setup(
         name=NAME,
         version=VERSION,
