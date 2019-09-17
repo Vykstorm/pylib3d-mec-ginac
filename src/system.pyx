@@ -48,6 +48,19 @@ cdef class System:
         return Parameter(<Py_ssize_t>handler)
 
 
+    cpdef get_symbol(self, unicode name):
+        '''get_symbol(name: str) -> SymbolNumeric
+        Get a symbol defined on this system by name
+
+        :param str name: Name of the symbol
+        :return: Return the symbol defined on the system with the specified name.
+        :rtype: str
+        :raises TypeError: If input argument have invalid type
+        :raises ValueError: If no symbol with that name exists in the system.
+        '''
+        return self.get_parameter(name)
+
+
     cpdef Parameter get_parameter(self, unicode name):
         '''get_parameter(name: str) -> Parameter
         Get a parameter by name.
@@ -77,29 +90,32 @@ cdef class System:
         return 0
 
 
-    cpdef _get_parameters(self):
+    cpdef get_symbols(self):
+        '''get_symbols() -> Dict[str, SymbolNumeric]
+        Get all the symbols defined in the system.
+
+        :return: Return all the symbols defined in the system in a dictionary, where
+        keys are symbol names and values instances of the class SymbolNumeric.
+        :rtype: Dict[str, SymbolNumeric]
         '''
-        Retrieve a list with all the parameters created in the system.
+        return self.get_parameters()
+
+
+    cpdef get_parameters(self):
+        '''get_parameters() -> Dict[str, Parameter]
+        Get all the parameters created in the system.
+
+        :return: Return all the parameters in the system in a dictionary, where
+        keys are parameter names and values instances of the class Parameter.
+        :rtype: Dict[str, Parameter]
         '''
         params = []
         cdef vector[c_symbol_numeric*] ptrs = self.system.get_Parameters()
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
             params.append(Parameter(<Py_ssize_t>ptr))
-        return params
+        return dict(zip(map(attrgetter('name'), params), params))
 
-
-    cpdef get_symbol(self, unicode name):
-        '''get_symbol(name: str) -> SymbolNumeric
-        Get a symbol defined on this system by name
-
-        :param str name: Name of the symbol
-        :return: Return the symbol defined on the system with the specified name.
-        :rtype: str
-        :raises TypeError: If input argument have invalid type
-        :raises ValueError: If no symbol with that name exists in the system.
-        '''
-        return self.get_parameter(name)
 
 
     cpdef get_value(self, symbol):
@@ -140,12 +156,21 @@ cdef class System:
 
 
     @property
+    def symbols(self):
+        '''
+        This property (read only) retrieves all the symbols defined in the system.
+        :return: The same as get_symbols()
+        :rtype: Dict[str, SymbolNumeric]
+        '''
+        return self.get_symbols()
+
+
+    @property
     def parameters(self):
         '''
         This property (read only) retrieves all the parameters in the system.
 
-        :return: A dictionary where keys are parameter names and values, instances of the class Parameter
+        :return: The same as get_parameters()
         :rtype: Dict[str, Parameter]
         '''
-        params = self._get_parameters()
-        return dict(zip(map(attrgetter('name'), params), params))
+        return self.get_parameters()
