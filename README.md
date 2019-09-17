@@ -21,9 +21,9 @@ e.g: In ubuntu 18.04 bionic, you can do:
 For the rest of this document, it is assumed that the default version of python and pip are 3.7 and 3 respectively.
 
 
--Install Cython>=0.29.13 via pip:
+-Install all library dependencies via pip:
 ```bash
-    pip install Cython>=0.29.13
+    pip install -r requirements.txt
 ```
 
 
