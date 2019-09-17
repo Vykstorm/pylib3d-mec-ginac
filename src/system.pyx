@@ -16,13 +16,21 @@ cdef class System:
     Its the main class of the library. It represents a mechanical system defined with different variables:
     coordinates, parameters, inputs, tensors, ...
     '''
+    ######## C Attributes ########
+
     cdef c_System* system
+
+
+    ######## Constructor & Destructor ########
 
     def __cinit__(self):
         self.system = new c_System()
 
     def __dealloc__(self):
         del self.system
+
+
+    ######## Symbol spawners  ########
 
     cpdef Parameter new_parameter(self, unicode name, unicode tex_name=None):
         '''new_parameter(name: str[, tex_name: str]) -> Parameter
@@ -47,6 +55,8 @@ cdef class System:
             handler = self.system.new_Parameter(name.encode(), tex_name.encode())
         return Parameter(<Py_ssize_t>handler)
 
+
+    ######## Symbol getters ########
 
     cpdef get_symbol(self, unicode name):
         '''get_symbol(name: str) -> SymbolNumeric
@@ -90,6 +100,8 @@ cdef class System:
         return 0
 
 
+    ######## Symbol containers getters ########
+
     cpdef get_symbols(self):
         '''get_symbols() -> Dict[str, SymbolNumeric]
         Get all the symbols defined in the system.
@@ -117,6 +129,31 @@ cdef class System:
         return dict(zip(map(attrgetter('name'), params), params))
 
 
+    ######## Symbol containers properties ########
+
+    @property
+    def symbols(self):
+        '''
+        This property (read only) retrieves all the symbols defined in the system.
+        :return: The same as get_symbols()
+        :rtype: Dict[str, SymbolNumeric]
+        '''
+        return self.get_symbols()
+
+
+    @property
+    def parameters(self):
+        '''
+        This property (read only) retrieves all the parameters in the system.
+
+        :return: The same as get_parameters()
+        :rtype: Dict[str, Parameter]
+        '''
+        return self.get_parameters()
+
+
+
+    ######## Symbol value getter & setter ########
 
     cpdef get_value(self, symbol):
         '''get_value(symbol: Union[str, SymbolNumeric]) -> float
@@ -153,24 +190,3 @@ cdef class System:
         elif not isinstance(symbol, SymbolNumeric):
             raise TypeError(f'First argument must be a string or an instance of the class {SymbolNumeric.__name__}')
         symbol.set_value(value)
-
-
-    @property
-    def symbols(self):
-        '''
-        This property (read only) retrieves all the symbols defined in the system.
-        :return: The same as get_symbols()
-        :rtype: Dict[str, SymbolNumeric]
-        '''
-        return self.get_symbols()
-
-
-    @property
-    def parameters(self):
-        '''
-        This property (read only) retrieves all the parameters in the system.
-
-        :return: The same as get_parameters()
-        :rtype: Dict[str, Parameter]
-        '''
-        return self.get_parameters()
