@@ -4,7 +4,21 @@ Description: This module defines the class System
 '''
 
 
-# Import statements
+## Import statements
+
+# Import cython internal library
+cimport cython
+
+# C++ standard library imports
+from libcpp.string cimport string
+from libcpp.vector cimport vector
+
+# Import .pxd declarations
+from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
+from src.csystem cimport System as c_System
+from src.cnumeric cimport numeric as c_numeric
+
+# Python imports
 from collections.abc import Mapping
 from operator import attrgetter
 
