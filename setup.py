@@ -31,7 +31,7 @@ with open(join(root_dir, 'README.md'), 'r') as f:
     LONG_DESCRIPTION = f.read()
 
 # License
-with open(join(root_dir, 'LICENSE'), 'r') as f:
+with open(join(root_dir, 'LICENSE.txt'), 'r') as f:
     LICENSE = f.read()
 
 # Classifiers
