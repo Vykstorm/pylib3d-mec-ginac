@@ -114,8 +114,10 @@ if __name__ == '__main__':
     try:
         from Cython.Build import cythonize
     except ImportError as e:
-        print(f'Failed to import {e.name} module. Make sure to install dependencies with "pip install -r requirements.txt"')
+        print(f'Failed to import "{e.name}" module')
+        print('Make sure to install dependencies with "pip install -r requirements.txt"')
         exit(-1)
+
 
     # Invoke distutils setup
     setup(
