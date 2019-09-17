@@ -76,4 +76,4 @@ A few usage examples of this library are avaliable under the directory ```exampl
 
 ## License
 
-This project is under [GPLv3 license](LICENSE)
+This project is under [GPLv3 license](LICENSE.txt)
