@@ -5,10 +5,10 @@ cdef class SymbolNumeric:
     '''
     Objects of this class can be used to perform math symbolic computation.
     '''
-    cdef symbol_numeric* handler
+    cdef c_symbol_numeric* handler
 
     def __cinit__(self, Py_ssize_t handler):
-        self.handler = <symbol_numeric*>handler
+        self.handler = <c_symbol_numeric*>handler
 
     @property
     def name(self):

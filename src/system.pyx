@@ -35,7 +35,7 @@ cdef class System:
         if self.has_parameter(name):
             raise ValueError(f'Parameter "{name}" already created')
 
-        cdef symbol_numeric* handler
+        cdef c_symbol_numeric* handler
         if tex_name is None:
             handler = self.system.new_Parameter(name.encode())
         else:
@@ -64,8 +64,8 @@ cdef class System:
         '''
         Check if a parameter with the given name exists.
         '''
-        cdef vector[symbol_numeric*] ptrs = self.system.get_Parameters()
-        cdef symbol_numeric* ptr
+        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Parameters()
+        cdef c_symbol_numeric* ptr
         for ptr in ptrs:
             if ptr.get_name() == <string>name.encode():
                 return 1
@@ -77,8 +77,8 @@ cdef class System:
         Retrieve a list with all the parameters created in the system.
         '''
         params = []
-        cdef vector[symbol_numeric*] ptrs = self.system.get_Parameters()
-        cdef symbol_numeric* ptr
+        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Parameters()
+        cdef c_symbol_numeric* ptr
         for ptr in ptrs:
             params.append(Parameter(<Py_ssize_t>ptr))
         return params
