@@ -165,7 +165,7 @@ cdef class System:
         :rtype: Dict[str, SymbolNumeric]
         '''
         # TODO
-        symbols = {}
+        symbols = SymbolsDict()
         {% for symbol_type in symbol_types %}
         symbols.update(self.{{symbol_type | plural | getter}}()){% endfor %}
         return symbols
@@ -192,7 +192,7 @@ cdef class System:
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
             items.append({{symbol_class}}(<Py_ssize_t>ptr, self))
-        return dict(zip(map(attrgetter('name'), items), items))
+        return SymbolsDict(zip(map(attrgetter('name'), items), items))
 
     {% endfor %}
 

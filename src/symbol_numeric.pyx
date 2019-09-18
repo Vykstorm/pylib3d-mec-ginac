@@ -7,7 +7,7 @@ Description: This module defines the wrapper class SymbolNumeric and all its sub
 
 ## Import statements
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
-
+from collections import OrderedDict
 
 
 ## Wrapper of the symbol_numeric class for Python
@@ -133,7 +133,7 @@ cdef class SymbolNumeric:
         return complex(self.handler.get_value().real().to_double(), self.handler.get_value().imag().to_double())
 
     def __str__(self):
-        return f'{self.__class__.__name__.lower()} {self.name}, value = {self.value}'
+        return f'{self.__class__.__name__.lower()} {self.name}, value = {round(self.value, 4)}'
 
     def __repr__(self):
         return self.__str__()
@@ -145,11 +145,44 @@ cdef class SymbolNumeric:
 # They only redefine the method __str__ to improve symbol printing on the python console
 
 {% for symbol_type in symbol_types %}
-cdef class {{symbol_type|pytitle}}(SymbolNumeric):
+{% set symbol_name = symbol_type | replace('_', ' ') %}
+cdef class {{symbol_type | pytitle}}(SymbolNumeric):
     '''
-    Represents {{symbol_type|aprefix|replace('_', ' ')}} symbol defined within a system.
+    Represents {{symbol_name | aprefix}} symbol defined within a system.
     '''
-    pass
+    _display_name = "{{symbol_name}}"
 
+    def __str__(self):
+        return f'{{symbol_name}} {self.name}, value = {round(self.value, 4)}'
 
 {% endfor %}
+
+
+
+## Wrapper for values returned by symbol container getters in the class System
+class SymbolsDict(OrderedDict):
+    def __str__(self):
+        if len(self.keys()) == 0:
+            # No symbols at all
+            return 'No symbols yet'
+
+        lines = []
+        for name, symbol in self.items():
+            line = ''
+            # Print the symbol type
+            if len(frozenset(map(type, self.values()))) > 1:
+                line += symbol._display_name.ljust(18) + ' '
+
+            # Print the symbol name
+            line += name.ljust(12) + ' '
+
+            # Print the symbol value
+            line += str(round(symbol.value, 4)).ljust(12)
+
+            lines.append(line)
+
+        return '\n'.join(lines)
+
+
+    def __repr__(self):
+        return self.__str__()
