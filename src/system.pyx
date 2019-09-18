@@ -160,8 +160,7 @@ cdef class System:
         '''get_symbols() -> Dict[str, SymbolNumeric]
         Get all the symbols defined in the system.
 
-        :return: Return all the symbols defined in the system in a dictionary, where
-        keys are symbol names and values, instances of the class SymbolNumeric.
+        :return: Return all the symbols defined in the system in a dictionary, where keys are symbol names and values, instances of the class SymbolNumeric.
         :rtype: Dict[str, SymbolNumeric]
         '''
         # TODO
@@ -179,8 +178,7 @@ cdef class System:
         '''{{pymethod}}() -> Dict[str, {{symbol_class}}]
         Get all the {{symbol_type | plural}} created within the system.
 
-        :return: Return all the {{symbol_type | replace('_', ' ')}} symbols defined in the system in a dictionary where
-        keys are their names and the entry values, instances of the class {{symbol_class}}.
+        :return: Return all the {{symbol_type | replace('_', ' ')}} symbols defined in the system in a dictionary where keys are their names and the entry values, instances of the class {{symbol_class}}.
         :rtype: Dict[str, {{symbol_class}}]
         '''
         items = []
