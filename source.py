@@ -109,7 +109,7 @@ def parse_source(source, **kwargs):
         return 'set_' + x
 
     def plural(x):
-        if x.lower() == 'velocity':
+        if x.lower().endswith('velocity'):
             return x[:-1] + 'ies'
         return x + 's'
 
