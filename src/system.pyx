@@ -78,7 +78,11 @@ cdef class System:
         if tex_name is None:
             handler = self.system.{{cmethod}}(name.encode())
         else:
+            {% if symbol_type == 'coordinate' %}
+            handler = self.system.{{cmethod}}(name.encode())
+            {% else %}
             handler = self.system.{{cmethod}}(name.encode(), tex_name.encode())
+            {% endif %}
         return {{symbol_class}}(<Py_ssize_t>handler, self)
 
     {% endfor %}

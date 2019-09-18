@@ -41,11 +41,11 @@ cdef extern from "System.h":
 
         ## Symbol spawners
         symbol_numeric* new_Coordinate(string name)
+        # symbol_numeric* new_AuxCoordinate(...)
         symbol_numeric* new_Parameter(string name)
         symbol_numeric* new_Joint_Unknown(string name)
         symbol_numeric* new_Input(string name)
 
-        symbol_numeric* new_Coordinate(string name, string tex_name)
         symbol_numeric* new_Parameter(string name, string tex_name)
         symbol_numeric* new_Joint_Unknown(string name, string tex_name)
         symbol_numeric* new_Input(string name, string tex_name)
