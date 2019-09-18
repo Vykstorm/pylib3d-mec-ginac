@@ -10,6 +10,7 @@ from jinja2 import Template, Environment
 from operator import attrgetter
 
 
+
 def parse_source(source, **kwargs):
     '''
     Parses the given source code (which is usually the contents of a .pyx definition file)
@@ -52,6 +53,16 @@ def parse_source(source, **kwargs):
 
         plural('acceleration') -> 'accelerations'
         plural('velocity') -> 'velocities'
+
+
+    - aprefix(x: str) -> str
+        Prefix the given word with the indefinite article 'a' or 'an' (if the
+        first char is a vowel) plus an space.
+
+        aprefix('acceleration') -> 'an acceleration'
+        aprefix('object') -> 'an object'
+        aprefix('coordinate') -> 'a coordinate'
+
 
 
     The output of a filter can be used as an input for a second filter in the templates.
@@ -102,6 +113,10 @@ def parse_source(source, **kwargs):
             return x[:-1] + 'ies'
         return x + 's'
 
+    def aprefix(x):
+        if any(map(x.lower().startswith, ('a', 'e', 'i', 'o', 'u'))):
+            return 'an ' + x
+        return 'a ' + x
 
     ## Custom tests
 
@@ -122,7 +137,7 @@ def parse_source(source, **kwargs):
 
     # Create environment & add custom filters and tests
     env = Environment()
-    filters = [pytitle, ctitle, plural, getter, setter]
+    filters = [pytitle, ctitle, plural, getter, setter, aprefix]
     env.filters.update(dict(zip(map(attrgetter('__name__'), filters), filters)))
 
     # Parse source code
