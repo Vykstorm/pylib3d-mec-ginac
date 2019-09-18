@@ -21,6 +21,7 @@ import unittest
 # Import unitary tests
 from test_system import TestSystem
 from test_symbol_numeric import TestSymbolNumeric
+from test_source import TestParseSource
 
 
 if __name__ == '__main__':
