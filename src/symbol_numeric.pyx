@@ -100,7 +100,7 @@ cdef class SymbolNumeric:
 
 
     def __str__(self):
-        return f'Symbol {self.name}, value = {self.value}'
+        return f'{self.__class__.__name__.lower()} {self.name}, value = {self.value}'
 
     def __repr__(self):
         return self.__str__()
@@ -108,10 +108,25 @@ cdef class SymbolNumeric:
 
 
 
-## Wrapper of the symbol_numeric class for Python for parameters
-cdef class Parameter(SymbolNumeric):
+## Wrapper for subclasses of symbol_numeric
+# They only redefine the method __str__ to improve symbol printing on the python console
+
+{% for symbol_type in symbol_types %}
+cdef class {{symbol_type|title}}(SymbolNumeric):
     '''
-    Represents a parameter in a mechanical system.
+    Represents a {{symbol_type}} symbol defined within a system.
     '''
+    {% if symbol_type == 'coordinate' %}
     def __str__(self):
-        return f'Parameter {self.name}, value = {self.value}'
+        return f'{self.name}, value = {self.value}'
+    {% elif symbol_type == 'velocity' %}
+    def __str__(self):
+        return f'\u2202{self.name}\u2215\u2202\u03c4, value = {self.value}'
+    {% elif symbol_type == 'acceleration' %}
+    def __str__(self):
+        return f'\u2202\u00b2{self.name}\u2215\u2202\u03c4, value = {self.value}'
+    {% else %}
+    pass
+    {% endif %}
+
+{% endfor %}

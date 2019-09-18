@@ -16,5 +16,12 @@ cdef extern from "System.h":
         System() except +
         symbol_numeric* new_Parameter(string name)
         symbol_numeric* new_Parameter(string name, string tex_name)
+
         symbol_numeric* get_Parameter(string name)
+
+        vector[symbol_numeric*] get_Coordinates()
+        vector[symbol_numeric*] get_Velocities()
+        vector[symbol_numeric*] get_Accelerations()
         vector[symbol_numeric*] get_Parameters()
+        vector[symbol_numeric*] get_Inputs()
+        vector[symbol_numeric*] get_Joint_Unknowns()

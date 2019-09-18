@@ -119,7 +119,7 @@ if __name__ == '__main__':
     ## Import statements
     try:
         from Cython.Build import cythonize
-        from jinja2 import Template
+        from jinja2 import Template, Environment
     except ImportError as e:
         # Generate error message if missing dependencies
         print(f'Failed to import "{e.name}" module')
@@ -139,12 +139,19 @@ if __name__ == '__main__':
                 # Read .pyx source code
                 source = f_in.read()
 
-                # Parse .pyx as jinja templates
-                template = Template(source)
-                context = {}
+                # Parse .pyx as jinja templates (expand code macros)
+                env = Environment()
+                env.filters['cls'] = lambda name: name.title()
+                env.filters['plural'] = lambda name: name + 's' if not name.endswith('y') else name[:-1] + 'ies'
+                env.filters['getter'] = lambda name: 'get_' + name
+
+                template = env.from_string(source)
+                context = {
+                    'symbol_types': ['parameter', 'unknown', 'input', 'coordinate', 'velocity', 'acceleration']
+                }
                 source = template.render(**context)
 
-                # Store the result in the output .pyx file
+                # Store the result in a single .pyx file
                 f_out.write(source)
                 f_out.write('\n')
 

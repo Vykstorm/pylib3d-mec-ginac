@@ -121,26 +121,35 @@ cdef class System:
         Get all the symbols defined in the system.
 
         :return: Return all the symbols defined in the system in a dictionary, where
-        keys are symbol names and values instances of the class SymbolNumeric.
+        keys are symbol names and values, instances of the class SymbolNumeric.
         :rtype: Dict[str, SymbolNumeric]
         '''
-        return self.get_parameters()
+        # TODO
+        symbols = {}
+        {% for symbol_type in symbol_types %}
+        symbols.update(self.{{symbol_type | plural | getter}}()){% endfor %}
+        return symbols
 
 
-    cpdef get_parameters(self):
-        '''get_parameters() -> Dict[str, Parameter]
-        Get all the parameters created in the system.
 
-        :return: Return all the parameters in the system in a dictionary, where
-        keys are parameter names and values instances of the class Parameter.
-        :rtype: Dict[str, Parameter]
+    {% for symbol_type in symbol_types %}
+    cpdef {{symbol_type | plural | getter}}(self):
+        '''get_{{symbol_type | plural}}() -> Dict[str, {{symbol_type | cls}}]
+        Get all the {{symbol_type | plural}} created within the system.
+
+        :return: Return all the {{symbol_type}} symbols defined in the system in a dictionary where
+        keys are their names and entry values, instances of the class {{symbol_type | cls}}.
+        :rtype: Dict[str, {{symbol_type | cls}}]
         '''
-        params = []
-        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Parameters()
+        items = []
+        cdef vector[c_symbol_numeric*] ptrs = {% if symbol_type != 'unknown' %}self.system.get_{{symbol_type | cls | plural}}(){% else %}self.system.get_Joint_Unknowns(){% endif %}
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
-            params.append(Parameter(<Py_ssize_t>ptr))
-        return dict(zip(map(attrgetter('name'), params), params))
+            items.append({{symbol_type | cls}}(<Py_ssize_t>ptr))
+        return dict(zip(map(attrgetter('name'), items), items))
+
+    {% endfor %}
+
 
 
     ######## Symbol containers properties ########
@@ -155,15 +164,18 @@ cdef class System:
         return self.get_symbols()
 
 
+    {% for symbol_type in symbol_types %}
     @property
-    def parameters(self):
+    def {{symbol_type | plural}}(self):
         '''
-        This property (read only) retrieves all the parameters in the system.
+        This property (read only) retrieves all the {{symbol_type | plural}} defined within the system.
 
-        :return: The same as get_parameters()
-        :rtype: Dict[str, Parameter]
+        :return: The same as {{symbol_type | plural | getter}}()
+        :rtype: Dict[str, {{symbol_type | cls}}]
         '''
-        return self.get_parameters()
+        return self.{{symbol_type | plural | getter}}()
+
+    {% endfor %}
 
 
 
