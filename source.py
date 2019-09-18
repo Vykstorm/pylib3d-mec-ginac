@@ -48,6 +48,12 @@ def parse_source(source, **kwargs):
         setter('parameters') -> 'get_parameters'
 
 
+    - spawner(x: str) -> str
+        Adds the prefix new_ to the string
+
+        setter('parameter') -> 'new_parameter'
+
+
     - plural(x: str) -> str
         Adds the suffix to make the word plural
 
@@ -115,6 +121,9 @@ def parse_source(source, **kwargs):
     def setter(x):
         return 'set_' + x
 
+    def spawner(x):
+        return 'new_' + x
+
     def plural(x):
         if x.lower().endswith('velocity'):
             return x[:-1] + 'ies'
@@ -149,7 +158,7 @@ def parse_source(source, **kwargs):
 
     # Create environment & add custom filters and tests
     env = Environment()
-    filters = [pytitle, ctitle, plural, getter, setter, aprefix]
+    filters = [pytitle, ctitle, plural, getter, setter, spawner, aprefix]
     env.filters.update(dict(zip(map(attrgetter('__name__'), filters), filters)))
 
     # Parse source code
