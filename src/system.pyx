@@ -49,11 +49,15 @@ cdef class System:
 
     ######## Symbol spawners  ########
 
-    {% for symbol_type in ['parameter'] %}
+    {% for symbol_type in symbol_types if not symbol_type.endswith('velocity') and not symbol_type.endswith('acceleration') and not symbol_type.startswith('aux') %}
     {% set symbol_name = symbol_type | replace('_', ' ') %}
     {% set symbol_class = symbol_type | pytitle %}
     {% set pymethod = symbol_type | spawner %}
+    {% if symbol_type == 'joint_unknown' %}
+    {% set cmethod = 'new_Joint_Unknown' %}
+    {% else %}
     {% set cmethod = symbol_type | pytitle | spawner %}
+    {% endif %}
     cpdef {{symbol_class}} {{pymethod}}(self, unicode name, unicode tex_name=None):
         '''{{pymethod}}(name: str[, tex_name: str]) -> {{symbol_class}}
         Creates a new {{symbol_name}} with the given name.
@@ -78,6 +82,8 @@ cdef class System:
         return {{symbol_class}}(<Py_ssize_t>handler, self)
 
     {% endfor %}
+
+
 
     ######## Symbol getters ########
 
@@ -111,16 +117,21 @@ cdef class System:
         return Parameter(<Py_ssize_t>self.system.get_Parameter(name.encode()), self)
 
 
-    cdef bint has_parameter(self, unicode name):
-        '''
-        Check if a parameter with the given name exists.
-        '''
-        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Parameters()
+    {% for symbol_type in symbol_types  %}
+    cdef bint has_{{symbol_type}}(self, unicode name):
+        {% if symbol_type == 'joint_unknown' %}
+        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Joint_Unknowns()
+        {% else %}
+        cdef vector[c_symbol_numeric*] ptrs = self.system.{{symbol_type | plural | pytitle | getter}}()
+        {% endif %}
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
             if ptr.get_name() == <string>name.encode():
                 return 1
         return 0
+
+    {% endfor %}
+
 
 
     ######## Symbol containers getters ########

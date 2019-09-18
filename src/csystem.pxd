@@ -8,6 +8,7 @@ mec ginac System.h header which are going to be used by this library.
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from src.csymbol_numeric cimport symbol_numeric
+from src.cnumeric cimport numeric
 
 cdef extern from "System.h":
 
@@ -40,13 +41,11 @@ cdef extern from "System.h":
 
         ## Symbol spawners
         symbol_numeric* new_Coordinate(string name)
-        symbol_numeric* new_AuxCoordinate(string name)
         symbol_numeric* new_Parameter(string name)
         symbol_numeric* new_Joint_Unknown(string name)
         symbol_numeric* new_Input(string name)
 
         symbol_numeric* new_Coordinate(string name, string tex_name)
-        symbol_numeric* new_AuxCoordinate(string name, string tex_name)
         symbol_numeric* new_Parameter(string name, string tex_name)
         symbol_numeric* new_Joint_Unknown(string name, string tex_name)
         symbol_numeric* new_Input(string name, string tex_name)
