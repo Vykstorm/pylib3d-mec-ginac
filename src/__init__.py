@@ -9,7 +9,7 @@ Public API of the pylib3d_mec_ginac library.
 __all__ = [
     'System', 'Coordinate', 'Velocity', 'Acceleration',
     'AuxCoordinate', 'AuxVelocity', 'AuxAcceleration',
-    'Parameter', 'JointUnknown', 'Input'
+    'Parameter', 'JointUnknown', 'Input', 'SymbolNumeric'
 ]
 
 
@@ -25,7 +25,7 @@ def __dir__():
 
 
 # Import extension definitions
-from lib3d_mec_ginac_ext import System
+from lib3d_mec_ginac_ext import System, SymbolNumeric
 from lib3d_mec_ginac_ext import Coordinate, Velocity, Acceleration
 from lib3d_mec_ginac_ext import AuxCoordinate, AuxVelocity, AuxAcceleration
 from lib3d_mec_ginac_ext import Parameter, JointUnknown, Input
