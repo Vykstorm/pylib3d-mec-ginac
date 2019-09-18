@@ -89,9 +89,16 @@ def parse_source(source, **kwargs):
         ['coordinate', 'velocity', 'acceleration', 'aux_coordinate', 'aux_velocity',
          'aux_acceleration', 'parameter', 'joint_unknown', 'input']
 
+    - coordinate_types:
+        Sames as the previous list, but only includes coordinate, aux_coordinate and its
+        derivatives
+        ['coordinate', 'velocity', 'acceleration',
+         'aux_coordinate', 'aux_velocity', 'aux_acceleration']
+
     - geometric_types:
         A list with all kind of geometry objects defined in the lib3d_mec_ginac library.
         ['base', 'frame', 'solid', 'tensor3D', 'matrix', 'vector3D', 'point', 'wrench3D', 'drawing3D']
+
     '''
 
 
@@ -126,6 +133,11 @@ def parse_source(source, **kwargs):
         'symbol_types': [
             'coordinate', 'velocity', 'acceleration', 'aux_coordinate', 'aux_velocity',
             'aux_acceleration', 'parameter', 'joint_unknown', 'input'
+        ],
+
+        'coordinate_types': [
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration'
         ],
 
         'geometric_types': [
