@@ -66,3 +66,12 @@ class TestParseSource(TestCase):
             self.assertEqual(x+'s', y)
 
         self.assertEqual(parse_source('{{x|plural}}', x='velocity'), 'velocities')
+
+    def test_aprefix(self):
+        for x in ('object', 'item', 'acceleration'):
+            y = parse_source('{{x|aprefix}}', x=x)
+            self.assertEqual('an '+x, y)
+
+        for x in ('coordinate', 'joint'):
+            y = parse_source('{{x|aprefix}}', x=x)
+            self.assertEqual('a '+x, y)
