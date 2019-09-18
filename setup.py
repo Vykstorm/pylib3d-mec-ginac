@@ -140,6 +140,7 @@ if __name__ == '__main__':
             "'"*3
         ]))
 
+        # Parse each .pyx file
         for filename in listdir('src'):
             if not filename.endswith('.pyx') or filename.startswith('main'):
                 continue
