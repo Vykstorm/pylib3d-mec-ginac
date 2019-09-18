@@ -15,10 +15,21 @@ cdef class SymbolNumeric:
     '''
     Objects of this class can be used to perform math symbolic computation.
     '''
-    cdef c_symbol_numeric* handler
 
-    def __cinit__(self, Py_ssize_t handler):
+    ######## C Attributes  ########
+
+    cdef c_symbol_numeric* handler
+    cdef System _owner
+
+
+    ######## Constructor & Destructor  ########
+
+    def __cinit__(self, Py_ssize_t handler, owner):
         self.handler = <c_symbol_numeric*>handler
+        self._owner = owner
+
+
+    ######## Properties  ########
 
     @property
     def name(self):
@@ -48,11 +59,21 @@ cdef class SymbolNumeric:
         '''
         return self.get_value()
 
-
     @value.setter
     def value(self, value):
         self.set_value(value)
 
+    @property
+    def owner(self):
+        '''
+        Only read property that returns the System object that created this symbol.
+
+        :rtype: System
+        '''
+        return self.get_owner()
+
+
+    ######## Getters ########
 
     cpdef float get_value(self):
         '''get_value() -> float
@@ -62,6 +83,16 @@ cdef class SymbolNumeric:
         '''
         return self.handler.get_value().to_double()
 
+    cdef get_owner(self):
+        '''get_owner() -> System
+        Get the System object that created this symbol.
+
+        :rtype: System
+        '''
+        return self._owner
+
+
+    ######## Setters ########
 
     cpdef set_value(self, value):
         '''set_value(value: Union[int, float, complex])
@@ -75,6 +106,8 @@ cdef class SymbolNumeric:
             raise TypeError(f'Value must be a int or float')
         self.handler.set_value(c_numeric(float(value)))
 
+
+    ######## Metamethods ########
 
     def __float__(self):
         '''
@@ -91,7 +124,6 @@ cdef class SymbolNumeric:
         '''
         return int(self.get_value())
 
-
     def __complex__(self):
         '''
         Returns the numeric value of this symbol as a complex number.
@@ -99,7 +131,6 @@ cdef class SymbolNumeric:
         :rtype: complex
         '''
         return complex(self.handler.get_value().real().to_double(), self.handler.get_value().imag().to_double())
-
 
     def __str__(self):
         return f'{self.__class__.__name__.lower()} {self.name}, value = {self.value}'

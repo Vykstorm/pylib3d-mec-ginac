@@ -70,7 +70,7 @@ cdef class System:
             handler = self.system.new_Parameter(name.encode())
         else:
             handler = self.system.new_Parameter(name.encode(), tex_name.encode())
-        return Parameter(<Py_ssize_t>handler)
+        return Parameter(<Py_ssize_t>handler, self)
 
 
     ######## Symbol getters ########
@@ -102,7 +102,7 @@ cdef class System:
             raise TypeError('Parameter name must be a string')
         if not self.has_parameter(name):
             raise ValueError(f'Parameter "{name}" not created yet')
-        return Parameter(<Py_ssize_t>self.system.get_Parameter(name.encode()))
+        return Parameter(<Py_ssize_t>self.system.get_Parameter(name.encode()), self)
 
 
     cdef bint has_parameter(self, unicode name):
@@ -152,7 +152,7 @@ cdef class System:
         {% endif %}
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
-            items.append({{symbol_type | pytitle}}(<Py_ssize_t>ptr))
+            items.append({{symbol_type | pytitle}}(<Py_ssize_t>ptr, self))
         return dict(zip(map(attrgetter('name'), items), items))
 
     {% endfor %}
