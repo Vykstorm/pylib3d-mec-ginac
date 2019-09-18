@@ -101,7 +101,14 @@ cdef class System:
         :raises TypeError: If input argument have invalid type
         :raises ValueError: If no symbol with that name exists in the system.
         '''
-        return self.get_parameter(name)
+        if name is None:
+            raise TypeError('Symbol name must be a string')
+        {% for symbol_type in symbol_types %}
+        if self.has_{{symbol_type}}(name):
+            return self.get_{{symbol_type}}(name)
+        {% endfor %}
+        raise ValueError(f'Symbol "{name}" not created yet')
+
 
 
     {% for symbol_type in symbol_types %}
