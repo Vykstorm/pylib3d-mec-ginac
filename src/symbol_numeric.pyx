@@ -166,11 +166,13 @@ class SymbolsDict(OrderedDict):
             # No symbols at all
             return 'No symbols yet'
 
+        show_types = len(frozenset(map(type, self.values()))) > 1
+
         lines = []
         for name, symbol in self.items():
             line = ''
             # Print the symbol type
-            if len(frozenset(map(type, self.values()))) > 1:
+            if show_types:
                 line += symbol._display_name.ljust(18) + ' '
 
             # Print the symbol name
