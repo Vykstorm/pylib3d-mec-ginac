@@ -49,29 +49,35 @@ cdef class System:
 
     ######## Symbol spawners  ########
 
-    cpdef Parameter new_parameter(self, unicode name, unicode tex_name=None):
-        '''new_parameter(name: str[, tex_name: str]) -> Parameter
-        Creates a new parameter with the given name.
+    {% for symbol_type in ['parameter'] %}
+    {% set symbol_name = symbol_type | replace('_', ' ') %}
+    {% set symbol_class = symbol_type | pytitle %}
+    {% set pymethod = symbol_type | spawner %}
+    {% set cmethod = symbol_type | pytitle | spawner %}
+    cpdef {{symbol_class}} {{pymethod}}(self, unicode name, unicode tex_name=None):
+        '''{{pymethod}}(name: str[, tex_name: str]) -> {{symbol_class}}
+        Creates a new {{symbol_name}} with the given name.
 
-        :param str name: The name of the new parameter
-        :param str tex_name: The name of the new parameter in latex.
-        :return: Returns the parameter created on success
-        :rtype: Parameter
+        :param str name: The name of the new {{symbol_name}}
+        :param str tex_name: The name of the new {{symbol_name}} in latex.
+        :return: Returns the {{symbol_name}} created on success
+        :rtype: {{symbol_class}}
         :raises TypeError: If input arguments have incorrect types
-        :raises ValueError: If a parameter with the given name already exists in the system
+        :raises ValueError: If {{symbol_name | aprefix}} with the given name already exists in the system
         '''
         if name is None:
-            raise TypeError('Parameter name must be a string')
-        if self.has_parameter(name):
-            raise ValueError(f'Parameter "{name}" already created')
+            raise TypeError('{{symbol_name}} name must be a string')
+        if self.has_{{symbol_type}}(name):
+            raise ValueError(f'{{symbol_name}} "{name}" already created')
 
         cdef c_symbol_numeric* handler
         if tex_name is None:
-            handler = self.system.new_Parameter(name.encode())
+            handler = self.system.{{cmethod}}(name.encode())
         else:
-            handler = self.system.new_Parameter(name.encode(), tex_name.encode())
-        return Parameter(<Py_ssize_t>handler, self)
+            handler = self.system.{{cmethod}}(name.encode(), tex_name.encode())
+        return {{symbol_class}}(<Py_ssize_t>handler, self)
 
+    {% endfor %}
 
     ######## Symbol getters ########
 
@@ -136,13 +142,15 @@ cdef class System:
 
 
     {% for symbol_type in symbol_types %}
-    cpdef {{symbol_type | plural | getter}}(self):
-        '''{{symbol_type | plural | getter}}() -> Dict[str, {{symbol_type | pytitle}}]
+    {% set pymethod = symbol_type | plural | getter %}
+    {% set symbol_class = symbol_type | pytitle %}
+    cpdef {{pymethod}}(self):
+        '''{{pymethod}}() -> Dict[str, {{symbol_class}}]
         Get all the {{symbol_type | plural}} created within the system.
 
         :return: Return all the {{symbol_type | replace('_', ' ')}} symbols defined in the system in a dictionary where
-        keys are their names and the entry values, instances of the class {{symbol_type | pytitle}}.
-        :rtype: Dict[str, {{symbol_type | pytitle}}]
+        keys are their names and the entry values, instances of the class {{symbol_class}}.
+        :rtype: Dict[str, {{symbol_class}}]
         '''
         items = []
         {% if symbol_type == 'joint_unknown' %}
@@ -152,7 +160,7 @@ cdef class System:
         {% endif %}
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
-            items.append({{symbol_type | pytitle}}(<Py_ssize_t>ptr, self))
+            items.append({{symbol_class}}(<Py_ssize_t>ptr, self))
         return dict(zip(map(attrgetter('name'), items), items))
 
     {% endfor %}
