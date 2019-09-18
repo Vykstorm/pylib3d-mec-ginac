@@ -39,5 +39,14 @@ cdef extern from "System.h":
         symbol_numeric* get_Input(string name);
 
         ## Symbol spawners
+        symbol_numeric* new_Coordinate(string name)
+        symbol_numeric* new_AuxCoordinate(string name)
         symbol_numeric* new_Parameter(string name)
+        symbol_numeric* new_Joint_Unknown(string name)
+        symbol_numeric* new_Input(string name)
+
+        symbol_numeric* new_Coordinate(string name, string tex_name)
+        symbol_numeric* new_AuxCoordinate(string name, string tex_name)
         symbol_numeric* new_Parameter(string name, string tex_name)
+        symbol_numeric* new_Joint_Unknown(string name, string tex_name)
+        symbol_numeric* new_Input(string name, string tex_name)
