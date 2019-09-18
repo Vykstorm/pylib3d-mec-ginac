@@ -110,25 +110,15 @@ cdef class SymbolNumeric:
 
 
 
-## Wrapper for subclasses of symbol_numeric
+## Wrappers for subclasses of symbol_numeric
 # They only redefine the method __str__ to improve symbol printing on the python console
 
 {% for symbol_type in symbol_types %}
-cdef class {{symbol_type|title}}(SymbolNumeric):
+cdef class {{symbol_type|pytitle}}(SymbolNumeric):
     '''
-    Represents a {{symbol_type}} symbol defined within a system.
+    Represents {{symbol_type|aprefix|replace('_', ' ')}} symbol defined within a system.
     '''
-    {% if symbol_type == 'coordinate' %}
-    def __str__(self):
-        return f'{self.name}, value = {self.value}'
-    {% elif symbol_type == 'velocity' %}
-    def __str__(self):
-        return f'\u2202{self.name}\u2215\u2202\u03c4, value = {self.value}'
-    {% elif symbol_type == 'acceleration' %}
-    def __str__(self):
-        return f'\u2202\u00b2{self.name}\u2215\u2202\u03c4, value = {self.value}'
-    {% else %}
     pass
-    {% endif %}
+
 
 {% endfor %}
