@@ -104,24 +104,33 @@ cdef class System:
         return self.get_parameter(name)
 
 
-    cpdef Parameter get_parameter(self, unicode name):
-        '''get_parameter(name: str) -> Parameter
+    {% for symbol_type in symbol_types %}
+    {% set pymethod = symbol_type | getter %}
+    {% set symbol_class = symbol_type | pytitle %}
+    {% set symbol_name = symbol_type | replace('_', ' ') %}
+    cpdef {{symbol_class}} {{pymethod}}(self, unicode name):
+        '''{{pymethod}}(name: str) -> {{symbol_class}}
         Get a parameter by name.
 
-        :param str name: The name of the parameter to query
-        :return: The parameter on the system with the specified name
-        :rtype: Parameter
+        :param str name: The name of the {{symbol_name}} to query
+        :return: The {{symbol_name}} on the system with the specified name if it exists.
+        :rtype: {{symbol_class}}
         :raises TypeError: If input argument have invalid type
-        :raises ValueError: If no parameter with the given name exists in the system
+        :raises ValueError: If no {{symbol_name}} with the given name exists in the system
         '''
         if name is None:
-            raise TypeError('Parameter name must be a string')
-        if not self.has_parameter(name):
-            raise ValueError(f'Parameter "{name}" not created yet')
-        return Parameter(<Py_ssize_t>self.system.get_Parameter(name.encode()), self)
+            raise TypeError('{{symbol_name}} name must be a string')
+        if not self.has_{{symbol_type}}(name):
+            raise ValueError(f'{{symbol_name}} "{name}" not created yet')
+        {% if symbol_type != 'joint_unknown' %}
+        return {{symbol_class}}(<Py_ssize_t>self.system.{{symbol_type | pytitle | getter}}(name.encode()), self)
+        {% else %}
+        return {{symbol_class}}(<Py_ssize_t>self.system.get_Unknown(name.encode()), self)
+        {% endif %}
+    {% endfor %}
 
 
-    {% for symbol_type in symbol_types  %}
+    {% for symbol_type in symbol_types %}
     cdef bint has_{{symbol_type}}(self, unicode name):
         {% if symbol_type == 'joint_unknown' %}
         cdef vector[c_symbol_numeric*] ptrs = self.system.get_Joint_Unknowns()
