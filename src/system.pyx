@@ -262,3 +262,23 @@ cdef class System:
         elif not isinstance(symbol, SymbolNumeric):
             raise TypeError(f'First argument must be a string or an instance of the class {SymbolNumeric.__name__}')
         symbol.set_value(value)
+
+
+
+    ######## Metamethods ########
+
+    def __str__(self):
+        symbols = self.symbols
+        s, bullet = '', '\u2022 '
+
+        if len(symbols) > 0:
+            s += bullet + f'Numeric symbols ({len(symbols)} in total):\n' + str(symbols) + '\n'
+        else:
+            s += bullet + 'No numeric symbols added yet\n'
+
+        s += '\n'
+        s += bullet + 'No geometric symbols added yet\n'
+        return s
+
+    def __repr__(self):
+        return self.__str__()
