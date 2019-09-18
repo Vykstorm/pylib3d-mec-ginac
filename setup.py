@@ -119,7 +119,7 @@ if __name__ == '__main__':
     ## Import statements
     try:
         from Cython.Build import cythonize
-        from jinja2 import Template, Environment
+        from source import parse_source
     except ImportError as e:
         # Generate error message if missing dependencies
         print(f'Failed to import "{e.name}" module')
@@ -128,9 +128,6 @@ if __name__ == '__main__':
 
 
     ## Parse .pyx modules and merge them into one single source
-
-    # Get the list of .pyx modules
-    modules = [join('src', filename) for filename in listdir('src') if filename.endswith('.pyx') and not filename.startswith('main')]
 
     with open('src/main.pyx', 'w') as f_out: # All source code will be merged to this file
         # Insert a header comment in the output file
@@ -143,29 +140,17 @@ if __name__ == '__main__':
             "'"*3
         ]))
 
-        for module in modules:
+        for filename in listdir('src'):
+            if not filename.endswith('.pyx') or filename.startswith('main'):
+                continue
+
             print(f'Parsing {module}')
-            with open(module, 'r') as f_in:
-                # Read .pyx source code
-                source = f_in.read()
-
-                # Parse .pyx module as a jinja template (expand code macros)
-                env = Environment()
-                env.filters['cls'] = lambda name: name.title()
-                env.filters['plural'] = lambda name: name + 's' if not name.endswith('y') else name[:-1] + 'ies'
-                env.filters['getter'] = lambda name: 'get_' + name
-
-                template = env.from_string(source)
-                context = {
-                    'symbol_types': ['parameter', 'unknown', 'input', 'coordinate', 'velocity', 'acceleration']
-                }
-                source = template.render(**context)
-
-                # Store the result in the output .pyx file
-                f_out.write(source)
+            with open(join('src', filename), 'r') as f_in:
+                f_out.write(parse_source(f_in.read(), context))
                 f_out.write('\n')
 
     print(f"Files {', '.join(modules)} merged to src/main.pyx")
+
 
 
     ## Invoke distutils setup
