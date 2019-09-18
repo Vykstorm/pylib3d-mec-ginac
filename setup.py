@@ -145,12 +145,12 @@ if __name__ == '__main__':
             if not filename.endswith('.pyx') or filename.startswith('main'):
                 continue
 
-            print(f'Parsing {module}')
+            print(f'Parsing {filename}')
             with open(join('src', filename), 'r') as f_in:
-                f_out.write(parse_source(f_in.read(), context))
+                f_out.write(parse_source(f_in.read()))
                 f_out.write('\n')
 
-    print(f"Files {', '.join(modules)} merged to src/main.pyx")
+    print(f"Generated src/main.pyx file")
 
 
 
