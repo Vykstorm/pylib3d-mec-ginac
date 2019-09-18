@@ -25,3 +25,10 @@ cdef extern from "System.h":
         vector[symbol_numeric*] get_Parameters()
         vector[symbol_numeric*] get_Inputs()
         vector[symbol_numeric*] get_Joint_Unknowns()
+
+        symbol_numeric* get_Coordinate(string name);
+        symbol_numeric* get_Velocity(string name);
+        symbol_numeric* get_Acceleration(string name);
+        symbol_numeric* get_Parameter(string name);
+        symbol_numeric* get_Unknown(string name);
+        symbol_numeric* get_Input(string name);
