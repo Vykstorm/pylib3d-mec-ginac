@@ -17,11 +17,12 @@ cdef extern from "System.h":
         symbol_numeric* new_Parameter(string name)
         symbol_numeric* new_Parameter(string name, string tex_name)
 
-        symbol_numeric* get_Parameter(string name)
-
         vector[symbol_numeric*] get_Coordinates()
         vector[symbol_numeric*] get_Velocities()
         vector[symbol_numeric*] get_Accelerations()
+        vector[symbol_numeric*] get_AuxCoordinates()
+        vector[symbol_numeric*] get_AuxVelocities()
+        vector[symbol_numeric*] get_AuxAccelerations()
         vector[symbol_numeric*] get_Parameters()
         vector[symbol_numeric*] get_Inputs()
         vector[symbol_numeric*] get_Joint_Unknowns()
@@ -29,6 +30,9 @@ cdef extern from "System.h":
         symbol_numeric* get_Coordinate(string name);
         symbol_numeric* get_Velocity(string name);
         symbol_numeric* get_Acceleration(string name);
+        symbol_numeric* get_AuxCoordinate(string name);
+        symbol_numeric* get_AuxVelocity(string name);
+        symbol_numeric* get_AuxAcceleration(string name);
         symbol_numeric* get_Parameter(string name);
         symbol_numeric* get_Unknown(string name);
         symbol_numeric* get_Input(string name);

@@ -145,7 +145,11 @@ cdef class System:
         :rtype: Dict[str, {{symbol_type | pytitle}}]
         '''
         items = []
-        cdef vector[c_symbol_numeric*] ptrs = self.system.{{symbol_type | plural | ctitle | getter}}
+        {% if symbol_type == 'joint_unknown' %}
+        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Joint_Unknowns()
+        {% else %}
+        cdef vector[c_symbol_numeric*] ptrs = self.system.{{symbol_type | plural | pytitle | getter}}()
+        {% endif %}
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
             items.append({{symbol_type | pytitle}}(<Py_ssize_t>ptr))
