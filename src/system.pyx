@@ -137,18 +137,18 @@ cdef class System:
 
     {% for symbol_type in symbol_types %}
     cpdef {{symbol_type | plural | getter}}(self):
-        '''get_{{symbol_type | plural}}() -> Dict[str, {{symbol_type | cls}}]
+        '''{{symbol_type | plural | getter}}() -> Dict[str, {{symbol_type | pytitle}}]
         Get all the {{symbol_type | plural}} created within the system.
 
-        :return: Return all the {{symbol_type}} symbols defined in the system in a dictionary where
-        keys are their names and entry values, instances of the class {{symbol_type | cls}}.
-        :rtype: Dict[str, {{symbol_type | cls}}]
+        :return: Return all the {{symbol_type | replace('_', ' ')}} symbols defined in the system in a dictionary where
+        keys are their names and the entry values, instances of the class {{symbol_type | pytitle}}.
+        :rtype: Dict[str, {{symbol_type | pytitle}}]
         '''
         items = []
-        cdef vector[c_symbol_numeric*] ptrs = {% if symbol_type != 'unknown' %}self.system.get_{{symbol_type | cls | plural}}(){% else %}self.system.get_Joint_Unknowns(){% endif %}
+        cdef vector[c_symbol_numeric*] ptrs = self.system.{{symbol_type | plural | ctitle | getter}}
         cdef c_symbol_numeric* ptr
         for ptr in ptrs:
-            items.append({{symbol_type | cls}}(<Py_ssize_t>ptr))
+            items.append({{symbol_type | pytitle}}(<Py_ssize_t>ptr))
         return dict(zip(map(attrgetter('name'), items), items))
 
     {% endfor %}
@@ -174,7 +174,7 @@ cdef class System:
         This property (read only) retrieves all the {{symbol_type | plural}} defined within the system.
 
         :return: The same as {{symbol_type | plural | getter}}()
-        :rtype: Dict[str, {{symbol_type | cls}}]
+        :rtype: Dict[str, {{symbol_type | pytitle}}]
         '''
         return self.{{symbol_type | plural | getter}}()
 
