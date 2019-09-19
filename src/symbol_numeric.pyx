@@ -75,7 +75,7 @@ cdef class SymbolNumeric:
 
     ######## Getters ########
 
-    cpdef float get_value(self):
+    cpdef double get_value(self):
         '''get_value() -> float
 
         :return: The numeric value of this symbol as a float value.
