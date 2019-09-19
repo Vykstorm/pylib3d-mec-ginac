@@ -132,6 +132,28 @@ cdef class SymbolNumeric:
         '''
         return complex(self.handler.get_value().real().to_double(), self.handler.get_value().imag().to_double())
 
+
+    def __hash__(self):
+        '''
+        Returns the hash value for this symbol. One instance of this class is equal to
+        another one if they refer to the same numeric symbol (same name)
+        '''
+        return hash((SymbolNumeric, self.name))
+
+
+    def __eq__(self, other):
+        '''
+        Check if two objects refer to the same numeric symbol (have the same name)
+
+        :param other: Other object to compare this instance with
+        :return: True if the specified object is also an instance of the class SymbolNumeric and have the same name as this object. False otherwise.
+        :rtype: bool
+        '''
+        if not isinstance(other, SymbolNumeric):
+            return False
+        return self.name == other.name
+
+
     def __str__(self):
         return f'{self.__class__.__name__.lower()} {self.name}, value = {round(self.value, 4)}'
 
