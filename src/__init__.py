@@ -22,7 +22,6 @@ for name in dir(_ext):
     globals()[name] = obj
 
 
-
 # This only has effect with python>=3.7 (PEP 562)
 # It "hides" variables starting with _ from the public API
 def __getattr__(name):
@@ -32,3 +31,15 @@ def __getattr__(name):
 
 def __dir__():
     return __all__.copy()
+
+
+# This will store the "default" system object.
+_default_system = System()
+
+# Expose get_* and new_*, set_* methods of the default system object (add them to __all__ and globals())
+for name in dir(System):
+    if not any(map(name.startswith, ('get_', 'set_', 'new_'))):
+        continue
+    method = getattr(_default_system, name)
+    __all__.append(name)
+    globals()[name] = method
