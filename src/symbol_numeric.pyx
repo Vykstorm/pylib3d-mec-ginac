@@ -160,7 +160,7 @@ cdef class {{symbol_type | pytitle}}(SymbolNumeric):
 
 
 ## Wrapper for values returned by symbol container getters in the class System
-class SymbolsDict(OrderedDict):
+class _SymbolsDict(OrderedDict):
     def __str__(self):
         if len(self.keys()) == 0:
             # No symbols at all
