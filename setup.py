@@ -10,7 +10,7 @@ from distutils.extension import Extension
 from os import listdir
 from os.path import join, abspath, dirname
 from functools import reduce, partial
-
+from re import sub, DOTALL
 
 
 ######## PACKAGE DESCRIPTION ########
@@ -119,7 +119,6 @@ if __name__ == '__main__':
     ## Import statements
     try:
         from Cython.Build import cythonize
-        from source import parse_source
     except ImportError as e:
         # Generate error message if missing dependencies
         print(f'Failed to import "{e.name}" module')
@@ -127,8 +126,8 @@ if __name__ == '__main__':
         exit(-1)
 
 
-    ## Parse .pyx modules and merge them into one single source
-
+    ## Merge .pyx definition files into one
+    print(f"Generating src/main.pyx file")
     with open('src/main.pyx', 'w') as f_out: # All source code will be merged to this file
         # Insert a header comment in the output file
         f_out.write('\n'.join([
@@ -139,20 +138,19 @@ if __name__ == '__main__':
             f'Version : {VERSION}',
             "'"*3
         ]))
+        f_out.write('\n'*3)
 
-        # Parse each .pyx file
         for filename in listdir('src'):
             if not filename.endswith('.pyx') or filename.startswith('main'):
                 continue
-
-            print(f'Parsing {filename}')
             with open(join('src', filename), 'r') as f_in:
-                f_out.write(parse_source(f_in.read()))
-                f_out.write('\n')
+                code = sub("'''.*?'''", '#'*8 + f' {filename} ' + '#'*8, f_in.read(), count=1, flags=DOTALL)
+                f_out.write(code)
+                f_out.write('\n'*3)
 
-    print(f"Generated src/main.pyx file")
 
-
+    ## Generate C-Python extension
+    extensions = cythonize(EXTENSIONS, compiler_directives={'language_level': 3}, nthreads=2, force=True)
 
     ## Invoke distutils setup
     setup(
@@ -171,7 +169,5 @@ if __name__ == '__main__':
 
         packages=[PACKAGE],
         package_dir={PACKAGE:PACKAGE_DIR},
-        ext_modules=cythonize(EXTENSIONS,
-            compiler_directives={'language_level': 3},
-            nthreads=2, force=True),
+        ext_modules=extensions,
     )
