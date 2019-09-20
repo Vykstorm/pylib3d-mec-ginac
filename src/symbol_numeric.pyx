@@ -28,23 +28,54 @@ cdef class SymbolNumeric:
         self._owner = owner
 
 
-    ######## Properties  ########
+    ######## Getters ########
 
-    @property
-    def name(self):
+    cpdef double get_value(self):
+        '''get_value() -> float
+        :return: The numeric value of this symbol as a float value.
+        :rtype: float
         '''
-        Only read property that returns the name of this symbol.
+        return self.handler.get_value().to_double()
+
+    cpdef get_owner(self):
+        '''get_owner() -> System
+        Get the System object that created this symbol.
+        :rtype: System
+        '''
+        return self._owner
+
+    cpdef get_name(self):
+        '''get_name() -> str
+        Get the name of this symbol
         :rtype: str
         '''
         return (<bytes>self.handler.get_name()).decode()
 
-    @property
-    def tex_name(self):
-        '''
-        Only read property that returns the name in latex of this symbol.
+    cpdef get_tex_name(self):
+        '''get_tex_name() -> str
+        Get the name in latex of this symbol
         :rtype: str
         '''
         return (<bytes>self.handler.print_TeX_name()).decode()
+
+
+
+    ######## Setters ########
+
+    cpdef set_value(self, value):
+        '''set_value(value: Union[int, float])
+        Assigns a new numeric value to this symbol.
+        :param value: It must be the new numeric value to assign for this symbol
+        :type value: int, float
+        :raises TypeError: If value has an incorrect type.
+        '''
+        if not isinstance(value, (int, float)):
+            raise TypeError(f'Value must be a int or float')
+        self.handler.set_value(c_numeric(float(value)))
+
+
+
+    ######## Properties  ########
 
     @property
     def value(self):
@@ -67,36 +98,22 @@ cdef class SymbolNumeric:
         '''
         return self.get_owner()
 
-
-    ######## Getters ########
-
-    cpdef double get_value(self):
-        '''get_value() -> float
-        :return: The numeric value of this symbol as a float value.
-        :rtype: float
+    @property
+    def name(self):
         '''
-        return self.handler.get_value().to_double()
-
-    cdef get_owner(self):
-        '''get_owner() -> System
-        Get the System object that created this symbol.
-        :rtype: System
+        Only read property that returns the name of this symbol.
+        :rtype: str
         '''
-        return self._owner
+        return self.get_name()
 
-
-    ######## Setters ########
-
-    cpdef set_value(self, value):
-        '''set_value(value: Union[int, float])
-        Assigns a new numeric value to this symbol.
-        :param value: It must be the new numeric value to assign for this symbol
-        :type value: int, float
-        :raises TypeError: If value has an incorrect type.
+    @property
+    def tex_name(self):
         '''
-        if not isinstance(value, (int, float)):
-            raise TypeError(f'Value must be a int or float')
-        self.handler.set_value(c_numeric(float(value)))
+        Only read property that returns the name in latex of this symbol.
+        :rtype: str
+        '''
+        return self.get_tex_name()
+
 
 
     ######## Metamethods ########
