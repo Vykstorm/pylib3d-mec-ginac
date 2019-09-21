@@ -1,10 +1,7 @@
-
-{#
 '''
 Author: Víctor Ruiz Gómez
 Description: This module defines the class System
 '''
-#}
 
 
 ## Import statements
@@ -13,8 +10,10 @@ Description: This module defines the class System
 cimport cython
 
 # C++ standard library imports
-from libcpp.string cimport string
-from libcpp.vector cimport vector
+from libcpp.string cimport string as c_string
+from libcpp.vector cimport vector as c_vector
+from libcpp.map cimport map as c_map
+from libcpp.utility cimport pair as c_pair
 
 # Import .pxd declarations
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
@@ -23,260 +22,155 @@ from src.cnumeric cimport numeric as c_numeric
 
 # Python imports
 from collections.abc import Mapping
-from operator import attrgetter
+from functools import partial, partialmethod
+
+
+## C Type aliases
+
+ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
 
 
 
-## Wrapper of System class for Python
-cdef class System:
+## Helper variables, methods and types
+
+# All numeric symbol types
+_symbol_types = tuple(map(str.encode, (
+    'coordinate', 'velocity', 'acceleration',
+    'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+    'parameter', 'joint_unknown', 'input'
+)))
+
+
+
+## Class which acts like a bridge between Python and C++ System class
+cdef class _System:
     '''
     Its the main class of the library. It represents a mechanical system defined with different variables:
     coordinates, parameters, inputs, tensors, ...
     '''
     ######## C Attributes ########
 
-    cdef c_System* system
+    cdef c_System* _c_handler
 
 
     ######## Constructor & Destructor ########
 
     def __cinit__(self):
-        self.system = new c_System()
+        # Initialize C++ System object
+        self._c_handler = new c_System()
 
     def __dealloc__(self):
-        del self.system
-
-
-    ######## Symbol spawners  ########
-
-    {% for symbol_type in symbol_types if not symbol_type.endswith('velocity') and not symbol_type.endswith('acceleration') and not symbol_type.startswith('aux') %}
-    {% set symbol_name = symbol_type | replace('_', ' ') %}
-    {% set symbol_class = symbol_type | pytitle %}
-    {% set pymethod = symbol_type | spawner %}
-    {% if symbol_type == 'joint_unknown' %}
-    {% set cmethod = 'new_Joint_Unknown' %}
-    {% else %}
-    {% set cmethod = symbol_type | pytitle | spawner %}
-    {% endif %}
-    cpdef {{symbol_class}} {{pymethod}}(self, unicode name, unicode tex_name=None):
-        '''{{pymethod}}(name: str[, tex_name: str]) -> {{symbol_class}}
-        Creates a new {{symbol_name}} with the given name.
-
-        :param str name: The name of the new {{symbol_name}}
-        :param str tex_name: The name of the new {{symbol_name}} in latex.
-        :return: Returns the {{symbol_name}} created on success
-        :rtype: {{symbol_class}}
-        :raises TypeError: If input arguments have incorrect types
-        :raises ValueError: If {{symbol_name | aprefix}} with the given name already exists in the system
-        '''
-        if name is None:
-            raise TypeError('{{symbol_name}} name must be a string')
-        if self.has_{{symbol_type}}(name):
-            raise ValueError(f'{{symbol_name}} "{name}" already created')
-
-        cdef c_symbol_numeric* handler
-        if tex_name is None:
-            handler = self.system.{{cmethod}}(name.encode())
-        else:
-            {% if symbol_type == 'coordinate' %}
-            handler = self.system.{{cmethod}}(name.encode())
-            {% else %}
-            handler = self.system.{{cmethod}}(name.encode(), tex_name.encode())
-            {% endif %}
-        return {{symbol_class}}(<Py_ssize_t>handler, self)
-
-    {% endfor %}
-
+        del self._c_handler
 
 
     ######## Symbol getters ########
 
-    cpdef get_symbol(self, unicode name):
-        '''get_symbol(name: str) -> SymbolNumeric
-        Get a symbol defined on this system by name
+    cdef c_map[c_string, c_symbol_numeric_list] _get_c_symbols_by_type(self):
+        ## This method returns C++ map where each entry value is a vector of pointers to symbol_numeric objects
+        # and keys are symbol types.
+        cdef c_map[c_string, c_symbol_numeric_list] symbols_by_type
+        symbols_by_type[b'coordinate'] = self._c_handler.get_Coordinates()
+        symbols_by_type[b'velocity'] = self._c_handler.get_Velocities()
+        symbols_by_type[b'acceleration'] = self._c_handler.get_Accelerations()
+        symbols_by_type[b'aux_coordinate'] = self._c_handler.get_AuxCoordinates()
+        symbols_by_type[b'aux_velocity'] = self._c_handler.get_AuxVelocities()
+        symbols_by_type[b'aux_acceleration'] = self._c_handler.get_AuxAccelerations()
+        symbols_by_type[b'parameter'] = self._c_handler.get_Parameters()
+        symbols_by_type[b'input'] = self._c_handler.get_Inputs()
+        symbols_by_type[b'joint_unknown'] = self._c_handler.get_Joint_Unknowns()
+        return symbols_by_type
 
-        :param str name: Name of the symbol
-        :return: Return the symbol defined on the system with the specified name.
-        :rtype: str
-        :raises TypeError: If input argument have invalid type
-        :raises ValueError: If no symbol with that name exists in the system.
-        '''
-        if name is None:
-            raise TypeError('Symbol name must be a string')
-        {% for symbol_type in symbol_types %}
-        if self.has_{{symbol_type}}(name):
-            return self.get_{{symbol_type}}(name)
-        {% endfor %}
-        raise ValueError(f'Symbol "{name}" not created yet')
-
-
-
-    {% for symbol_type in symbol_types %}
-    {% set pymethod = symbol_type | getter %}
-    {% set symbol_class = symbol_type | pytitle %}
-    {% set symbol_name = symbol_type | replace('_', ' ') %}
-    cpdef {{symbol_class}} {{pymethod}}(self, unicode name):
-        '''{{pymethod}}(name: str) -> {{symbol_class}}
-        Get a parameter by name.
-
-        :param str name: The name of the {{symbol_name}} to query
-        :return: The {{symbol_name}} on the system with the specified name if it exists.
-        :rtype: {{symbol_class}}
-        :raises TypeError: If input argument have invalid type
-        :raises ValueError: If no {{symbol_name}} with the given name exists in the system
-        '''
-        if name is None:
-            raise TypeError('{{symbol_name}} name must be a string')
-        if not self.has_{{symbol_type}}(name):
-            raise ValueError(f'{{symbol_name}} "{name}" not created yet')
-        {% if symbol_type != 'joint_unknown' %}
-        return {{symbol_class}}(<Py_ssize_t>self.system.{{symbol_type | pytitle | getter}}(name.encode()), self)
-        {% else %}
-        return {{symbol_class}}(<Py_ssize_t>self.system.get_Unknown(name.encode()), self)
-        {% endif %}
-    {% endfor %}
-
-
-    {% for symbol_type in symbol_types %}
-    cdef bint has_{{symbol_type}}(self, unicode name):
-        {% if symbol_type == 'joint_unknown' %}
-        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Joint_Unknowns()
-        {% else %}
-        cdef vector[c_symbol_numeric*] ptrs = self.system.{{symbol_type | plural | pytitle | getter}}()
-        {% endif %}
-        cdef c_symbol_numeric* ptr
-        for ptr in ptrs:
-            if ptr.get_name() == <string>name.encode():
-                return 1
-        return 0
-
-    {% endfor %}
-
-
-
-    ######## Symbol containers getters ########
 
     cpdef get_symbols(self):
-        '''get_symbols() -> Dict[str, SymbolNumeric]
-        Get all the symbols defined in the system.
+        symbols = []
+        cdef c_symbol_numeric_list c_symbols
+        cdef c_map[c_string, c_symbol_numeric_list] c_symbols_by_type
+        cdef c_pair[c_string, c_symbol_numeric_list] c_map_entry
 
-        :return: Return all the symbols defined in the system in a dictionary, where keys are symbol names and values, instances of the class SymbolNumeric.
-        :rtype: Dict[str, SymbolNumeric]
-        '''
-        # TODO
-        symbols = _SymbolsDict()
-        {% for symbol_type in symbol_types %}
-        symbols.update(self.{{symbol_type | plural | getter}}()){% endfor %}
+        c_symbols_by_type = self._get_c_symbols_by_type()
+        for c_map_entry in c_symbols_by_type:
+            c_symbols = c_map_entry.second
+            symbols.extend([SymbolNumeric(<Py_ssize_t>c_symbol, (<bytes>c_map_entry.first).decode(), self) for c_symbol in c_symbols])
+
         return symbols
 
 
 
-    {% for symbol_type in symbol_types %}
-    {% set pymethod = symbol_type | plural | getter %}
-    {% set symbol_class = symbol_type | pytitle %}
-    cpdef {{pymethod}}(self):
-        '''{{pymethod}}() -> Dict[str, {{symbol_class}}]
-        Get all the {{symbol_type | plural}} created within the system.
+    cpdef get_symbol(self, name, kind=None):
+        # Validate input argument types
+        if not isinstance(name, (str, bytes)):
+            raise TypeError('Symbol name must be a string or bytes sequence')
 
-        :return: Return all the {{symbol_type | replace('_', ' ')}} symbols defined in the system in a dictionary where keys are their names and the entry values, instances of the class {{symbol_class}}.
-        :rtype: Dict[str, {{symbol_class}}]
-        '''
-        items = []
-        {% if symbol_type == 'joint_unknown' %}
-        cdef vector[c_symbol_numeric*] ptrs = self.system.get_Joint_Unknowns()
-        {% else %}
-        cdef vector[c_symbol_numeric*] ptrs = self.system.{{symbol_type | plural | pytitle | getter}}()
-        {% endif %}
-        cdef c_symbol_numeric* ptr
-        for ptr in ptrs:
-            items.append({{symbol_class}}(<Py_ssize_t>ptr, self))
-        return _SymbolsDict(zip(map(attrgetter('name'), items), items))
+        if kind is not None and not isinstance(kind, (str, bytes)):
+            raise TypeError('Symbol type must be a string or bytes sequence')
 
-    {% endfor %}
+        # Convert input arguments to bytes
+        if isinstance(name, str):
+            name = name.encode()
 
+        if isinstance(kind, str):
+            kind = kind.encode()
 
+        # Validate input argument values
+        if kind is not None and kind not in _symbol_types:
+            raise ValueError(f'Invalid "{kind}" symbol type')
 
-    ######## Symbol containers properties ########
+        # Find the numeric symbol by name
+        cdef c_map[c_string, c_symbol_numeric_list] c_symbols_by_type = self._get_c_symbols_by_type()
+        cdef c_pair[c_string, c_symbol_numeric_list] c_map_entry
+        cdef c_symbol_numeric_list c_symbols
+        cdef c_symbol_numeric* c_symbol
 
-    @property
-    def symbols(self):
-        '''
-        This property (read only) retrieves all the symbols defined in the system.
-        :return: The same as get_symbols()
-        :rtype: Dict[str, SymbolNumeric]
-        '''
-        return self.get_symbols()
+        if kind is None:
+            for c_map_entry in c_symbols_by_type:
+                for c_symbol in c_map_entry.second:
+                    if c_symbol.get_name() == <c_string>name:
+                        return SymbolNumeric(<Py_ssize_t>c_symbol, (<bytes>c_map_entry.first).decode(), self)
+        else:
+            # Get symbols of an specific type
+            c_symbols = c_symbols_by_type[<c_string>kind]
+            for c_symbol in c_symbols:
+                if c_symbol.get_name() == <c_string>name:
+                    return SymbolNumeric(<Py_ssize_t>c_symbol, kind.decode(), self)
 
-
-    {% for symbol_type in symbol_types %}
-    @property
-    def {{symbol_type | plural}}(self):
-        '''
-        This property (read only) retrieves all the {{symbol_type | plural}} defined within the system.
-
-        :return: The same as {{symbol_type | plural | getter}}()
-        :rtype: Dict[str, {{symbol_type | pytitle}}]
-        '''
-        return self.{{symbol_type | plural | getter}}()
-
-    {% endfor %}
+        # No symbol with such name exists
+        if kind is None:
+            raise IndexError(f'Symbol "{name.decode()}" not created yet')
+        raise IndexError(f'{kind.decode().title().replace("_", " ")} "{name.decode()}" not created yet')
 
 
 
-    ######## Symbol value getter & setter ########
 
-    cpdef get_value(self, symbol):
-        '''get_value(symbol: Union[str, SymbolNumeric]) -> float
-        Get the numeric value of a symbol.
-
-        :param symbol: The symbol to fetch its numeric value
-        :type symbol: str or SymbolNumeric
-        :return: The value of the symbol specified
-        :rtype: float
-        :raises TypeError: if input arguments have invalid types
-        :raises ValueError: if the argument is a string and there not exists a symbol in the system with that name
-        '''
-        if isinstance(symbol, str):
-            symbol = self.get_symbol(symbol)
-        elif not isinstance(symbol, SymbolNumeric):
+## System class for Python (it emulates the class System in C++ but also provides additional features).
+class System(_System):
+    def get_value(self, symbol):
+        if not isinstance(symbol, (SymbolNumeric, str, bytes)):
             raise TypeError(f'Input argument must be a string or an instance of the class {SymbolNumeric.__name__}')
+
+        if not isinstance(symbol, SymbolNumeric):
+            symbol = self.get_symbol(symbol)
         return symbol.get_value()
 
 
-    cpdef set_value(self, symbol, value):
-        '''set_value(symbol: Union[str, SymbolNumeric], value: Union[float, int])
-        Set the numeric value of a symbol.
+    def set_value(self, symbol, value):
+        if not isinstance(symbol, (SymbolNumeric, str, bytes)):
+            raise TypeError(f'Input argument must be a string or an instance of the class {SymbolNumeric.__name__}')
 
-        :param symbol: The symbol where to assign a new numeric value
-        :type symbol: str or SymbolNumeric
-        :param value: The new value
-        :type value: int, float
-
-        :raises TypeError: If input arguments have invalid types
-        :raises ValueError: If the first argument is a string and there not exists a symbol in the system with that name.
-        '''
-        if isinstance(symbol, str):
+        if not isinstance(symbol, SymbolNumeric):
             symbol = self.get_symbol(symbol)
-        elif not isinstance(symbol, SymbolNumeric):
-            raise TypeError(f'First argument must be a string or an instance of the class {SymbolNumeric.__name__}')
         symbol.set_value(value)
 
 
+    def has_symbol(self, *args, **kwargs):
+        try:
+            self.get_symbol(*args, **kwargs)
+        except IndexError:
+            return False
+        return True
 
-    ######## Metamethods ########
 
-    def __str__(self):
-        symbols = self.symbols
-        s, bullet = '', '\u2022 '
-
-        if len(symbols) > 0:
-            s += bullet + f'Numeric symbols ({len(symbols)} in total):\n' + str(symbols) + '\n'
-        else:
-            s += bullet + 'No numeric symbols added yet\n'
-
-        s += '\n'
-        s += bullet + 'No geometric symbols added yet\n'
-        return s
-
-    def __repr__(self):
-        return self.__str__()
+# Autogenerate getter_* and has_* methods
+for symbol_type in _symbol_types:
+    name = symbol_type.decode()
+    setattr(System, 'get_' + name, partialmethod(System.get_symbol, kind=symbol_type))
+    setattr(System, 'has_' + name, partialmethod(System.has_symbol, kind=symbol_type))
