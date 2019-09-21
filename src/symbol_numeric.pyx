@@ -17,15 +17,15 @@ cdef class SymbolNumeric:
 
     ######## C Attributes  ########
 
-    cdef c_symbol_numeric* handler
+    cdef c_symbol_numeric* _c_handler
     cdef unicode _kind
     cdef object _owner
 
 
     ######## Constructor & Destructor  ########
 
-    def __cinit__(self, Py_ssize_t handler, unicode kind, owner):
-        self.handler = <c_symbol_numeric*>handler
+    def __cinit__(self, Py_ssize_t ptr, unicode kind, owner):
+        self._c_handler = <c_symbol_numeric*>ptr
         self._kind = kind
         self._owner = owner
 
@@ -37,7 +37,7 @@ cdef class SymbolNumeric:
         :return: The numeric value of this symbol as a float value.
         :rtype: float
         '''
-        return self.handler.get_value().to_double()
+        return self._c_handler.get_value().to_double()
 
     cpdef get_owner(self):
         '''get_owner() -> System
@@ -51,14 +51,14 @@ cdef class SymbolNumeric:
         Get the name of this symbol
         :rtype: str
         '''
-        return (<bytes>self.handler.get_name()).decode()
+        return (<bytes>self._c_handler.get_name()).decode()
 
     cpdef get_tex_name(self):
         '''get_tex_name() -> str
         Get the name in latex of this symbol
         :rtype: str
         '''
-        return (<bytes>self.handler.print_TeX_name()).decode()
+        return (<bytes>self._c_handler.print_TeX_name()).decode()
 
     cpdef get_kind(self):
         '''get_kind() -> str
@@ -84,7 +84,7 @@ cdef class SymbolNumeric:
         '''
         if not isinstance(value, (int, float)):
             raise TypeError(f'Value must be a int or float')
-        self.handler.set_value(c_numeric(float(value)))
+        self._c_handler.set_value(c_numeric(float(value)))
 
 
 
@@ -157,7 +157,7 @@ cdef class SymbolNumeric:
         Returns the numeric value of this symbol as a complex number.
         :rtype: complex
         '''
-        return complex(self.handler.get_value().real().to_double(), self.handler.get_value().imag().to_double())
+        return complex(self._c_handler.get_value().real().to_double(), self._c_handler.get_value().imag().to_double())
 
 
     def __hash__(self):
