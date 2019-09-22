@@ -53,6 +53,28 @@ _derivable_symbol_types = frozenset(map(str.encode, (
 )))
 
 
+def _parse_symbol_type(kind):
+    if not isinstance(kind, (str, bytes)):
+        raise TypeError(f'Symbol type must be a str or bytes object')
+
+    if isinstance(kind, str):
+        kind = kind.encode()
+
+    if kind not in _symbol_types:
+        raise ValueError(f'Invalid "{kind.decode()}" symbol type')
+
+    return kind
+
+
+def _parse_symbol_name(name):
+    if not isinstance(name, (str, bytes)):
+        raise TypeError(f'Symbol name must be a str or bytes object')
+
+    if isinstance(name, str):
+        name = name.encode()
+
+    return name
+
 
 
 ######## Class definitions ########
@@ -158,22 +180,9 @@ cdef class _System:
         :raises ValueError: If input arguments have incorrect values
         :raises IndexError: If no symbol with the given name & type is defined in the system
         '''
-        # Validate arguments types
-        if not isinstance(name, (str, bytes)):
-            raise TypeError('Symbol name must be a string or bytes object')
-
-        if kind is not None and not isinstance(kind, (str, bytes)):
-            raise TypeError('Symbol type must be a string or bytes object')
-
-        # Validate & parse argument values
-        if isinstance(name, str):
-            name = name.encode()
-
-        if isinstance(kind, str):
-            kind = kind.encode()
-
-        if kind is not None and kind not in _symbol_types:
-            raise ValueError(f'Invalid "{kind.decode()}" symbol type')
+        name = _parse_symbol_name(name)
+        if kind is not None:
+            kind = _parse_symbol_type(kind)
 
         # Find a numeric symbol by name
         cdef c_symbol_numeric_list c_symbols
@@ -224,15 +233,7 @@ cdef class _System:
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
-        if not isinstance(kind, (str, bytes)):
-            raise TypeError('Symbol type must be a string or bytes object')
-        if isinstance(kind, str):
-            kind = kind.encode()
-        if kind not in _symbol_types:
-            raise ValueError(f'Invalid "{kind.decode()}" symbol type')
-
-
-        cdef c_symbol_numeric_list c_symbols = self._get_c_symbols_by_type(kind)
+        cdef c_symbol_numeric_list c_symbols = self._get_c_symbols_by_type(_parse_symbol_type(kind))
         symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
         return dict(zip(map(attrgetter('name'), symbols), symbols))
 
