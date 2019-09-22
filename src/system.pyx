@@ -379,11 +379,11 @@ cdef class _System:
 
             params = [
                 Parameter('name', Parameter.POSITIONAL_OR_KEYWORD),
-                Parameter('vel_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                Parameter('acc_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                Parameter('tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                Parameter('vel_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                Parameter('acc_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
+                Parameter('vel_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
+                Parameter('acc_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
+                Parameter('tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
+                Parameter('vel_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
+                Parameter('acc_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
                 Parameter('value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
                 Parameter('vel_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
                 Parameter('acc_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0)
@@ -392,9 +392,16 @@ cdef class _System:
             bounded.apply_defaults()
             bounded_args = bounded.args
 
-            names = [_parse_symbol_name(arg) for arg in bounded_args[:3]]
-            tex_names = [_parse_symbol_tex_name(arg) for arg in bounded_args[3:6]]
+            names = [_parse_symbol_name(arg) if arg is not None else None for arg in bounded_args[:3]]
+            tex_names = [_parse_symbol_tex_name(arg) if arg is not None else None for arg in bounded_args[3:6]]
             values = [_parse_symbol_value(arg) for arg in bounded_args[6:9]]
+
+            names[1:] = [name or b'd'*k + names[0] for k, name in enumerate(names[1:], 1)]
+            if tex_names[0]:
+                tex_names[1:] = [tex_name or b'\\' + b'd'*k + b'ot{' + tex_names[0] + b'}' for k, tex_name in enumerate(tex_names[1:], 1)]
+            else:
+                tex_names = [tex_name or b'' for tex_name in tex_names]
+
 
             # Check if the name of the coordinate or its components is already in use by other symbol
             for name in names:
