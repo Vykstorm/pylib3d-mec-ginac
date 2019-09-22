@@ -24,10 +24,8 @@ cdef class SymbolNumeric:
 
     ######## Constructor & Destructor  ########
 
-    def __cinit__(self, Py_ssize_t ptr, unicode kind, owner):
+    def __cinit__(self, Py_ssize_t ptr):
         self._c_handler = <c_symbol_numeric*>ptr
-        self._kind = kind
-        self._owner = owner
 
 
     ######## Getters ########
@@ -38,13 +36,6 @@ cdef class SymbolNumeric:
         :rtype: float
         '''
         return self._c_handler.get_value().to_double()
-
-    cpdef get_owner(self):
-        '''get_owner() -> System
-        Get the System object that created this symbol.
-        :rtype: System
-        '''
-        return self._owner
 
     cpdef get_name(self):
         '''get_name() -> str
@@ -59,17 +50,6 @@ cdef class SymbolNumeric:
         :rtype: str
         '''
         return (<bytes>self._c_handler.print_TeX_name()).decode()
-
-    cpdef get_kind(self):
-        '''get_kind() -> str
-        Get the kind of symbol numeric. e.g: 'input'
-        It will be one of the next list:
-        ['coordinate', 'velocity', 'acceleration',
-        'aux_coordinate', 'aux_velocity', 'aux_acceleration',
-        'parameter', 'joint_unknown', 'input']
-        :rtype: str
-        '''
-        return self._kind
 
 
 
@@ -104,14 +84,6 @@ cdef class SymbolNumeric:
         self.set_value(value)
 
     @property
-    def owner(self):
-        '''
-        Only read property that returns the System object that created this symbol.
-        :rtype: System
-        '''
-        return self.get_owner()
-
-    @property
     def name(self):
         '''
         Only read property that returns the name of this symbol.
@@ -127,13 +99,6 @@ cdef class SymbolNumeric:
         '''
         return self.get_tex_name()
 
-    @property
-    def kind(self):
-        '''
-        Only read property that returns the kind of this symbol.
-        :rtype: str
-        '''
-        return self.get_kind()
 
 
     ######## Metamethods ########
@@ -181,7 +146,7 @@ cdef class SymbolNumeric:
 
 
     def __str__(self):
-        return f'{self.kind.replace("_", " ")} {self.name}, value = {round(self.value, 4)}'
+        return f'Symbol {self.name}, value = {round(self.value, 4)}'
 
     def __repr__(self):
         return self.__str__()
