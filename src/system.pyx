@@ -540,6 +540,7 @@ class System(_System):
         :rtype: SymbolNumeric
 
         .. note::
+
             You can specify the initial values of the coordinate and its derivatives
             right after the first argument (name) or any other string parameter (if all arguments are positional):
 
@@ -669,16 +670,42 @@ def _generate_symbol_getter_methods(symbol_type):
         setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
 
 
+
 def _generate_symbol_constructor_method(symbol_type):
     name = symbol_type.decode()
     display_name = name.replace('_', ' ')
 
     def constructor(self, *args, **kwargs):
-        '''
-        Cool stuff
+        '''new_{name}(name: str[, tex_name: str][, value: float]) -> SymbolNumeric
+        Create a new {display_name} symbol
+
+        :param str name: Name of the new {display_name}
+        :param str tex_name: Name of the new {display_name} in latex.
+            By default is an empty string if not specified.
+        :param float value: Initial value for the new {dislpay_name}.
+            By default is 0
+
+        :returns: The new {display_name} symbol
+        :rtype: SymbolNumeric
+        :raises TypeError: If any input argument has an incorrect type.
+        :raises ValueError: If any input argument has an incorrect value.
+        :raises IndexError: If a numeric symbol with the specified name already
+            exists in the system
+
+        .. note::
+
+            You can specify the initial value right after the name if
+            both arguments are positional.
+            e.g:
+            new_{name}('x', 1)
+
         '''
         return self.new_symbol(symbol_type, *args, **kwargs)
 
+    for key, value in locals().items():
+        if not isinstance(value, str):
+            continue
+        constructor.__doc__ = constructor.__doc__.replace('{' + key + '}', value)
     constructor.__name__ = 'new_' + name
     constructor.__qualname__ = f'{System.__name__}.{constructor.__name__}'
     setattr(System, constructor.__name__, constructor)
