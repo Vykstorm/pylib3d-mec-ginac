@@ -203,6 +203,42 @@ cdef class _System:
 
 
 
+    cpdef has_symbol(self, name, kind=None):
+        '''has_symbol(name: str[, kind: str]) -> bool
+        Check if a symbol with the given name and type exists in this system
+
+        :param name: Name of the symbol to check
+        :param kind: Type of symbol.
+            It can be one None (by default) or one of the next values:
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+            'parameter', 'input', 'joint_unknown'
+            If set to None, it does not take into account the symbol type.
+        :type name: str
+        :type kind: str
+        :returns: True if a symbol with the given name and type exists, False otherwise
+        :rtype: bool
+        :raises TypeError: If input arguments have incorrect types
+        :raises ValueError: If input arguments have incorrect values
+        '''
+        name = _parse_symbol_name(name)
+        if kind is not None:
+            kind = _parse_symbol_type(kind)
+
+        # Check if symbol exists
+        cdef c_symbol_numeric_list c_symbols
+        if kind is None:
+            c_symbols = self._get_c_symbols()
+        else:
+            c_symbols = self._get_c_symbols_by_type(kind)
+
+        for c_symbol in c_symbols:
+            if c_symbol.get_name() == <c_string>name:
+                return True
+        return False
+
+
+
     cpdef get_symbols(self):
         '''get_symbols() -> Dict[str, SymbolNumeric]
         Get all symbols defined within this system
@@ -269,17 +305,6 @@ class System(_System):
 
 
 
-    ######## Symbol checker ########
-
-    def has_symbol(self, *args, **kwargs):
-        try:
-            self.get_symbol(*args, **kwargs)
-        except IndexError:
-            return False
-        return True
-
-
-
     ######## Properties ########
 
     @property
@@ -297,8 +322,10 @@ class System(_System):
         pass
 
     def __repr__(self):
-        pass
+        return self.__str__()
 
+    def __dir__(self):
+        return super().__dir__()
 
 
 # Autogenerate get_*, new_* and has_* methods
