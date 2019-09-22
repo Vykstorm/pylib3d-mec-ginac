@@ -342,16 +342,89 @@ class System(_System):
 def _generate_methods(symbol_type):
     name = symbol_type.decode()
     pname = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
+    display_name, display_pname = name.replace('_', ' '), pname.replace('_', ' ')
 
-    getter =  partialmethod(System.get_symbol, kind=symbol_type)
-    checker = partialmethod(System.has_symbol, kind=symbol_type)
-    pgetter = partialmethod(System._get_symbols_by_type, symbol_type)
-    pgetterprop = property(lambda self: self._get_symbols_by_type(symbol_type))
+    # get_* method
+    def getter(self, name):
+        '''get_{name}(name: str) -> SymbolNumeric
+        Get a {name} defined in this system
 
-    setattr(System, 'get_' + name, getter)
-    setattr(System, 'has_' + name, checker)
-    setattr(System, 'get_' + pname, pgetter)
-    setattr(System, pname, pgetterprop)
+        :param name: Name of the {display_name}
+        :type name: str
+        :returns: Return the {display_name} with the given name on success
+        :rtype: SymbolNumeric
+        :raises TypeError: If the input argument is not a valid symbol name
+        :raises IndexError: If there not exists any {display_name} with the given name within this system
+        '''
+        return self.get_symbol(name, kind=symbol_type)
+
+    # has_* method
+    def checker(self, name):
+        '''has_{name}(name: str) -> bool
+        Check if a {display_name} is defined in this system
+
+        :param name: Name of the {display_name}
+        :type name: str
+        :returns: Returns True if the {display_name} exists within this system. False otherwise
+        :rtype: bool
+        :raises TypeError: If the input argument is not a valid symbol name
+        '''
+        return self.has_symbol(name, kind=symbol_type)
+
+
+    # get_* method (return all symbols for the given type)
+    def pgetter(self):
+        '''get_{pname}() -> Mapping[str, SymbolNumeric]
+        Get all {display_pname} defined in the system
+
+        :returns: Returns a dictionary where keys are {name} names and values,
+            instances of the class SymbolNumeric
+        :rtype: Mapping[str, SymbolNumeric]
+        '''
+        return self._get_symbols_by_type(symbol_type)
+
+
+    # only-read property that is equivalent to the method defined above
+    @property
+    def pgetterprop(self):
+        '''
+        Read only property that returns all {display_pname} defined in the system
+
+        :returns: Returns a dictionary where keys are {name} names and values,
+            instances of the class SymbolNumeric
+        :rtype: Mapping[str, SymbolNumeric]
+        '''
+        return self._get_symbols_by_type(symbol_type)
+
+
+
+    methods = [getter, checker, pgetter, pgetterprop]
+
+    # Format method docstrings
+    for method in methods:
+        for key, value in locals().items():
+            if not isinstance(value, str):
+                continue
+            method.__doc__ = method.__doc__.replace('{' + key + '}', value)
+
+    # Change method names
+    getter.__name__ = 'get_' + name
+    checker.__name__ = 'has_' + name
+    pgetter.__name__ = 'get_' + pname
+    pgetterprop.fget.__name__ = pname
+
+    # Change method qualnames
+    for method in methods:
+        if isinstance(method, property):
+            method = method.fget
+        method.__qualname__ = f'{System.__name__}.{method.__name__}'
+
+
+    # Add them to the System class
+    for method in methods:
+        setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
+
+
 
 for symbol_type in _symbol_types:
     _generate_methods(symbol_type)
