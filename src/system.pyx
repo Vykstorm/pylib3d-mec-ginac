@@ -292,13 +292,19 @@ class System(_System):
 
 
 # Autogenerate get_*, new_* and has_* methods
-for symbol_type in _symbol_types:
+def _generate_methods(symbol_type):
     name = symbol_type.decode()
-    plural_name = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
+    pname = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
 
-    setattr(System, 'get_' + name, partialmethod(System.get_symbol, kind=symbol_type))
-    setattr(System, 'has_' + name, partialmethod(System.has_symbol, kind=symbol_type))
+    getter =  partialmethod(System.get_symbol, kind=symbol_type)
+    checker = partialmethod(System.has_symbol, kind=symbol_type)
+    pgetter = partialmethod(System._get_symbols_by_type, symbol_type)
+    pgetterprop = property(lambda self: self._get_symbols_by_type(symbol_type))
 
+    setattr(System, 'get_' + name, getter)
+    setattr(System, 'has_' + name, checker)
+    setattr(System, 'get_' + pname, pgetter)
+    setattr(System, pname, pgetterprop)
 
-    #if symbol_type not in _derivable_symbol_types:
-    #    setattr(System, 'new_' + name, partialmethod(System._new_symbol, symbol_type))
+for symbol_type in _symbol_types:
+    _generate_methods(symbol_type)
