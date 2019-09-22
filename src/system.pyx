@@ -582,9 +582,9 @@ class System(_System):
 
 
 
-######## Auto generation of getter System methods ########
+######## Auto generation of System class methods ########
 
-def _generate_getter_methods(symbol_type):
+def _generate_symbol_getter_methods(symbol_type):
     name = symbol_type.decode()
     pname = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
     display_name, display_pname = name.replace('_', ' '), pname.replace('_', ' ')
@@ -669,9 +669,23 @@ def _generate_getter_methods(symbol_type):
         setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
 
 
+def _generate_symbol_constructor_method(symbol_type):
+    name = symbol_type.decode()
+    display_name = name.replace('_', ' ')
+
+    def constructor(self, *args, **kwargs):
+        '''
+        Cool stuff
+        '''
+        return self.new_symbol(symbol_type, *args, **kwargs)
+
+    constructor.__name__ = 'new_' + name
+    constructor.__qualname__ = f'{System.__name__}.{constructor.__name__}'
+    setattr(System, constructor.__name__, constructor)
+
+
+
 for symbol_type in _symbol_types:
-    _generate_getter_methods(symbol_type)
-
-
-
-######## Auto generation of new_* methods ########
+    _generate_symbol_getter_methods(symbol_type)
+    if b'coordinate' not in symbol_type and symbol_type not in _derivable_symbol_types:
+        _generate_symbol_constructor_method(symbol_type)
