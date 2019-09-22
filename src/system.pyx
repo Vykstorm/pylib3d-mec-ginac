@@ -240,12 +240,12 @@ cdef class _System:
 
 
     cpdef get_symbols(self):
-        '''get_symbols() -> Dict[str, SymbolNumeric]
+        '''get_symbols() -> Mapping[str, SymbolNumeric]
         Get all symbols defined within this system
 
         :returns: Returns all the symbols defined in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
-        :rtype: Dict[str, SymbolNumeric]
+        :rtype: Mapping[str, SymbolNumeric]
         '''
 
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols()
@@ -255,7 +255,7 @@ cdef class _System:
 
 
     cpdef _get_symbols_by_type(self, kind):
-        '''get_symbols_by_type(kind: str) -> Dict[str, SymbolNumeric]
+        '''get_symbols_by_type(kind: str) -> Mapping[str, SymbolNumeric]
         Get all symbols of the given type defined within this system
 
         :param kind: Must be one of the next values:
@@ -265,7 +265,7 @@ cdef class _System:
         :type kind: str
         :returns: All symbols with the given type in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
-        :rtype: Dict[str, SymbolNumeric]
+        :rtype: Mapping[str, SymbolNumeric]
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
@@ -319,13 +319,18 @@ class System(_System):
 
     @property
     def symbols(self):
+        '''
+        Only read property that returns all the symbols defined within this system.
+
+        :rtype: Mapping[str, SymbolNumeric]
+        '''
         return self.get_symbols()
 
 
 
     ######## Metamethods ########
 
-    def __contains__(self, symbol):
+    def __contains__(self, name):
         pass
 
     def __str__(self):
@@ -334,8 +339,6 @@ class System(_System):
     def __repr__(self):
         return self.__str__()
 
-    def __dir__(self):
-        return super().__dir__()
 
 
 # Autogenerate get_*, new_* and has_* methods
