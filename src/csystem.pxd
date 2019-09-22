@@ -28,24 +28,9 @@ cdef extern from "System.h":
         vector[symbol_numeric*] get_Inputs()
         vector[symbol_numeric*] get_Joint_Unknowns()
 
-        ## Symbol getters
-        symbol_numeric* get_Coordinate(string name);
-        symbol_numeric* get_Velocity(string name);
-        symbol_numeric* get_Acceleration(string name);
-        symbol_numeric* get_AuxCoordinate(string name);
-        symbol_numeric* get_AuxVelocity(string name);
-        symbol_numeric* get_AuxAcceleration(string name);
-        symbol_numeric* get_Parameter(string name);
-        symbol_numeric* get_Unknown(string name);
-        symbol_numeric* get_Input(string name);
-
         ## Symbol spawners
-        symbol_numeric* new_Coordinate(string name)
-        # symbol_numeric* new_AuxCoordinate(...)
-        symbol_numeric* new_Parameter(string name)
-        symbol_numeric* new_Joint_Unknown(string name)
-        symbol_numeric* new_Input(string name)
-
-        symbol_numeric* new_Parameter(string name, string tex_name)
-        symbol_numeric* new_Joint_Unknown(string name, string tex_name)
-        symbol_numeric* new_Input(string name, string tex_name)
+        symbol_numeric* new_Coordinate(string name, string dname, string ddname, string tex_name, string dtex_name, string ddtex_name, numeric value, numeric dvalue, numeric ddvalue)
+        symbol_numeric* new_AuxCoordinate(string name, string dname, string ddname, string tex_name, string dtex_name, string ddtex_name, numeric value, numeric dvalue, numeric ddvalue)
+        symbol_numeric* new_Parameter(string name, string tex_name, numeric value)
+        symbol_numeric* new_Joint_Unknown(string name, string tex_name, numeric value)
+        symbol_numeric* new_Input(string name, string tex_name, numeric value)
