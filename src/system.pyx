@@ -330,11 +330,8 @@ class System(_System):
 
     ######## Metamethods ########
 
-    def __contains__(self, name):
-        pass
-
     def __str__(self):
-        pass
+        return self.__class__.__name__
 
     def __repr__(self):
         return self.__str__()
