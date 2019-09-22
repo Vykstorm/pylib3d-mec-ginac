@@ -268,7 +268,8 @@ class System(_System):
         symbol.set_value(value)
 
 
-    ######## Misc methods ########
+
+    ######## Symbol checker ########
 
     def has_symbol(self, *args, **kwargs):
         try:
@@ -276,6 +277,15 @@ class System(_System):
         except IndexError:
             return False
         return True
+
+
+
+    ######## Properties ########
+
+    @property
+    def symbols(self):
+        return self.get_symbols()
+
 
 
     ######## Metamethods ########
