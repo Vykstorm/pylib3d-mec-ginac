@@ -154,6 +154,9 @@ cdef class _System:
         :type kind: str
         :returns: The numeric symbol with that name & type if it exists
         :rtype: SymbolNumeric
+        :raises TypeError: If input arguments have incorrect types
+        :raises ValueError: If input arguments have incorrect values
+        :raises IndexError: If no symbol with the given name & type is defined in the system
         '''
         # Validate arguments types
         if not isinstance(name, (str, bytes)):
@@ -205,13 +208,21 @@ cdef class _System:
         return dict(zip(map(attrgetter('name'), symbols), symbols))
 
 
+
     cpdef get_symbols_by_type(self, kind):
         '''get_symbols_by_type(kind: str) -> Dict[str, SymbolNumeric]
         Get all symbols of the given type defined within this system
 
+        :param kind: Must be one of the next values:
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+            'parameter', 'input', 'joint_unknown'
+        :type kind: str
         :returns: All symbols with the given type in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
         :rtype: Dict[str, SymbolNumeric]
+        :raises TypeError: If input arguments have incorrect types
+        :raises ValueError: If input arguments have incorrect values
         '''
         if not isinstance(kind, (str, bytes)):
             raise TypeError('Symbol type must be a string or bytes object')
@@ -282,8 +293,11 @@ class System(_System):
 # Autogenerate get_*, new_* and has_* methods
 for symbol_type in _symbol_types:
     name = symbol_type.decode()
+    plural_name = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
+
     setattr(System, 'get_' + name, partialmethod(System.get_symbol, kind=symbol_type))
     setattr(System, 'has_' + name, partialmethod(System.has_symbol, kind=symbol_type))
+
 
     #if symbol_type not in _derivable_symbol_types:
     #    setattr(System, 'new_' + name, partialmethod(System._new_symbol, symbol_type))
