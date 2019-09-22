@@ -218,7 +218,7 @@ cdef class _System:
 
 
 
-    cpdef get_symbols_by_type(self, kind):
+    cpdef _get_symbols_by_type(self, kind):
         '''get_symbols_by_type(kind: str) -> Dict[str, SymbolNumeric]
         Get all symbols of the given type defined within this system
 
