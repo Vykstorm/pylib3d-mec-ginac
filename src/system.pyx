@@ -351,6 +351,10 @@ cdef class _System:
             name, tex_name, value = bounded.args
             name, tex_name, value = _parse_symbol_name(name), _parse_symbol_tex_name(tex_name), _parse_symbol_value(value)
 
+            # Check if a symbol with the name specified already exists
+            if self.has_symbol(name):
+                raise IndexError(f'A symbol with the name "{name.decode()}" already exists')
+
             # Apply a different constructor for each symbol type
             if kind == b'parameter':
                 c_symbol = self._new_c_parameter(name, tex_name, value)
@@ -373,24 +377,29 @@ cdef class _System:
                 while args and params:
                     kwargs[params.pop(0)] = args.pop(0)
 
-                params = [
-                    Parameter('name', Parameter.POSITIONAL_OR_KEYWORD),
-                    Parameter('vel_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                    Parameter('acc_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                    Parameter('tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                    Parameter('vel_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                    Parameter('acc_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                    Parameter('value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
-                    Parameter('vel_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
-                    Parameter('acc_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0)
-                ]
-                bounded = Signature(parameters=params).bind(*args, **kwargs)
-                bounded.apply_defaults()
-                bounded_args = bounded.args
+            params = [
+                Parameter('name', Parameter.POSITIONAL_OR_KEYWORD),
+                Parameter('vel_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
+                Parameter('acc_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
+                Parameter('tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
+                Parameter('vel_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
+                Parameter('acc_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
+                Parameter('value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
+                Parameter('vel_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
+                Parameter('acc_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0)
+            ]
+            bounded = Signature(parameters=params).bind(*args, **kwargs)
+            bounded.apply_defaults()
+            bounded_args = bounded.args
 
-                names = [_parse_symbol_name(arg) for arg in bounded_args[:3]]
-                tex_names = [_parse_symbol_tex_name(arg) for arg in bounded_args[3:6]]
-                values = [_parse_symbol_value(arg) for arg in bounded_args[6:9]]
+            names = [_parse_symbol_name(arg) for arg in bounded_args[:3]]
+            tex_names = [_parse_symbol_tex_name(arg) for arg in bounded_args[3:6]]
+            values = [_parse_symbol_value(arg) for arg in bounded_args[6:9]]
+
+            # Check if the name of the coordinate or its components is already in use by other symbol
+            for name in names:
+                if self.has_symbol(name):
+                    raise IndexError(f'A symbol with the name "{name.decode()}" already exists')
 
             # Apply a different constructor for each symbol type
             if kind.startswith(b'aux_'):
@@ -400,7 +409,7 @@ cdef class _System:
         else:
             raise RuntimeError
 
-        #return SymbolNumeric(<Py_ssize_t>c_symbol)
+        return SymbolNumeric(<Py_ssize_t>c_symbol)
 
 
 
