@@ -538,6 +538,10 @@ class System(_System):
 
         :returns: The new coordinate symbol created on success
         :rtype: SymbolNumeric
+        :raises TypeError: If any input argument has an invalid type
+        :raises ValueError: If any input argument has an invalid value
+        :raises IndexError: If a symbol with the name indicated for the new coordinate (or its derivatives)
+            is already created in the system
 
         .. note::
 
