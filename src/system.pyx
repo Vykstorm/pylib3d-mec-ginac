@@ -515,6 +515,50 @@ class System(_System):
         return self._new_symbol(kind, args, kwargs)
 
 
+    def new_coordinate(self, *args, **kwargs):
+        '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
+        Creates a new coordinate symbol and its derivative components (velocity and acceleration)
+
+        :param str name: Name of the coordinate
+        :param str vel_name: Name of the first derivative
+            By default its the name of the coordinate prefixed with 'd'
+        :param str acc_name: Name of the second derivative
+            By default its the name of the coordinate prefixed with 'dd'
+
+        :param str tex_name: Name in latex of the coordinate
+            By default its an empty string
+        :param str vel_tex_name: Name in latex of the first derivative
+            By default its \dot{tex_name} if tex_name argument is set. Otherwise, its an empty string
+        :param str acc_tex_name: Name in latex of the second derivative
+            By default its \ddot{tex_name} if tex_name argument is set. Otherwise, its an empty string
+
+        :param float value: The initial numeric value of the coordinate. By default 0
+        :param float vel_value: The intial numeric value of the first derivative. By default 0
+        :param float acc_value: The initial numeric value of the first derivative. By default 0
+
+        :returns: The new coordinate symbol created on success
+        :rtype: SymbolNumeric
+
+        .. note::
+            You can specify the initial values of the coordinate and its derivatives
+            right after the first argument (name) or any other string parameter (if all arguments are positional):
+
+            new_coordinate('a', 1, 2, 3)
+            new_coordinate('a', 'a2', 'a3', 1, 2)
+
+        '''
+        return self.new_symbol('coordinate', *args, **kwargs)
+
+
+    def new_aux_coordinate(self, *args, **kwargs):
+        '''new_aux_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
+        Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
+        The signature is the same as for new_coordinate method
+        '''
+        return self.new_symbol('aux_coordinate', *args, **kwargs)
+
+
+
     ######## Properties ########
 
     @property
@@ -538,9 +582,9 @@ class System(_System):
 
 
 
-######## Auto generation of System methods (get_*, new_*) ########
+######## Auto generation of getter System methods ########
 
-def _generate_methods(symbol_type):
+def _generate_getter_methods(symbol_type):
     name = symbol_type.decode()
     pname = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
     display_name, display_pname = name.replace('_', ' '), pname.replace('_', ' ')
@@ -598,7 +642,6 @@ def _generate_methods(symbol_type):
         return self.get_symbols_by_type(symbol_type)
 
 
-
     methods = [getter, checker, pgetter, pgetterprop]
 
     # Format method docstrings
@@ -626,6 +669,9 @@ def _generate_methods(symbol_type):
         setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
 
 
-
 for symbol_type in _symbol_types:
-    _generate_methods(symbol_type)
+    _generate_getter_methods(symbol_type)
+
+
+
+######## Auto generation of new_* methods ########
