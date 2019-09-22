@@ -286,22 +286,32 @@ class System(_System):
 
     ######## Get/Set symbol value ########
 
-    def get_value(self, symbol):
-        if not isinstance(symbol, (SymbolNumeric, str, bytes)):
-            raise TypeError(f'Input argument must be a string or an instance of the class {SymbolNumeric.__name__}')
+    def get_value(self, name):
+        '''get_value(name: str) -> float
+        Get the value of a numeric symbol
 
-        if not isinstance(symbol, SymbolNumeric):
-            symbol = self.get_symbol(symbol)
-        return symbol.get_value()
+        :param name: Name of the symbol
+        :type name: str
+        :return: The value of the symbol on success
+        :rtype: float
+        :raises TypeError: If input argument is not a valid symbol name
+        :raises IndexError: If there is no symbol with that name in the system
+        '''
+        return self.get_symbol(name).get_value()
 
 
-    def set_value(self, symbol, value):
-        if not isinstance(symbol, (SymbolNumeric, str, bytes)):
-            raise TypeError(f'Input argument must be a string or an instance of the class {SymbolNumeric.__name__}')
+    def set_value(self, name, value):
+        '''get_value(name: str, value: Union[int, float]) -> float
+        Changes the value of a numeric symbol
 
-        if not isinstance(symbol, SymbolNumeric):
-            symbol = self.get_symbol(symbol)
-        symbol.set_value(value)
+        :param name: Name of the symbol
+        :type name: str
+        :param value: New value for the symbol
+        :type value: int, float
+        :raises TypeError: If input arguments are not valid
+        :raises IndexError: If there is no symbol with that name in the system
+        '''
+        return self.get_symbol(name).set_value(value)
 
 
 
