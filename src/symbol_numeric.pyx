@@ -62,9 +62,7 @@ cdef class SymbolNumeric:
         :type value: int, float
         :raises TypeError: If value has an incorrect type.
         '''
-        if not isinstance(value, (int, float)):
-            raise TypeError(f'Value must be a int or float')
-        self._c_handler.set_value(c_numeric(float(value)))
+        self._c_handler.set_value(c_numeric(_parse_symbol_value(value)))
 
 
 

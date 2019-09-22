@@ -29,8 +29,8 @@ cdef extern from "System.h":
         vector[symbol_numeric*] get_Joint_Unknowns()
 
         ## Symbol spawners
-        symbol_numeric* new_Coordinate(string name, string dname, string ddname, string tex_name, string dtex_name, string ddtex_name, numeric value, numeric dvalue, numeric ddvalue)
-        symbol_numeric* new_AuxCoordinate(string name, string dname, string ddname, string tex_name, string dtex_name, string ddtex_name, numeric value, numeric dvalue, numeric ddvalue)
+        symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
+        symbol_numeric* new_AuxCoordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
         symbol_numeric* new_Parameter(string name, string tex_name, numeric value)
         symbol_numeric* new_Joint_Unknown(string name, string tex_name, numeric value)
         symbol_numeric* new_Input(string name, string tex_name, numeric value)
