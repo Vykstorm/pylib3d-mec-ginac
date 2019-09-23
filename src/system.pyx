@@ -241,7 +241,11 @@ cdef class _System:
         # No symbol with such name exists
         if kind is None:
             raise IndexError(f'Symbol "{name.decode()}" not created yet')
-        raise IndexError(f'{kind.decode().title().replace("_", " ")} "{name.decode()}" not created yet')
+
+        kind_title = kind.decode().replace("_", " ")
+        if self.has_symbol(name):
+            raise IndexError(f'Symbol "{name.decode()}" is not a {kind_title}')
+        raise IndexError(f'{kind_title} "{name.decode()}" not created yet')
 
 
 
