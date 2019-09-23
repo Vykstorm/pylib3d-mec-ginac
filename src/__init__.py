@@ -11,11 +11,17 @@ __all__ = []
 # Import underline extension
 import lib3d_mec_ginac_ext as _ext
 
+# Other imports
+from inspect import isclass, isfunction
+
+
 # Get all definitions in the extension (add them to __all__ and globals())
 for name in dir(_ext):
     if name.startswith('_'):
         continue
     obj = getattr(_ext, name)
+    if not isclass(obj) and not isfunction(obj):
+        continue
     if obj.__module__ != _ext.__name__:
         continue
     __all__.append(name)
