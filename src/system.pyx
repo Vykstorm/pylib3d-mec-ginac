@@ -22,7 +22,7 @@ from src.cnumeric cimport numeric as c_numeric
 
 # Python imports
 from collections.abc import Mapping
-from functools import partial, partialmethod
+from functools import partial, partialmethod, wraps
 from inspect import Signature, Parameter
 from operator import attrgetter
 
@@ -95,7 +95,11 @@ def _parse_symbol_value(value):
     return value
 
 
-######## Class definitions ########
+
+
+
+
+######## Class System ########
 
 
 ## Class which acts like a bridge between Python and C++ System class
@@ -272,14 +276,15 @@ cdef class _System:
 
 
 
-    cpdef get_symbols_by_type(self, kind):
-        '''get_symbols_by_type(kind: str) -> Mapping[str, SymbolNumeric]
+    cpdef get_symbols_by_type(self, kind=None):
+        '''get_symbols_by_type([kind: str]) -> Mapping[str, SymbolNumeric]
         Get all symbols of the given type defined within this system
 
-        :param kind: Must be one of the next values:
+        :param kind: Must be one of the next values if set:
             'coordinate', 'velocity', 'acceleration',
             'aux_coordinate', 'aux_velocity', 'aux_acceleration',
             'parameter', 'input', 'joint_unknown'
+            If not set, this call is the same as get_symbols
         :type kind: str
         :returns: All symbols with the given type in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
@@ -287,6 +292,8 @@ cdef class _System:
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
+        if kind is None:
+            return _System.get_symbols(self)
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols_by_type(_parse_symbol_type(kind))
         symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
         return dict(zip(map(attrgetter('name'), symbols), symbols))
@@ -420,6 +427,10 @@ cdef class _System:
 
 
 
+
+
+
+
 ## System class for Python (it emulates the class System in C++ but also provides additional features).
 class System(_System):
 
@@ -451,6 +462,13 @@ class System(_System):
         :raises IndexError: If there is no symbol with that name in the system
         '''
         return self.get_symbol(name).set_value(value)
+
+
+    def get_symbols(self):
+        return _SymbolsView(self)
+
+    def get_symbols_by_type(self, kind):
+        return _SymbolsView(self, kind)
 
 
     ######## Symbol constructors ########
@@ -720,3 +738,45 @@ for symbol_type in _symbol_types:
     _generate_symbol_getter_methods(symbol_type)
     if b'coordinate' not in symbol_type and symbol_type not in _derivable_symbol_types:
         _generate_symbol_constructor_method(symbol_type)
+
+
+
+
+
+
+######## Helper class SymbolsView ########
+
+class _SymbolsView(Mapping):
+    '''
+    Objects of this class emulates a dictionary which maps string names to numeric symbols.
+    They are returned by the methods System.get_symbols and System.get_symbols_by_type.
+    This class is not intentended to be instantiated by the user manually.
+    '''
+    def __init__(self, system, kind=None):
+        '''
+        Constructor.
+        :param System system: An instance of the class System to fetch the numeric symbols from
+        :param str kind: The kind of symbols to fetch
+            By default is None (get all symbols)
+        '''
+        assert isinstance(system, System) and (kind is None or kind in _symbol_types)
+        self.system, self.kind = system, kind
+
+    @property
+    def _symbols(self):
+        return _System.get_symbols_by_type(self.system, self.kind)
+
+    def __iter__(self):
+        return iter(self._symbols)
+
+    def __len__(self):
+        return len(self._symbols)
+
+    def __str__(self):
+        return str(self._symbols)
+
+    def __getitem__(self, name):
+        return self.system.get_symbol(name, self.kind)
+
+    def __repr__(self):
+        return self.__str__()
