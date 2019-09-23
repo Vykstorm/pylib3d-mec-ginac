@@ -23,7 +23,7 @@ from src.cnumeric cimport numeric as c_numeric
 
 # Python imports
 from collections import OrderedDict
-from collections.abc import Mapping
+from collections.abc import Mapping, Iterable
 from functools import partial, partialmethod, wraps
 from inspect import Signature, Parameter
 from operator import attrgetter
@@ -97,6 +97,18 @@ def _parse_symbol_value(value):
         except:
             raise TypeError(f'Invalid symbol numeric value')
     return value
+
+
+def _apply_signature(params, defaults, args, kwargs):
+    assert isinstance(params, Iterable)
+    assert isinstance(defaults, dict)
+
+    sig = Signature(
+        parameters=[Parameter(param, Parameter.POSITIONAL_OR_KEYWORD, default=defaults.get(param, Parameter.empty)) for param in params]
+    )
+    bounded_args = sig.bind(*args, **kwargs)
+    bounded_args.apply_defaults()
+    return bounded_args.args
 
 
 
@@ -336,14 +348,11 @@ cdef class _System:
                 if not isinstance(args[-1], (str, bytes)):
                     kwargs['value'] = args.pop()
 
-            params = [
-                Parameter('name', Parameter.POSITIONAL_OR_KEYWORD),
-                Parameter('tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=b''),
-                Parameter('value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0)
-            ]
-            bounded = Signature(parameters=params).bind(*args, **kwargs)
-            bounded.apply_defaults()
-            name, tex_name, value = bounded.args
+            name, tex_name, value = _apply_signature(
+                ['name', 'tex_name', 'value'],
+                {'tex_name': b'', 'value': 0.0},
+                args, kwargs
+            )
             name, tex_name, value = _parse_symbol_name(name), _parse_symbol_tex_name(tex_name), _parse_symbol_value(value)
 
             # Check if a symbol with the name specified already exists
@@ -372,20 +381,12 @@ cdef class _System:
                 while args and params:
                     kwargs[params.pop(0)] = args.pop(0)
 
-            params = [
-                Parameter('name', Parameter.POSITIONAL_OR_KEYWORD),
-                Parameter('vel_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
-                Parameter('acc_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
-                Parameter('tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
-                Parameter('vel_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
-                Parameter('acc_tex_name', Parameter.POSITIONAL_OR_KEYWORD, default=None),
-                Parameter('value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
-                Parameter('vel_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0),
-                Parameter('acc_value', Parameter.POSITIONAL_OR_KEYWORD, default=0.0)
-            ]
-            bounded = Signature(parameters=params).bind(*args, **kwargs)
-            bounded.apply_defaults()
-            bounded_args = bounded.args
+            bounded_args = _apply_signature(
+                ['name', 'vel_name', 'acc_name', 'tex_name', 'vel_tex_name', 'acc_tex_name', 'value', 'vel_value', 'acc_value'],
+                {'vel_name': None, 'acc_name': None, 'tex_name': None, 'vel_tex_name': None, 'acc_tex_name': None,
+                'value': 0.0, 'vel_value': 0.0, 'acc_value': 0.0},
+                args, kwargs
+            )
 
             names = [_parse_symbol_name(arg) if arg is not None else None for arg in bounded_args[:3]]
             tex_names = [_parse_symbol_tex_name(arg) if arg is not None else None for arg in bounded_args[3:6]]
