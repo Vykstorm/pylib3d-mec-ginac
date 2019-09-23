@@ -6,6 +6,7 @@ Description: This module defines the class System
 
 ######## Imports ########
 
+
 # Import cython internal library
 cimport cython
 
@@ -29,7 +30,9 @@ from operator import attrgetter
 
 
 
+
 ######## C helper methods, variables & types ########
+
 
 # Type alias representing a list of numeric symbols (std::vector[symbol_numeric*])
 ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
@@ -38,6 +41,7 @@ ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
 
 
 ######## Python helper methods & variables ########
+
 
 # All numeric symbol types
 _symbol_types = frozenset(map(str.encode, (
@@ -97,8 +101,6 @@ def _parse_symbol_value(value):
 
 
 
-
-
 ######## Class System ########
 
 
@@ -108,12 +110,16 @@ cdef class _System:
     Its the main class of the library. It represents a mechanical system defined with different variables:
     coordinates, parameters, inputs, tensors, ...
     '''
+
     ######## C Attributes ########
 
     cdef c_System* _c_handler
 
 
+
+
     ######## Constructor & Destructor ########
+
 
     def __cinit__(self):
         # Initialize C++ System object
@@ -123,7 +129,10 @@ cdef class _System:
         del self._c_handler
 
 
+
+
     ######## Symbol getters ########
+
 
     cdef c_symbol_numeric_list _get_c_symbols_by_type(self, c_string kind):
         '''
@@ -150,6 +159,7 @@ cdef class _System:
             return self._c_handler.get_Inputs()
         if kind == b'joint_unknown':
             return self._c_handler.get_Joint_Unknowns()
+
 
 
     cdef c_symbol_numeric_list _get_c_symbols(self):
@@ -276,14 +286,18 @@ cdef class _System:
 
     ######## Symbol constructors ########
 
+
     cdef c_symbol_numeric* _new_c_parameter(self, c_string name, c_string tex_name, double value):
         return self._c_handler.new_Parameter(name, tex_name, c_numeric(value))
+
 
     cdef c_symbol_numeric* _new_c_input(self, c_string name, c_string tex_name, double value):
         return self._c_handler.new_Input(name, tex_name, c_numeric(value))
 
+
     cdef c_symbol_numeric* _new_c_joint_unknown(self, c_string name, c_string tex_name, double value):
         return self._c_handler.new_Joint_Unknown(name, tex_name, c_numeric(value))
+
 
     cdef c_symbol_numeric* _new_c_aux_coordinate(self,
         c_string name,     c_string vel_name,     c_string acc_name,
@@ -293,6 +307,7 @@ cdef class _System:
             name, vel_name, acc_name,
             tex_name, vel_tex_name, acc_tex_name,
             c_numeric(value), c_numeric(vel_value), c_numeric(acc_value))
+
 
     cdef c_symbol_numeric* _new_c_coordinate(self,
         c_string name,     c_string vel_name,     c_string acc_name,
@@ -402,12 +417,12 @@ cdef class _System:
 
 
 
-
-
 ## System class for Python (it emulates the class System in C++ but also provides additional features).
 class System(_System):
 
+
     ######## Get/Set symbol value ########
+
 
     def get_value(self, name):
         '''get_value(name: str) -> float
@@ -420,6 +435,7 @@ class System(_System):
         :raises IndexError: If there is no symbol with that name in the system
         '''
         return self.get_symbol(name).get_value()
+
 
 
     def set_value(self, name, value):
@@ -435,6 +451,7 @@ class System(_System):
         return self.get_symbol(name).set_value(value)
 
 
+
     def get_symbols(self):
         '''get_symbols() -> Mapping[str, SymbolNumeric]
         Get all symbols defined within this system
@@ -444,6 +461,7 @@ class System(_System):
         :rtype: Mapping[str, SymbolNumeric]
         '''
         return _SymbolsView(self)
+
 
 
     def get_symbols_by_type(self, kind):
@@ -464,7 +482,10 @@ class System(_System):
         return _SymbolsView(self, kind)
 
 
+
+
     ######## Symbol constructors ########
+
 
     def new_symbol(self, kind, *args, **kwargs):
         '''new_symbol(kind: str, name: str, ...) -> SymbolNumeric
@@ -524,6 +545,7 @@ class System(_System):
         return self._new_symbol(kind, args, kwargs)
 
 
+
     def new_coordinate(self, *args, **kwargs):
         '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
         Creates a new coordinate symbol and its derivative components (velocity and acceleration)
@@ -564,12 +586,14 @@ class System(_System):
         return self.new_symbol('coordinate', *args, **kwargs)
 
 
+
     def new_aux_coordinate(self, *args, **kwargs):
         '''new_aux_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
         Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
         The signature is the same as for new_coordinate method
         '''
         return self.new_symbol('aux_coordinate', *args, **kwargs)
+
 
 
 
@@ -586,7 +610,9 @@ class System(_System):
 
 
 
+
     ######## Metamethods ########
+
 
     def __str__(self):
         return self.__class__.__name__
@@ -596,7 +622,9 @@ class System(_System):
 
 
 
+
 ######## Auto generation of System class methods ########
+
 
 def _generate_symbol_getter_methods(symbol_type):
     name = symbol_type.decode()
@@ -727,7 +755,6 @@ for symbol_type in _symbol_types:
     _generate_symbol_getter_methods(symbol_type)
     if b'coordinate' not in symbol_type and symbol_type not in _derivable_symbol_types:
         _generate_symbol_constructor_method(symbol_type)
-
 
 
 

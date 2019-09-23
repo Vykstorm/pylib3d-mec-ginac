@@ -3,18 +3,24 @@ Author: Víctor Ruiz Gómez
 Description: This module defines the wrapper class SymbolNumeric.
 '''
 
+######## Imports ########
 
-## Import statements
+
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 
 
-## Wrapper of the symbol_numeric class for Python
+
+
+######## Class SymbolNumeric ########
+
+
 cdef class SymbolNumeric:
     '''
     Objects of this class can be used to perform math symbolic computation.
     '''
 
     ######## C Attributes  ########
+
 
     cdef c_symbol_numeric* _c_handler
     cdef unicode _kind
@@ -29,6 +35,7 @@ cdef class SymbolNumeric:
 
     ######## Getters ########
 
+
     cpdef double get_value(self):
         '''get_value() -> float
         :return: The numeric value of this symbol as a float value.
@@ -36,12 +43,14 @@ cdef class SymbolNumeric:
         '''
         return self._c_handler.get_value().to_double()
 
+
     cpdef get_name(self):
         '''get_name() -> str
         Get the name of this symbol
         :rtype: str
         '''
         return (<bytes>self._c_handler.get_name()).decode()
+
 
     cpdef get_tex_name(self):
         '''get_tex_name() -> str
@@ -52,7 +61,9 @@ cdef class SymbolNumeric:
 
 
 
+
     ######## Setters ########
+
 
     cpdef set_value(self, value):
         '''set_value(value: float)
@@ -65,7 +76,9 @@ cdef class SymbolNumeric:
 
 
 
+
     ######## Properties  ########
+
 
     @property
     def value(self):
@@ -80,6 +93,7 @@ cdef class SymbolNumeric:
     def value(self, value):
         self.set_value(value)
 
+
     @property
     def name(self):
         '''
@@ -87,6 +101,7 @@ cdef class SymbolNumeric:
         :rtype: str
         '''
         return self.get_name()
+
 
     @property
     def tex_name(self):
@@ -98,7 +113,9 @@ cdef class SymbolNumeric:
 
 
 
+
     ######## Metamethods ########
+
 
     def __float__(self):
         '''
@@ -113,6 +130,7 @@ cdef class SymbolNumeric:
         :rtype: int
         '''
         return int(self.get_value())
+
 
     def __complex__(self):
         '''
