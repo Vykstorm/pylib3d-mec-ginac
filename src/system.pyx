@@ -21,11 +21,11 @@ from src.csystem cimport System as c_System
 from src.cnumeric cimport numeric as c_numeric
 
 # Python imports
+from collections import OrderedDict
 from collections.abc import Mapping
 from functools import partial, partialmethod, wraps
 from inspect import Signature, Parameter
 from operator import attrgetter
-
 
 
 
@@ -764,7 +764,7 @@ class _SymbolsView(Mapping):
 
     @property
     def _symbols(self):
-        return _System.get_symbols_by_type(self.system, self.kind)
+        return OrderedDict(_System.get_symbols_by_type(self.system, self.kind))
 
     def __iter__(self):
         return iter(self._symbols)
@@ -772,11 +772,43 @@ class _SymbolsView(Mapping):
     def __len__(self):
         return len(self._symbols)
 
-    def __str__(self):
-        return str(self._symbols)
-
     def __getitem__(self, name):
         return self.system.get_symbol(name, self.kind)
+
+    def __bool__(self):
+        return len(self) > 0
+
+    def __str__(self):
+        if not self:
+            # No symbols at all
+            return 'No symbols yet'
+
+        # Get symbol types
+        if self.kind is None:
+            symbol_types = {}
+            for symbol_type in _symbol_types:
+                for symbol in _System.get_symbols_by_type(self.system, symbol_type).values():
+                    symbol_types[symbol] = symbol_type.decode()
+        else:
+            symbol_types = None
+
+        lines = []
+        for name, symbol in self.items():
+            line = ''
+            # Print the symbol type
+            if symbol_types:
+                line += symbol_types[symbol].replace('_', ' ').ljust(18) + ' '
+
+            # Print the symbol name
+            line += name.ljust(12) + ' '
+
+            # Print the symbol value
+            line += str(round(symbol.value, 4)).ljust(12)
+
+            lines.append(line)
+
+        return '\n'.join(lines)
+
 
     def __repr__(self):
         return self.__str__()

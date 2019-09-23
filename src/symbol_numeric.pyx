@@ -6,7 +6,6 @@ Description: This module defines the wrapper class SymbolNumeric.
 
 ## Import statements
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
-from collections import OrderedDict
 
 
 ## Wrapper of the symbol_numeric class for Python
