@@ -262,14 +262,6 @@ cdef class _System:
 
 
     cpdef get_symbols(self):
-        '''get_symbols() -> Mapping[str, SymbolNumeric]
-        Get all symbols defined within this system
-
-        :returns: Returns all the symbols defined in a dictionary, where keys are
-            symbol names and values, instances of the class SymbolNumeric
-        :rtype: Mapping[str, SymbolNumeric]
-        '''
-
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols()
         symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
         return dict(zip(map(attrgetter('name'), symbols), symbols))
@@ -277,21 +269,6 @@ cdef class _System:
 
 
     cpdef get_symbols_by_type(self, kind=None):
-        '''get_symbols_by_type([kind: str]) -> Mapping[str, SymbolNumeric]
-        Get all symbols of the given type defined within this system
-
-        :param kind: Must be one of the next values if set:
-            'coordinate', 'velocity', 'acceleration',
-            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
-            'parameter', 'input', 'joint_unknown'
-            If not set, this call is the same as get_symbols
-        :type kind: str
-        :returns: All symbols with the given type in a dictionary, where keys are
-            symbol names and values, instances of the class SymbolNumeric
-        :rtype: Mapping[str, SymbolNumeric]
-        :raises TypeError: If input arguments have incorrect types
-        :raises ValueError: If input arguments have incorrect values
-        '''
         if kind is None:
             return _System.get_symbols(self)
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols_by_type(_parse_symbol_type(kind))
@@ -465,9 +442,32 @@ class System(_System):
 
 
     def get_symbols(self):
+        '''get_symbols() -> Mapping[str, SymbolNumeric]
+        Get all symbols defined within this system
+
+        :returns: Returns all the symbols defined in a dictionary, where keys are
+            symbol names and values, instances of the class SymbolNumeric
+        :rtype: Mapping[str, SymbolNumeric]
+        '''
         return _SymbolsView(self)
 
+
     def get_symbols_by_type(self, kind):
+        '''get_symbols_by_type([kind: str]) -> Mapping[str, SymbolNumeric]
+        Get all symbols of the given type defined within this system
+
+        :param kind: Must be one of the next values if set:
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+            'parameter', 'input', 'joint_unknown'
+            If not set, this call is the same as get_symbols
+        :type kind: str
+        :returns: All symbols with the given type in a dictionary, where keys are
+            symbol names and values, instances of the class SymbolNumeric
+        :rtype: Mapping[str, SymbolNumeric]
+        :raises TypeError: If input arguments have incorrect types
+        :raises ValueError: If input arguments have incorrect values
+        '''
         return _SymbolsView(self, kind)
 
 
