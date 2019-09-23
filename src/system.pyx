@@ -746,6 +746,9 @@ class _SymbolsView(Mapping):
     def __getitem__(self, name):
         return self.system.get_symbol(name, self.kind)
 
+    def __contains__(self, name):
+        return self.system.has_symbol(name, self.kind)
+
     def __bool__(self):
         return len(self) > 0
 
