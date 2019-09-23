@@ -186,16 +186,14 @@ cdef class _System:
         '''get_symbol(name: str[, kind: str]) -> SymbolNumeric
         Search a numeric symbol defined within this system with the given name and type.
 
-        :param name: Name of the numeric symbol to fetch
-        :param kind: Type of symbol.
+        :param str name: Name of the numeric symbol to fetch
+        :param str kind: Type of symbol.
             It can be one None (by default) or one of the next values:
             'coordinate', 'velocity', 'acceleration',
             'aux_coordinate', 'aux_velocity', 'aux_acceleration',
             'parameter', 'input', 'joint_unknown'
             If set to None, the search is performed over all symbols defined by this system
             regarding their types.
-        :type name: str
-        :type kind: str
         :returns: The numeric symbol with that name & type if it exists
         :rtype: SymbolNumeric
         :raises TypeError: If input arguments have incorrect types
@@ -229,15 +227,13 @@ cdef class _System:
         '''has_symbol(name: str[, kind: str]) -> bool
         Check if a symbol with the given name and type exists in this system
 
-        :param name: Name of the symbol to check
-        :param kind: Type of symbol.
+        :param str name: Name of the symbol to check
+        :param str kind: Type of symbol.
             It can be one None (by default) or one of the next values:
             'coordinate', 'velocity', 'acceleration',
             'aux_coordinate', 'aux_velocity', 'aux_acceleration',
             'parameter', 'input', 'joint_unknown'
             If set to None, it does not take into account the symbol type.
-        :type name: str
-        :type kind: str
         :returns: True if a symbol with the given name and type exists, False otherwise
         :rtype: bool
         :raises TypeError: If input arguments have incorrect types
@@ -417,8 +413,7 @@ class System(_System):
         '''get_value(name: str) -> float
         Get the value of a numeric symbol
 
-        :param name: Name of the symbol
-        :type name: str
+        :param str name: Name of the symbol
         :return: The value of the symbol on success
         :rtype: float
         :raises TypeError: If input argument is not a valid symbol name
@@ -431,8 +426,7 @@ class System(_System):
         '''get_value(name: str, value: float) -> float
         Changes the value of a numeric symbol
 
-        :param name: Name of the symbol
-        :type name: str
+        :param str name: Name of the symbol
         :param value: New value for the symbol
         :type value: int, float
         :raises TypeError: If input arguments have invalid types
@@ -456,12 +450,11 @@ class System(_System):
         '''get_symbols_by_type([kind: str]) -> Mapping[str, SymbolNumeric]
         Get all symbols of the given type defined within this system
 
-        :param kind: Must be one of the next values if set:
+        :param str kind: Must be one of the next values if set:
             'coordinate', 'velocity', 'acceleration',
             'aux_coordinate', 'aux_velocity', 'aux_acceleration',
             'parameter', 'input', 'joint_unknown'
             If not set, this call is the same as get_symbols
-        :type kind: str
         :returns: All symbols with the given type in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
         :rtype: Mapping[str, SymbolNumeric]
@@ -516,13 +509,11 @@ class System(_System):
 
 
 
-        :param kind: Type of the new symbol. Must be one of the next list:
+        :param str kind: Type of the new symbol. Must be one of the next list:
             'coordinate', 'aux_coordinate', 'input', 'parameter', 'joint_unknown'
-        :param name: Name of the new symbol
-        :param kind: Additional positional and keyword argument indicating extra options for the
+        :param str name: Name of the new symbol
+        :param ...: Additional positional and keyword argument indicating extra options for the
             numeric symbol creation and value initialization
-        :type kind: str
-        :type name: str
 
         :returns: The new symbol created on success
         :rtype: SymbolNumeric
@@ -617,8 +608,7 @@ def _generate_symbol_getter_methods(symbol_type):
         '''get_{name}(name: str) -> SymbolNumeric
         Get a {name} defined in this system
 
-        :param name: Name of the {display_name}
-        :type name: str
+        :param str name: Name of the {display_name}
         :returns: Return the {display_name} with the given name on success
         :rtype: SymbolNumeric
         :raises TypeError: If the input argument is not a valid symbol name
@@ -631,8 +621,7 @@ def _generate_symbol_getter_methods(symbol_type):
         '''has_{name}(name: str) -> bool
         Check if a {display_name} is defined in this system
 
-        :param name: Name of the {display_name}
-        :type name: str
+        :param str name: Name of the {display_name}
         :returns: Returns True if the {display_name} exists within this system. False otherwise
         :rtype: bool
         :raises TypeError: If the input argument is not a valid symbol name
