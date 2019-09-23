@@ -496,8 +496,13 @@ class System(_System):
     ######## Symbol constructors ########
 
 
+    def _new_symbol(self, kind, *args, **kwargs):
+        return super()._new_symbol(kind, args, kwargs)
+
+
+
     def new_coordinate(self, *args, **kwargs):
-        '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
+        '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
         Creates a new coordinate symbol and its derivative components (velocity and acceleration)
 
         :param str name: Name of the coordinate
@@ -517,8 +522,8 @@ class System(_System):
         :param float vel_value: The intial numeric value of the first derivative. By default 0
         :param float acc_value: The initial numeric value of the first derivative. By default 0
 
-        :returns: The new coordinate symbol created on success
-        :rtype: SymbolNumeric
+        :returns: The new coordinate and its derivatives created on success
+        :rtype: Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
         :raises TypeError: If any input argument has an invalid type
         :raises ValueError: If any input argument has an invalid value
         :raises IndexError: If a symbol with the name indicated for the new coordinate (or its derivatives)
