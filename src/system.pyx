@@ -428,7 +428,7 @@ class System(_System):
 
 
     def set_value(self, name, value):
-        '''get_value(name: str, value: Union[int, float]) -> float
+        '''get_value(name: str, value: float) -> float
         Changes the value of a numeric symbol
 
         :param name: Name of the symbol

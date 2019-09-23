@@ -55,7 +55,7 @@ cdef class SymbolNumeric:
     ######## Setters ########
 
     cpdef set_value(self, value):
-        '''set_value(value: Union[int, float])
+        '''set_value(value: float)
         Assigns a new numeric value to this symbol.
         :param value: It must be the new numeric value to assign for this symbol
         :type value: int, float
