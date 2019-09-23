@@ -340,6 +340,9 @@ cdef class _System:
             raise ValueError(f'You cant create a {kind.decode().replace("_", " ")} symbol by hand')
 
         cdef c_symbol_numeric* c_symbol
+        cdef c_symbol_numeric* vel_c_symbol
+        cdef c_symbol_numeric* acc_c_symbol
+
 
         # Signature of the method depends on the type of symbol
         if kind in (b'parameter', b'input', b'joint_unknown'):
@@ -366,6 +369,8 @@ cdef class _System:
                 c_symbol = self._new_c_input(name, tex_name, value)
             elif kind == b'joint_unknown':
                 c_symbol = self._new_c_joint_unknown(name, tex_name, value)
+
+            return SymbolNumeric(<Py_ssize_t>c_symbol)
 
 
         elif kind.endswith(b'coordinate'):
@@ -407,12 +412,15 @@ cdef class _System:
             # Apply a different constructor for each symbol type
             if kind.startswith(b'aux_'):
                 c_symbol = self._new_c_aux_coordinate(names[0], names[1], names[2], tex_names[0], tex_names[1], tex_names[2], values[0], values[1], values[2])
+                vel_c_symbol, acc_c_symbol = self._c_handler.get_AuxVelocity(names[1]), self._c_handler.get_AuxAcceleration(names[2])
             else:
                 c_symbol = self._new_c_coordinate(names[0], names[1], names[2], tex_names[0], tex_names[1], tex_names[2], values[0], values[1], values[2])
+                vel_c_symbol, acc_c_symbol = self._c_handler.get_Velocity(names[1]), self._c_handler.get_Acceleration(names[2])
+
+            return SymbolNumeric(<Py_ssize_t>c_symbol), SymbolNumeric(<Py_ssize_t>vel_c_symbol), SymbolNumeric(<Py_ssize_t>acc_c_symbol)
+
         else:
             raise RuntimeError
-
-        return SymbolNumeric(<Py_ssize_t>c_symbol)
 
 
 
@@ -488,65 +496,6 @@ class System(_System):
     ######## Symbol constructors ########
 
 
-    def new_symbol(self, kind, *args, **kwargs):
-        '''new_symbol(kind: str, name: str, ...) -> SymbolNumeric
-        Creates a new symbol with the type and name specified. Additional options can be indicated
-        as positional or keyword arguments after the 'name' argument.
-
-        * If kind is 'parameter', 'input' or 'joint_unknown', the signature is:
-        new_symbol(kind: str, name: str[, tex_name: str][, value: float)
-        where tex_name is the name of the symbol in latex and value can be used to initialize its
-        numeric value.
-        e.g:
-        new_symbol('parameter', 'a')
-        new_symbol('parameter', 'a', '\\alpha', 1.0)
-        new_symbol('input', 'x', 1.0)
-        new_symbol('input', name='x', value=1.0)
-
-        * For 'coordinate' or 'aux_coordinate' symbol types, the signature is:
-        new_symbol(kind: str,
-            name: str   [, vel_name: str     [, acc_name: str
-        [, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]],
-        [value: float,  [vel_value: float,  [acc_value: float]]])
-
-        The first three optional arguments specify the name of the coordinate (or aux coordinate) and
-        its derivatives (velocity and acceleration).
-        The next three arguments indicates their names for latex.
-        The last three inputs will be the initial numeric values to assign for each component.
-
-        e.g:
-        new_symbol('coordinate', 'v')
-        new_symbol('coordinate', 'v', 'v2', 'v3')
-        new_symbol('aux_coordinate', 'p', 'xp', 'xxp', value=1, vel_value=2, acc_value=3)
-        new_symbol('aux_coordinate', 'a', 'da', 'dda', '\\alpha', '\\alpha^2', '\\alpha^3', value=2.5)
-
-
-        If all the arguments are positional, it is possible to specify the initial numeric values
-        for the components after the 'name' argument
-
-        e.g:
-        new_symbol('coordinate', 'v', 1, 2, 3)
-        new_symbol('coordinate', 'v', 'v2', 1)
-        new_symbol('coordinate', 't', 't2', 't3', 1, 2)
-
-
-
-        :param str kind: Type of the new symbol. Must be one of the next list:
-            'coordinate', 'aux_coordinate', 'input', 'parameter', 'joint_unknown'
-        :param str name: Name of the new symbol
-        :param ...: Additional positional and keyword argument indicating extra options for the
-            numeric symbol creation and value initialization
-
-        :returns: The new symbol created on success
-        :rtype: SymbolNumeric
-        :raises TypeError: If input arguments have invalid types
-        :raises ValueError: If input arguments have invalid values
-        :raises IndexError: If a symbol with the name indicated is already created in the system
-        '''
-        return self._new_symbol(kind, args, kwargs)
-
-
-
     def new_coordinate(self, *args, **kwargs):
         '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
         Creates a new coordinate symbol and its derivative components (velocity and acceleration)
@@ -584,7 +533,7 @@ class System(_System):
             new_coordinate('a', 'a2', 'a3', 1, 2)
 
         '''
-        return self.new_symbol('coordinate', *args, **kwargs)
+        return self._new_symbol('coordinate', *args, **kwargs)
 
 
 
@@ -593,7 +542,7 @@ class System(_System):
         Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
         The signature is the same as for new_coordinate method
         '''
-        return self.new_symbol('aux_coordinate', *args, **kwargs)
+        return self._new_symbol('aux_coordinate', *args, **kwargs)
 
 
 
@@ -740,7 +689,7 @@ def _generate_symbol_constructor_method(symbol_type):
             new_{name}('x', 1)
 
         '''
-        return self.new_symbol(symbol_type, *args, **kwargs)
+        return self._new_symbol(symbol_type, *args, **kwargs)
 
     for key, value in locals().items():
         if not isinstance(value, str):

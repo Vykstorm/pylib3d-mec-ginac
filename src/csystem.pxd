@@ -28,6 +28,12 @@ cdef extern from "System.h":
         vector[symbol_numeric*] get_Inputs()
         vector[symbol_numeric*] get_Joint_Unknowns()
 
+        ## Symbol getters
+        symbol_numeric* get_Velocity(string name)
+        symbol_numeric* get_Acceleration(string name)
+        symbol_numeric* get_AuxVelocity(string name)
+        symbol_numeric* get_AuxAcceleration(string name)
+
         ## Symbol spawners
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
         symbol_numeric* new_AuxCoordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
