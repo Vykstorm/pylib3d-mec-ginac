@@ -5,10 +5,17 @@ Description: This file will declare all the methods and classes defined in the l
 mec ginac System.h header which are going to be used by this library.
 '''
 
+# Imports from the standard library
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+
+# Imports from other .pxd files
 from src.csymbol_numeric cimport symbol_numeric
 from src.cnumeric cimport numeric
+from src.cbase cimport Base
+from src.cexpression cimport ex
+
+
 
 cdef extern from "System.h":
 
@@ -34,9 +41,12 @@ cdef extern from "System.h":
         symbol_numeric* get_AuxVelocity(string name)
         symbol_numeric* get_AuxAcceleration(string name)
 
-        ## Symbol spawners
+        ## Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
         symbol_numeric* new_AuxCoordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
         symbol_numeric* new_Parameter(string name, string tex_name, numeric value)
         symbol_numeric* new_Joint_Unknown(string name, string tex_name, numeric value)
         symbol_numeric* new_Input(string name, string tex_name, numeric value)
+
+        ## Base constructors
+        Base* new_Base(string name, string previous, ex a, ex b, ex c, ex rotation_angle)
