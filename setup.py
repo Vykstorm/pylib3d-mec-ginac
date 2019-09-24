@@ -66,10 +66,10 @@ PACKAGE_DIR = 'src'
 ######## C EXTENSION CONFIGURATION VARIABLES ########
 
 # Directory that contains all lib3d-mec-ginac headers
-LIB3D_MEC_GINAC_INCLUDE_DIR = abspath('../lib3d-mec-ginac/include/lib_3d_mec_ginac')
+LIB3D_MEC_GINAC_INCLUDE_DIR = abspath('../lib_3d_mec_ginac/include/lib_3d_mec_ginac')
 
 # Directory where lib3d-mec-ginac libraries are located
-LIB3D_MEC_GINAC_LIBRARY_DIR = abspath('../lib3d-mec-ginac/lib')
+LIB3D_MEC_GINAC_LIBRARY_DIR = abspath('../lib_3d_mec_ginac/lib')
 
 # Directories containing header files used to build the extensions
 INCLUDE_DIRS = [
