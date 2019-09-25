@@ -1,3 +1,8 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This module defines the class Base
+'''
+
 
 
 ######## Imports ########
@@ -22,6 +27,9 @@ from operator import attrgetter
 
 
 cdef class Base:
+    '''
+    Objects of this class represent geometric bases defined within a system.
+    '''
 
     ######## C Attributes ########
 

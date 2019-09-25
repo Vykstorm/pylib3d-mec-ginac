@@ -1,4 +1,8 @@
-
+'''
+Author: Víctor Ruiz Gómez
+Description: This module defines the class Expr, a basic wrapper of
+the C++ class GiNac::ex
+'''
 
 
 ######## Imports ########
@@ -21,6 +25,7 @@ from src.cexpression cimport print_python as c_print_context
 
 ######## Helper methods ########
 
+
 cdef Expr _expr_from_c(c_ex x):
     # Converts GiNac::ex to Python class Expr instance
     expr = Expr()
@@ -29,10 +34,14 @@ cdef Expr _expr_from_c(c_ex x):
 
 
 
+
 ######## Class Expr ########
 
 cdef class Expr:
-
+    '''
+    This class represents a symbolic expression.
+    It implements a subset of the features provided by the C++ class GiNac::ex
+    '''
 
     ######## C Attributes ########
 

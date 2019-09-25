@@ -1,3 +1,10 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This file will declare all the methods and classes defined in the
+C++ header ginac/ex.h to be used for this library
+'''
+
+
 
 # Imports from the standard library
 from libcpp.string cimport string

@@ -1,3 +1,8 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This file will declare all the methods and classes defined in the lib3d
+mec ginac Base.h header which are going to be used by this library.
+'''
 
 
 # Imports from the standard library
