@@ -1,8 +1,8 @@
 
 ## Introduction
 
-lib3d_mec_ginac is a library for multibody mechanichal systems simulations (http://www.imem.unavarra.es/3d_mec/download/lib3d-mec-ginac/eccomas2007_paper.pdf)
-It was developed in C++ due to its performance requirements for symbolic computation (it uses ginac C++ library).
+lib3d_mec_ginac is a library for multibody mechanial systems simulations (http://www.imem.unavarra.es/3d_mec/download/lib3d-mec-ginac/eccomas2007_paper.pdf)
+It was developed in C++ due to its performance requirements on symbolic numeric computation tasks.
 
 This module provides bindings to the Python language and additional features to improve interaction between the user and the library.
 
