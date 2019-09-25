@@ -506,9 +506,68 @@ cdef class _System:
     ######## Base constructor ########
 
 
-    cpdef new_base(self):
-        return Base(<Py_ssize_t>self._c_handler.new_Base(b'foo', b'xyz', c_ex(0), c_ex(0), c_ex(0),  c_ex(0)))
+    cpdef _new_base(self, name, args, kwargs):
+        # Validate & parse base name
+        name = _parse_base_name(name)
 
+
+        # Check if a base with the given name already exists
+        if self.has_base(name):
+            raise IndexError(f'Base "{name.decode()}" already exists')
+
+        # Validate & parse previous base, rotation tupla and angle arguments
+        args = list(args)
+
+        if args:
+            new_args = []
+            if not isinstance(args[0], (str, bytes, Base)):
+                new_args.append(None)
+            else:
+                new_args.append(args.pop(0))
+
+            if len(args) > 2:
+                rotation_tupla = args[:3]
+                args = args[3:]
+                new_args.append(rotation_tupla)
+            new_args.extend(args)
+            args = new_args
+
+        previous, rotation_tupla, rotation_angle = _apply_signature(
+            ['previous', 'rotation_tupla', 'rotation_angle'],
+            {'previous': None, 'rotation_tupla': (0, 0, 0), 'rotation_angle': 0},
+            args, kwargs
+        )
+
+        if previous is not None:
+            if not isinstance(previous, Base):
+                try:
+                    previous = self.get_base(previous)
+                except IndexError as e:
+                    raise ValueError(*e.args)
+        else:
+            previous = self.get_base(b'xyz')
+
+        if not isinstance(rotation_tupla, Iterable):
+            raise TypeError(f'Rotation tupla must be an iterable object')
+
+        rotation_tupla = tuple(rotation_tupla)
+        if len(rotation_tupla) != 3:
+            raise ValueError(f'Rotation tupla must have exactly three components')
+
+        rotation_tupla = tuple(map(Expr, rotation_tupla))
+        rotation_angle = Expr(rotation_angle)
+
+        # Finally create the base
+        cdef c_ex a, b, c, d
+        cdef c_Base* c_prev_base
+
+        c_prev_base = (<Base>previous)._c_handler
+        a = (<Expr>rotation_tupla[0])._c_handler
+        b = (<Expr>rotation_tupla[1])._c_handler
+        c = (<Expr>rotation_tupla[2])._c_handler
+        d = (<Expr>rotation_angle)._c_handler
+
+        return Base(<Py_ssize_t>self._c_handler.new_Base(name, c_prev_base.get_name(), a, b, c, d))
 
 
 
@@ -637,6 +696,43 @@ class System(_System):
         The signature is the same as for new_coordinate method
         '''
         return self._new_symbol('aux_coordinate', *args, **kwargs)
+
+
+
+
+    ######## Base constructors ########
+
+
+    def new_base(self, name, *args, **kwargs):
+        '''new_base(name: str[, previous: Union[str, Base]][...][, rotation_angle: Expr]) -> Base
+        Creates a new base in this system with the given name, rotation tupla & angle
+
+        :param str name: Must be the name of the new base
+        :param previous: Is the previous base of the new base.
+            By default is the "xyz" base
+        :rtype previous: str, Base
+        :param rotation_angle: Must be the rotation angle
+        :param rotation_tupla: A list of three components that represents the base rotation tupla.
+        :rtype rotation_angle: Expr
+        :rtype rotation_tupla: Tuple[Expr, Expr, Expr]
+
+        :returns: The new base created on success
+        :rtype: Base
+        :raises TypeError: If any argument supplied has an invalid type
+        :raises ValueError: If any argument supplied has an incorrect value (e.g: previous base doesnt exist)
+        :raises IndexError: If there is already a base with the name specified
+
+        The rotation tupla can be specified with three positional arguments
+        or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers).
+
+        new_base('a', 'xyz', 0, 1, 2)
+        new_base('a', None, 0, 1, 2)
+        new_base('a', 0, 1, 2, rotation_angle=pi)
+        new_base('a', [0, 1, 2], rotation_angle=pi)
+        new_base('a', rotation_tupla=[0, 1, 2], pi)
+
+        '''
+        return self._new_base(name, args, kwargs)
 
 
 
