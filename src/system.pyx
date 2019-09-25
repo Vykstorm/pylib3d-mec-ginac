@@ -20,6 +20,8 @@ from libcpp.utility cimport pair as c_pair
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 from src.csystem cimport System as c_System
 from src.cnumeric cimport numeric as c_numeric
+from src.cexpression cimport ex as c_ex
+from src.cbase cimport Base as c_Base
 
 # Python imports
 from collections import OrderedDict
@@ -37,6 +39,8 @@ from operator import attrgetter
 # Type alias representing a list of numeric symbols (std::vector[symbol_numeric*])
 ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
 
+# Type alias representing a list of bases (std::vector[Base*])
+ctypedef c_vector[c_Base*] c_base_list
 
 
 
@@ -97,6 +101,17 @@ def _parse_symbol_value(value):
         except:
             raise TypeError(f'Invalid symbol numeric value')
     return value
+
+
+def _parse_base_name(name):
+    if not isinstance(name, (str, bytes)):
+        raise TypeError(f'Base name must be a str or bytes object')
+
+    if isinstance(name, str):
+        name = name.encode()
+
+    return name
+
 
 
 def _apply_signature(params, defaults, args, kwargs):
@@ -429,6 +444,76 @@ cdef class _System:
 
 
 
+    ######## Base getters ########
+
+
+    cdef c_vector[c_Base*] _get_c_bases(self):
+        return self._c_handler.get_Bases()
+
+
+
+    cpdef get_base(self, name):
+        '''get_base(name: str) -> Base
+        Get the base in this system with the specified name
+
+        :param str name: Name of the base to search
+        :returns: The base with the name indicated if it exists.
+        :rtype: Symbol
+        :raises TypeError: If the input argument has an incorrect type
+        :raises IndexError: If no base with that name exists within the system
+        '''
+        name = _parse_base_name(name)
+
+        cdef c_base_list c_bases = self._get_c_bases()
+        for c_base in c_bases:
+            if c_base.get_name() == <c_string>name:
+                return Base(<Py_ssize_t>c_base)
+        raise IndexError(f'Base "{name.decode()}" not created yet')
+
+
+
+    cpdef has_base(self, name):
+        '''has_base(name: str) -> bool
+        Check if a base with the given name is defined in the system
+
+        :param str name: Name of the base
+        :returns: True if the base exists. False otherwise
+        :rtype: bool
+        :raises TypeError: If the input argument has an incorrect type
+        '''
+        name = _parse_base_name(name)
+        cdef c_base_list c_bases = self._get_c_bases()
+        for c_base in c_bases:
+            if c_base.get_name() == <c_string>name:
+                return True
+        return False
+
+
+
+    cpdef get_bases(self):
+        '''get_bases() -> Mapping[str, Base]
+        Get all the bases defined within this system
+        :returns: All the bases in a dictionary, where keys are base names and values,
+            instances of the class Base
+        :rtype: Mapping[str, Base]
+        '''
+        cdef c_base_list c_bases = self._get_c_bases()
+        bases = [Base(<Py_ssize_t>c_base) for c_base in c_bases]
+        return dict(zip(map(attrgetter('name'), bases), bases))
+
+
+
+    ######## Base constructor ########
+
+
+    cpdef new_base(self):
+        return Base(<Py_ssize_t>self._c_handler.new_Base(b'foo', b'xyz', c_ex(0), c_ex(0), c_ex(0),  c_ex(0)))
+
+
+
+
+
+
 
 ## System class for Python (it emulates the class System in C++ but also provides additional features).
 class System(_System):
@@ -566,6 +651,18 @@ class System(_System):
         :rtype: Mapping[str, SymbolNumeric]
         '''
         return self.get_symbols()
+
+
+
+    @property
+    def bases(self):
+        '''
+        Only read property that returns all the bases defined within this system.
+
+        :rtype: Mapping[str, Base]
+        '''
+        return self.get_bases()
+
 
 
 

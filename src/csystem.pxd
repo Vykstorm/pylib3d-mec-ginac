@@ -24,7 +24,7 @@ cdef extern from "System.h":
         ## Constructors
         System() except +
 
-        ## Symbol container getters
+        ## Symbol getters
         vector[symbol_numeric*] get_Coordinates()
         vector[symbol_numeric*] get_Velocities()
         vector[symbol_numeric*] get_Accelerations()
@@ -35,11 +35,14 @@ cdef extern from "System.h":
         vector[symbol_numeric*] get_Inputs()
         vector[symbol_numeric*] get_Joint_Unknowns()
 
-        ## Symbol getters
         symbol_numeric* get_Velocity(string name)
         symbol_numeric* get_Acceleration(string name)
         symbol_numeric* get_AuxVelocity(string name)
         symbol_numeric* get_AuxAcceleration(string name)
+
+        ## Base getters
+        vector[Base*] get_Bases()
+
 
         ## Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
