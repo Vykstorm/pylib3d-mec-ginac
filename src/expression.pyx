@@ -19,6 +19,16 @@ from src.cexpression cimport print_python as c_print_context
 
 
 
+######## Helper methods ########
+
+cdef Expr _expr_from_c(c_ex x):
+    # Converts GiNac::ex to Python class Expr instance
+    expr = Expr()
+    expr._c_handler = x
+    return expr
+
+
+
 ######## Class Expr ########
 
 cdef class Expr:
@@ -34,10 +44,11 @@ cdef class Expr:
     ######## Constructor ########
 
 
-    def __cinit__(self, value):
-        if not isinstance(value, (int, float)):
-            raise TypeError
-        self._c_handler = c_ex(value)
+    def __cinit__(self, value=None):
+        if value is not None:
+            if not isinstance(value, (int, float)):
+                raise TypeError
+            self._c_handler = c_ex(value)
 
 
 

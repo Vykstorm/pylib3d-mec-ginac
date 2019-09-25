@@ -10,6 +10,7 @@ from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
 from src.cbase cimport Base as c_Base
+from src.cexpression cimport ex as c_ex
 
 # Python imports
 from operator import attrgetter
@@ -79,6 +80,15 @@ cdef class Base:
 
 
 
+    cpdef get_rotation_angle(self):
+        '''get_rotation_angle() -> Expr
+        Get the rotation angle of this base
+        :rtype: Expr
+        '''
+        return _expr_from_c(self._c_handler.get_Rotation_Angle())
+
+
+
 
     ######## Properties ########
 
@@ -108,6 +118,14 @@ cdef class Base:
         '''
         return self.get_previous_base()
 
+
+    @property
+    def rotation_angle(self):
+        '''
+        Read only property that returns the rotation angle of this base
+        :type: Expr
+        '''
+        return self.get_rotation_angle()
 
 
 
