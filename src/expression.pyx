@@ -1,0 +1,57 @@
+
+
+
+######## Imports ########
+
+# Cython imports
+from cython.operator import dereference as c_deref
+
+# C++ standard library imports
+from libcpp.string cimport string as c_string
+
+# Import .pxd declarations
+from src.cexpression cimport ex as c_ex
+from src.cexpression cimport stringstream as c_sstream
+from src.cexpression cimport print_python as c_print_context
+
+# Python imports
+
+
+
+
+######## Class Expr ########
+
+cdef class Expr:
+
+
+    ######## C Attributes ########
+
+
+    cdef c_ex _c_handler
+
+
+
+    ######## Constructor ########
+
+
+    def __cinit__(self, value):
+        if not isinstance(value, (int, float)):
+            raise TypeError
+        self._c_handler = c_ex(value)
+
+
+
+
+    ######## Metamethods ########
+
+
+    def __str__(self):
+        # Use GiNac print method
+        cdef c_print_context* c_printer = new c_print_context(c_sstream())
+        self._c_handler.print(c_deref(c_printer))
+        cdef c_string s = (<c_sstream*>&c_printer.s).str()
+        del c_printer
+        return (<bytes>s).decode()
+
+    def __repr__(self):
+        return self.__str__()
