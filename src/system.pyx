@@ -682,8 +682,8 @@ class System(_System):
             You can specify the initial values of the coordinate and its derivatives
             right after the first argument (name) or any other string parameter (if all arguments are positional):
 
-            new_coordinate('a', 1, 2, 3)
-            new_coordinate('a', 'a2', 'a3', 1, 2)
+            >>> new_coordinate('a', 1, 2, 3)
+            >>> new_coordinate('a', 'a2', 'a3', 1, 2)
 
         '''
         return self._new_symbol('coordinate', *args, **kwargs)
@@ -710,11 +710,11 @@ class System(_System):
         :param str name: Must be the name of the new base
         :param previous: Is the previous base of the new base.
             By default is the "xyz" base
-        :rtype previous: str, Base
+        :type previous: str, Base
         :param rotation_angle: Must be the rotation angle
         :param rotation_tupla: A list of three components that represents the base rotation tupla.
-        :rtype rotation_angle: Expr
-        :rtype rotation_tupla: Tuple[Expr, Expr, Expr]
+        :type rotation_angle: Expr
+        :type rotation_tupla: Tuple[Expr, Expr, Expr]
 
         :returns: The new base created on success
         :rtype: Base
@@ -722,14 +722,17 @@ class System(_System):
         :raises ValueError: If any argument supplied has an incorrect value (e.g: previous base doesnt exist)
         :raises IndexError: If there is already a base with the name specified
 
-        The rotation tupla can be specified with three positional arguments
-        or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers).
+        .. note::
+            The rotation tupla can be specified with three positional arguments
+            or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers).
 
-        new_base('a', 'xyz', 0, 1, 2)
-        new_base('a', None, 0, 1, 2)
-        new_base('a', 0, 1, 2, rotation_angle=pi)
-        new_base('a', [0, 1, 2], rotation_angle=pi)
-        new_base('a', rotation_tupla=[0, 1, 2], pi)
+            :Example:
+
+            >>> new_base('a', 'xyz', 0, 1, 2)
+            >>> new_base('a', None, 0, 1, 2)
+            >>> new_base('a', 0, 1, 2, rotation_angle=pi)
+            >>> new_base('a', [0, 1, 2], rotation_angle=pi)
+            >>> new_base('a', rotation_tupla=[0, 1, 2], pi)
 
         '''
         return self._new_base(name, args, kwargs)
