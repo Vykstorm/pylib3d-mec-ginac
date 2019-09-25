@@ -15,8 +15,8 @@ from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
 from src.cexpression cimport ex as c_ex
-from src.cexpression cimport stringstream as c_sstream
-from src.cexpression cimport print_python as c_print_context
+from src.cprint cimport stringstream as c_sstream
+from src.cprint cimport print_python as c_print_context
 
 # Python imports
 
