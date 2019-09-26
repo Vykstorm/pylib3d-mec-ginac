@@ -5,7 +5,7 @@ Description: This module defines the wrapper class SymbolNumeric.
 
 ######## Imports ########
 
-
+# Import .pxd declarations
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 
 

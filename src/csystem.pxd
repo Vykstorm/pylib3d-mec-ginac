@@ -5,17 +5,22 @@ Description: This file will declare all the methods and classes defined in the l
 mec ginac System.h header which are going to be used by this library.
 '''
 
+
+######## Imports ########
+
 # Imports from the standard library
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 # Imports from other .pxd files
 from src.csymbol_numeric cimport symbol_numeric
-from src.cnumeric cimport numeric
+from src.cginac cimport numeric, ex
 from src.cbase cimport Base
-from src.cexpression cimport ex
 
 
+
+
+######## Class System ########
 
 cdef extern from "System.h":
 

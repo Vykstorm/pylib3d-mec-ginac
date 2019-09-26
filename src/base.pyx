@@ -15,7 +15,7 @@ from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
 from src.cbase cimport Base as c_Base
-from src.cexpression cimport ex as c_ex
+from src.cginac cimport ex as c_ex
 
 # Python imports
 from operator import attrgetter

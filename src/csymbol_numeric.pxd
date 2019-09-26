@@ -4,12 +4,19 @@ Description: This file will declare all the methods and classes defined in the l
 mec ginac symbol_numeric.h that will be used by this library
 '''
 
+
+
+######## Imports ########
+
 # Imports from the standard library
 from libcpp.string cimport string
 
 # Imports from other .pxd files
-from src.cnumeric cimport numeric
+from src.cginac cimport numeric
 
+
+
+######## Class symbol_numeric ########
 
 cdef extern from "symbol_numeric.h":
     cdef cppclass symbol_numeric:

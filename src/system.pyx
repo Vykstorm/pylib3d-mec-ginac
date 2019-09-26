@@ -19,8 +19,8 @@ from libcpp.utility cimport pair as c_pair
 # Import .pxd declarations
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 from src.csystem cimport System as c_System
-from src.cnumeric cimport numeric as c_numeric
-from src.cexpression cimport ex as c_ex
+from src.cginac cimport numeric as c_numeric
+from src.cginac cimport ex as c_ex
 from src.cbase cimport Base as c_Base
 
 # Python imports

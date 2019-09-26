@@ -14,9 +14,9 @@ from cython.operator import dereference as c_deref
 from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
-from src.cexpression cimport ex as c_ex
-from src.cprint cimport stringstream as c_sstream
-from src.cprint cimport print_python as c_print_context
+from src.cginac cimport ex as c_ex
+from src.cginac cimport print_python as c_print_context
+from src.cpp cimport stringstream as c_sstream
 
 # Python imports
 
