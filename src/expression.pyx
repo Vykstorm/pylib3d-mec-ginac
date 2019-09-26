@@ -14,9 +14,11 @@ from cython.operator import dereference as c_deref
 from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
+from src.cginac cimport basic as c_basic
 from src.cginac cimport ex as c_ex
 from src.cginac cimport print_python as c_print_context
 from src.cpp cimport stringstream as c_sstream
+from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 
 # Python imports
 
@@ -55,9 +57,13 @@ cdef class Expr:
 
     def __cinit__(self, value=None):
         if value is not None:
-            if not isinstance(value, (int, float)):
+            if not isinstance(value, (int, float, SymbolNumeric)):
                 raise TypeError
-            self._c_handler = c_ex(value)
+
+            if isinstance(value, (int, float)):
+                self._c_handler = c_ex(<double>float(value))
+            else:
+                self._c_handler = c_ex(c_deref(<c_basic*>((<SymbolNumeric>value)._c_handler)))
 
 
 

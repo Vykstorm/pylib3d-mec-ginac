@@ -26,6 +26,12 @@ cdef extern from "ginac/print.h" namespace "GiNaC":
         print_python(ostream& os) except +
 
 
+######## Class GiNaC::basic ########
+
+cdef extern from "ginac/basic.h" namespace "GiNaC":
+    cdef cppclass basic:
+        pass
+
 
 ######## Class GiNaC::ex ########
 
@@ -33,13 +39,14 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
     cdef cppclass ex:
         ex() except +
         ex(const double value) except +
+        ex(const basic& value) except +
         void print(print_context&, unsigned level=0) const
 
 
 ######## Class GiNaC::numeric ########
 
 cdef extern from "ginac/ginac.h" namespace "GiNaC":
-    cdef cppclass numeric:
+    cdef cppclass numeric(basic):
         numeric(double value)
 
         double to_double() const
