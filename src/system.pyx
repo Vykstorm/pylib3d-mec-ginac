@@ -29,6 +29,7 @@ from collections.abc import Mapping, Iterable
 from functools import partial, partialmethod, wraps
 from inspect import Signature, Parameter
 from operator import attrgetter
+from asciitree import LeftAligned
 
 
 
@@ -491,12 +492,6 @@ cdef class _System:
 
 
     cpdef get_bases(self):
-        '''get_bases() -> Mapping[str, Base]
-        Get all the bases defined within this system
-        :returns: All the bases in a dictionary, where keys are base names and values,
-            instances of the class Base
-        :rtype: Mapping[str, Base]
-        '''
         cdef c_base_list c_bases = self._get_c_bases()
         bases = [Base(<Py_ssize_t>c_base) for c_base in c_bases]
         return dict(zip(map(attrgetter('name'), bases), bases))
@@ -696,6 +691,21 @@ class System(_System):
         The signature is the same as for new_coordinate method
         '''
         return self._new_symbol('aux_coordinate', *args, **kwargs)
+
+
+
+
+    ######## Base getters ########
+
+
+    def get_bases(self):
+        '''get_bases() -> Mapping[str, Base]
+        Get all the bases defined within this system
+        :returns: All the bases in a dictionary, where keys are base names and values,
+            instances of the class Base
+        :rtype: Mapping[str, Base]
+        '''
+        return _BasesView(self)
 
 
 
@@ -935,7 +945,7 @@ class _SymbolsView(Mapping):
 
     @property
     def _symbols(self):
-        return OrderedDict(_System.get_symbols_by_type(self.system, self.kind))
+        return _System.get_symbols_by_type(self.system, self.kind)
 
     def __iter__(self):
         return iter(self._symbols)
@@ -983,6 +993,58 @@ class _SymbolsView(Mapping):
 
         return '\n'.join(lines)
 
+
+    def __repr__(self):
+        return self.__str__()
+
+
+
+
+######## Helper class BasesView ########
+
+class _BasesView(Mapping):
+    '''
+    Objects of this class are instantiated and returned by System get_bases() method
+    and its 'bases' property, and provides better visualization of geometric bases
+    when printing them in the python console.
+    This class is not intentended to be instantiated by the user manually.
+    '''
+
+    def __init__(self, system):
+        self.system = system
+
+    @property
+    def _bases(self):
+        return _System.get_bases(self.system)
+
+    def __iter__(self):
+        return iter(self._bases)
+
+    def __len__(self):
+        return len(self._bases)
+
+    def __getitem__(self, name):
+        return self.system.get_base(name)
+
+    def __contains__(self, name):
+        return self.system.has_base(name)
+
+    def __bool__(self):
+        return len(self) == 0
+
+    def __str__(self):
+        bases = frozenset(self._bases.values())
+        roots = frozenset([base for base in bases if not base.has_previous()])
+
+        def get_tree(base):
+            children = [x for x in bases - roots if x.previous == base]
+            return dict(zip(map(attrgetter('name'), children), map(get_tree, children)))
+
+        tree = {}
+        for base in roots:
+            tree[base.name] = get_tree(base)
+
+        return LeftAligned()(tree)
 
     def __repr__(self):
         return self.__str__()
