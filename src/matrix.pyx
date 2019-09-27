@@ -42,6 +42,11 @@ cdef class Matrix:
     def get_shape(self):
         return self._c_handler.rows(), self._c_handler.cols()
 
+    def get_num_rows(self):
+        return self._c_handler.rows()
+
+    def get_num_cols(self):
+        return self._c_handler.cols()
 
     def get_name(self):
         return (<bytes>self._c_handler.get_name()).decode()
@@ -60,6 +65,14 @@ cdef class Matrix:
     @property
     def shape(self):
         return self.get_shape()
+
+    @property
+    def num_rows(self):
+        return self.get_num_rows()
+
+    @property
+    def num_cols(self):
+        return self.get_num_cols()
 
     @property
     def name(self):
