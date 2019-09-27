@@ -602,13 +602,13 @@ cdef class _System:
         else:
             previous = self.get_base(b'xyz')
 
-        if not isinstance(rotation_tupla, Iterable):
-            raise TypeError(f'Rotation tupla must be an iterable object')
+        if not isinstance(rotation_tupla, (Iterable, Matrix)):
+            raise TypeError(f'Rotation tupla must be an iterable or a Matrix object')
 
-        rotation_tupla = tuple(rotation_tupla)
         if len(rotation_tupla) != 3:
             raise ValueError(f'Rotation tupla must have exactly three components')
 
+        rotation_tupla = tuple(rotation_tupla)
         rotation_tupla = tuple(map(Expr, rotation_tupla))
         rotation_angle = Expr(rotation_angle)
 
@@ -796,8 +796,9 @@ class System(_System):
         :type previous: str, Base
         :param rotation_angle: Must be the rotation angle
         :param rotation_tupla: A list of three components that represents the base rotation tupla.
+            It can also be a Matrix 1x3 or 3x1
         :type rotation_angle: Expr
-        :type rotation_tupla: Tuple[Expr, Expr, Expr]
+        :type rotation_tupla: Tuple[Expr, Expr, Expr], Matrix
 
         :returns: The new base created on success
         :rtype: Base
@@ -807,15 +808,17 @@ class System(_System):
 
         .. note::
             The rotation tupla can be specified with three positional arguments
-            or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers).
+            or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers) or
+            a Matrix object
 
             :Example:
 
             >>> new_base('a', 'xyz', 0, 1, 2)
             >>> new_base('a', None, 0, 1, 2)
-            >>> new_base('a', 0, 1, 2, rotation_angle=pi)
-            >>> new_base('a', [0, 1, 2], rotation_angle=pi)
-            >>> new_base('a', rotation_tupla=[0, 1, 2], pi)
+            >>> new_base('a', 0, 1, 2)
+            >>> new_base('a', [0, 1, 2])
+            >>> new_base('a', rotation_tupla=[0, 1, 2])
+            >>> new_base('a', rotation_tupla=new_matrix(3))
 
         '''
         return self._new_base(name, args, kwargs)
