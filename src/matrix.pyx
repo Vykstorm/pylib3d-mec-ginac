@@ -13,7 +13,9 @@ from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
 from src.cmatrix cimport Matrix as c_Matrix
-#from src.cginac cimport matrix as c_ginac_matrix
+from src.cginac cimport matrix as c_ginac_matrix
+from src.cginac cimport print_python as c_print_context
+from src.cpp cimport stringstream as c_sstream
 
 
 
@@ -79,6 +81,11 @@ cdef class Matrix:
 
 
 
+    def expand(self):
+        cdef c_Matrix c_matrix = self._c_handler.expand()
+        return Matrix(<Py_ssize_t>&c_matrix)
+
+
 
     ######## Properties ########
 
@@ -114,3 +121,16 @@ cdef class Matrix:
 
     def __len__(self):
         return self.get_size()
+
+
+
+    def __str__(self):
+        # Use GiNac print method to print the underline matrix
+        cdef c_print_context* c_printer = new c_print_context(c_sstream())
+        self._c_handler.get_matrix().print(c_deref(c_printer))
+        cdef c_string s = (<c_sstream*>&c_printer.s).str()
+        del c_printer
+        return (<bytes>s).decode()
+
+    def __repr__(self):
+        return self.__str__()
