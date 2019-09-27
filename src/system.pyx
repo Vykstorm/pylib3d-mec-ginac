@@ -28,9 +28,10 @@ from src.cmatrix cimport Matrix as c_Matrix
 from collections import OrderedDict
 from collections.abc import Mapping, Iterable
 from functools import partial, partialmethod, wraps
-from inspect import Signature, Parameter
 from operator import attrgetter
 from asciitree import LeftAligned
+from src.common import _apply_signature
+
 
 
 
@@ -144,17 +145,6 @@ def _parse_geom_obj_type(kind):
         raise ValueError(f'Invalid "{kind.decode()}" geometric object type')
     return kind
 
-
-def _apply_signature(params, defaults, args, kwargs):
-    assert isinstance(params, Iterable)
-    assert isinstance(defaults, dict)
-
-    sig = Signature(
-        parameters=[Parameter(param, Parameter.POSITIONAL_OR_KEYWORD, default=defaults.get(param, Parameter.empty)) for param in params]
-    )
-    bounded_args = sig.bind(*args, **kwargs)
-    bounded_args.apply_defaults()
-    return bounded_args.args
 
 
 
@@ -505,7 +495,7 @@ cdef class _System:
             c_matrices = self._get_c_matrices()
             for c_matrix in c_matrices:
                 if c_matrix.get_name() == <c_string>name:
-                    return Matrix(<Py_ssize_t>c_matrix)
+                    return _matrix_from_c(c_matrix)
             raise IndexError(f'Matrix "{name.decode()}" not created yet')
         else:
             raise RuntimeError
@@ -551,7 +541,7 @@ cdef class _System:
             objs = [Base(<Py_ssize_t>c_base) for c_base in c_bases]
         elif kind == b'matrix':
             c_matrices = self._get_c_matrices()
-            objs = [Matrix(<Py_ssize_t>c_matrix) for c_matrix in c_matrices]
+            objs = [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
 
         return dict(zip(map(attrgetter('name'), objs), objs))
 
@@ -627,11 +617,24 @@ cdef class _System:
 
 
     cpdef _new_matrix(self, name, args, kwargs):
-        num_rows, num_cols = args
+        # Validate & parse name argument
+        name = _parse_geom_obj_name(name)
 
-        cdef c_Matrix* c_matrix = new c_Matrix(<int>num_rows, <int>num_cols)
+        # Check if a matrix with the same name already exists
+        if self.has_matrix(name):
+            raise IndexError(f'Matrix "{name.decode()}" already exists')
+
+        # Create the matrix
+        matrix = Matrix(*args, **kwargs)
+
+        # Register the matrix with the given name in the system
+        cdef c_Matrix* c_matrix = matrix._get_c_handler()
         c_matrix.set_name(name)
-        return Matrix(<Py_ssize_t>self._c_handler.new_Matrix(c_matrix))
+        self._c_handler.new_Matrix(c_matrix)
+        (<Matrix>matrix)._owns_c_handler = False
+
+        return matrix
+
 
 
 
@@ -826,6 +829,8 @@ class System(_System):
 
 
     def new_matrix(self, name, *args, **kwargs):
+        '''new_matrix(name[, shape][, values]) -> Matrix
+        '''
         return self._new_matrix(name, args, kwargs)
 
 

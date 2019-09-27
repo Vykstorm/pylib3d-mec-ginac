@@ -26,11 +26,12 @@ from itertools import chain
 ######## Helper methods ########
 
 
-cdef Matrix _matrix_from_c(c_Matrix x):
+cdef Matrix _matrix_from_c(c_Matrix* x):
     # Converts C++ Matrix to Python class Matrix instance
     m = Matrix()
-    m._c_handler = x
+    m._c_handler, m._owns_c_handler = x, False
     return m
+
 
 
 
@@ -43,8 +44,8 @@ cdef class Matrix:
     ######## C Attributes ########
 
 
-    cdef c_Matrix _c_handler
-
+    cdef c_Matrix* _c_handler
+    cdef bint _owns_c_handler
 
 
 
@@ -55,12 +56,9 @@ cdef class Matrix:
         # Validate input arguments
         if values is None and shape is None:
             # Matrix 1x1 with a zero initialized by default
+            self._c_handler = NULL
             return
 
-        if isinstance(values, Matrix):
-            # Copy underline matrix in C
-            self._c_handler = (<Matrix>values)._c_handler
-            return
 
         # Validate & parse shape argument
         if shape is not None:
@@ -82,7 +80,7 @@ cdef class Matrix:
         if values is not None:
             # values must be a matrix or an iterable
             if not isinstance(values, Iterable):
-                raise TypeError(f'Matrix values must be an iterable or Matrix object')
+                raise TypeError(f'Matrix values must be an iterable object')
 
             values = tuple(values)
             if len(values) == 0:
@@ -119,7 +117,8 @@ cdef class Matrix:
 
 
         # set matrix shape
-        self._c_handler = c_Matrix(shape[0], shape[1])
+        self._c_handler = new c_Matrix(shape[0], shape[1])
+        self._owns_c_handler = True
 
 
         if values is not None:
@@ -129,7 +128,20 @@ cdef class Matrix:
                 self._c_handler.set(i, j, (<Expr>value)._c_handler)
 
 
+    def __dealloc__(self):
+        if self._c_handler != NULL and self._owns_c_handler:
+            print("Deallocating")
+            del self._c_handler
+
+
     ######## Getters ########
+
+
+    cdef c_Matrix* _get_c_handler(self):
+        if self._c_handler == NULL:
+            self._c_handler = new c_Matrix(1, 1)
+            self._owns_c_handler = True
+        return self._c_handler
 
 
     def get_shape(self):
@@ -138,21 +150,21 @@ cdef class Matrix:
         :returns: A tuple with two numbers (number of rows and columns)
         :rtype: Tuple[int, int]
         '''
-        return self._c_handler.rows(), self._c_handler.cols()
+        return self._get_c_handler().rows(), self._get_c_handler().cols()
 
     def get_num_rows(self):
         '''
         Get the number of rows of this matrix
         :rtype: int
         '''
-        return self._c_handler.rows()
+        return self._get_c_handler().rows()
 
     def get_num_cols(self):
         '''
         Get the number of columns of this matrix
         :rtype: int
         '''
-        return self._c_handler.cols()
+        return self._get_c_handler().cols()
 
     def get_size(self):
         '''
@@ -166,7 +178,7 @@ cdef class Matrix:
         Get the name of this matrix
         :rtype: int
         '''
-        return (<bytes>self._c_handler.get_name()).decode()
+        return (<bytes>self._get_c_handler().get_name()).decode()
 
 
 
@@ -215,7 +227,7 @@ cdef class Matrix:
         :raises IndexError: If indices are out of bounds
         '''
         i, j = self._parse_indices(i, j)
-        return _expr_from_c(self._c_handler.get(i, j))
+        return _expr_from_c(self._get_c_handler().get(i, j))
 
 
 
@@ -234,7 +246,7 @@ cdef class Matrix:
         i, j = self._parse_indices(i, j)
         if not isinstance(value, Expr):
             value = Expr(value)
-        self._c_handler.set(i, j, (<Expr>value)._c_handler)
+        self._get_c_handler().set(i, j, (<Expr>value)._c_handler)
 
 
 
@@ -246,8 +258,14 @@ cdef class Matrix:
         Tranpose this matrix
         :returns: Returns this matrix transposed
         '''
-        cdef c_Matrix c_matrix = self._c_handler.transpose()
-        return _matrix_from_c(c_matrix)
+        cdef c_Matrix a = self._get_c_handler().transpose()
+        cdef c_Matrix* b = new c_Matrix(a.get_matrix())
+        b.set_name(a.get_name())
+
+        m = Matrix()
+        (<Matrix>m)._c_handler, (<Matrix>m)._owns_c_handler = b, True
+        return m
+
 
     def get_transposed(self):
         '''
@@ -255,14 +273,6 @@ cdef class Matrix:
         '''
         return self.transpose()
 
-
-
-    def expand(self):
-        '''
-        TODO
-        '''
-        cdef c_Matrix c_matrix = self._c_handler.expand()
-        return _matrix_from_c(c_matrix)
 
 
 
@@ -337,7 +347,7 @@ cdef class Matrix:
         n, m = self.get_shape()
         for i in range(0, n):
             for j in range(0, m):
-                yield _expr_from_c(self._c_handler.get(i, j))
+                yield _expr_from_c(self._get_c_handler().get(i, j))
 
 
     def __getitem__(self, index):
@@ -355,7 +365,7 @@ cdef class Matrix:
     def __str__(self):
         # Use GiNac print method to print the underline matrix
         cdef c_print_context* c_printer = new c_print_context(c_sstream())
-        self._c_handler.get_matrix().print(c_deref(c_printer))
+        self._get_c_handler().get_matrix().print(c_deref(c_printer))
         cdef c_string s = (<c_sstream*>&c_printer.s).str()
         del c_printer
         return (<bytes>s).decode()
