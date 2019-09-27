@@ -74,6 +74,9 @@ cdef class Matrix:
         cdef c_Matrix c_matrix = self._c_handler.transpose()
         return Matrix(<Py_ssize_t>&c_matrix)
 
+    def get_transposed(self):
+        return self.transpose()
+
 
 
 
