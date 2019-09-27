@@ -130,7 +130,6 @@ cdef class Matrix:
 
     def __dealloc__(self):
         if self._c_handler != NULL and self._owns_c_handler:
-            print("Deallocating")
             del self._c_handler
 
 
