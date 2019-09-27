@@ -17,6 +17,7 @@ from src.cginac cimport matrix
 ######## Class Matrix ########
 cdef extern from "Matrix.h":
     cdef cppclass Matrix:
+        Matrix() except +
         Matrix(long rows, long cols) except +
 
         string get_name()

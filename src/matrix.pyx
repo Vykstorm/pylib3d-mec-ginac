@@ -5,6 +5,9 @@ Description: This module defines the class Matrix
 
 ######## Imports ########
 
+# Cython imports
+from cython.operator cimport dereference as c_deref
+
 # C++ standard library imports
 from libcpp.string cimport string as c_string
 
@@ -22,7 +25,7 @@ cdef class Matrix:
     ######## C Attributes ########
 
 
-    cdef c_Matrix* _c_handler
+    cdef c_Matrix _c_handler
 
 
 
@@ -31,7 +34,7 @@ cdef class Matrix:
 
 
     def __cinit__(self, Py_ssize_t handler):
-        self._c_handler = <c_Matrix*>handler
+        self._c_handler = c_deref(<c_Matrix*>handler)
 
 
 
@@ -63,6 +66,17 @@ cdef class Matrix:
     ######## Changing matrix values ########
 
 
+
+    ######## Methods ########
+
+
+    def transpose(self):
+        cdef c_Matrix c_matrix = self._c_handler.transpose()
+        return Matrix(<Py_ssize_t>&c_matrix)
+
+
+
+
     ######## Properties ########
 
 
@@ -85,6 +99,10 @@ cdef class Matrix:
     @property
     def name(self):
         return self.get_name()
+
+    @property
+    def T(self):
+        return self.tranpose()
 
 
 
