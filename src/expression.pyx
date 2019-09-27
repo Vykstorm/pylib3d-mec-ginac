@@ -57,14 +57,15 @@ cdef class Expr:
 
     def __cinit__(self, value=None):
         if value is not None:
-            if not isinstance(value, (int, float, SymbolNumeric)):
+            if not isinstance(value, (int, float, SymbolNumeric, Expr)):
                 raise TypeError
 
             if isinstance(value, (int, float)):
                 self._c_handler = c_ex(<double>float(value))
-            else:
+            elif isinstance(value, SymbolNumeric):
                 self._c_handler = c_ex(c_deref(<c_basic*>((<SymbolNumeric>value)._c_handler)))
-
+            else:
+                self._c_handler = (<Expr>value)._c_handler
 
 
 
