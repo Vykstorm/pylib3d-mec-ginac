@@ -18,6 +18,21 @@ from src.cginac cimport print_python as c_print_context
 from src.cginac cimport ex as c_ex
 from src.cpp cimport stringstream as c_sstream
 
+# Python imports
+from collections.abc import Iterable
+from itertools import chain
+
+
+######## Helper methods ########
+
+
+cdef Matrix _matrix_from_c(c_Matrix x):
+    # Converts C++ Matrix to Python class Matrix instance
+    m = Matrix()
+    m._c_handler = x
+    return m
+
+
 
 
 
@@ -36,48 +51,190 @@ cdef class Matrix:
     ######## Constructor ########
 
 
-    def __cinit__(self, Py_ssize_t handler):
-        self._c_handler = c_deref(<c_Matrix*>handler)
+    def __cinit__(self, values=None, shape=None):
+        # Validate input arguments
+        if values is None and shape is None:
+            # Matrix 1x1 with a zero initialized by default
+            return
+
+        if isinstance(values, Matrix):
+            # Copy underline matrix in C
+            self._c_handler = (<Matrix>values)._c_handler
+            return
+
+        # Validate & parse shape argument
+        if shape is not None:
+            if not isinstance(shape, (Iterable, int)):
+                raise TypeError('Matrix shape must be an integer or iterable object')
+            if isinstance(shape, int):
+                shape = (shape, shape)
+            else:
+                shape = tuple(shape)
+                if len(shape) == 1:
+                    shape *= 2
+
+            if len(shape) != 2 or not isinstance(shape[0], int) or not isinstance(shape[1], int):
+                raise ValueError('Matrix shape must be a pair of numbers (num.rows x num.cols)')
+            if shape[0] <= 0 or shape[1] <= 0:
+                raise ValueError('Matrix dimensions must be numbers greater than zero')
 
 
+        if values is not None:
+            # values must be a matrix or an iterable
+            if not isinstance(values, Iterable):
+                raise TypeError(f'Matrix values must be an iterable or Matrix object')
+
+            values = tuple(values)
+            if len(values) == 0:
+                raise ValueError(f'You must specify at least one value')
+            if isinstance(values[0], Iterable):
+                if not all(map(lambda x: isinstance(x, Iterable), values[1:])):
+                    raise TypeError
+
+                # value is a list of sublists with expressions
+                values = tuple(map(tuple, values))
+
+                # check that all subslits have the same size
+                if not all(map(lambda x: len(x) == len(values[0]), values[1:])):
+                    raise ValueError('All sublists must have the same size')
+
+                if shape is None:
+                    # compute shape from values
+                    shape = (len(values), len(values[0]))
+                values = tuple(chain.from_iterable(values))
+                if len(values) == 0:
+                    raise ValueError('You must specify at least one value')
+            else:
+                # values is a list of expressions
+                if any(map(lambda x: isinstance(x, Iterable), values[1:])):
+                    raise TypeError
+                if shape is None:
+                    # compute shape from values
+                    shape = (1, len(values))
+                if len(values) == 0:
+                    raise ValueError('You must specify at least one value')
+
+            if shape[0] * shape[1] != len(values):
+                raise ValueError(f'Inconsistent number of values ({len(values)}) and shape ({shape[0]} x {shape[1]})')
+
+
+        # set matrix shape
+        self._c_handler = c_Matrix(shape[0], shape[1])
+
+
+        if values is not None:
+            # Assign values to the matrix
+            for k, value in enumerate(map(Expr, values)):
+                i, j = k // shape[1], k % shape[1]
+                self._c_handler.set(i, j, (<Expr>value)._c_handler)
 
 
     ######## Getters ########
 
 
     def get_shape(self):
+        '''
+        Get the shape of this matrix.
+        :returns: A tuple with two numbers (number of rows and columns)
+        :rtype: Tuple[int, int]
+        '''
         return self._c_handler.rows(), self._c_handler.cols()
 
     def get_num_rows(self):
+        '''
+        Get the number of rows of this matrix
+        :rtype: int
+        '''
         return self._c_handler.rows()
 
     def get_num_cols(self):
+        '''
+        Get the number of columns of this matrix
+        :rtype: int
+        '''
         return self._c_handler.cols()
 
     def get_size(self):
+        '''
+        Get the total number of items of this matrix (number of rows x number of columns)
+        :rtype: int
+        '''
         return self.get_num_rows() * self.get_num_cols()
 
     def get_name(self):
+        '''
+        Get the name of this matrix
+        :rtype: int
+        '''
         return (<bytes>self._c_handler.get_name()).decode()
 
 
 
 
-    ######## Accessing matrix values ########
+    ######## Accessing values ########
+
+    def _parse_row_index(self, i):
+        if not isinstance(i, int):
+            raise TypeError('Matrix indices must be numbers')
+        if i not in range(0, self.get_num_rows()):
+            raise IndexError('Row index out of bounds')
+        return i
+
+    def _parse_col_index(self, j):
+        if not isinstance(j, int):
+            raise TypeError('Matrix indices must be numbers')
+        if j not in range(0, self.get_num_cols()):
+            raise IndexError('Column index out of bounds')
+        return j
 
 
-    def get_items(self):
-        cdef c_ex expr
-        n, m = self.get_shape()
-        for i in range(0, n):
-            for j in range(0, m):
-                expr = self._c_handler(i, j)
-                yield _expr_from_c(expr)
+    def _parse_indices(self, i, j):
+        return self._parse_row_index(i), self._parse_col_index(j)
+
+
+
+    def get_values(self):
+        '''
+        Get all the items of this matrix
+        :returns: A list containing all the items of this matrix, where the item
+        at ith row and jth column is located at i*num_cols + j index
+        :rtype: List[Expr]
+        '''
+        return list(iter(self))
+
+
+
+    def get(self, i, j):
+        '''
+        Get the value at ith row and jth column
+        :param int i: The row index
+        :param int j: The column index
+        :returns: The item at the given position
+        :rtype: Expr
+        :raises TypeError: If indices are not int objects
+        :raises IndexError: If indices are out of bounds
+        '''
+        i, j = self._parse_indices(i, j)
+        return _expr_from_c(self._c_handler.get(i, j))
 
 
 
 
-    ######## Changing matrix values ########
+    ######## Changing values ########
+
+
+    def set(self, i, j, value):
+        '''
+        Set the value at ith row and jth column
+        :param int i: The row index
+        :param int j: The column index
+        :raises TypeError: If indices are not int objects
+        :raises IndexError: If indices are out of bounds
+        '''
+        i, j = self._parse_indices(i, j)
+        if not isinstance(value, Expr):
+            value = Expr(value)
+        self._c_handler.set(i, j, (<Expr>value)._c_handler)
 
 
 
@@ -85,17 +242,27 @@ cdef class Matrix:
 
 
     def transpose(self):
+        '''
+        Tranpose this matrix
+        :returns: Returns this matrix transposed
+        '''
         cdef c_Matrix c_matrix = self._c_handler.transpose()
-        return Matrix(<Py_ssize_t>&c_matrix)
+        return _matrix_from_c(c_matrix)
 
     def get_transposed(self):
+        '''
+        Alias of transpose
+        '''
         return self.transpose()
 
 
 
     def expand(self):
+        '''
+        TODO
+        '''
         cdef c_Matrix c_matrix = self._c_handler.expand()
-        return Matrix(<Py_ssize_t>&c_matrix)
+        return _matrix_from_c(c_matrix)
 
 
 
@@ -104,31 +271,59 @@ cdef class Matrix:
 
     @property
     def shape(self):
+        '''
+        Read only property that returns the shape of this matrix
+        :rtype: Tuple[int, int]
+        '''
         return self.get_shape()
 
     @property
     def num_rows(self):
+        '''
+        Read only property that returns the number of rows of this matrix
+        :rtype: int
+        '''
         return self.get_num_rows()
 
     @property
     def num_cols(self):
+        '''
+        Read only property that returns the number of columns of this matrix
+        :rtype: int
+        '''
         return self.get_num_cols()
 
     @property
     def size(self):
+        '''
+        Read only property that returns the total number of items on this matrix
+        :rtype: int
+        '''
         return self.get_size()
 
     @property
     def name(self):
+        '''
+        Read only property that returns the name of this matrix
+        :rtype: int
+        '''
         return self.get_name()
 
     @property
     def T(self):
+        '''
+        Read only property that returns the transposed matrix
+        :rtype: Matrix
+        '''
         return self.transpose()
 
     @property
-    def items(self):
-        return self.get_items()
+    def values(self):
+        '''
+        Read only property that returns all the items of this matrix
+        :rtype: List[Expr]
+        '''
+        return self.values()
 
 
 
@@ -139,7 +334,22 @@ cdef class Matrix:
 
 
     def __iter__(self):
-        return self.get_items()
+        n, m = self.get_shape()
+        for i in range(0, n):
+            for j in range(0, m):
+                yield _expr_from_c(self._c_handler.get(i, j))
+
+
+    def __getitem__(self, index):
+        if not isinstance(index, tuple) or len(index) != 2:
+            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
+        return self.get(*index)
+
+    def __setitem__(self, index, value):
+        if not isinstance(index, tuple) or len(index) != 2:
+            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
+        i, j = index
+        self.set(i, j, value)
 
 
     def __str__(self):

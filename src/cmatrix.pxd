@@ -28,7 +28,10 @@ cdef extern from "Matrix.h":
         long rows()
         long cols()
 
-        ex& operator()(long i , long j)
+        ex& get(int i, int j)
+        void set(int i, int j, ex& value)
+
+
         Matrix get_row(int i)
         Matrix get_col(int j)
         void set_row(const int i, Matrix values)
