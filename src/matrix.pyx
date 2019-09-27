@@ -112,7 +112,7 @@ cdef class Matrix:
 
     @property
     def T(self):
-        return self.tranpose()
+        return self.transpose()
 
 
 
