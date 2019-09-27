@@ -821,7 +821,8 @@ class System(_System):
             >>> new_base('a', 0, 1, 2)
             >>> new_base('a', [0, 1, 2])
             >>> new_base('a', rotation_tupla=[0, 1, 2])
-            >>> new_base('a', rotation_tupla=new_matrix(3))
+            m = Matrix([0, 1, 2])
+            >>> new_base('a', rotation_tupla=m)
 
         '''
         return self._new_base(name, args, kwargs)
@@ -1052,7 +1053,18 @@ def _generate_geom_obj_getter_methods(kind):
         return self._has_geom_obj(name, kind)
 
 
-    methods = [getter, checker]
+    # property
+    @property
+    def pgetterprop(self):
+        '''
+        Read only property that returns all the {pname} within this system
+
+        :rtype: {name}
+        '''
+        return self._get_geom_objs(kind)
+
+
+    methods = [getter, checker, pgetterprop]
 
     # Format method docstrings
     for method in methods:
@@ -1064,6 +1076,7 @@ def _generate_geom_obj_getter_methods(kind):
     # Change method names
     getter.__name__ = 'get_' + name
     checker.__name__ = 'has_' + name
+    pgetterprop.fget.__name__ = pname
 
     # Change method qualnames
     for method in methods:
