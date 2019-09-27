@@ -15,6 +15,7 @@ from libcpp.string cimport string as c_string
 from src.cmatrix cimport Matrix as c_Matrix
 from src.cginac cimport matrix as c_ginac_matrix
 from src.cginac cimport print_python as c_print_context
+from src.cginac cimport ex as c_ex
 from src.cpp cimport stringstream as c_sstream
 
 
@@ -63,6 +64,17 @@ cdef class Matrix:
 
 
     ######## Accessing matrix values ########
+
+
+    def get_items(self):
+        cdef c_ex expr
+        n, m = self.get_shape()
+        for i in range(0, n):
+            for j in range(0, m):
+                expr = self._c_handler(i, j)
+                yield _expr_from_c(expr)
+
+
 
 
     ######## Changing matrix values ########
@@ -114,6 +126,9 @@ cdef class Matrix:
     def T(self):
         return self.transpose()
 
+    @property
+    def items(self):
+        return self.get_items()
 
 
 
@@ -122,6 +137,9 @@ cdef class Matrix:
     def __len__(self):
         return self.get_size()
 
+
+    def __iter__(self):
+        return self.get_items()
 
 
     def __str__(self):

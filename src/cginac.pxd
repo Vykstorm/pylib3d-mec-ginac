@@ -30,7 +30,7 @@ cdef extern from "ginac/print.h" namespace "GiNaC":
 
 cdef extern from "ginac/basic.h" namespace "GiNaC":
     cdef cppclass basic:
-        pass
+        void print(print_context&, unsigned level=0) const
 
 
 ######## Class GiNaC::ex ########

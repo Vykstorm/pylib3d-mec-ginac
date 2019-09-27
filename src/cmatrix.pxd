@@ -11,7 +11,7 @@ Matrix.h that are going to be used by this library
 from libcpp.string cimport string
 
 # Imports from .pxd file definitions
-from src.cginac cimport matrix
+from src.cginac cimport matrix, ex
 
 
 ######## Class Matrix ########
@@ -27,6 +27,8 @@ cdef extern from "Matrix.h":
 
         long rows()
         long cols()
+
+        ex& operator()(long i , long j)
         Matrix get_row(int i)
         Matrix get_col(int j)
         void set_row(const int i, Matrix values)
