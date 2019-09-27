@@ -52,3 +52,10 @@ cdef extern from "ginac/ginac.h" namespace "GiNaC":
         double to_double() const
         const numeric real() const
         const numeric imag() const
+
+
+######## Class GiNaC::matrix ########
+
+cdef extern from "ginac/matrix.h" namespace "GiNaC":
+    cdef cppclass matrix(basic):
+        pass

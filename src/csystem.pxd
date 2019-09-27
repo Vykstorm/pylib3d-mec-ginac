@@ -16,7 +16,7 @@ from libcpp.string cimport string
 from src.csymbol_numeric cimport symbol_numeric
 from src.cginac cimport numeric, ex
 from src.cbase cimport Base
-
+from src.cmatrix cimport Matrix
 
 
 
@@ -26,10 +26,10 @@ cdef extern from "System.h":
 
     # Public API for System class
     cdef cppclass System:
-        ## Constructors
+        # Constructors
         System() except +
 
-        ## Symbol getters
+        # Symbol getters
         vector[symbol_numeric*] get_Coordinates()
         vector[symbol_numeric*] get_Velocities()
         vector[symbol_numeric*] get_Accelerations()
@@ -45,16 +45,20 @@ cdef extern from "System.h":
         symbol_numeric* get_AuxVelocity(string name)
         symbol_numeric* get_AuxAcceleration(string name)
 
-        ## Base getters
+        # Base & Matrix getters
         vector[Base*] get_Bases()
+        vector[Matrix*] get_Matrixs()
 
-
-        ## Symbol constructors
+        # Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
         symbol_numeric* new_AuxCoordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
         symbol_numeric* new_Parameter(string name, string tex_name, numeric value)
         symbol_numeric* new_Joint_Unknown(string name, string tex_name, numeric value)
         symbol_numeric* new_Input(string name, string tex_name, numeric value)
 
-        ## Base constructors
+        # Base constructors
         Base* new_Base(string name, string previous, ex a, ex b, ex c, ex rotation_angle)
+
+
+        # Matrix constructors
+        Matrix* new_Matrix(Matrix* m)

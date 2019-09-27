@@ -22,6 +22,7 @@ from src.csystem cimport System as c_System
 from src.cginac cimport numeric as c_numeric
 from src.cginac cimport ex as c_ex
 from src.cbase cimport Base as c_Base
+from src.cmatrix cimport Matrix as c_Matrix
 
 # Python imports
 from collections import OrderedDict
@@ -43,6 +44,9 @@ ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
 # Type alias representing a list of bases (std::vector[Base*])
 ctypedef c_vector[c_Base*] c_base_list
 
+# Same for std::vector[Matrix*]
+ctypedef c_vector[c_Matrix*] c_matrix_list
+
 
 
 ######## Python helper methods & variables ########
@@ -60,6 +64,12 @@ _symbol_types = frozenset(map(str.encode, (
 _derivable_symbol_types = frozenset(map(str.encode, (
     'velocity', 'acceleration', 'aux_velocity', 'aux_acceleration'
 )))
+
+# All geometric types
+_geom_obj_types = frozenset(map(str.encode, (
+    'base', 'matrix'
+)))
+
 
 
 def _parse_symbol_type(kind):
@@ -104,7 +114,7 @@ def _parse_symbol_value(value):
     return value
 
 
-def _parse_base_name(name):
+def _parse_geom_obj_name(name):
     if not isinstance(name, (str, bytes)):
         raise TypeError(f'Base name must be a str or bytes object')
 
@@ -113,6 +123,26 @@ def _parse_base_name(name):
 
     return name
 
+def _parse_geom_obj_name(name):
+    if not isinstance(name, (str, bytes)):
+        raise TypeError(f'Name must be a str or bytes object')
+
+    if isinstance(name, str):
+        name = name.encode()
+
+    return name
+
+
+def _parse_geom_obj_type(kind):
+    if not isinstance(kind, (str, bytes)):
+        raise TypeError(f'Type must be a str or bytes object')
+
+    if isinstance(kind, str):
+        kind = kind.encode()
+
+    if kind not in _geom_obj_types:
+        raise ValueError(f'Invalid "{kind.decode()}" geometric object type')
+    return kind
 
 
 def _apply_signature(params, defaults, args, kwargs):
@@ -445,65 +475,95 @@ cdef class _System:
 
 
 
-    ######## Base getters ########
+    ######## Geometric objects getters ########
 
 
     cdef c_vector[c_Base*] _get_c_bases(self):
         return self._c_handler.get_Bases()
 
 
-
-    cpdef get_base(self, name):
-        '''get_base(name: str) -> Base
-        Get the base in this system with the specified name
-
-        :param str name: Name of the base to search
-        :returns: The base with the name indicated if it exists.
-        :rtype: Symbol
-        :raises TypeError: If the input argument has an incorrect type
-        :raises IndexError: If no base with that name exists within the system
-        '''
-        name = _parse_base_name(name)
-
-        cdef c_base_list c_bases = self._get_c_bases()
-        for c_base in c_bases:
-            if c_base.get_name() == <c_string>name:
-                return Base(<Py_ssize_t>c_base)
-        raise IndexError(f'Base "{name.decode()}" not created yet')
+    cdef c_vector[c_Matrix*] _get_c_matrices(self):
+        return self._c_handler.get_Matrixs()
 
 
 
-    cpdef has_base(self, name):
-        '''has_base(name: str) -> bool
-        Check if a base with the given name is defined in the system
+    cpdef _get_geom_obj(self, name, kind):
+        name, kind = _parse_geom_obj_name(name), _parse_geom_obj_type(kind)
 
-        :param str name: Name of the base
-        :returns: True if the base exists. False otherwise
-        :rtype: bool
-        :raises TypeError: If the input argument has an incorrect type
-        '''
-        name = _parse_base_name(name)
-        cdef c_base_list c_bases = self._get_c_bases()
-        for c_base in c_bases:
-            if c_base.get_name() == <c_string>name:
-                return True
+        cdef c_vector[c_Base*] c_bases
+        cdef c_vector[c_Matrix*] c_matrices
+        cdef c_Base* c_base
+        cdef c_Matrix* c_matrix
+
+        if kind == b'base':
+            c_bases = self._get_c_bases()
+            for c_base in c_bases:
+                if c_base.get_name() == <c_string>name:
+                    return Base(<Py_ssize_t>c_base)
+            raise IndexError(f'Base "{name.decode()}" not created yet')
+        elif kind == b'matrix':
+            c_matrices = self._get_c_matrices()
+            for c_matrix in c_matrices:
+                if c_matrix.get_name() == <c_string>name:
+                    return Matrix(<Py_ssize_t>c_matrix)
+            raise IndexError(f'Matrix "{name.decode()}" not created yet')
+        else:
+            raise RuntimeError
+
+
+
+
+    cpdef _has_geom_obj(self, name, kind):
+        name, kind =  _parse_geom_obj_name(name), _parse_geom_obj_type(kind)
+
+        cdef c_vector[c_Base*] c_bases
+        cdef c_vector[c_Matrix*] c_matrices
+        cdef c_Base* c_base
+        cdef c_Matrix* c_matrix
+
+        if kind == b'base':
+            c_bases = self._get_c_bases()
+            for c_base in c_bases:
+                if c_base.get_name() == <c_string>name:
+                    return True
+        elif kind == b'matrix':
+            c_matrices = self._get_c_matrices()
+            for c_matrix in c_matrices:
+                if c_matrix.get_name() == <c_string>name:
+                    return True
+        else:
+            raise RuntimeError
+
         return False
 
 
 
-    cpdef get_bases(self):
-        cdef c_base_list c_bases = self._get_c_bases()
-        bases = [Base(<Py_ssize_t>c_base) for c_base in c_bases]
-        return dict(zip(map(attrgetter('name'), bases), bases))
+    cpdef _get_geom_objs(self, kind):
+        kind = _parse_geom_obj_type(kind)
+
+        cdef c_vector[c_Base*] c_bases
+        cdef c_vector[c_Matrix*] c_matrices
+        cdef c_Base* c_base
+        cdef c_Matrix* c_matrix
+
+        if kind == b'base':
+            c_bases = self._get_c_bases()
+            objs = [Base(<Py_ssize_t>c_base) for c_base in c_bases]
+        elif kind == b'matrix':
+            c_matrices = self._get_c_matrices()
+            objs = [Matrix(<Py_ssize_t>c_matrix) for c_matrix in c_matrices]
+
+        return dict(zip(map(attrgetter('name'), objs), objs))
 
 
 
-    ######## Base constructor ########
+
+    ######## Geomeric objects constructors ########
 
 
     cpdef _new_base(self, name, args, kwargs):
         # Validate & parse base name
-        name = _parse_base_name(name)
+        name = _parse_geom_obj_name(name)
 
 
         # Check if a base with the given name already exists
@@ -564,6 +624,14 @@ cdef class _System:
 
         return Base(<Py_ssize_t>self._c_handler.new_Base(name, c_prev_base.get_name(), a, b, c, d))
 
+
+
+    cpdef _new_matrix(self, name, args, kwargs):
+        num_rows, num_cols = args
+
+        cdef c_Matrix* c_matrix = new c_Matrix(<int>num_rows, <int>num_cols)
+        c_matrix.set_name(name)
+        return Matrix(<Py_ssize_t>self._c_handler.new_Matrix(c_matrix))
 
 
 
@@ -695,7 +763,7 @@ class System(_System):
 
 
 
-    ######## Base getters ########
+    ######## Geometric object getters ########
 
 
     def get_bases(self):
@@ -709,8 +777,13 @@ class System(_System):
 
 
 
+    def get_matrices(self):
+        return None
 
-    ######## Base constructors ########
+
+
+
+    ######## Geometric object constructors ########
 
 
     def new_base(self, name, *args, **kwargs):
@@ -749,6 +822,11 @@ class System(_System):
 
 
 
+    def new_matrix(self, name, *args, **kwargs):
+        return self._new_matrix(name, args, kwargs)
+
+
+
 
     ######## Properties ########
 
@@ -772,6 +850,16 @@ class System(_System):
         '''
         return self.get_bases()
 
+
+
+
+    @property
+    def matrices(self):
+        '''
+        Only read property that returns all the matrices defined within this system
+        :rtype: Mapping[str, Base]
+        '''
+        return self.get_matrices()
 
 
 
@@ -920,6 +1008,71 @@ for symbol_type in _symbol_types:
     _generate_symbol_getter_methods(symbol_type)
     if b'coordinate' not in symbol_type and symbol_type not in _derivable_symbol_types:
         _generate_symbol_constructor_method(symbol_type)
+
+
+
+
+
+def _generate_geom_obj_getter_methods(kind):
+    name = kind.decode()
+    cls = name.title()
+    pname = name + 's' if name != 'matrix' else 'matrices'
+
+    # get_* method
+    def getter(self, name):
+        '''get_{name}(name: str) -> {cls}
+        Get a {name} by name
+
+        :param str name: Name of the {name} to find
+        :returns: The {name} with the given name on success
+        :rtype: {cls}
+        :raises TypeError: If the input argument has an invalid type
+        :raises IndexError: If no {name} exists with the given name
+        '''
+        return self._get_geom_obj(name, kind)
+
+    # has_* method
+    def checker(self, name):
+        '''check_{name}(name: str) -> bool
+        Check if a {name} exists with the given name within this system
+
+        :param str name: Name of the {name}
+        :returns: True if the {name} exists, False otherwise
+        :rtype: bool
+        :raises TypeError: If the input argument has an invalid type
+        '''
+        return self._has_geom_obj(name, kind)
+
+
+    methods = [getter, checker]
+
+    # Format method docstrings
+    for method in methods:
+        for key, value in locals().items():
+            if not isinstance(value, str):
+                continue
+            method.__doc__ = method.__doc__.replace('{' + key + '}', value)
+
+    # Change method names
+    getter.__name__ = 'get_' + name
+    checker.__name__ = 'has_' + name
+
+    # Change method qualnames
+    for method in methods:
+        if isinstance(method, property):
+            method = method.fget
+        method.__qualname__ = f'{System.__name__}.{method.__name__}'
+
+    # Add them to the System class
+    for method in methods:
+        setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
+
+
+
+for geom_obj_type in _geom_obj_types:
+    _generate_geom_obj_getter_methods(geom_obj_type)
+
+
 
 
 
