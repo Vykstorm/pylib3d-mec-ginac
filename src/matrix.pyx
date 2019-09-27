@@ -48,8 +48,12 @@ cdef class Matrix:
     def get_num_cols(self):
         return self._c_handler.cols()
 
+    def get_size(self):
+        return self.get_num_rows() * self.get_num_cols()
+
     def get_name(self):
         return (<bytes>self._c_handler.get_name()).decode()
+
 
 
 
@@ -75,8 +79,17 @@ cdef class Matrix:
         return self.get_num_cols()
 
     @property
+    def size(self):
+        return self.get_size()
+
+    @property
     def name(self):
         return self.get_name()
 
 
+
+
     ######## Metamethods ########
+
+    def __len__(self):
+        return self.get_size()
