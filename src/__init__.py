@@ -27,6 +27,11 @@ for name in dir(_ext):
     __all__.append(name)
     globals()[name] = obj
 
+# Add extra classes & methods
+from .system import System
+__all__.append('System')
+
+
 
 # This only has effect with python>=3.7 (PEP 562)
 # It "hides" variables starting with _ from the public API

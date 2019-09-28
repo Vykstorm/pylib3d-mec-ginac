@@ -34,7 +34,7 @@ from src.pxd.cginac cimport matrix as c_ginac_matrix
 
 # Python imports (builtins)
 from collections import OrderedDict
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable
 from inspect import Signature, Parameter
 from functools import partial, partialmethod, wraps
 from itertools import chain
