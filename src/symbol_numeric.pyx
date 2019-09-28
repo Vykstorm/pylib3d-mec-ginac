@@ -18,8 +18,7 @@ cdef class SymbolNumeric:
 
 
     cdef c_symbol_numeric* _c_handler
-    cdef unicode _kind
-    cdef object _owner
+
 
 
     ######## Constructor & Destructor  ########
