@@ -21,7 +21,7 @@ from src.cpp cimport stringstream as c_sstream
 from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 
 # Python imports
-
+from math import floor
 
 
 
@@ -30,6 +30,7 @@ from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 
 cdef Expr _expr_from_c(c_ex x):
     # Converts GiNac::ex to Python class Expr instance
+    # This is used instead
     expr = Expr()
     expr._c_handler = x
     return expr
@@ -78,7 +79,21 @@ cdef class Expr:
         self._c_handler.print(c_deref(c_printer))
         cdef c_string s = (<c_sstream*>&c_printer.s).str()
         del c_printer
-        return (<bytes>s).decode()
+
+        x = (<bytes>s).decode()
+
+        # Try to format the expression as a number (remove decimals if its integer)
+        try:
+            x = float(x)
+            if floor(x) == x:
+                x = floor(x)
+            else:
+                x = round(x, 4)
+            return str(x)
+        except:
+            return x
+
+
 
     def __repr__(self):
         return self.__str__()
