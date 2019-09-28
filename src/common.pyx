@@ -101,81 +101,116 @@ _geom_obj_types = frozenset(map(str.encode, (
 
 ######## Python helper methods ########
 
+def _parse_text(text):
+    '''
+    Check that input argument is a string or bytes object. If not, raises
+    TypeError. The return value is the input converted to a bytes object.
+    '''
+    if not isinstance(text, (str, bytes)):
+        raise TypeError
+    if isinstance(text, str):
+        text = text.encode()
+    return text
+
+
+def _parse_name(name):
+    '''
+    Check that input argument is a valid name for numeric symbols, vectors, matrices, ...
+
+    :raises TypeError: If the input argument is not str or bytes object
+    :raises ValueError: If the input argument is not a valid name
+    :returns: The input argument converted to a bytes object on success
+    :rtype: bytes
+    '''
+    try:
+        return _parse_text(name)
+    except TypeError:
+        raise TypeError('Name must be a str or bytes object')
+
+
+def _parse_tex_name(tex_name):
+    '''
+    Check that input argument is a valid latex name for numeric symbols, vector, matrices, ...
+    :raises TypeError: If the input argument is not str or bytes object
+    :raises ValueError: If the input argument is not a valid latex name
+    :returns: The input argument converted to a bytes object on success
+    :rtype: bytes
+    '''
+    try:
+        return _parse_text(tex_name)
+    except TypeError:
+        raise TypeError('Latex name must be a str or bytes object')
+
+
 
 def _parse_symbol_type(kind):
-    if not isinstance(kind, (str, bytes)):
-        raise TypeError(f'Symbol type must be a str or bytes object')
+    '''
+    Check that input argument is a valid numeric symbol type. It raises an exception
+    otherwise.
 
-    if isinstance(kind, str):
-        kind = kind.encode()
+    :raises TypeError: If the input argument is not str or bytes object
+    :raises ValueError: If the input argument is not a valid symbol type.
+    :returns: The input argument string converted to bytes on success
+    :rtype: bytes
+
+    '''
+    try:
+        kind = _parse_text(kind)
+    except TypeError:
+        raise TypeError('Symbol type must be a str or bytes object')
 
     if kind not in _symbol_types:
         raise ValueError(f'Invalid "{kind.decode()}" symbol type')
-
     return kind
 
 
-def _parse_symbol_name(name):
-    if not isinstance(name, (str, bytes)):
-        raise TypeError(f'Symbol name must be a str or bytes object')
-
-    if isinstance(name, str):
-        name = name.encode()
-
-    return name
-
-
-def _parse_symbol_tex_name(tex_name):
-    if not isinstance(tex_name, (str, bytes)):
-        raise TypeError(f'Symbol latex name must be a str or bytes object')
-
-    if isinstance(tex_name, str):
-        tex_name = tex_name.encode()
-
-    return tex_name
-
-
-def _parse_symbol_value(value):
-    if not isinstance(value, float):
-        try:
-            value = float(value)
-        except:
-            raise TypeError(f'Invalid symbol numeric value')
-    return value
-
-
-def _parse_geom_obj_name(name):
-    if not isinstance(name, (str, bytes)):
-        raise TypeError(f'Base name must be a str or bytes object')
-
-    if isinstance(name, str):
-        name = name.encode()
-
-    return name
-
-def _parse_geom_obj_name(name):
-    if not isinstance(name, (str, bytes)):
-        raise TypeError(f'Name must be a str or bytes object')
-
-    if isinstance(name, str):
-        name = name.encode()
-
-    return name
-
-
 def _parse_geom_obj_type(kind):
-    if not isinstance(kind, (str, bytes)):
-        raise TypeError(f'Type must be a str or bytes object')
+    '''
+    Check that input argument is a valid geometric object type. It raises an exception
+    otherwise.
 
-    if isinstance(kind, str):
-        kind = kind.encode()
+    :raises TypeError: If the input argument is not str or bytes object
+    :raises ValueError: If the input argument is not a valid geometric type.
+    :returns: The input argument string converted to bytes on success
+    :rtype: bytes
+    '''
+    try:
+        kind = _parse_text(kind)
+    except TypeError:
+        raise TypeError('Geometric object type must be a str or bytes object')
 
     if kind not in _geom_obj_types:
         raise ValueError(f'Invalid "{kind.decode()}" geometric object type')
     return kind
 
 
+def _parse_numeric_value(value):
+    '''
+    Convert the input argument to a float value.
+    It invokes __float__ metamethod of the input argument if it is not a float object.
+    If it doesnt have such method defined, it raises TypeError
+    '''
+    if not isinstance(value, float):
+        try:
+            value = float(value)
+        except:
+            raise TypeError(f'Invalid numeric value')
+    return value
+
+
 def _apply_signature(params, defaults, args, kwargs):
+    '''
+    This method emulates the binding process of arbitrary positional and keyword arguments to
+    a function signature.
+
+    :param params: Must be a list of strings indicating the name of the parameters
+        to bind the input arguments
+    :param defaults: Its a dictionary where keys are parameter names and values, the default
+        parameter values
+    :param args: The input positional arguments to bind to the signature
+    :param kwargs: The input keyword arguments to bing to the signature
+    :rtype: A tuple with the bounded arguments to the parameters specified
+    '''
     assert isinstance(params, Iterable)
     assert isinstance(defaults, dict)
 

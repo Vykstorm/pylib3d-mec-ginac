@@ -115,7 +115,7 @@ cdef class _System:
         :raises ValueError: If input arguments have incorrect values
         :raises IndexError: If no symbol with the given name & type is defined in the system
         '''
-        name = _parse_symbol_name(name)
+        name = _parse_name(name)
         if kind is not None:
             kind = _parse_symbol_type(kind)
 
@@ -158,7 +158,7 @@ cdef class _System:
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
-        name = _parse_symbol_name(name)
+        name = _parse_name(name)
         if kind is not None:
             kind = _parse_symbol_type(kind)
 
@@ -253,7 +253,7 @@ cdef class _System:
                 {'tex_name': b'', 'value': 0.0},
                 args, kwargs
             )
-            name, tex_name, value = _parse_symbol_name(name), _parse_symbol_tex_name(tex_name), _parse_symbol_value(value)
+            name, tex_name, value = _parse_name(name), _parse_tex_name(tex_name), _parse_numeric_value(value)
 
             # Check if a symbol with the name specified already exists
             if self.has_symbol(name):
@@ -290,9 +290,9 @@ cdef class _System:
                 args, kwargs
             )
 
-            names = [_parse_symbol_name(arg) if arg is not None else None for arg in bounded_args[:3]]
-            tex_names = [_parse_symbol_tex_name(arg) if arg is not None else None for arg in bounded_args[3:6]]
-            values = [_parse_symbol_value(arg) for arg in bounded_args[6:9]]
+            names = [_parse_name(arg) if arg is not None else None for arg in bounded_args[:3]]
+            tex_names = [_parse_tex_name(arg) if arg is not None else None for arg in bounded_args[3:6]]
+            values = [_parse_numeric_value(arg) for arg in bounded_args[6:9]]
 
             names[1:] = [name or b'd'*k + names[0] for k, name in enumerate(names[1:], 1)]
             if tex_names[0]:
@@ -335,7 +335,7 @@ cdef class _System:
 
 
     cpdef _get_geom_obj(self, name, kind):
-        name, kind = _parse_geom_obj_name(name), _parse_geom_obj_type(kind)
+        name, kind = _parse_name(name), _parse_geom_obj_type(kind)
 
         cdef c_vector[c_Base*] c_bases
         cdef c_vector[c_Matrix*] c_matrices
@@ -361,7 +361,7 @@ cdef class _System:
 
 
     cpdef _has_geom_obj(self, name, kind):
-        name, kind =  _parse_geom_obj_name(name), _parse_geom_obj_type(kind)
+        name, kind =  _parse_name(name), _parse_geom_obj_type(kind)
 
         cdef c_vector[c_Base*] c_bases
         cdef c_vector[c_Matrix*] c_matrices
@@ -410,7 +410,7 @@ cdef class _System:
 
     cpdef _new_base(self, name, args, kwargs):
         # Validate & parse base name
-        name = _parse_geom_obj_name(name)
+        name = _parse_name(name)
 
 
         # Check if a base with the given name already exists
@@ -475,7 +475,7 @@ cdef class _System:
 
     cpdef _new_matrix(self, name, args, kwargs):
         # Validate & parse name argument
-        name = _parse_geom_obj_name(name)
+        name = _parse_name(name)
 
         # Check if a matrix with the same name already exists
         if self.has_matrix(name):
