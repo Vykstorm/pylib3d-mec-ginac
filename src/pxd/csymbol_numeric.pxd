@@ -12,7 +12,7 @@ mec ginac symbol_numeric.h that will be used by this library
 from libcpp.string cimport string
 
 # Imports from other .pxd files
-from src.cginac cimport numeric
+from src.pxd.cginac cimport numeric
 
 
 

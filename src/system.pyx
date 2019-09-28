@@ -17,20 +17,20 @@ from libcpp.map cimport map as c_map
 from libcpp.utility cimport pair as c_pair
 
 # Import .pxd declarations
-from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
-from src.csystem cimport System as c_System
-from src.cginac cimport numeric as c_numeric
-from src.cginac cimport ex as c_ex
-from src.cbase cimport Base as c_Base
-from src.cmatrix cimport Matrix as c_Matrix
+from src.pxd.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
+from src.pxd.csystem cimport System as c_System
+from src.pxd.cginac cimport numeric as c_numeric
+from src.pxd.cginac cimport ex as c_ex
+from src.pxd.cbase cimport Base as c_Base
+from src.pxd.cmatrix cimport Matrix as c_Matrix
 
 # Python imports
 from collections import OrderedDict
 from collections.abc import Mapping, Iterable
+from inspect import Signature, Parameter
 from functools import partial, partialmethod, wraps
 from operator import attrgetter
 from asciitree import LeftAligned
-from src.common import _apply_signature
 
 
 
@@ -145,6 +145,17 @@ def _parse_geom_obj_type(kind):
         raise ValueError(f'Invalid "{kind.decode()}" geometric object type')
     return kind
 
+
+def _apply_signature(params, defaults, args, kwargs):
+    assert isinstance(params, Iterable)
+    assert isinstance(defaults, dict)
+
+    sig = Signature(
+        parameters=[Parameter(param, Parameter.POSITIONAL_OR_KEYWORD, default=defaults.get(param, Parameter.empty)) for param in params]
+    )
+    bounded_args = sig.bind(*args, **kwargs)
+    bounded_args.apply_defaults()
+    return bounded_args.args
 
 
 

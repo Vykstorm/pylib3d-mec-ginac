@@ -10,7 +10,7 @@ mec ginac Base.h header which are going to be used by this library.
 from libcpp.string cimport string
 
 # Imports from other .pxd files
-from src.cginac cimport ex
+from src.pxd.cginac cimport ex
 
 
 

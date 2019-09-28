@@ -13,6 +13,7 @@ from functools import reduce, partial
 from re import sub, DOTALL
 
 
+
 ######## PACKAGE DESCRIPTION ########
 
 # Name of this library
@@ -151,7 +152,9 @@ if __name__ == '__main__':
 
 
     ## Generate C-Python extension
-    extensions = cythonize(EXTENSIONS, compiler_directives={'language_level': 3}, nthreads=2, force=True)
+    extensions = cythonize(EXTENSIONS,
+        compiler_directives={'language_level': 3}, nthreads=2, force=True)
+
 
     ## Invoke distutils setup
     setup(
@@ -170,5 +173,5 @@ if __name__ == '__main__':
 
         packages=[PACKAGE],
         package_dir={PACKAGE:PACKAGE_DIR},
-        ext_modules=extensions,
+        ext_modules=extensions
     )

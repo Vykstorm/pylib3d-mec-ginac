@@ -14,11 +14,11 @@ from cython.operator import dereference as c_deref
 from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
-from src.cginac cimport basic as c_basic
-from src.cginac cimport ex as c_ex
-from src.cginac cimport print_python as c_print_context
-from src.cpp cimport stringstream as c_sstream
-from src.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
+from src.pxd.cginac cimport basic as c_basic
+from src.pxd.cginac cimport ex as c_ex
+from src.pxd.cginac cimport print_python as c_print_context
+from src.pxd.cpp cimport stringstream as c_sstream
+from src.pxd.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 
 # Python imports
 from math import floor

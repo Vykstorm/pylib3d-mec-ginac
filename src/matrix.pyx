@@ -12,11 +12,11 @@ from cython.operator cimport dereference as c_deref
 from libcpp.string cimport string as c_string
 
 # Import .pxd declarations
-from src.cmatrix cimport Matrix as c_Matrix
-from src.cginac cimport matrix as c_ginac_matrix
-from src.cginac cimport print_python as c_print_context
-from src.cginac cimport ex as c_ex
-from src.cpp cimport stringstream as c_sstream
+from src.pxd.cmatrix cimport Matrix as c_Matrix
+from src.pxd.cginac cimport matrix as c_ginac_matrix
+from src.pxd.cginac cimport print_python as c_print_context
+from src.pxd.cginac cimport ex as c_ex
+from src.pxd.cpp cimport stringstream as c_sstream
 
 # Python imports
 from collections.abc import Iterable

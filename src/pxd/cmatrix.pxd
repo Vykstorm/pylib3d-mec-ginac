@@ -11,7 +11,7 @@ Matrix.h that are going to be used by this library
 from libcpp.string cimport string
 
 # Imports from .pxd file definitions
-from src.cginac cimport matrix, ex
+from src.pxd.cginac cimport matrix, ex
 
 
 ######## Class Matrix ########

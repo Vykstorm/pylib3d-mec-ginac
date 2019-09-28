@@ -12,7 +12,7 @@ C++ library that are going to be used by this library.
 
 
 # Imports from other .pxd definition files
-from src.cpp cimport ostream
+from src.pxd.cpp cimport ostream
 
 
 

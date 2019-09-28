@@ -13,10 +13,10 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 
 # Imports from other .pxd files
-from src.csymbol_numeric cimport symbol_numeric
-from src.cginac cimport numeric, ex
-from src.cbase cimport Base
-from src.cmatrix cimport Matrix
+from src.pxd.csymbol_numeric cimport symbol_numeric
+from src.pxd.cginac cimport numeric, ex
+from src.pxd.cbase cimport Base
+from src.pxd.cmatrix cimport Matrix
 
 
 
