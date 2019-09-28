@@ -362,12 +362,25 @@ cdef class Matrix:
 
 
     def __str__(self):
-        # Use GiNac print method to print the underline matrix
-        cdef c_print_context* c_printer = new c_print_context(c_sstream())
-        self._get_c_handler().get_matrix().print(c_deref(c_printer))
-        cdef c_string s = (<c_sstream*>&c_printer.s).str()
-        del c_printer
-        return (<bytes>s).decode()
+        values = tuple(map(str, self))
+        n, m = self.shape
+
+        col_sizes = [max([len(values[i*m + j]) for i in range(0, n)])+1 for j in range(0, m)]
+
+        lines = []
+        for i in range(0, n):
+            line = ' '.join([values[i*m + j].rjust(col_size) for j, col_size in zip(range(0, m), col_sizes)])
+            line = '\u2502' + line + ' \u2502'
+            lines.append(line)
+
+        # Insert decoratives
+        row_width = len(lines[0]) - 2
+        head = '\u256d' + ' '*row_width + '\u256e'
+        tail = '\u2570' + ' '*row_width + '\u256f'
+        lines.insert(0, head)
+        lines.append(tail)
+
+        return '\n'.join(lines)
 
     def __repr__(self):
         return self.__str__()
