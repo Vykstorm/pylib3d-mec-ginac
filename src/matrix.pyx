@@ -5,18 +5,6 @@ Description: This module defines the class Matrix
 
 
 
-######## Helper methods ########
-
-
-cdef Matrix _matrix_from_c(c_Matrix* x):
-    # Converts C++ Matrix to Python class Matrix instance
-    m = Matrix()
-    m._c_handler, m._owns_c_handler = x, False
-    return m
-
-
-
-
 
 
 ######## Class Matrix ########

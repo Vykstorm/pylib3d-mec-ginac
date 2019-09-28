@@ -46,9 +46,7 @@ from asciitree import LeftAligned
 
 
 
-
-######## C helper methods, variables & types ########
-
+######## C type aliases ########
 
 # C type alias representing a list of numeric symbols (std::vector[symbol_numeric*])
 ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
@@ -58,3 +56,20 @@ ctypedef c_vector[c_Base*] c_base_list
 
 # Same for std::vector[Matrix*]
 ctypedef c_vector[c_Matrix*] c_matrix_list
+
+
+
+######## C helper functions ########
+
+cdef Expr _expr_from_c(c_ex x):
+    # Converts GiNac::ex to Python class Expr instance
+    expr = Expr()
+    expr._c_handler = x
+    return expr
+
+
+cdef Matrix _matrix_from_c(c_Matrix* x):
+    # Converts C++ Matrix object to Python class Matrix instance
+    m = Matrix()
+    m._c_handler, m._owns_c_handler = x, False
+    return m
