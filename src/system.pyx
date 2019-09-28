@@ -1,6 +1,7 @@
 '''
 Author: Víctor Ruiz Gómez
-Description: This module defines the class System
+Description: This module defines the interface between Python and C++ for the
+class System
 '''
 
 
