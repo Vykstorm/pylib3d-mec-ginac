@@ -11,6 +11,7 @@ from os import listdir
 from os.path import join, abspath, dirname
 from functools import reduce, partial
 from re import sub, DOTALL
+from itertools import chain
 
 
 
@@ -142,7 +143,7 @@ if __name__ == '__main__':
         ]))
         f_out.write('\n'*3)
 
-        for filename in listdir('src'):
+        for filename in chain(['common.pyx'], set(listdir('src')) - {'common.pyx'}):
             if not filename.endswith('.pyx') or filename.startswith('main'):
                 continue
             with open(join('src', filename), 'r') as f_in:
