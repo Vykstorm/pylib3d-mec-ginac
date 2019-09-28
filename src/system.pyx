@@ -11,10 +11,7 @@ Description: This module defines the class System
 
 ## Class which acts like a bridge between Python and C++ System class
 cdef class _System:
-    '''
-    Its the main class of the library. It represents a mechanical system defined with different variables:
-    coordinates, parameters, inputs, tensors, ...
-    '''
+
 
     ######## C Attributes ########
 
@@ -98,23 +95,6 @@ cdef class _System:
 
 
     cpdef get_symbol(self, name, kind=None):
-        '''get_symbol(name: str[, kind: str]) -> SymbolNumeric
-        Search a numeric symbol defined within this system with the given name and type.
-
-        :param str name: Name of the numeric symbol to fetch
-        :param str kind: Type of symbol.
-            It can be one None (by default) or one of the next values:
-            'coordinate', 'velocity', 'acceleration',
-            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
-            'parameter', 'input', 'joint_unknown'
-            If set to None, the search is performed over all symbols defined by this system
-            regarding their types.
-        :returns: The numeric symbol with that name & type if it exists
-        :rtype: SymbolNumeric
-        :raises TypeError: If input arguments have incorrect types
-        :raises ValueError: If input arguments have incorrect values
-        :raises IndexError: If no symbol with the given name & type is defined in the system
-        '''
         name = _parse_name(name)
         if kind is not None:
             kind = _parse_symbol_type(kind)
@@ -143,21 +123,6 @@ cdef class _System:
 
 
     cpdef has_symbol(self, name, kind=None):
-        '''has_symbol(name: str[, kind: str]) -> bool
-        Check if a symbol with the given name and type exists in this system
-
-        :param str name: Name of the symbol to check
-        :param str kind: Type of symbol.
-            It can be one None (by default) or one of the next values:
-            'coordinate', 'velocity', 'acceleration',
-            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
-            'parameter', 'input', 'joint_unknown'
-            If set to None, it does not take into account the symbol type.
-        :returns: True if a symbol with the given name and type exists, False otherwise
-        :rtype: bool
-        :raises TypeError: If input arguments have incorrect types
-        :raises ValueError: If input arguments have incorrect values
-        '''
         name = _parse_name(name)
         if kind is not None:
             kind = _parse_symbol_type(kind)

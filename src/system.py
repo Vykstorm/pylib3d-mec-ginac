@@ -1,13 +1,22 @@
 
 
-from lib3d_mec_ginac_ext import _System, _symbol_types, _derivable_symbol_types
-from lib3d_mec_ginac_ext import _geom_obj_types
+######## Import statements ########
+
+from lib3d_mec_ginac_ext import _System
+from lib3d_mec_ginac_ext import _symbol_types, _derivable_symbol_types, _geom_obj_types
 from collections.abc import Mapping
 
 
 
-## System class for Python (it emulates the class System in C++ but also provides additional features).
+
+######## System class ########
+
+
 class System(_System):
+    '''
+    Its the main class of the library. It represents a mechanical system defined with different variables:
+    coordinates, parameters, inputs, tensors, ...
+    '''
 
 
     ######## Get/Set symbol value ########
@@ -38,6 +47,52 @@ class System(_System):
         :raises IndexError: If there is no symbol with that name in the system
         '''
         return self.get_symbol(name).set_value(value)
+
+
+
+
+    ######## Symbol getters ########
+
+
+    def get_symbol(self, name, kind=None):
+        '''get_symbol(name: str[, kind: str]) -> SymbolNumeric
+        Search a numeric symbol defined within this system with the given name and type.
+
+        :param str name: Name of the numeric symbol to fetch
+        :param str kind: Type of symbol.
+            It can be one None (by default) or one of the next values:
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+            'parameter', 'input', 'joint_unknown'
+            If set to None, the search is performed over all symbols defined by this system
+            regarding their types.
+        :returns: The numeric symbol with that name & type if it exists
+        :rtype: SymbolNumeric
+        :raises TypeError: If input arguments have incorrect types
+        :raises ValueError: If input arguments have incorrect values
+        :raises IndexError: If no symbol with the given name & type is defined in the system
+        '''
+        return super().get_symbol(name, kind)
+
+
+
+    def has_symbol(self, name, kind=None):
+        '''has_symbol(name: str[, kind: str]) -> bool
+        Check if a symbol with the given name and type exists in this system
+
+        :param str name: Name of the symbol to check
+        :param str kind: Type of symbol.
+            It can be one None (by default) or one of the next values:
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+            'parameter', 'input', 'joint_unknown'
+            If set to None, it does not take into account the symbol type.
+        :returns: True if a symbol with the given name and type exists, False otherwise
+        :rtype: bool
+        :raises TypeError: If input arguments have incorrect types
+        :raises ValueError: If input arguments have incorrect values
+        '''
+        return super().has_symbol(self, name, kind)
 
 
 
@@ -122,6 +177,7 @@ class System(_System):
 
 
 
+
     def new_aux_coordinate(self, *args, **kwargs):
         '''new_aux_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
         Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
@@ -147,6 +203,12 @@ class System(_System):
 
 
     def get_matrices(self):
+        '''get_matrices() -> Mapping[str, Base]
+        Get all the matrices defined within this system
+        :returns: All the matrices in a dictionary, where keys are base names and values,
+            instances of the class Matrix
+        :rtype: Mapping[str, Base]
+        '''
         return None
 
 
