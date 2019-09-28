@@ -5,23 +5,6 @@ Description: This module defines the class Base
 
 
 
-######## Imports ########
-
-# Import cython internal library
-cimport cython
-
-# C++ standard library imports
-from libcpp.string cimport string as c_string
-
-# Import .pxd declarations
-from src.pxd.cbase cimport Base as c_Base
-from src.pxd.cginac cimport ex as c_ex
-
-# Python imports
-from operator import attrgetter
-
-
-
 
 ######## Class Base ########
 

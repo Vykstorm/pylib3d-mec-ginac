@@ -3,24 +3,6 @@ Author: Víctor Ruiz Gómez
 Description: This module defines the class Matrix
 '''
 
-######## Imports ########
-
-# Cython imports
-from cython.operator cimport dereference as c_deref
-
-# C++ standard library imports
-from libcpp.string cimport string as c_string
-
-# Import .pxd declarations
-from src.pxd.cmatrix cimport Matrix as c_Matrix
-from src.pxd.cginac cimport matrix as c_ginac_matrix
-from src.pxd.cginac cimport print_python as c_print_context
-from src.pxd.cginac cimport ex as c_ex
-from src.pxd.cpp cimport stringstream as c_sstream
-
-# Python imports
-from collections.abc import Iterable
-from itertools import chain
 
 
 ######## Helper methods ########
