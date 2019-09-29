@@ -13,6 +13,7 @@ import lib3d_mec_ginac_ext as _ext
 
 # Other imports
 from inspect import isclass, isfunction
+from functools import wraps
 
 
 # Get all definitions in the extension (add them to __all__ and globals())
@@ -44,13 +45,48 @@ def __dir__():
     return __all__.copy()
 
 
-# This will store the "default" system object.
+# This variable will store the "default" system object.
 _default_system = System()
 
 # Expose get_* and new_*, set_* methods of the default system object (add them to __all__ and globals())
+def _create_system_global_func(method):
+    @wraps(method)
+    def func(*args, **kwargs):
+        return method(_default_system, *args, **kwargs)
+    return func
+
 for name in dir(System):
-    if not any(map(name.startswith, ('get_', 'set_', 'new_'))):
+    if not any(map(name.startswith, ('get_', 'set_', 'new_'))) or name == 'set_as_default':
         continue
-    method = getattr(_default_system, name)
     __all__.append(name)
-    globals()[name] = method
+    globals()[name] = _create_system_global_func(getattr(System, name))
+
+
+
+
+# Additional methods exposed to the api
+
+
+def get_default_system():
+    '''get_default_system() -> System
+    Get the default system instance.
+
+    :rtype: System
+    '''
+    return _default_system
+
+
+def set_default_system(system):
+    '''set_default_system(system: System)
+    Set the default system instance
+
+    :param System system: The system instance to be set as default
+    :raises TypeError: If the input argument is not an instance of the class System
+    '''
+    global _default_system
+    if not isinstance(system, System):
+        raise TypeError('Input argument must be an instance of the class System')
+    _default_system = system
+
+
+__all__.extend(['get_default_system', 'set_default_system'])
