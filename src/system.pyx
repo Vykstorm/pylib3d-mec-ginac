@@ -145,7 +145,7 @@ cdef class _System:
     cpdef get_symbols(self):
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols()
         symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
-        return dict(zip(map(attrgetter('name'), symbols), symbols))
+        return symbols
 
 
 
@@ -154,7 +154,7 @@ cdef class _System:
             return _System.get_symbols(self)
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols_by_type(_parse_symbol_type(kind))
         symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
-        return dict(zip(map(attrgetter('name'), symbols), symbols))
+        return symbols
 
 
 
@@ -297,7 +297,6 @@ cdef class _System:
 
     cdef c_vector[c_Matrix*] _get_c_matrices(self):
         return self._c_handler.get_Matrixs()
-
 
 
     cpdef _get_geom_obj(self, name, kind):

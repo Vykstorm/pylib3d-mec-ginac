@@ -10,7 +10,7 @@ This module defines the class System
 from lib3d_mec_ginac_ext import _System
 from lib3d_mec_ginac_ext import _symbol_types, _derivable_symbol_types, _geom_obj_types
 from collections.abc import Mapping
-
+from .views import SymbolsView
 
 
 
@@ -97,7 +97,7 @@ class System(_System):
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
-        return super().has_symbol(self, name, kind)
+        return super().has_symbol(name, kind)
 
 
 
@@ -109,7 +109,7 @@ class System(_System):
             symbol names and values, instances of the class SymbolNumeric
         :rtype: Mapping[str, SymbolNumeric]
         '''
-        return _SymbolsView(self)
+        return SymbolsView(self)
 
 
 
@@ -128,7 +128,7 @@ class System(_System):
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
-        return _SymbolsView(self, kind)
+        return SymbolsView(self, kind)
 
 
 
@@ -203,7 +203,7 @@ class System(_System):
             instances of the class Base
         :rtype: Mapping[str, Base]
         '''
-        return _BasesView(self)
+        return BasesView(self)
 
 
 
@@ -525,133 +525,3 @@ def _generate_geom_obj_getter_methods(kind):
 
 for geom_obj_type in _geom_obj_types:
     _generate_geom_obj_getter_methods(geom_obj_type)
-
-
-
-
-
-
-
-######## Helper class SymbolsView ########
-
-class _SymbolsView(Mapping):
-    '''
-    Objects of this class emulates a dictionary which maps string names to numeric symbols.
-    They are returned by the methods System.get_symbols and System.get_symbols_by_type.
-    This class is not intentended to be instantiated by the user manually.
-    '''
-    def __init__(self, system, kind=None):
-        '''
-        Constructor.
-        :param System system: An instance of the class System to fetch the numeric symbols from
-        :param str kind: The kind of symbols to fetch
-            By default is None (get all symbols)
-        '''
-        assert isinstance(system, System) and (kind is None or kind in _symbol_types)
-        self.system, self.kind = system, kind
-
-    @property
-    def _symbols(self):
-        return _System.get_symbols_by_type(self.system, self.kind)
-
-    def __iter__(self):
-        return iter(self._symbols)
-
-    def __len__(self):
-        return len(self._symbols)
-
-    def __getitem__(self, name):
-        return self.system.get_symbol(name, self.kind)
-
-    def __contains__(self, name):
-        return self.system.has_symbol(name, self.kind)
-
-    def __bool__(self):
-        return len(self) > 0
-
-    def __str__(self):
-        if not self:
-            # No symbols at all
-            return 'No symbols yet'
-
-        # Get symbol types
-        if self.kind is None:
-            symbol_types = {}
-            for symbol_type in _symbol_types:
-                for symbol in _System.get_symbols_by_type(self.system, symbol_type).values():
-                    symbol_types[symbol] = symbol_type.decode()
-        else:
-            symbol_types = None
-
-        lines = []
-        for name, symbol in self.items():
-            line = ''
-            # Print the symbol type
-            if symbol_types:
-                line += symbol_types[symbol].replace('_', ' ').ljust(18) + ' '
-
-            # Print the symbol name
-            line += name.ljust(12) + ' '
-
-            # Print the symbol value
-            line += str(round(symbol.value, 4)).ljust(12)
-
-            lines.append(line)
-
-        return '\n'.join(lines)
-
-
-    def __repr__(self):
-        return self.__str__()
-
-
-
-
-######## Helper class BasesView ########
-
-class _BasesView(Mapping):
-    '''
-    Objects of this class are instantiated and returned by System get_bases() method
-    and its 'bases' property, and provides better visualization of geometric bases
-    when printing them in the python console.
-    This class is not intentended to be instantiated by the user manually.
-    '''
-
-    def __init__(self, system):
-        self.system = system
-
-    @property
-    def _bases(self):
-        return _System.get_bases(self.system)
-
-    def __iter__(self):
-        return iter(self._bases)
-
-    def __len__(self):
-        return len(self._bases)
-
-    def __getitem__(self, name):
-        return self.system.get_base(name)
-
-    def __contains__(self, name):
-        return self.system.has_base(name)
-
-    def __bool__(self):
-        return len(self) == 0
-
-    def __str__(self):
-        bases = frozenset(self._bases.values())
-        roots = frozenset([base for base in bases if not base.has_previous()])
-
-        def get_tree(base):
-            children = [x for x in bases - roots if x.previous == base]
-            return dict(zip(map(attrgetter('name'), children), map(get_tree, children)))
-
-        tree = {}
-        for base in roots:
-            tree[base.name] = get_tree(base)
-
-        return LeftAligned()(tree)
-
-    def __repr__(self):
-        return self.__str__()
