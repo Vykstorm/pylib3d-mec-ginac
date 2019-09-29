@@ -316,7 +316,7 @@ class MatricesView(TableView, Mapping):
 class VectorsView(TableView):
     def __init__(self, system):
         super().__init__(
-            columns=['name', 'x', 'y', 'z']
+            columns=['name', 'x', 'y', 'z', 'base'], show_headers=True
         )
         self.system = system
 
@@ -333,6 +333,12 @@ class VectorsView(TableView):
     # Methods to implement the TableView interface
     def get_rows(self):
         return self.get_vectors()
+
+    def get_column_value(self, vector, attr):
+        if attr == 'base':
+            return vector.get_base().name
+        return super().get_column_value(vector, attr)
+
 
     # Methods to implement Mapping interface
     def __getitem__(self, name):
