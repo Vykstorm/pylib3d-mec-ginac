@@ -449,6 +449,10 @@ class System(_System):
         return self.get_joint_unknowns()
 
     @property
+    def inputs(self):
+        return self.get_inputs()
+
+    @property
     def bases(self):
         return self.get_bases()
 
