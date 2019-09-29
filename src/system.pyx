@@ -34,7 +34,7 @@ cdef class _System:
 
 
 
-    ######## Symbol getters ########
+    ######## C Getters ########
 
 
     cdef c_symbol_numeric_list _get_c_symbols_by_type(self, c_string kind):
@@ -93,6 +93,20 @@ cdef class _System:
 
         return symbols
 
+
+
+    cdef c_vector[c_Base*] _get_c_bases(self):
+        return self._c_handler.get_Bases()
+
+
+    cdef c_vector[c_Matrix*] _get_c_matrices(self):
+        return self._c_handler.get_Matrixs()
+
+
+
+
+
+    ######## Getters ########
 
 
     cpdef get_symbol(self, name, kind=None):
@@ -158,8 +172,78 @@ cdef class _System:
 
 
 
+    cpdef _get_geom_obj(self, name, kind):
+        name, kind = _parse_name(name), _parse_geom_obj_type(kind)
 
-    ######## Symbol constructors ########
+        cdef c_vector[c_Base*] c_bases
+        cdef c_vector[c_Matrix*] c_matrices
+        cdef c_Base* c_base
+        cdef c_Matrix* c_matrix
+
+        if kind == b'base':
+            c_bases = self._get_c_bases()
+            for c_base in c_bases:
+                if c_base.get_name() == <c_string>name:
+                    return Base(<Py_ssize_t>c_base)
+            raise IndexError(f'Base "{name.decode()}" not created yet')
+        elif kind == b'matrix':
+            c_matrices = self._get_c_matrices()
+            for c_matrix in c_matrices:
+                if c_matrix.get_name() == <c_string>name:
+                    return _matrix_from_c(c_matrix)
+            raise IndexError(f'Matrix "{name.decode()}" not created yet')
+        else:
+            raise RuntimeError
+
+
+
+
+    cpdef _has_geom_obj(self, name, kind):
+        name, kind =  _parse_name(name), _parse_geom_obj_type(kind)
+
+        cdef c_vector[c_Base*] c_bases
+        cdef c_vector[c_Matrix*] c_matrices
+        cdef c_Base* c_base
+        cdef c_Matrix* c_matrix
+
+        if kind == b'base':
+            c_bases = self._get_c_bases()
+            for c_base in c_bases:
+                if c_base.get_name() == <c_string>name:
+                    return True
+        elif kind == b'matrix':
+            c_matrices = self._get_c_matrices()
+            for c_matrix in c_matrices:
+                if c_matrix.get_name() == <c_string>name:
+                    return True
+        else:
+            raise RuntimeError
+
+        return False
+
+
+
+    cpdef _get_geom_objs(self, kind):
+        kind = _parse_geom_obj_type(kind)
+
+        cdef c_vector[c_Base*] c_bases
+        cdef c_vector[c_Matrix*] c_matrices
+        cdef c_Base* c_base
+        cdef c_Matrix* c_matrix
+
+        if kind == b'base':
+            c_bases = self._get_c_bases()
+            return [Base(<Py_ssize_t>c_base) for c_base in c_bases]
+        elif kind == b'matrix':
+            c_matrices = self._get_c_matrices()
+            return [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
+        else:
+            raise RuntimeError
+
+
+
+
+    ######## Constructors ########
 
 
     cdef c_symbol_numeric* _new_c_parameter(self, c_string name, c_string tex_name, double value):
@@ -286,91 +370,6 @@ cdef class _System:
             raise RuntimeError
 
 
-
-
-    ######## Geometric objects getters ########
-
-
-    cdef c_vector[c_Base*] _get_c_bases(self):
-        return self._c_handler.get_Bases()
-
-
-    cdef c_vector[c_Matrix*] _get_c_matrices(self):
-        return self._c_handler.get_Matrixs()
-
-
-    cpdef _get_geom_obj(self, name, kind):
-        name, kind = _parse_name(name), _parse_geom_obj_type(kind)
-
-        cdef c_vector[c_Base*] c_bases
-        cdef c_vector[c_Matrix*] c_matrices
-        cdef c_Base* c_base
-        cdef c_Matrix* c_matrix
-
-        if kind == b'base':
-            c_bases = self._get_c_bases()
-            for c_base in c_bases:
-                if c_base.get_name() == <c_string>name:
-                    return Base(<Py_ssize_t>c_base)
-            raise IndexError(f'Base "{name.decode()}" not created yet')
-        elif kind == b'matrix':
-            c_matrices = self._get_c_matrices()
-            for c_matrix in c_matrices:
-                if c_matrix.get_name() == <c_string>name:
-                    return _matrix_from_c(c_matrix)
-            raise IndexError(f'Matrix "{name.decode()}" not created yet')
-        else:
-            raise RuntimeError
-
-
-
-
-    cpdef _has_geom_obj(self, name, kind):
-        name, kind =  _parse_name(name), _parse_geom_obj_type(kind)
-
-        cdef c_vector[c_Base*] c_bases
-        cdef c_vector[c_Matrix*] c_matrices
-        cdef c_Base* c_base
-        cdef c_Matrix* c_matrix
-
-        if kind == b'base':
-            c_bases = self._get_c_bases()
-            for c_base in c_bases:
-                if c_base.get_name() == <c_string>name:
-                    return True
-        elif kind == b'matrix':
-            c_matrices = self._get_c_matrices()
-            for c_matrix in c_matrices:
-                if c_matrix.get_name() == <c_string>name:
-                    return True
-        else:
-            raise RuntimeError
-
-        return False
-
-
-
-    cpdef _get_geom_objs(self, kind):
-        kind = _parse_geom_obj_type(kind)
-
-        cdef c_vector[c_Base*] c_bases
-        cdef c_vector[c_Matrix*] c_matrices
-        cdef c_Base* c_base
-        cdef c_Matrix* c_matrix
-
-        if kind == b'base':
-            c_bases = self._get_c_bases()
-            return [Base(<Py_ssize_t>c_base) for c_base in c_bases]
-        elif kind == b'matrix':
-            c_matrices = self._get_c_matrices()
-            return [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
-        else:
-            raise RuntimeError
-
-
-
-
-    ######## Geomeric objects constructors ########
 
 
     cpdef new_base(self, name, args, kwargs):
