@@ -232,3 +232,18 @@ class MatricesView(TableView):
         if attr == 'name':
             return mat.name
         return f'{mat.num_rows}x{mat.num_cols}'
+
+
+
+######## Class VectorsView ########
+
+
+class VectorsView(TableView):
+    def __init__(self, system):
+        super().__init__(
+            columns=['name', 'x', 'y', 'z']
+        )
+        self.system = system
+
+    def get_rows(self):
+        return _System._get_geom_objs(self.system, 'vector')
