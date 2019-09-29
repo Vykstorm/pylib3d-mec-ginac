@@ -360,12 +360,12 @@ cdef class _System:
 
         if kind == b'base':
             c_bases = self._get_c_bases()
-            objs = [Base(<Py_ssize_t>c_base) for c_base in c_bases]
+            return [Base(<Py_ssize_t>c_base) for c_base in c_bases]
         elif kind == b'matrix':
             c_matrices = self._get_c_matrices()
-            objs = [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
-
-        return dict(zip(map(attrgetter('name'), objs), objs))
+            return [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
+        else:
+            raise RuntimeError
 
 
 

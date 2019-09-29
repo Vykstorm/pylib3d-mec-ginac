@@ -9,8 +9,7 @@ This module defines the class System
 
 from lib3d_mec_ginac_ext import _System
 from lib3d_mec_ginac_ext import _symbol_types, _derivable_symbol_types, _geom_obj_types
-from collections.abc import Mapping
-from .views import SymbolsView
+from .views import SymbolsView, BasesView
 
 
 
@@ -318,6 +317,8 @@ class System(_System):
 
 
 
+
+
 ######## Auto generation of System class methods ########
 
 
@@ -486,18 +487,7 @@ def _generate_geom_obj_getter_methods(kind):
         return self._has_geom_obj(name, kind)
 
 
-    # property
-    @property
-    def pgetterprop(self):
-        '''
-        Read only property that returns all the {pname} within this system
-
-        :rtype: {name}
-        '''
-        return self._get_geom_objs(kind)
-
-
-    methods = [getter, checker, pgetterprop]
+    methods = [getter, checker]
 
     # Format method docstrings
     for method in methods:
@@ -509,7 +499,7 @@ def _generate_geom_obj_getter_methods(kind):
     # Change method names
     getter.__name__ = 'get_' + name
     checker.__name__ = 'has_' + name
-    pgetterprop.fget.__name__ = pname
+
 
     # Change method qualnames
     for method in methods:

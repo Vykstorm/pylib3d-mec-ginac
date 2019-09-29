@@ -176,3 +176,13 @@ class BasesView(TreeView):
     def __init__(self, system):
         super().__init__()
         self.system = system
+
+    def get_roots(self):
+        return [base for base in _System._get_geom_objs(self.system, 'base') if not base.has_previous()]
+
+    def get_children(self, base):
+        bases = _System._get_geom_objs(self.system, 'base')
+        return [x for x in bases if x.has_previous() and x.get_previous() == base]
+
+    def format_node(self, base):
+        return base.name
