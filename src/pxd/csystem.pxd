@@ -17,6 +17,7 @@ from src.pxd.csymbol_numeric cimport symbol_numeric
 from src.pxd.cginac cimport numeric, ex
 from src.pxd.cbase cimport Base
 from src.pxd.cmatrix cimport Matrix
+from src.pxd.cvector3D cimport Vector3D
 
 
 
@@ -45,9 +46,11 @@ cdef extern from "System.h":
         symbol_numeric* get_AuxVelocity(string name)
         symbol_numeric* get_AuxAcceleration(string name)
 
-        # Base & Matrix getters
+        # Geometric object getters
         vector[Base*] get_Bases()
         vector[Matrix*] get_Matrixs()
+        vector[Vector3D*] get_Vectors()
+
 
         # Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
@@ -56,9 +59,7 @@ cdef extern from "System.h":
         symbol_numeric* new_Joint_Unknown(string name, string tex_name, numeric value)
         symbol_numeric* new_Input(string name, string tex_name, numeric value)
 
-        # Base constructors
+        # Geometric object constructors
         Base* new_Base(string name, string previous, ex a, ex b, ex c, ex rotation_angle)
-
-
-        # Matrix constructors
         Matrix* new_Matrix(Matrix* m)
+        void new_Vector3D(Vector3D* v)

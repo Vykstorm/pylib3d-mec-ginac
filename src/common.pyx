@@ -124,7 +124,7 @@ _derivable_symbol_types = frozenset(map(str.encode, (
 
 # All geometric types
 _geom_obj_types = frozenset(map(str.encode, (
-    'base', 'matrix'
+    'base', 'matrix', 'vector'
 )))
 
 

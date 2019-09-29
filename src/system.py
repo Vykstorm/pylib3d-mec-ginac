@@ -112,6 +112,9 @@ class System(_System):
     def get_matrix(self, name):
         return self._get_geom_obj(name, b'matrix')
 
+    def get_vector(self, name):
+        return self._get_geom_obj(name, b'vector')
+
 
     get_coord = get_coordinate
     get_vel = get_velocity
@@ -179,6 +182,9 @@ class System(_System):
 
     def has_matrix(self, name):
         return self._has_geom_obj(name, b'matrix')
+
+    def has_vector(self, name):
+        return self._has_geom_obj(name, b'vector')
 
 
     has_coord = has_coordinate
@@ -258,6 +264,9 @@ class System(_System):
 
     def get_matrices(self):
         return MatricesView(self)
+
+    def get_vectors(self):
+        return self._get_geom_objs(b'vector')
 
 
     get_coords = get_coordinates
@@ -443,6 +452,10 @@ class System(_System):
     @property
     def matrices(self):
         return self.get_matrices()
+
+    @property
+    def vectors(self):
+        return self.get_vectors()
 
 
     coords = coordinates

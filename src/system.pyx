@@ -103,6 +103,9 @@ cdef class _System:
         return self._c_handler.get_Matrixs()
 
 
+    cdef c_vector[c_Vector3D*] _get_c_vectors(self):
+        return self._c_handler.get_Vectors()
+
 
 
 
@@ -177,8 +180,10 @@ cdef class _System:
 
         cdef c_vector[c_Base*] c_bases
         cdef c_vector[c_Matrix*] c_matrices
+        cdef c_vector[c_Vector3D*] c_vectors
         cdef c_Base* c_base
         cdef c_Matrix* c_matrix
+        cdef c_Vector3D* c_vector
 
         if kind == b'base':
             c_bases = self._get_c_bases()
@@ -186,12 +191,20 @@ cdef class _System:
                 if c_base.get_name() == <c_string>name:
                     return Base(<Py_ssize_t>c_base)
             raise IndexError(f'Base "{name.decode()}" not created yet')
+
         elif kind == b'matrix':
             c_matrices = self._get_c_matrices()
             for c_matrix in c_matrices:
                 if c_matrix.get_name() == <c_string>name:
                     return _matrix_from_c(c_matrix)
             raise IndexError(f'Matrix "{name.decode()}" not created yet')
+
+        elif kind == b'vector':
+            c_vectors = self._get_c_vectors()
+            for c_vector in c_vectors:
+                if c_vector.get_name() == <c_string>name:
+                    return _vector_from_c(c_vector)
+            raise IndexError(f'Vector "{name.decode()}" not created yet')
         else:
             raise RuntimeError
 
@@ -203,8 +216,10 @@ cdef class _System:
 
         cdef c_vector[c_Base*] c_bases
         cdef c_vector[c_Matrix*] c_matrices
+        cdef c_vector[c_Vector3D*] c_vectors
         cdef c_Base* c_base
         cdef c_Matrix* c_matrix
+        cdef c_Vector3D* c_vector
 
         if kind == b'base':
             c_bases = self._get_c_bases()
@@ -216,6 +231,12 @@ cdef class _System:
             for c_matrix in c_matrices:
                 if c_matrix.get_name() == <c_string>name:
                     return True
+        elif kind == b'vector':
+            c_vectors = self._get_c_vectors()
+            for c_vector in c_vectors:
+                if c_vector.get_name() == <c_string>name:
+                    return True
+            return False
         else:
             raise RuntimeError
 
@@ -228,8 +249,10 @@ cdef class _System:
 
         cdef c_vector[c_Base*] c_bases
         cdef c_vector[c_Matrix*] c_matrices
+        cdef c_vector[c_Vector3D*] c_vectors
         cdef c_Base* c_base
         cdef c_Matrix* c_matrix
+        cdef c_Vector3D* c_vector
 
         if kind == b'base':
             c_bases = self._get_c_bases()
@@ -237,6 +260,9 @@ cdef class _System:
         elif kind == b'matrix':
             c_matrices = self._get_c_matrices()
             return [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
+        elif kind == b'vector':
+            c_vectors = self._get_c_vectors()
+            return [_matrix_from_c(c_vector) for c_vector in c_vectors]
         else:
             raise RuntimeError
 
