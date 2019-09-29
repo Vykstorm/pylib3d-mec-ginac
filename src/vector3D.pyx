@@ -83,6 +83,11 @@ cdef class Vector3D(Matrix):
         return _expr_from_c(c_expr)
 
 
+    cpdef get_skew(self):
+        cdef c_Matrix c_skew = (<c_Vector3D*>self._get_c_handler()).skew()
+        return _matrix_from_c_value(c_skew)
+
+
     def _parse_row_index(self, i):
         if not isinstance(i, int):
             raise TypeError('Matrix indices must be numbers')
@@ -132,6 +137,9 @@ cdef class Vector3D(Matrix):
     def module(self):
         return self.get_module()
 
+    @property
+    def skew(self):
+        return self.get_skew()
 
     @property
     def x(self):

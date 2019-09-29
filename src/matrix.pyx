@@ -228,13 +228,8 @@ cdef class Matrix:
         Tranpose this matrix
         :returns: Returns this matrix transposed
         '''
-        cdef c_Matrix a = self._get_c_handler().transpose()
-        cdef c_Matrix* b = new c_Matrix(a.get_matrix())
-        b.set_name(a.get_name())
-
-        m = Matrix()
-        (<Matrix>m)._c_handler, (<Matrix>m)._owns_c_handler = b, True
-        return m
+        cdef c_Matrix c_mat = self._get_c_handler().transpose()
+        return _matrix_from_c_value(c_mat)
 
 
     def get_transposed(self):

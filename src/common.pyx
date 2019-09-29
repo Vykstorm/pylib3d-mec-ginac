@@ -71,16 +71,38 @@ cdef Expr _expr_from_c(c_ex x):
 
 cdef Matrix _matrix_from_c(c_Matrix* x):
     # Converts C++ Matrix object to Python class Matrix instance
-    m = Matrix()
-    m._c_handler, m._owns_c_handler = x, False
-    return m
+    # (it doesnt make a copy, only stores the given pointer to the C++ matrix)
+    mat = Matrix()
+    mat._c_handler, mat._owns_c_handler = x, False
+    return mat
+
+
+cdef Matrix _matrix_from_c_value(c_Matrix x):
+    # Converts C++ Matrix object to Python class Matrix instance
+    # It performs a copy of the given C++ matrix
+    mat = Matrix()
+    cdef c_Matrix* c_mat = new c_Matrix(x.get_matrix())
+    c_mat.set_name(x.get_name())
+
+    mat._c_handler, mat._owns_c_handler = c_mat, True
+    return mat
+
 
 cdef Vector3D _vector_from_c(c_Vector3D* x):
     # Converts C++ Vector3D object to Python class Vector3D instance
+    # It doesnt make a copy of the contents of the C++ Vector
     v = Vector3D()
     v._c_handler, v._owns_c_handler = x, False
     return v
 
+
+cdef Vector3D _vector_from_c_value(c_Vector3D x):
+    # Converts C++ Vector3D object to Python class Vector3D instance
+    # It performs a copy of the contents of the given C++ Vector3D
+    v = Vector3D()
+    v._c_handler = new c_Vector3D(x.get_Name(), x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get_Base())
+    v._owns_c_handler = True
+    return v
 
 
 ######## Python helper variables ########
