@@ -147,6 +147,9 @@ class TableView(ABC):
 
 
 class SymbolsView(TableView):
+    '''
+    Objects of this class are returned by System.get_symbols method.
+    '''
     def __init__(self, system, kind=None):
         columns = ['name']
         if kind is None:
@@ -173,6 +176,9 @@ class SymbolsView(TableView):
 
 
 class BasesView(TreeView):
+    '''
+    Objects of this class are returned by System.get_bases method
+    '''
     def __init__(self, system):
         super().__init__()
         self.system = system
