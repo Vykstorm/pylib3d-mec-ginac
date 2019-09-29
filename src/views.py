@@ -3,6 +3,8 @@ Author: Víctor Ruiz Gómez
 Description: This module defines the helper class DictView and its subclasses
 '''
 
+######## Imports ########
+
 from collections.abc import Iterable, Mapping
 from collections import OrderedDict
 from abc import ABC, abstractmethod
@@ -12,6 +14,10 @@ from asciitree import LeftAligned
 from lib3d_mec_ginac_ext import _System
 from lib3d_mec_ginac_ext import _symbol_types
 
+
+
+
+######## Class TreeView ########
 
 
 class TreeView(ABC):
@@ -85,6 +91,10 @@ class TreeView(ABC):
 
 
 
+
+######## Class TableView ########
+
+
 class TableView(ABC):
     '''
     This class can be used to print a table structure in text mode.
@@ -146,6 +156,10 @@ class TableView(ABC):
 
 
 
+
+######## Class SymbolsView ########
+
+
 class SymbolsView(TableView):
     '''
     Objects of this class are returned by System.get_symbols method.
@@ -173,6 +187,10 @@ class SymbolsView(TableView):
                 return symbol_type.decode().replace('_', ' ')
         return None
 
+
+
+
+######## Class BasesView ########
 
 
 class BasesView(TreeView):
