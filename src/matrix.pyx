@@ -103,14 +103,15 @@ cdef class Matrix:
             del self._c_handler
 
 
-    ######## Getters ########
-
-
-    cdef c_Matrix* _get_c_handler(self):
+    cdef c_Matrix* _get_c_handler(self) except? NULL:
         if self._c_handler == NULL:
             self._c_handler = new c_Matrix(1, 1)
             self._owns_c_handler = True
         return self._c_handler
+
+
+
+    ######## Getters ########
 
 
     def get_shape(self):

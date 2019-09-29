@@ -19,7 +19,7 @@ cdef extern from "Matrix.h":
     cdef cppclass Matrix:
         Matrix() except +
         Matrix(long rows, long cols) except +
-        Matrix(matrix m)
+        Matrix(matrix m) except +
 
         string get_name()
         void set_name(string name)

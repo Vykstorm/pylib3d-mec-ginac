@@ -23,6 +23,7 @@ from src.pxd.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 from src.pxd.csystem cimport System as c_System
 from src.pxd.cbase cimport Base as c_Base
 from src.pxd.cmatrix cimport Matrix as c_Matrix
+from src.pxd.cvector3D cimport Vector3D as c_Vector3D
 
 # Import GiNaC C++ classes
 from src.pxd.cginac cimport numeric as c_numeric
@@ -73,6 +74,13 @@ cdef Matrix _matrix_from_c(c_Matrix* x):
     m = Matrix()
     m._c_handler, m._owns_c_handler = x, False
     return m
+
+cdef Vector3D _vector_from_c(c_Vector3D* x):
+    # Converts C++ Vector3D object to Python class Vector3D instance
+    v = Vector3D()
+    v._c_handler, v._owns_c_handler = x, False
+    return v
+
 
 
 ######## Python helper variables ########
