@@ -183,6 +183,9 @@ class SymbolsView(TableView, Mapping):
     def get_symbol(self, name):
         return self.system.get_symbol(name, self.kind)
 
+    def has_symbol(self, name):
+        return self.system.has_symbol(name, self.kind)
+
 
     # Methods to implement TableView interface
     def get_rows(self):
@@ -207,6 +210,9 @@ class SymbolsView(TableView, Mapping):
     def __len__(self):
         return len(self.get_symbols())
 
+    def __contains__(self, name):
+        return self.has_symbol(name)
+
 
 
 
@@ -225,7 +231,10 @@ class BasesView(TreeView, Mapping):
         return _System._get_geom_objs(self.system, 'base')
 
     def get_base(self, name):
-        return _System._get_geom_obj(self.system, name, kind='base')
+        return _System._get_geom_obj(self.system, name, 'base')
+
+    def has_base(self, name):
+        return _System._has_geom_obj(self.system, name, 'base')
 
 
     # Methods to implement the TreeView interface
@@ -249,6 +258,8 @@ class BasesView(TreeView, Mapping):
     def __len__(self):
         return len(self.get_bases())
 
+    def __contains__(self, name):
+        return self.has_base(name)
 
 
 
@@ -267,7 +278,10 @@ class MatricesView(TableView, Mapping):
         return _System._get_geom_objs(self.system, 'matrix')
 
     def get_matrix(self, name):
-        return _System._get_geom_obj(self.system, name, kind='matrix')
+        return _System._get_geom_obj(self.system, name, 'matrix')
+
+    def has_matrix(self, name):
+        return _System._has_geom_obj(self.system, name, 'matrix')
 
 
     # Methods to implement TableView interface
@@ -290,6 +304,9 @@ class MatricesView(TableView, Mapping):
     def __len__(self):
         return len(self.get_matrices())
 
+    def __contains__(self, name):
+        return self.has_matrix(name)
+
 
 
 
@@ -307,7 +324,11 @@ class VectorsView(TableView):
         return _System._get_geom_objs(self.system, 'vector')
 
     def get_vector(self, name):
-        return _System._get_geom_obj(self.system, name, kind='vector')
+        return _System._get_geom_obj(self.system, name, 'vector')
+
+    def has_vector(self, name):
+        return _System._has_geom_obj(self.system, name, 'vector')
+
 
     # Methods to implement the TableView interface
     def get_rows(self):
@@ -322,3 +343,6 @@ class VectorsView(TableView):
 
     def __len__(self):
         return len(self.get_vectors())
+
+    def __contains__(self, name):
+        return self.has_vector(name)
