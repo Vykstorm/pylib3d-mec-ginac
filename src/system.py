@@ -8,7 +8,6 @@ This module defines the class System
 ######## Import statements ########
 
 from lib3d_mec_ginac_ext import _System
-from lib3d_mec_ginac_ext import _symbol_types, _derivable_symbol_types, _geom_obj_types
 from .views import SymbolsView, BasesView, MatricesView
 
 
@@ -55,7 +54,7 @@ class System(_System):
 
 
 
-    ######## Symbol getters ########
+    ######## Getters ########
 
 
     def get_symbol(self, name, kind=None):
@@ -80,6 +79,54 @@ class System(_System):
 
 
 
+    def get_coordinate(self, name):
+        return self.get_symbol(name, b'coordinate')
+
+    def get_velocity(self, name):
+        return self.get_symbol(name, b'velocity')
+
+    def get_acceleration(self, name):
+        return self.get_symbol(name, b'acceleration')
+
+    def get_aux_coordinate(self, name):
+        return self.get_symbol(name, b'aux_coordinate')
+
+    def get_aux_velocity(self, name):
+        return self.get_symbol(name, b'aux_velocity')
+
+    def get_aux_acceleration(self, name):
+        return self.get_symbol(name, b'acceleration')
+
+    def get_parameter(self, name):
+        return self.get_symbol(name, b'parameter')
+
+    def get_joint_unknown(self, name):
+        return self.get_symbol(name, b'joint_unknown')
+
+    def get_input(self, name):
+        return self.get_symbol(name, b'input')
+
+    def get_base(self, name):
+        return self._get_geom_obj(name, b'base')
+
+    def get_matrix(self, name):
+        return self._get_geom_obj(name, b'matrix')
+
+
+    get_coord = get_coordinate
+    get_vel = get_velocity
+    get_acc = get_acceleration
+
+    get_aux_coord = get_aux_coordinate
+    get_aux_vel = get_aux_velocity
+    get_aux_acc = get_aux_acceleration
+
+    get_param = get_parameter
+    get_unknown = get_joint_unknown
+
+
+
+
     def has_symbol(self, name, kind=None):
         '''has_symbol(name: str[, kind: str]) -> bool
         Check if a symbol with the given name and type exists in this system
@@ -97,6 +144,54 @@ class System(_System):
         :raises ValueError: If input arguments have incorrect values
         '''
         return super().has_symbol(name, kind)
+
+
+
+    def has_coordinate(self, name):
+        return self.has_symbol(name, b'coordinate')
+
+    def has_velocity(self, name):
+        return self.has_symbol(name, b'velocity')
+
+    def has_acceleration(self, name):
+        return self.has_symbol(name, b'acceleration')
+
+    def has_aux_coordinate(self, name):
+        return self.has_symbol(name, b'aux_coordinate')
+
+    def has_aux_velocity(self, name):
+        return self.has_symbol(name, b'aux_velocity')
+
+    def has_aux_acceleration(self, name):
+        return self.has_symbol(name, b'acceleration')
+
+    def has_parameter(self, name):
+        return self.has_symbol(name, b'parameter')
+
+    def has_joint_unknown(self, name):
+        return self.has_symbol(name, b'joint_unknown')
+
+    def has_input(self, name):
+        return self.has_symbol(name, b'input')
+
+    def has_base(self, name):
+        return self._has_geom_obj(name, b'base')
+
+    def has_matrix(self, name):
+        return self._has_geom_obj(name, b'matrix')
+
+
+    has_coord = has_coordinate
+    has_vel = has_velocity
+    has_acc = has_acceleration
+
+    has_aux_coord = has_aux_coordinate
+    has_aux_vel = has_aux_velocity
+    has_aux_acc = has_aux_acceleration
+
+    has_param = has_parameter
+    has_unknown = has_joint_unknown
+
 
 
 
@@ -131,12 +226,54 @@ class System(_System):
 
 
 
+    def get_coordinates(self):
+        return self.get_symbols_by_type(b'coordinate')
 
-    ######## Symbol constructors ########
+    def get_velocities(self):
+        return self.get_symbols_by_type(b'velocity')
+
+    def get_accelerations(self):
+        return self.get_symbols_by_type(b'acceleration')
+
+    def get_aux_coordinates(self):
+        return self.get_symbols_by_type(b'aux_coordinate')
+
+    def get_aux_velocities(self):
+        return self.get_symbols_by_type(b'aux_velocity')
+
+    def get_aux_accelerations(self):
+        return self.get_symbols_by_type(b'aux_acceleration')
+
+    def get_parameters(self):
+        return self.get_symbols_by_type(b'parameter')
+
+    def get_joint_unknowns(self):
+        return self.get_symbols_by_type(b'joint_unknown')
+
+    def get_inputs(self):
+        return self.get_symbols_by_type(b'input')
+
+    def get_bases(self):
+        return BasesView(self)
+
+    def get_matrices(self):
+        return MatricesView(self)
 
 
-    def _new_symbol(self, kind, *args, **kwargs):
-        return super()._new_symbol(kind, args, kwargs)
+    get_coords = get_coordinates
+    get_aux_coords = get_aux_coordinates
+
+    get_params = get_parameters
+    get_unknowns = get_joint_unknowns
+
+
+
+
+    ######## Constructors ########
+
+
+    def new_symbol(self, kind, *args, **kwargs):
+        return super().new_symbol(kind, args, kwargs)
 
 
 
@@ -177,8 +314,7 @@ class System(_System):
             >>> new_coordinate('a', 'a2', 'a3', 1, 2)
 
         '''
-        return self._new_symbol('coordinate', *args, **kwargs)
-
+        return self.new_symbol(b'coordinate', *args, **kwargs)
 
 
 
@@ -187,38 +323,19 @@ class System(_System):
         Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
         The signature is the same as for new_coordinate method
         '''
-        return self._new_symbol('aux_coordinate', *args, **kwargs)
+        return self.new_symbol(b'aux_coordinate', *args, **kwargs)
 
 
 
+    def new_parameter(self, *args, **kwargs):
+        return self.new_symbol(b'parameter', *args, **kwargs)
 
-    ######## Geometric object getters ########
+    def new_joint_unknown(self, *args, **kwargs):
+        return self.new_symbol(b'joint_unknown', *args, **kwargs)
 
+    def new_input(self, *args, **kwargs):
+        return self.new_symbol(b'input', *args, **kwargs)
 
-    def get_bases(self):
-        '''get_bases() -> Mapping[str, Base]
-        Get all the bases defined within this system
-        :returns: All the bases in a dictionary, where keys are base names and values,
-            instances of the class Base
-        :rtype: Mapping[str, Base]
-        '''
-        return BasesView(self)
-
-
-
-    def get_matrices(self):
-        '''get_matrices() -> Mapping[str, Base]
-        Get all the matrices defined within this system
-        :returns: All the matrices in a dictionary, where keys are base names and values,
-            instances of the class Matrix
-        :rtype: Mapping[str, Base]
-        '''
-        return MatricesView(self)
-
-
-
-
-    ######## Geometric object constructors ########
 
 
     def new_base(self, name, *args, **kwargs):
@@ -257,14 +374,20 @@ class System(_System):
             >>> new_base('a', rotation_tupla=m)
 
         '''
-        return self._new_base(name, args, kwargs)
+        return super().new_base(name, args, kwargs)
 
 
 
     def new_matrix(self, name, *args, **kwargs):
         '''new_matrix(name[, shape][, values]) -> Matrix
         '''
-        return self._new_matrix(name, args, kwargs)
+        return super().new_matrix(name, args, kwargs)
+
+
+    new_coord = new_coordinate
+    new_aux_coord = new_aux_coordinate,
+    new_param = new_parameter
+    new_unknown = new_joint_unknown
 
 
 
@@ -281,237 +404,58 @@ class System(_System):
         return self.get_symbols()
 
 
+    @property
+    def coordinates(self):
+        return self.get_coordinates()
+
+    @property
+    def velocities(self):
+        return self.get_velocities()
+
+    @property
+    def accelerations(self):
+        return self.get_accelerations()
+
+    @property
+    def aux_coordinates(self):
+        return self.get_aux_coordinates()
+
+    @property
+    def aux_velocities(self):
+        return self.get_aux_velocities()
+
+    @property
+    def aux_accelerations(self):
+        return self.get_aux_accelerations()
+
+    @property
+    def parameters(self):
+        return self.get_parameters()
+
+    @property
+    def joint_unknowns(self):
+        return self.get_joint_unknowns()
 
     @property
     def bases(self):
-        '''
-        Only read property that returns all the bases defined within this system.
-
-        :rtype: Mapping[str, Base]
-        '''
         return self.get_bases()
-
-
-
 
     @property
     def matrices(self):
-        '''
-        Only read property that returns all the matrices defined within this system
-        :rtype: Mapping[str, Base]
-        '''
         return self.get_matrices()
 
+
+    coords = coordinates
+    aux_coords = aux_coordinates
+    params = parameters
+    unknowns = joint_unknowns
 
 
 
     ######## Metamethods ########
 
-
     def __str__(self):
-        return self.__class__.__name__
+        return 'System instance'
 
     def __repr__(self):
         return self.__str__()
-
-
-
-
-
-
-######## Auto generation of System class methods ########
-
-
-def _generate_symbol_getter_methods(symbol_type):
-    name = symbol_type.decode()
-    pname = name + 's' if not name.endswith('y') else name[:-1] + 'ies'
-    display_name, display_pname = name.replace('_', ' '), pname.replace('_', ' ')
-
-    # get_* method
-    def getter(self, name):
-        '''get_{name}(name: str) -> SymbolNumeric
-        Get a {name} defined in this system
-
-        :param str name: Name of the {display_name}
-        :returns: Return the {display_name} with the given name on success
-        :rtype: SymbolNumeric
-        :raises TypeError: If the input argument is not a valid symbol name
-        :raises IndexError: If there not exists any {display_name} with the given name within this system
-        '''
-        return self.get_symbol(name, kind=symbol_type)
-
-    # has_* method
-    def checker(self, name):
-        '''has_{name}(name: str) -> bool
-        Check if a {display_name} is defined in this system
-
-        :param str name: Name of the {display_name}
-        :returns: Returns True if the {display_name} exists within this system. False otherwise
-        :rtype: bool
-        :raises TypeError: If the input argument is not a valid symbol name
-        '''
-        return self.has_symbol(name, kind=symbol_type)
-
-
-    # get_* method (return all symbols for the given type)
-    def pgetter(self):
-        '''get_{pname}() -> Mapping[str, SymbolNumeric]
-        Get all {display_pname} defined in the system
-
-        :returns: Returns a dictionary where keys are {name} names and values,
-            instances of the class SymbolNumeric
-        :rtype: Mapping[str, SymbolNumeric]
-        '''
-        return self.get_symbols_by_type(symbol_type)
-
-
-    # only-read property that is equivalent to the method defined above
-    @property
-    def pgetterprop(self):
-        '''
-        Read only property that returns all {display_pname} defined in the system
-
-        :returns: Returns a dictionary where keys are {name} names and values,
-            instances of the class SymbolNumeric
-        :rtype: Mapping[str, SymbolNumeric]
-        '''
-        return self.get_symbols_by_type(symbol_type)
-
-
-    methods = [getter, checker, pgetter, pgetterprop]
-
-    # Format method docstrings
-    for method in methods:
-        for key, value in locals().items():
-            if not isinstance(value, str):
-                continue
-            method.__doc__ = method.__doc__.replace('{' + key + '}', value)
-
-    # Change method names
-    getter.__name__ = 'get_' + name
-    checker.__name__ = 'has_' + name
-    pgetter.__name__ = 'get_' + pname
-    pgetterprop.fget.__name__ = pname
-
-    # Change method qualnames
-    for method in methods:
-        if isinstance(method, property):
-            method = method.fget
-        method.__qualname__ = f'{System.__name__}.{method.__name__}'
-
-
-    # Add them to the System class
-    for method in methods:
-        setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
-
-
-
-def _generate_symbol_constructor_method(symbol_type):
-    name = symbol_type.decode()
-    display_name = name.replace('_', ' ')
-
-    def constructor(self, *args, **kwargs):
-        '''new_{name}(name: str[, tex_name: str][, value: float]) -> SymbolNumeric
-        Create a new {display_name} symbol
-
-        :param str name: Name of the new {display_name}
-        :param str tex_name: Name of the new {display_name} in latex.
-            By default is an empty string if not specified.
-        :param float value: Initial value for the new {dislpay_name}.
-            By default is 0
-
-        :returns: The new {display_name} symbol
-        :rtype: SymbolNumeric
-        :raises TypeError: If any input argument has an incorrect type.
-        :raises ValueError: If any input argument has an incorrect value.
-        :raises IndexError: If a numeric symbol with the specified name already
-            exists in the system
-
-        .. note::
-
-            You can specify the initial value right after the name if
-            both arguments are positional.
-            e.g:
-            new_{name}('x', 1)
-
-        '''
-        return self._new_symbol(symbol_type, *args, **kwargs)
-
-    for key, value in locals().items():
-        if not isinstance(value, str):
-            continue
-        constructor.__doc__ = constructor.__doc__.replace('{' + key + '}', value)
-    constructor.__name__ = 'new_' + name
-    constructor.__qualname__ = f'{System.__name__}.{constructor.__name__}'
-    setattr(System, constructor.__name__, constructor)
-
-
-
-for symbol_type in _symbol_types:
-    _generate_symbol_getter_methods(symbol_type)
-    if b'coordinate' not in symbol_type and symbol_type not in _derivable_symbol_types:
-        _generate_symbol_constructor_method(symbol_type)
-
-
-
-
-
-def _generate_geom_obj_getter_methods(kind):
-    name = kind.decode()
-    cls = name.title()
-    pname = name + 's' if name != 'matrix' else 'matrices'
-
-    # get_* method
-    def getter(self, name):
-        '''get_{name}(name: str) -> {cls}
-        Get a {name} by name
-
-        :param str name: Name of the {name} to find
-        :returns: The {name} with the given name on success
-        :rtype: {cls}
-        :raises TypeError: If the input argument has an invalid type
-        :raises IndexError: If no {name} exists with the given name
-        '''
-        return self._get_geom_obj(name, kind)
-
-    # has_* method
-    def checker(self, name):
-        '''check_{name}(name: str) -> bool
-        Check if a {name} exists with the given name within this system
-
-        :param str name: Name of the {name}
-        :returns: True if the {name} exists, False otherwise
-        :rtype: bool
-        :raises TypeError: If the input argument has an invalid type
-        '''
-        return self._has_geom_obj(name, kind)
-
-
-    methods = [getter, checker]
-
-    # Format method docstrings
-    for method in methods:
-        for key, value in locals().items():
-            if not isinstance(value, str):
-                continue
-            method.__doc__ = method.__doc__.replace('{' + key + '}', value)
-
-    # Change method names
-    getter.__name__ = 'get_' + name
-    checker.__name__ = 'has_' + name
-
-
-    # Change method qualnames
-    for method in methods:
-        if isinstance(method, property):
-            method = method.fget
-        method.__qualname__ = f'{System.__name__}.{method.__name__}'
-
-    # Add them to the System class
-    for method in methods:
-        setattr(System, getattr(method.fget if isinstance(method, property) else method, '__name__'), method)
-
-
-
-for geom_obj_type in _geom_obj_types:
-    _generate_geom_obj_getter_methods(geom_obj_type)

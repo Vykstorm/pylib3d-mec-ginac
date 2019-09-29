@@ -195,7 +195,7 @@ cdef class _System:
 
 
 
-    cpdef _new_symbol(self, kind, args, kwargs):
+    cpdef new_symbol(self, kind, args, kwargs):
         # Validate & parse input arguments
         args = list(args)
         kind = _parse_symbol_type(kind)
@@ -373,7 +373,7 @@ cdef class _System:
     ######## Geomeric objects constructors ########
 
 
-    cpdef _new_base(self, name, args, kwargs):
+    cpdef new_base(self, name, args, kwargs):
         # Validate & parse base name
         name = _parse_name(name)
 
@@ -438,7 +438,7 @@ cdef class _System:
 
 
 
-    cpdef _new_matrix(self, name, args, kwargs):
+    cpdef new_matrix(self, name, args, kwargs):
         # Validate & parse name argument
         name = _parse_name(name)
 
