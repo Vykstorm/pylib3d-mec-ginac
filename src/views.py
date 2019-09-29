@@ -171,7 +171,7 @@ class SymbolsView(TableView, Mapping):
             columns.append('type')
         columns.append('value')
         super().__init__(
-            show_headers=False,
+            show_headers=kind is None,
             columns=columns
         )
         self.system, self.kind = system, kind
