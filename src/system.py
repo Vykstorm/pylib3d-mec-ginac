@@ -9,7 +9,7 @@ This module defines the class System
 
 from lib3d_mec_ginac_ext import _System
 from lib3d_mec_ginac_ext import _symbol_types, _derivable_symbol_types, _geom_obj_types
-from .views import SymbolsView, BasesView
+from .views import SymbolsView, BasesView, MatricesView
 
 
 
@@ -213,7 +213,7 @@ class System(_System):
             instances of the class Matrix
         :rtype: Mapping[str, Base]
         '''
-        return None
+        return MatricesView(self)
 
 
 

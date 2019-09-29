@@ -190,6 +190,7 @@ class SymbolsView(TableView):
 
 
 
+
 ######## Class BasesView ########
 
 
@@ -210,3 +211,24 @@ class BasesView(TreeView):
 
     def format_node(self, base):
         return base.name
+
+
+
+
+######## Class MatricesView ########
+
+
+class MatricesView(TableView):
+    def __init__(self, system):
+        super().__init__(
+            columns=['name', 'size', 'description']
+        )
+        self.system = system
+
+    def get_rows(self):
+        return _System._get_geom_objs(self.system, 'matrix')
+
+    def get_column_value(self, mat, attr):
+        if attr == 'name':
+            return mat.name
+        return f'{mat.num_rows}x{mat.num_cols}'
