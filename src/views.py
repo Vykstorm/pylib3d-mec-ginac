@@ -8,6 +8,7 @@ Description: This module defines the helper class DictView and its subclasses
 from collections.abc import Iterable, Mapping
 from collections import OrderedDict
 from abc import ABC, abstractmethod
+from operator import attrgetter
 from tabulate import tabulate
 from asciitree import LeftAligned
 
@@ -98,7 +99,7 @@ class TreeView(ABC):
 class TableView(ABC):
     '''
     This class can be used to print a table structure in text mode.
-    You need to implement the next abstract method get_rows.
+    You need to implement the next abstract method: get_rows.
 
     Metamethods __str__ & __repr__ can be used to print the table.
     '''
@@ -160,7 +161,7 @@ class TableView(ABC):
 ######## Class SymbolsView ########
 
 
-class SymbolsView(TableView):
+class SymbolsView(TableView, Mapping):
     '''
     Objects of this class are returned by System.get_symbols method.
     '''
@@ -175,8 +176,17 @@ class SymbolsView(TableView):
         )
         self.system, self.kind = system, kind
 
-    def get_rows(self):
+
+    def get_symbols(self):
         return _System.get_symbols_by_type(self.system, self.kind)
+
+    def get_symbol(self, name):
+        return self.system.get_symbol(name, self.kind)
+
+
+    # Methods to implement TableView interface
+    def get_rows(self):
+        return self.get_symbols()
 
     def get_column_value(self, symbol, attr):
         if attr in ('name', 'value'):
@@ -187,6 +197,15 @@ class SymbolsView(TableView):
                 return symbol_type.decode().replace('_', ' ')
         return None
 
+    # Methods to implement Mapping interface
+    def __getitem__(self, name):
+        return self.get_symbol(name)
+
+    def __iter__(self):
+        return map(attrgetter('name'), self.get_symbols())
+
+    def __len__(self):
+        return len(self.get_symbols())
 
 
 
@@ -194,7 +213,7 @@ class SymbolsView(TableView):
 ######## Class BasesView ########
 
 
-class BasesView(TreeView):
+class BasesView(TreeView, Mapping):
     '''
     Objects of this class are returned by System.get_bases method
     '''
@@ -202,15 +221,34 @@ class BasesView(TreeView):
         super().__init__()
         self.system = system
 
+    def get_bases(self):
+        return _System._get_geom_objs(self.system, 'base')
+
+    def get_base(self, name):
+        return _System._get_geom_obj(self.system, name, kind='base')
+
+
+    # Methods to implement the TreeView interface
     def get_roots(self):
-        return [base for base in _System._get_geom_objs(self.system, 'base') if not base.has_previous()]
+        return [base for base in self.get_bases() if not base.has_previous()]
 
     def get_children(self, base):
-        bases = _System._get_geom_objs(self.system, 'base')
-        return [x for x in bases if x.has_previous() and x.get_previous() == base]
+        return [x for x in self.get_bases() if x.has_previous() and x.get_previous() == base]
 
     def format_node(self, base):
         return base.name
+
+
+    # Methods to implement the mapping interface
+    def __getitem__(self, name):
+        return self.get_base(name)
+
+    def __iter__(self):
+        return map(attrgetter('name'), self.get_bases())
+
+    def __len__(self):
+        return len(self.get_bases())
+
 
 
 
@@ -218,20 +256,40 @@ class BasesView(TreeView):
 ######## Class MatricesView ########
 
 
-class MatricesView(TableView):
+class MatricesView(TableView, Mapping):
     def __init__(self, system):
         super().__init__(
             columns=['name', 'size']
         )
         self.system = system
 
-    def get_rows(self):
+    def get_matrices(self):
         return _System._get_geom_objs(self.system, 'matrix')
+
+    def get_matrix(self, name):
+        return _System._get_geom_obj(self.system, name, kind='matrix')
+
+
+    # Methods to implement TableView interface
+    def get_rows(self):
+        return self.get_matrices()
 
     def get_column_value(self, mat, attr):
         if attr == 'name':
             return mat.name
         return f'{mat.num_rows}x{mat.num_cols}'
+
+
+    # Methods to implement Mapping interface
+    def __getitem__(self, name):
+        return self.get_matrix(name)
+
+    def __iter__(self):
+        return map(attrgetter('name'), self.get_matrices())
+
+    def __len__(self):
+        return len(self.get_matrices())
+
 
 
 
@@ -245,5 +303,22 @@ class VectorsView(TableView):
         )
         self.system = system
 
-    def get_rows(self):
+    def get_vectors(self):
         return _System._get_geom_objs(self.system, 'vector')
+
+    def get_vector(self, name):
+        return _System._get_geom_obj(self.system, name, kind='vector')
+
+    # Methods to implement the TableView interface
+    def get_rows(self):
+        return self.get_vectors()
+
+    # Methods to implement Mapping interface
+    def __getitem__(self, name):
+        return self.get_vector(name)
+
+    def __iter__(self):
+        return map(attrgetter('name'), self.get_vectors())
+
+    def __len__(self):
+        return len(self.get_vectors())
