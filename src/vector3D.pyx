@@ -22,7 +22,7 @@ cdef class Vector3D(Matrix):
             args = list(args)
 
             try:
-                if isinstance(args[-1], Base):
+                if isinstance(args[-1], (str, Base)):
                     base, values = args[-1], args[:-1]
                     if len(values) not in (0, 1, 3):
                         raise TypeError
@@ -41,16 +41,25 @@ cdef class Vector3D(Matrix):
             except TypeError:
                 raise TypeError('You must specify exactly three values for the vector components')
 
-        values, base = _apply_signature(
-            ['values', 'base'],
-            {'values': (0, 0, 0), 'base': None},
+        values, base, system = _apply_signature(
+            ['values', 'base', 'system'],
+            {'values': (0, 0, 0), 'base': 'xyz', 'system': None},
             args, kwargs
         )
 
+        if not isinstance(base, (str, Base)):
+            raise TypeError('base must be an instance of the class Base or a str')
+
+        if system is not None and not isinstance(system, _System):
+            raise TypeError('system must be an instance of the class System or None')
+
+        if isinstance(base, str):
+            if system is None:
+                raise TypeError('base cannot be a string if system is not given')
+            base = system.get_base(base)
+
         values = tuple(map(Expr, values))
 
-        if not isinstance(base, Base):
-            raise TypeError('argument base must be an instance of the class Base')
 
         # Create the underline vector object
         cdef c_ex x = (<Expr>values[0])._c_handler
@@ -183,7 +192,7 @@ cdef class Vector3D(Matrix):
 
 
     def __str__(self):
-        return '[ ' + ', '.join(map(str, self)) + '] '
+        return '[ ' + ', '.join(map(str, self)) + ' ]'
 
 
 

@@ -392,6 +392,9 @@ class System(_System):
         '''
         return super().new_matrix(name, args, kwargs)
 
+    def new_vector(self, name, *args, **kwargs):
+        return super().new_vector(name, args, kwargs)
+
 
     new_coord = new_coordinate
     new_aux_coord = new_aux_coordinate,

@@ -262,7 +262,7 @@ cdef class _System:
             return [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
         elif kind == b'vector':
             c_vectors = self._get_c_vectors()
-            return [_matrix_from_c(c_vector) for c_vector in c_vectors]
+            return [_vector_from_c(c_vector) for c_vector in c_vectors]
         else:
             raise RuntimeError
 
@@ -481,3 +481,24 @@ cdef class _System:
         (<Matrix>matrix)._owns_c_handler = False
 
         return matrix
+
+
+    cpdef new_vector(self, name, args, kwargs):
+        # Validate & parse name argument
+        name = _parse_name(name)
+
+        # Check if a matrix with the same name already exists
+        if self.has_vector(name):
+            raise IndexError(f'Vector "{name.decode()}" already exists')
+
+        # Create the vector
+        kwargs['system'] = self
+        vector = Vector3D(*args, **kwargs)
+
+        # Register the matrix with the given name in the system
+        cdef c_Vector3D* c_vector = <c_Vector3D*>vector._get_c_handler()
+        c_vector.set_name(name)
+        self._c_handler.new_Vector3D(c_vector)
+        (<Vector3D>vector)._owns_c_handler = False
+
+        return vector
