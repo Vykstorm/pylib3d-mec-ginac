@@ -221,7 +221,7 @@ class BasesView(TreeView):
 class MatricesView(TableView):
     def __init__(self, system):
         super().__init__(
-            columns=['name', 'size', 'description']
+            columns=['name', 'size']
         )
         self.system = system
 
