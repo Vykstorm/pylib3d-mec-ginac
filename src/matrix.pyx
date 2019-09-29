@@ -22,7 +22,7 @@ cdef class Matrix:
     ######## Constructor ########
 
 
-    def __cinit__(self, values=None, shape=None):
+    def __init__(self, values=None, shape=None):
         # Validate input arguments
         if values is None and shape is None:
             # Matrix 1x1 with a zero initialized by default
