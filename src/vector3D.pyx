@@ -183,4 +183,11 @@ cdef class Vector3D(Matrix):
 
 
     def __str__(self):
-        return '[' + ', '.join(map(str, self)) + ']'
+        return '[ ' + ', '.join(map(str, self)) + '] '
+
+
+
+
+######## Aliases for class Vector3D ########
+
+Vec3D = Vector3D
