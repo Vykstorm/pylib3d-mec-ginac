@@ -111,7 +111,29 @@ cdef class Vector3D(Matrix):
 
     ######## Properties ########
 
+    @property
+    def x(self):
+        return self.get(0)
 
+    @x.setter
+    def x(self, value):
+        self.set(0, value)
+
+    @property
+    def y(self):
+        return self.get(1)
+
+    @y.setter
+    def y(self, value):
+        self.set(1, value)
+
+    @property
+    def z(self):
+        return self.get(2)
+
+    @z.setter
+    def z(self, value):
+        self.set(2, value)
 
 
     ######## Metamethods ########
