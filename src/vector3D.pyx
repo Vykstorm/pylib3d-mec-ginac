@@ -72,6 +72,13 @@ cdef class Vector3D(Matrix):
 
     ######## Getters ########
 
+
+    cpdef get_base(self):
+        cdef c_Base* c_base = (<c_Vector3D*>self._get_c_handler()).get_Base()
+        return Base(<Py_ssize_t>c_base)
+
+
+
     def _parse_row_index(self, i):
         if not isinstance(i, int):
             raise TypeError('Matrix indices must be numbers')
@@ -109,7 +116,14 @@ cdef class Vector3D(Matrix):
 
 
 
+
     ######## Properties ########
+
+
+    @property
+    def base(self):
+        return self.get_base()
+
 
     @property
     def x(self):
@@ -134,6 +148,8 @@ cdef class Vector3D(Matrix):
     @z.setter
     def z(self, value):
         self.set(2, value)
+
+
 
 
     ######## Metamethods ########

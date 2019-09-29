@@ -23,3 +23,5 @@ from src.pxd.cbase cimport Base
 cdef extern from "Vector3D.h":
     cdef cppclass Vector3D(Matrix):
         Vector3D(string name, ex x, ex y, ex z, Base* base) except +
+
+        Base* get_Base()
