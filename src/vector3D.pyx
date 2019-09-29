@@ -78,6 +78,10 @@ cdef class Vector3D(Matrix):
         return Base(<Py_ssize_t>c_base)
 
 
+    cpdef get_module(self):
+        cdef c_ex c_expr = (<c_Vector3D*>self._get_c_handler()).get_module()
+        return _expr_from_c(c_expr)
+
 
     def _parse_row_index(self, i):
         if not isinstance(i, int):
@@ -123,6 +127,10 @@ cdef class Vector3D(Matrix):
     @property
     def base(self):
         return self.get_base()
+
+    @property
+    def module(self):
+        return self.get_module()
 
 
     @property
