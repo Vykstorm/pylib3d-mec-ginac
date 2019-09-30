@@ -526,7 +526,7 @@ class System(_System):
     ######## Metamethods ########
 
     def __str__(self):
-        return 'System instance'
+        return 'System instance.\nType help(System) to see all methods avaliable on this class'
 
     def __repr__(self):
         return self.__str__()
