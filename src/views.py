@@ -17,6 +17,7 @@ from lib3d_mec_ginac_ext import _symbol_types, _parse_symbol_type
 
 
 
+######## Class ObjectsView ########
 
 class ObjectsView(Mapping):
     def __init__(self, get_objects, get_object, has_object):
@@ -47,6 +48,8 @@ class ObjectsView(Mapping):
 
 
 
+######## ObjectsTableView ########
+
 class ObjectsTableView(ObjectsView):
     def __init__(self, get_objects, get_object, has_object, columns, show_headers=False):
         super().__init__(get_objects, get_object, has_object)
@@ -65,6 +68,8 @@ class ObjectsTableView(ObjectsView):
 
 
 
+
+######## BasesView ########
 
 class BasesView(ObjectsView):
     def __init__(self, system):
@@ -92,6 +97,7 @@ class BasesView(ObjectsView):
 
 
 
+######## SymbolsView ########
 
 class SymbolsView(ObjectsTableView):
     def __init__(self, system, kind=None):
@@ -129,6 +135,7 @@ class SymbolsView(ObjectsTableView):
 
 
 
+######## MatricesView ########
 
 class MatricesView(ObjectsTableView):
     def __init__(self, system):
@@ -147,6 +154,7 @@ class MatricesView(ObjectsTableView):
 
 
 
+######## VectorsView ########
 
 class VectorsView(ObjectsTableView):
     def __init__(self, system):
