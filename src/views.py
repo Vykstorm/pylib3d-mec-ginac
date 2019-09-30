@@ -125,6 +125,14 @@ class SymbolsView(ObjectsTableView):
             values.insert(1, symbol_type.decode().replace('_', ' '))
         return values
 
+    def __getattr__(self, key):
+        if key in ('mat', 'matrix') and self.kind is not None:
+            return self.system.get_symbols_matrix(self.kind)
+        raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{key}'")
+
+    def __dir__(self):
+        return super().__dir__() + ['mat', 'matrix']
+
 
     def __str__(self):
         if len(self) == 0:
