@@ -78,6 +78,13 @@ class System(_System):
         return super()._get_symbol(name, kind)
 
 
+    def get_time(self):
+        '''
+        Get the time symbol
+        :rtype: SymbolNumeric
+        '''
+        return self._get_time()
+
 
     def get_coordinate(self, name):
         return self.get_symbol(name, b'coordinate')
@@ -114,6 +121,7 @@ class System(_System):
 
     def get_vector(self, name):
         return self._get_vector(name)
+
 
 
     get_coord = get_coordinate
@@ -437,6 +445,13 @@ class System(_System):
         '''
         return self.get_symbols()
 
+    @property
+    def time(self):
+        '''
+        Only read property that returns the time symbol
+        :rtype: SymbolNumeric
+        '''
+        return self.get_time()
 
     @property
     def coordinates(self):

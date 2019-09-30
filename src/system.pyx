@@ -27,13 +27,13 @@ cdef class _System:
 
 
 
-
     ######## Constructor & Destructor ########
 
 
     def __cinit__(self):
         # Initialize C++ System object
         self._c_handler = new c_System(outError)
+
 
     def __dealloc__(self):
         del self._c_handler
@@ -257,6 +257,10 @@ cdef class _System:
         cdef c_Matrix c_matrix = self._get_c_symbols_matrix(_parse_symbol_type(kind))
         return _matrix_from_c_value(c_matrix)
 
+
+
+    cpdef _get_time(self):
+        return SymbolNumeric(<Py_ssize_t>&self._c_handler.t)
 
 
 

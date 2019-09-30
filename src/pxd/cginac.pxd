@@ -9,6 +9,7 @@ C++ library that are going to be used by this library.
 
 
 # Imports from the standard library
+from libcpp.string cimport string
 
 
 # Imports from other .pxd definition files
@@ -41,6 +42,13 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
         ex(const double value) except +
         ex(const basic& value) except +
         void print(print_context&, unsigned level=0) const
+
+
+######## Class GiNaC::symbol ########
+
+cdef extern from "ginac/symbol.h" namespace "GiNaC":
+    cdef cppclass symbol:
+        void set_name(string& name)
 
 
 ######## Class GiNaC::numeric ########

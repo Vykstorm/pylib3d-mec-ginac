@@ -31,6 +31,9 @@ cdef extern from "System.h":
         System() except +
         System(void(*func)(const char*)) except +
 
+        # Attributes
+        symbol_numeric t
+
         # Symbol getters
         vector[symbol_numeric*] get_Coordinates()
         vector[symbol_numeric*] get_Velocities()
