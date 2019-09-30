@@ -247,6 +247,7 @@ cdef class _System:
             kind = _parse_symbol_type(kind)
             return self._has_c_object(name, kind)
 
+        c_symbols = self._get_all_c_symbols()
         for x in c_symbols:
             if x.get_name() == <c_string>name:
                 return True
