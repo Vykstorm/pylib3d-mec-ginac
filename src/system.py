@@ -7,8 +7,12 @@ This module defines the class System
 
 ######## Import statements ########
 
+from functools import lru_cache
+
 from lib3d_mec_ginac_ext import _System
 from .views import SymbolsView, BasesView, MatricesView, VectorsView
+
+
 
 
 
@@ -75,7 +79,7 @@ class System(_System):
         :raises ValueError: If input arguments have incorrect values
         :raises IndexError: If no symbol with the given name & type is defined in the system
         '''
-        return super()._get_symbol(name, kind)
+        return self._get_symbol(name, kind)
 
 
     def get_time(self):
@@ -154,7 +158,7 @@ class System(_System):
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
-        return super()._has_symbol(name, kind)
+        return self._has_symbol(name, kind)
 
 
 
@@ -413,17 +417,17 @@ class System(_System):
             >>> new_base('a', rotation_tupla=m)
 
         '''
-        return super()._new_base(name, args, kwargs)
+        return self._new_base(name, args, kwargs)
 
 
 
     def new_matrix(self, name, *args, **kwargs):
         '''new_matrix(name[, shape][, values]) -> Matrix
         '''
-        return super()._new_matrix(name, args, kwargs)
+        return self._new_matrix(name, args, kwargs)
 
     def new_vector(self, name, *args, **kwargs):
-        return super()._new_vector(name, args, kwargs)
+        return self._new_vector(name, args, kwargs)
 
 
     new_coord = new_coordinate
@@ -524,9 +528,3 @@ class System(_System):
 
 
     ######## Metamethods ########
-
-    def __str__(self):
-        return 'System instance.\nType help(System) to see all methods avaliable on this class'
-
-    def __repr__(self):
-        return self.__str__()
