@@ -106,7 +106,6 @@ class System(_System):
     def get_input(self, name):
         return self.get_symbol(name, b'input')
 
-
     def get_base(self, name):
         return self._get_base(name)
 
@@ -259,6 +258,45 @@ class System(_System):
 
     get_params = get_parameters
     get_unknowns = get_joint_unknowns
+
+
+
+
+    def get_symbols_matrix(self, kind):
+        return super()._get_symbols_matrix(kind)
+
+    def get_coordinates_matrix(self):
+        return self.get_symbols_matrix(b'coordinate')
+
+    def get_velocities_matrix(self):
+        return self.get_symbols_matrix(b'velocity')
+
+    def get_accelerations_matrix(self):
+        return self.get_symbols_matrix(b'acceleration')
+
+    def get_aux_coordinates_matrix(self):
+        return self.get_symbols_matrix(b'aux_coordinate')
+
+    def get_aux_velocities_matrix(self):
+        return self.get_symbols_matrix(b'aux_velocity')
+
+    def get_aux_accelerations_matrix(self):
+        return self.get_symbols_matrix(b'aux_acceleration')
+
+    def get_parameters_matrix(self):
+        return self.get_symbols_matrix(b'parameter')
+
+    def get_joint_unknowns_matrix(self):
+        return self.get_symbols_matrix(b'joint_unknown')
+
+    def get_inputs_matrix(self):
+        return self.get_symbols_matrix(b'input')
+
+
+    get_coords_matrix = get_coordinates_matrix
+    get_aux_coords_matrix = get_aux_coordinates_matrix
+    get_params_matrix = get_parameters_matrix
+    get_unknowns_matrix = get_joint_unknowns_matrix
 
 
 

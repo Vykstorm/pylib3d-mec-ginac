@@ -122,6 +122,34 @@ cdef class _System:
 
 
 
+    cdef c_Matrix _get_c_symbols_matrix(self, c_string kind):
+        '''
+        Get the matrix for the symbols of the given type.
+        :param string kind: Must be the type of symbols to include in the resulting matrix
+        :rtype: Matrix
+        '''
+        if kind == b'coordinate':
+            return self._c_handler.Coordinates()
+        if kind == b'velocity':
+            return self._c_handler.Velocities()
+        if kind == b'acceleration':
+            return self._c_handler.Accelerations()
+        if kind == b'aux_coordinate':
+            return self._c_handler.Aux_Coordinates()
+        if kind == b'aux_velocity':
+            return self._c_handler.Aux_Velocities()
+        if kind == b'aux_acceleration':
+            return self._c_handler.Aux_Accelerations()
+        if kind == b'parameter':
+            return self._c_handler.Parameters()
+        if kind == b'input':
+            return self._c_handler.Inputs()
+        if kind == b'joint_unknown':
+            return self._c_handler.Joint_Unknowns()
+
+
+
+
     cdef c_symbol_numeric_list _get_all_c_symbols(self):
         '''
         Get all symbols within this system
@@ -223,6 +251,12 @@ cdef class _System:
             if x.get_name() == <c_string>name:
                 return True
         return False
+
+
+    cpdef _get_symbols_matrix(self, kind):
+        cdef c_Matrix c_matrix = self._get_c_symbols_matrix(_parse_symbol_type(kind))
+        return _matrix_from_c_value(c_matrix)
+
 
 
 

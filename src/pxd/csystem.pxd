@@ -52,6 +52,17 @@ cdef extern from "System.h":
         symbol_numeric* get_Unknown(string name)
         symbol_numeric* get_Input(string name)
 
+        # Symbol matrix getters
+        Matrix Coordinates()
+        Matrix Velocities()
+        Matrix Accelerations()
+        Matrix Aux_Coordinates()
+        Matrix Aux_Velocities()
+        Matrix Aux_Accelerations()
+        Matrix Parameters()
+        Matrix Joint_Unknowns()
+        Matrix Inputs()
+
         # Geometric object getters
         vector[Base*] get_Bases()
         vector[Matrix*] get_Matrixs()
