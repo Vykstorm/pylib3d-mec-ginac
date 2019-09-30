@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from collections import OrderedDict
 from abc import ABC, abstractmethod
 from operator import attrgetter
+from functools import partial
 from tabulate import tabulate
 from asciitree import LeftAligned
 
@@ -99,7 +100,9 @@ class SymbolsView(ObjectsTableView):
         if kind is None:
             columns.insert(1, 'type')
         super().__init__(
-            system._get_symbols, system._get_symbol, system._has_symbol,
+            partial(system._get_symbols, kind=kind),
+            partial(system._get_symbol, kind=kind),
+            partial(system._has_symbol, kind=kind),
             columns=columns,
             show_headers=kind is None
         )
@@ -140,4 +143,4 @@ class VectorsView(ObjectsTableView):
         )
 
     def get_row_values(self, vector):
-        return vector.x, vector.y, vector.z, vector.base.name
+        return vector.name, vector.x, vector.y, vector.z, vector.base.name
