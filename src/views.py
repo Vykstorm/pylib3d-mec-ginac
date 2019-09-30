@@ -14,7 +14,7 @@ from tabulate import tabulate
 from asciitree import LeftAligned
 
 from lib3d_mec_ginac_ext import _System
-from lib3d_mec_ginac_ext import _symbol_types
+from lib3d_mec_ginac_ext import _symbol_types, _parse_symbol_type
 
 
 
@@ -99,6 +99,8 @@ class SymbolsView(ObjectsTableView):
         columns = ['name', 'value']
         if kind is None:
             columns.insert(1, 'type')
+        else:
+            kind = _parse_symbol_type(kind)
         super().__init__(
             partial(system._get_symbols, kind=kind),
             partial(system._get_symbol, kind=kind),
@@ -118,6 +120,13 @@ class SymbolsView(ObjectsTableView):
             values.insert(1, symbol_type.decode().replace('_', ' '))
         return values
 
+    def __str__(self):
+        if len(self) == 0:
+            if self.kind is not None:
+                return f'No {self.kind.decode().replace("_", " ")} symbols created yet'
+            return 'No symbols created yet'
+        return super().__str__()
+
 
 
 
@@ -130,6 +139,11 @@ class MatricesView(ObjectsTableView):
 
     def get_row_values(self, matrix):
         return matrix.name, f'{matrix.num_rows}x{matrix.num_cols}'
+
+    def __str__(self):
+        if len(self) == 0:
+            return 'No matrices created yet'
+        return super().__str__()
 
 
 
@@ -144,3 +158,8 @@ class VectorsView(ObjectsTableView):
 
     def get_row_values(self, vector):
         return vector.name, vector.x, vector.y, vector.z, vector.base.name
+
+    def __str__(self):
+        if len(self) == 0:
+            return 'No vectors created yet'
+        return super().__str__()
