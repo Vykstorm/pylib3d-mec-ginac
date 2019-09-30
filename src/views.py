@@ -178,7 +178,7 @@ class SymbolsView(TableView, Mapping):
 
 
     def get_symbols(self):
-        return _System.get_symbols_by_type(self.system, self.kind)
+        return self.system._get_symbols(self.kind)
 
     def get_symbol(self, name):
         return self.system.get_symbol(name, self.kind)
@@ -196,7 +196,7 @@ class SymbolsView(TableView, Mapping):
             return super().get_column_value(symbol, attr)
 
         for symbol_type in _symbol_types:
-            if symbol in _System.get_symbols_by_type(self.system, symbol_type):
+            if symbol in self.system._get_symbols(symbol_type):
                 return symbol_type.decode().replace('_', ' ')
         return None
 
@@ -228,13 +228,13 @@ class BasesView(TreeView, Mapping):
         self.system = system
 
     def get_bases(self):
-        return _System._get_geom_objs(self.system, 'base')
+        return self.system._get_bases()
 
     def get_base(self, name):
-        return _System._get_geom_obj(self.system, name, 'base')
+        return self.system.get_base(name)
 
     def has_base(self, name):
-        return _System._has_geom_obj(self.system, name, 'base')
+        return self.system.has_base(name)
 
 
     # Methods to implement the TreeView interface
@@ -275,13 +275,13 @@ class MatricesView(TableView, Mapping):
         self.system = system
 
     def get_matrices(self):
-        return _System._get_geom_objs(self.system, 'matrix')
+        return self.system.get_matrices()
 
     def get_matrix(self, name):
-        return _System._get_geom_obj(self.system, name, 'matrix')
+        return self.system.get_matrix(name)
 
     def has_matrix(self, name):
-        return _System._has_geom_obj(self.system, name, 'matrix')
+        return self.system.has_matrix(name)
 
 
     # Methods to implement TableView interface
@@ -321,13 +321,13 @@ class VectorsView(TableView):
         self.system = system
 
     def get_vectors(self):
-        return _System._get_geom_objs(self.system, 'vector')
+        return self.system._get_vectors()
 
     def get_vector(self, name):
-        return _System._get_geom_obj(self.system, name, 'vector')
+        return self.system.get_vector(name)
 
     def has_vector(self, name):
-        return _System._has_geom_obj(self.system, name, 'vector')
+        return self.system.has_vector(name)
 
 
     # Methods to implement the TableView interface

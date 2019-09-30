@@ -75,7 +75,7 @@ class System(_System):
         :raises ValueError: If input arguments have incorrect values
         :raises IndexError: If no symbol with the given name & type is defined in the system
         '''
-        return super().get_symbol(name, kind)
+        return super()._get_symbol(name, kind)
 
 
 
@@ -106,14 +106,15 @@ class System(_System):
     def get_input(self, name):
         return self.get_symbol(name, b'input')
 
+
     def get_base(self, name):
-        return self._get_geom_obj(name, b'base')
+        return self._get_base(name)
 
     def get_matrix(self, name):
-        return self._get_geom_obj(name, b'matrix')
+        return self._get_matrix(name)
 
     def get_vector(self, name):
-        return self._get_geom_obj(name, b'vector')
+        return self._get_vector(name)
 
 
     get_coord = get_coordinate
@@ -146,7 +147,7 @@ class System(_System):
         :raises TypeError: If input arguments have incorrect types
         :raises ValueError: If input arguments have incorrect values
         '''
-        return super().has_symbol(name, kind)
+        return super()._has_symbol(name, kind)
 
 
 
@@ -177,14 +178,15 @@ class System(_System):
     def has_input(self, name):
         return self.has_symbol(name, b'input')
 
+
     def has_base(self, name):
-        return self._has_geom_obj(name, b'base')
+        return self._has_base(name)
 
     def has_matrix(self, name):
-        return self._has_geom_obj(name, b'matrix')
+        return self._has_matrix(name)
 
     def has_vector(self, name):
-        return self._has_geom_obj(name, b'vector')
+        return self._has_vector(name)
 
 
     has_coord = has_coordinate
@@ -201,63 +203,46 @@ class System(_System):
 
 
 
-    def get_symbols(self):
-        '''get_symbols() -> Mapping[str, SymbolNumeric]
+    def get_symbols(self, kind=None):
+        '''get_symbols([kind: str]) -> Mapping[str, SymbolNumeric]
         Get all symbols defined within this system
 
+        :param str kind: Its an optional argument that can be used to retrieve
+            only symbols with the given type e.g: 'parameter', 'input', ...
         :returns: Returns all the symbols defined in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
         :rtype: Mapping[str, SymbolNumeric]
         '''
-        return SymbolsView(self)
-
-
-
-    def get_symbols_by_type(self, kind):
-        '''get_symbols_by_type([kind: str]) -> Mapping[str, SymbolNumeric]
-        Get all symbols of the given type defined within this system
-
-        :param str kind: Must be one of the next values if set:
-            'coordinate', 'velocity', 'acceleration',
-            'aux_coordinate', 'aux_velocity', 'aux_acceleration',
-            'parameter', 'input', 'joint_unknown'
-            If not set, this call is the same as get_symbols
-        :returns: All symbols with the given type in a dictionary, where keys are
-            symbol names and values, instances of the class SymbolNumeric
-        :rtype: Mapping[str, SymbolNumeric]
-        :raises TypeError: If input arguments have incorrect types
-        :raises ValueError: If input arguments have incorrect values
-        '''
         return SymbolsView(self, kind)
 
 
-
     def get_coordinates(self):
-        return self.get_symbols_by_type(b'coordinate')
+        return self.get_symbols(b'coordinate')
 
     def get_velocities(self):
-        return self.get_symbols_by_type(b'velocity')
+        return self.get_symbols(b'velocity')
 
     def get_accelerations(self):
-        return self.get_symbols_by_type(b'acceleration')
+        return self.get_symbols(b'acceleration')
 
     def get_aux_coordinates(self):
-        return self.get_symbols_by_type(b'aux_coordinate')
+        return self.get_symbols(b'aux_coordinate')
 
     def get_aux_velocities(self):
-        return self.get_symbols_by_type(b'aux_velocity')
+        return self.get_symbols(b'aux_velocity')
 
     def get_aux_accelerations(self):
-        return self.get_symbols_by_type(b'aux_acceleration')
+        return self.get_symbols(b'aux_acceleration')
 
     def get_parameters(self):
-        return self.get_symbols_by_type(b'parameter')
+        return self.get_symbols(b'parameter')
 
     def get_joint_unknowns(self):
-        return self.get_symbols_by_type(b'joint_unknown')
+        return self.get_symbols(b'joint_unknown')
 
     def get_inputs(self):
-        return self.get_symbols_by_type(b'input')
+        return self.get_symbols(b'input')
+
 
     def get_bases(self):
         return BasesView(self)
@@ -282,7 +267,7 @@ class System(_System):
 
 
     def new_symbol(self, kind, *args, **kwargs):
-        return super().new_symbol(kind, args, kwargs)
+        return super()._new_symbol(kind, args, kwargs)
 
 
 
@@ -335,7 +320,6 @@ class System(_System):
         return self.new_symbol(b'aux_coordinate', *args, **kwargs)
 
 
-
     def new_parameter(self, *args, **kwargs):
         return self.new_symbol(b'parameter', *args, **kwargs)
 
@@ -383,17 +367,17 @@ class System(_System):
             >>> new_base('a', rotation_tupla=m)
 
         '''
-        return super().new_base(name, args, kwargs)
+        return super()._new_base(name, args, kwargs)
 
 
 
     def new_matrix(self, name, *args, **kwargs):
         '''new_matrix(name[, shape][, values]) -> Matrix
         '''
-        return super().new_matrix(name, args, kwargs)
+        return super()._new_matrix(name, args, kwargs)
 
     def new_vector(self, name, *args, **kwargs):
-        return super().new_vector(name, args, kwargs)
+        return super()._new_vector(name, args, kwargs)
 
 
     new_coord = new_coordinate
