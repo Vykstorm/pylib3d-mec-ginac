@@ -5,7 +5,7 @@ Description: This module defines the helper class DictView and its subclasses
 
 ######## Imports ########
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping
 from collections import OrderedDict
 from abc import ABC, abstractmethod
 from operator import attrgetter
@@ -18,337 +18,126 @@ from lib3d_mec_ginac_ext import _symbol_types
 
 
 
-######## Class TreeView ########
+class ObjectsView(Mapping):
+    def __init__(self, get_objects, get_object, has_object):
+        self._get_objects = get_objects
+        self._get_object = get_object
+        self._has_object = has_object
 
+    def __getitem__(self, name):
+        return self._get_object(name)
 
-class TreeView(ABC):
-    '''
-    This class can be used to print a tree structure in text mode.
-    You need to inherit from this class and implement the methods
-    get_roots, get_children, format_node
-    Then you can use __str__ and __repr__ metamethods to print the tree
-    '''
+    def __len__(self):
+        return len(self._get_objects())
 
-    @abstractmethod
-    def get_roots(self):
-        '''get_roots() -> Iterable
-        This method must be implemented by subclasses.
-        It must return a list of all objects which are the roots of the tree to
-        print
-        '''
-        pass
+    def __iter__(self):
+        return map(attrgetter('name'), self._get_objects())
 
-    @abstractmethod
-    def get_children(self, node):
-        '''get_children(node) -> Iterable
-        This method must be implemented by subclasses.
-        It must return a list of all objects which are the children of the given node.
-        '''
-        pass
+    def __contains__(self, name):
+        return self._has_object(name)
 
-
-    def format_node(self, node):
-        '''format_node(node) -> str
-        This method takes a node (object) and returns the label to be shown when
-        printing the tree. By default it returns str(node)
-        '''
-        return str(node)
-
+    def __bool__(self):
+        return len(self) > 0
 
     def __str__(self):
-        # This method prints the tree
-
-        def _get_roots():
-            roots = self.get_roots()
-            if roots is not None and not isinstance(roots, Iterable):
-                raise TypeError('get_roots should return an iterable or None')
-            return tuple(roots) if roots is not None else ()
-
-        def _get_children(node):
-            children = self.get_children(node)
-            if children is not None and not isinstance(children, Iterable):
-                raise TypeError('get_children should return an iterable or None')
-            return tuple(children) if children is not None else ()
-
-        def _format_node(node):
-            s = self.format_node(node)
-            if not isinstance(s, str):
-                raise TypeError('format_node should return a str object')
-            return s
-
-
-        roots = _get_roots()
-        def get_tree(node):
-            children = _get_children(node)
-            return OrderedDict(dict(zip(map(_format_node, children), map(get_tree, children))))
-
-        trees = [dict([(_format_node(root), get_tree(root))]) for root in roots]
-        return '\n'.join(map(LeftAligned(), trees))
-
+        return str(dict(self.items()))
 
     def __repr__(self):
         return self.__str__()
 
 
 
-
-
-######## Class TableView ########
-
-
-class TableView(ABC):
-    '''
-    This class can be used to print a table structure in text mode.
-    You need to implement the next abstract method: get_rows.
-
-    Metamethods __str__ & __repr__ can be used to print the table.
-    '''
-    def __init__(self, columns, show_headers=False):
-        '''
-        Initialize this instance
-
-        :param columns: The columns of the table (a list of strings)
-        :param show_headers: If true, the first row will be the names of the columns.
-            By default is set to False
-        '''
+class ObjectsTableView(ObjectsView):
+    def __init__(self, get_objects, get_object, has_object, columns, show_headers=False):
+        super().__init__(get_objects, get_object, has_object)
         self.columns, self.show_headers = columns, show_headers
 
-
-    @abstractmethod
-    def get_rows(self):
-        '''
-        This method should be implemented by subclasses.
-        It must return a list of all rows that should be printed in the table
-        (any kind of object can represent a row)
-        '''
-        pass
-
-    def get_column_value(self, row, column):
-        '''
-        This method should return the value to be shown in the table for the given
-        row and column (By default returns getattr(row, column, None))
-        '''
-        return getattr(row, column, None)
-
+    def get_row_values(self, object):
+        return [getattr(object, column) for column in self.columns]
 
     def __str__(self):
-        def _get_rows():
-            rows = self.get_rows()
-            if rows is not None and not isinstance(rows, Iterable):
-                raise TypeError('get_rows should return an iterable or None')
-            return tuple(rows) if rows is not None else ()
-
-        def _get_column_value(row, column):
-            value = self.get_column_value(row, column)
-            return value
-
-
-        # This method prints the table
         t = []
         if self.show_headers:
             t.append(self.columns)
-        t.extend([[_get_column_value(row, column) for column in self.columns] for row in _get_rows()])
+        t.extend(map(self.get_row_values, self.values()))
 
         return tabulate(t, headers='firstrow' if self.show_headers else (), tablefmt='plain')
 
 
-    def __repr__(self):
-        return self.__str__()
+
+
+class BasesView(ObjectsView):
+    def __init__(self, system):
+        super().__init__(system._get_bases, system._get_base, system._has_base)
+
+    def __str__(self):
+        def get_roots():
+            return [base for base in self.values() if not base.has_previous()]
+
+        def get_children(base):
+            return [x for x in self.values() if x.has_previous() and x.get_previous() == base]
+
+        def format_base(base):
+            return base.name
+
+
+        roots = get_roots()
+
+        def get_tree(node):
+            children = get_children(node)
+            return OrderedDict(dict(zip(map(format_base, children), map(get_tree, children))))
+
+        trees = [dict([(format_base(root), get_tree(root))]) for root in roots]
+        return '\n'.join(map(LeftAligned(), trees))
 
 
 
 
-######## Class SymbolsView ########
-
-
-class SymbolsView(TableView, Mapping):
-    '''
-    Objects of this class are returned by System.get_symbols method.
-    '''
+class SymbolsView(ObjectsTableView):
     def __init__(self, system, kind=None):
-        columns = ['name']
+        columns = ['name', 'value']
         if kind is None:
-            columns.append('type')
-        columns.append('value')
+            columns.insert(1, 'type')
         super().__init__(
-            show_headers=kind is None,
-            columns=columns
+            system._get_symbols, system._get_symbol, system._has_symbol,
+            columns=columns,
+            show_headers=kind is None
         )
         self.system, self.kind = system, kind
 
 
-    def get_symbols(self):
-        return self.system._get_symbols(self.kind)
-
-    def get_symbol(self, name):
-        return self.system.get_symbol(name, self.kind)
-
-    def has_symbol(self, name):
-        return self.system.has_symbol(name, self.kind)
-
-
-    # Methods to implement TableView interface
-    def get_rows(self):
-        return self.get_symbols()
-
-    def get_column_value(self, symbol, attr):
-        if attr in ('name', 'value'):
-            return super().get_column_value(symbol, attr)
-
-        for symbol_type in _symbol_types:
-            if symbol in self.system._get_symbols(symbol_type):
-                return symbol_type.decode().replace('_', ' ')
-        return None
-
-    # Methods to implement Mapping interface
-    def __getitem__(self, name):
-        return self.get_symbol(name)
-
-    def __iter__(self):
-        return map(attrgetter('name'), self.get_symbols())
-
-    def __len__(self):
-        return len(self.get_symbols())
-
-    def __contains__(self, name):
-        return self.has_symbol(name)
+    def get_row_values(self, symbol):
+        values = [symbol.name, symbol.value]
+        if self.kind is None:
+            for symbol_type in _symbol_types:
+                if symbol in self.system._get_symbols(symbol_type):
+                    break
+            values.insert(1, symbol_type.decode().replace('_', ' '))
+        return values
 
 
 
 
-######## Class BasesView ########
-
-
-class BasesView(TreeView, Mapping):
-    '''
-    Objects of this class are returned by System.get_bases method
-    '''
-    def __init__(self, system):
-        super().__init__()
-        self.system = system
-
-    def get_bases(self):
-        return self.system._get_bases()
-
-    def get_base(self, name):
-        return self.system.get_base(name)
-
-    def has_base(self, name):
-        return self.system.has_base(name)
-
-
-    # Methods to implement the TreeView interface
-    def get_roots(self):
-        return [base for base in self.get_bases() if not base.has_previous()]
-
-    def get_children(self, base):
-        return [x for x in self.get_bases() if x.has_previous() and x.get_previous() == base]
-
-    def format_node(self, base):
-        return base.name
-
-
-    # Methods to implement the mapping interface
-    def __getitem__(self, name):
-        return self.get_base(name)
-
-    def __iter__(self):
-        return map(attrgetter('name'), self.get_bases())
-
-    def __len__(self):
-        return len(self.get_bases())
-
-    def __contains__(self, name):
-        return self.has_base(name)
-
-
-
-
-######## Class MatricesView ########
-
-
-class MatricesView(TableView, Mapping):
+class MatricesView(ObjectsTableView):
     def __init__(self, system):
         super().__init__(
-            columns=['name', 'size']
+            system._get_matrices, system._get_matrix, system._has_matrix,
+            columns=('name', 'size')
         )
-        self.system = system
 
-    def get_matrices(self):
-        return self.system.get_matrices()
-
-    def get_matrix(self, name):
-        return self.system.get_matrix(name)
-
-    def has_matrix(self, name):
-        return self.system.has_matrix(name)
-
-
-    # Methods to implement TableView interface
-    def get_rows(self):
-        return self.get_matrices()
-
-    def get_column_value(self, mat, attr):
-        if attr == 'name':
-            return mat.name
-        return f'{mat.num_rows}x{mat.num_cols}'
-
-
-    # Methods to implement Mapping interface
-    def __getitem__(self, name):
-        return self.get_matrix(name)
-
-    def __iter__(self):
-        return map(attrgetter('name'), self.get_matrices())
-
-    def __len__(self):
-        return len(self.get_matrices())
-
-    def __contains__(self, name):
-        return self.has_matrix(name)
+    def get_row_values(self, matrix):
+        return matrix.name, f'{matrix.num_rows}x{matrix.num_cols}'
 
 
 
 
-######## Class VectorsView ########
-
-
-class VectorsView(TableView):
+class VectorsView(ObjectsTableView):
     def __init__(self, system):
         super().__init__(
-            columns=['name', 'x', 'y', 'z', 'base'], show_headers=True
+            system._get_vectors, system._get_vector, system._has_vector,
+            columns=('name', 'x', 'y', 'z', 'base'),
+            show_headers=True
         )
-        self.system = system
 
-    def get_vectors(self):
-        return self.system._get_vectors()
-
-    def get_vector(self, name):
-        return self.system.get_vector(name)
-
-    def has_vector(self, name):
-        return self.system.has_vector(name)
-
-
-    # Methods to implement the TableView interface
-    def get_rows(self):
-        return self.get_vectors()
-
-    def get_column_value(self, vector, attr):
-        if attr == 'base':
-            return vector.get_base().name
-        return super().get_column_value(vector, attr)
-
-
-    # Methods to implement Mapping interface
-    def __getitem__(self, name):
-        return self.get_vector(name)
-
-    def __iter__(self):
-        return map(attrgetter('name'), self.get_vectors())
-
-    def __len__(self):
-        return len(self.get_vectors())
-
-    def __contains__(self, name):
-        return self.has_vector(name)
+    def get_row_values(self, vector):
+        return vector.x, vector.y, vector.z, vector.base.name
