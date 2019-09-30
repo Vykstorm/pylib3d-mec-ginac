@@ -7,7 +7,6 @@ Description: This module defines the helper class DictView and its subclasses
 
 from collections.abc import Mapping
 from collections import OrderedDict
-from abc import ABC, abstractmethod
 from operator import attrgetter
 from functools import partial
 from tabulate import tabulate
@@ -119,6 +118,7 @@ class SymbolsView(ObjectsTableView):
                     break
             values.insert(1, symbol_type.decode().replace('_', ' '))
         return values
+
 
     def __str__(self):
         if len(self) == 0:
