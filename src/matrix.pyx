@@ -293,6 +293,14 @@ cdef class Matrix:
         return self.transpose()
 
     @property
+    def transposed(self):
+        '''
+        Read only property that returns the transposed matrix
+        :rtype: Matrix
+        '''
+        return self.transpose()
+
+    @property
     def values(self):
         '''
         Read only property that returns all the items of this matrix
