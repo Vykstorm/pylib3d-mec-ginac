@@ -8,39 +8,56 @@ vectors, numeric symbols, ... to latex format
 from lib3d_mec_ginac_ext import SymbolNumeric, Vector3D, Matrix, Expr
 
 
-def to_latex(x):
-    '''to_latex(x: Union[SymbolNumeric, Matrix, Expr]) -> str
-    Converts the input argument to latex
-    :param x: The parameter to convert to latex
-    :type x: SymbolNumeric, Vector, Matrix, Expr
-    :raises TypeError: If the input argument has an invalid type
-    '''
+def _to_latex(x):
     if isinstance(x, SymbolNumeric):
         # Print a numeric symbol
-        tex = x.tex_name or r'\textrm{' + x.name + '}'
+        return x.tex_name or r'\textrm{' + x.name + '}'
 
     elif isinstance(x, Expr):
-        tex = _ginac_print_ex((<Expr>x)._c_handler, latex=True)
+        return _ginac_print_ex((<Expr>x)._c_handler, latex=True)
 
     elif isinstance(x, Matrix):
         n, m = x.shape
         rows = [' & '.join([to_latex(x.get(i, j)) for j in range(0, m)]) for i in range(0, n)]
         return r'\begin{pmatrix}' + '\n' + (r'\\' + '\n').join(rows) + '\n' + r'\end{pmatrix}'
-    else:
-        raise TypeError('Input argument must be a numeric symbol, vector, matrix or expression')
-
-    return tex
 
 
 
-def print_latex(x):
+def to_latex(*args, **kwargs):
     '''
-    This method prints the given object in latex form on IPython directly
-    (it can be useful for jupyter notebooks)
+    This function can be used to format one or multiple objects (matrices, symbols or expresions)
+    to latex.
+    '''
+    if args and isinstance(args[0], str):
+        format, args = args[0], args[1:]
+    else:
+        if kwargs:
+            raise TypeError('No keyword arguments allowed if format string is not specified')
+        format = None
+
+    def parse(x):
+        if isinstance(x, (Expr, SymbolNumeric, Matrix)):
+            return _to_latex(x)
+        return x
+
+    args = tuple(map(parse, args))
+
+    if format is None:
+        return ''.join(map(str, args))
+
+    kwargs = dict(zip(kwargs.keys(), map(parse, kwargs.values())))
+    return str.format(format, *args, **kwargs)
+
+
+
+def print_latex(*args, **kwargs):
+    '''
+    This function calls to_latex with the given arguments and displays the resulting
+    latex code into IPython directly (it can be useful for jupyter notebooks)
     '''
     try:
         from IPython.display import display, Math
     except ImportError:
         raise ImportError('You must have installed IPython to use print_latex function')
 
-    display(Math(to_latex(x)))
+    display(Math(to_latex(*args, **kwargs)))
