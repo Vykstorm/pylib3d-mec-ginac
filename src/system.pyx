@@ -78,6 +78,8 @@ cdef class _System:
             return <void*>self._c_handler.get_Matrix(name)
         if kind == b'vector':
             return <void*>self._c_handler.get_Vector3D(name)
+        if kind == b'point':
+            return <void*>self._c_handler.get_Point(name)
         return NULL
 
 
@@ -204,6 +206,14 @@ cdef class _System:
         return self._c_handler.get_Vectors()
 
 
+    cdef c_vector[c_Point*] _get_c_points(self):
+        '''
+        Get all points defined within this system
+        :rtype: std::vector[Point*]
+        '''
+        return self._c_handler.get_Points()
+
+
 
 
 
@@ -289,6 +299,14 @@ cdef class _System:
         return _vector_from_c(c_vector)
 
 
+    cpdef _get_point(self, name):
+        name = _parse_name(name)
+        cdef c_Point* c_point = <c_Point*>self._get_c_object(name, b'point')
+        if c_point == NULL:
+            raise IndexError(f'Point "{name.decode()}" doesnt exist')
+        return Point(<Py_ssize_t>c_point)
+
+
     cpdef _has_base(self, name):
         return self._has_c_object(_parse_name(name), b'base')
 
@@ -298,10 +316,20 @@ cdef class _System:
     cpdef _has_vector(self, name):
         return self._has_c_object(_parse_name(name), b'vector')
 
+    cpdef _has_point(self, name):
+        return self._has_c_object(_parse_name(name), b'point')
+
 
     cpdef _has_object(self, name):
         name = _parse_name(name)
-        return self._has_symbol(name) or self._has_base(name) or self._has_matrix(name) or self._has_vector(name)
+        if self._has_symbol(name):
+            return True
+        if self._has_base(name):
+            return True
+        if self._has_matrix(name) or self._has_vector(name) or self._has_point(name):
+            return True
+        return False
+
 
 
 
@@ -335,6 +363,9 @@ cdef class _System:
         cdef c_vector[c_Vector3D*] c_vectors = self._c_handler.get_Vectors()
         return [_vector_from_c(c_vector) for c_vector in c_vectors]
 
+    cpdef _get_points(self):
+        cdef c_vector[c_Point*] c_points = self._c_handler.get_Points()
+        return [Point(<Py_ssize_t>c_point) for c_point in c_points]
 
 
 
@@ -576,3 +607,22 @@ cdef class _System:
         (<Vector3D>vector)._owns_c_handler = False
 
         return vector
+
+
+
+    cpdef _new_point(self, name, previous, position):
+        name = _parse_name(name)
+
+        if self._has_object(name):
+            raise IndexError(f'Name "name.decode()" its already in use')
+
+        if not isinstance(previous, Point):
+            previous = self._get_point(previous)
+
+        if not isinstance(position, Vector3D):
+            position = self._get_vector(position)
+
+        cdef c_Point* c_prev_point = (<Point>previous)._c_handler
+        cdef c_Vector3D* c_pos_vector = <c_Vector3D*>(<Vector3D>position)._c_handler
+        cdef c_Point* c_point = self._c_handler.new_Point(name, c_prev_point, c_pos_vector)
+        return Point(<Py_ssize_t>c_point)

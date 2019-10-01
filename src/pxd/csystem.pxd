@@ -18,6 +18,7 @@ from src.pxd.cginac cimport numeric, ex
 from src.pxd.cbase cimport Base
 from src.pxd.cmatrix cimport Matrix
 from src.pxd.cvector3D cimport Vector3D
+from src.pxd.cpoint cimport Point
 
 
 
@@ -70,10 +71,12 @@ cdef extern from "System.h":
         vector[Base*] get_Bases()
         vector[Matrix*] get_Matrixs()
         vector[Vector3D*] get_Vectors()
+        vector[Point*] get_Points()
 
         Base* get_Base(string name)
         Matrix* get_Matrix(string name)
         Vector3D* get_Vector3D(string name)
+        Point* get_Point(string name)
 
         # Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
@@ -86,3 +89,4 @@ cdef extern from "System.h":
         Base* new_Base(string name, string previous, ex a, ex b, ex c, ex rotation_angle)
         Matrix* new_Matrix(Matrix* m)
         void new_Vector3D(Vector3D* v)
+        Point* new_Point(string name, Point* previous, Vector3D* position_vector);

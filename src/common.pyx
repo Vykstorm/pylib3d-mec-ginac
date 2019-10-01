@@ -24,6 +24,7 @@ from src.pxd.csystem cimport System as c_System
 from src.pxd.cbase cimport Base as c_Base
 from src.pxd.cmatrix cimport Matrix as c_Matrix
 from src.pxd.cvector3D cimport Vector3D as c_Vector3D
+from src.pxd.cpoint cimport Point as c_Point
 
 # Import GiNaC C++ classes
 from src.pxd.cginac cimport numeric as c_numeric
@@ -44,7 +45,7 @@ from math import floor
 
 # Python imports (external libraries)
 from asciitree import LeftAligned
-
+from tabulate import tabulate
 
 
 ######## C type aliases ########

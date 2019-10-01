@@ -7,8 +7,6 @@ This module defines the class System
 
 ######## Import statements ########
 
-from functools import lru_cache
-
 from lib3d_mec_ginac_ext import _System
 from .views import SymbolsView, BasesView, MatricesView, VectorsView
 
@@ -126,6 +124,9 @@ class System(_System):
     def get_vector(self, name):
         return self._get_vector(name)
 
+    def get_point(self, name):
+        return self._get_point(name)
+
 
 
     get_coord = get_coordinate
@@ -199,6 +200,9 @@ class System(_System):
     def has_vector(self, name):
         return self._has_vector(name)
 
+    def has_point(self, name):
+        return self._has_point(name)
+
 
     has_coord = has_coordinate
     has_vel = has_velocity
@@ -263,6 +267,9 @@ class System(_System):
 
     def get_vectors(self):
         return VectorsView(self)
+
+    def get_points(self):
+        return self._get_points()
 
 
     get_coords = get_coordinates
@@ -426,8 +433,14 @@ class System(_System):
         '''
         return self._new_matrix(name, args, kwargs)
 
+
     def new_vector(self, name, *args, **kwargs):
         return self._new_vector(name, args, kwargs)
+
+
+    def new_point(self, name, previous, position):
+        return self._new_point(name, previous, position)
+
 
 
     new_coord = new_coordinate
@@ -504,6 +517,10 @@ class System(_System):
     @property
     def vectors(self):
         return self.get_vectors()
+
+    @property
+    def points(self):
+        return self.get_points()
 
 
     coords = coordinates
