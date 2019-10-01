@@ -179,3 +179,25 @@ class VectorsView(ObjectsTableView):
         if len(self) == 0:
             return 'No vectors created yet'
         return super().__str__()
+
+
+
+######## PointsView ########
+
+class PointsView(ObjectsTableView):
+    def __init__(self, system):
+        super().__init__(
+            system._get_points, system._get_point, system._has_point,
+            columns=('name', 'x', 'y', 'z', 'base', 'previous'),
+            show_headers=True
+        )
+
+    def get_row_values(self, point):
+        values = [point.name]
+        if point.has_previous():
+            values.extend(point.offset.values)
+            values.append(point.offset.base.name)
+            values.append(point.previous.name)
+        else:
+            values.extend([None]*5)
+        return values

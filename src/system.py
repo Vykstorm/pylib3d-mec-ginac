@@ -8,7 +8,7 @@ This module defines the class System
 ######## Import statements ########
 
 from lib3d_mec_ginac_ext import _System
-from .views import SymbolsView, BasesView, MatricesView, VectorsView
+from .views import *
 
 
 
@@ -269,7 +269,7 @@ class System(_System):
         return VectorsView(self)
 
     def get_points(self):
-        return self._get_points()
+        return PointsView(self)
 
 
     get_coords = get_coordinates
