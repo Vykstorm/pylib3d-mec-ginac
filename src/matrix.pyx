@@ -182,7 +182,7 @@ cdef class Matrix:
         at ith row and jth column is located at i*num_cols + j index
         :rtype: List[Expr]
         '''
-        return list(iter(self))
+        return list(self)
 
 
 
@@ -298,7 +298,7 @@ cdef class Matrix:
         Read only property that returns all the items of this matrix
         :rtype: List[Expr]
         '''
-        return self.values()
+        return self.get_values()
 
 
 
@@ -313,6 +313,7 @@ cdef class Matrix:
         for i in range(0, n):
             for j in range(0, m):
                 yield _expr_from_c(self._get_c_handler().get(i, j))
+
 
 
     def __getitem__(self, index):
