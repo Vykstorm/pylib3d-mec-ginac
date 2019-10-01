@@ -109,29 +109,7 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
 
 
 
-cdef _ginac_print_basic(c_basic* x, latex=False):
-    # Prints a GiNaC::basic to a Python unicode string
-    # The object will be printed in latex if latex is set to True
-
-    # Create a print context object (associate the output stream to it)
-    cdef c_ginac_printer* c_printer
-    if latex:
-        c_printer = new c_ginac_latex_printer(c_sstream())
-    else:
-        c_printer = new c_ginac_python_printer(c_sstream())
-
-    # Now print the object
-    x.print(c_deref(c_printer))
-
-    # Extract the contents of the output stream and transform it to a unicode string
-    text = (<bytes>(<c_sstream*>&c_printer.s).str()).decode()
-    del c_printer
-
-    return text
-
-
-
-cdef _ginac_print_ex(c_ex* x, latex=False):
+cdef _ginac_print_ex(c_ex x, latex=False):
     # Prints a GiNaC::ex to a Python unicode string
     # The expression will be formatted with latex if latex is set to True
     cdef c_ginac_printer* c_printer

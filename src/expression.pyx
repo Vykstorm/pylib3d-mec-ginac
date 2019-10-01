@@ -53,7 +53,7 @@ cdef class Expr:
 
     def __str__(self):
         # Use GiNac print method
-        x = _ginac_print_ex(&self._c_handler)
+        x = _ginac_print_ex(self._c_handler)
 
         # Try to format the expression as a number (remove decimals if its integer)
         try:

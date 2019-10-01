@@ -12,7 +12,6 @@ __all__ = []
 import lib3d_mec_ginac_ext as _ext
 
 # Other imports
-from inspect import isclass, isfunction
 from functools import wraps
 
 
@@ -21,7 +20,7 @@ for name in dir(_ext):
     if name.startswith('_'):
         continue
     obj = getattr(_ext, name)
-    if not isclass(obj) and not isfunction(obj):
+    if not callable(obj):
         continue
     if obj.__module__ != _ext.__name__:
         continue
