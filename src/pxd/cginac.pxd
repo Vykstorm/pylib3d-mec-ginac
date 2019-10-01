@@ -26,6 +26,9 @@ cdef extern from "ginac/print.h" namespace "GiNaC":
     cdef cppclass print_python(print_context):
         print_python(ostream& os) except +
 
+    cdef cppclass print_latex(print_context):
+        print_latex(ostream& os) except +
+
 
 ######## Class GiNaC::basic ########
 

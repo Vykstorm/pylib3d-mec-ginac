@@ -30,7 +30,9 @@ from src.pxd.cpoint cimport Point as c_Point
 from src.pxd.cginac cimport numeric as c_numeric
 from src.pxd.cginac cimport ex as c_ex
 from src.pxd.cginac cimport basic as c_basic
-from src.pxd.cginac cimport print_python as c_print_context
+from src.pxd.cginac cimport print_context as c_ginac_printer
+from src.pxd.cginac cimport print_python as c_ginac_python_printer
+from src.pxd.cginac cimport print_latex as c_ginac_latex_printer
 from src.pxd.cginac cimport matrix as c_ginac_matrix
 
 
@@ -104,6 +106,47 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
     v._c_handler = new c_Vector3D(x.get_Name(), x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get_Base())
     v._owns_c_handler = True
     return v
+
+
+
+cdef _ginac_print_basic(c_basic* x, latex=False):
+    # Prints a GiNaC::basic to a Python unicode string
+    # The object will be printed in latex if latex is set to True
+
+    # Create a print context object (associate the output stream to it)
+    cdef c_ginac_printer* c_printer
+    if latex:
+        c_printer = new c_ginac_latex_printer(c_sstream())
+    else:
+        c_printer = new c_ginac_python_printer(c_sstream())
+
+    # Now print the object
+    x.print(c_deref(c_printer))
+
+    # Extract the contents of the output stream and transform it to a unicode string
+    text = (<bytes>(<c_sstream*>&c_printer.s).str()).decode()
+    del c_printer
+
+    return text
+
+
+
+cdef _ginac_print_ex(c_ex* x, latex=False):
+    # Prints a GiNaC::ex to a Python unicode string
+    # The expression will be formatted with latex if latex is set to True
+    cdef c_ginac_printer* c_printer
+    if latex:
+        c_printer = new c_ginac_latex_printer(c_sstream())
+    else:
+        c_printer = new c_ginac_python_printer(c_sstream())
+
+    x.print(c_deref(c_printer))
+    text = (<bytes>(<c_sstream*>&c_printer.s).str()).decode()
+    del c_printer
+    return text
+
+
+
 
 
 ######## Python helper variables ########

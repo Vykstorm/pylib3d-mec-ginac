@@ -38,18 +38,22 @@ cdef class Expr:
                 self._c_handler = (<Expr>value)._c_handler
 
 
+    ######## Getters ########
+
+
+
+
+    ######## Properties ########
+
+
+
 
     ######## Metamethods ########
 
 
     def __str__(self):
         # Use GiNac print method
-        cdef c_print_context* c_printer = new c_print_context(c_sstream())
-        self._c_handler.print(c_deref(c_printer))
-        cdef c_string s = (<c_sstream*>&c_printer.s).str()
-        del c_printer
-
-        x = (<bytes>s).decode()
+        x = _ginac_print_ex(&self._c_handler)
 
         # Try to format the expression as a number (remove decimals if its integer)
         try:
