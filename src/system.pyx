@@ -434,7 +434,7 @@ cdef class _System:
                 {'tex_name': b'', 'value': 0.0},
                 args, kwargs
             )
-            name, tex_name, value = _parse_name(name), _parse_tex_name(tex_name), _parse_numeric_value(value)
+            name, tex_name, value = _parse_name(name, check_syntax=True), _parse_tex_name(tex_name), _parse_numeric_value(value)
 
             # Check if a symbol with the name specified already exists
             if self._has_object(name):
@@ -471,7 +471,7 @@ cdef class _System:
                 args, kwargs
             )
 
-            names = [_parse_name(arg) if arg is not None else None for arg in bounded_args[:3]]
+            names = [_parse_name(arg, check_syntax=True) if arg is not None else None for arg in bounded_args[:3]]
             tex_names = [_parse_tex_name(arg) if arg is not None else None for arg in bounded_args[3:6]]
             values = [_parse_numeric_value(arg) for arg in bounded_args[6:9]]
 
@@ -505,7 +505,7 @@ cdef class _System:
 
     cpdef _new_base(self, name, args, kwargs):
         # Validate & parse base name
-        name = _parse_name(name)
+        name = _parse_name(name, check_syntax=True)
 
         # Check if a base with the given name already exists
         if self._has_object(name):
@@ -569,7 +569,7 @@ cdef class _System:
 
     cpdef _new_matrix(self, name, args, kwargs):
         # Validate & parse name argument
-        name = _parse_name(name)
+        name = _parse_name(name, check_syntax=True)
 
         # Check if a matrix with the same name already exists
         if self._has_object(name):
@@ -590,7 +590,7 @@ cdef class _System:
 
     cpdef _new_vector(self, name, args, kwargs):
         # Validate & parse name argument
-        name = _parse_name(name)
+        name = _parse_name(name, check_syntax=True)
 
         # Check if a matrix with the same name already exists
         if self._has_object(name):
@@ -611,7 +611,7 @@ cdef class _System:
 
 
     cpdef _new_point(self, name, previous, position):
-        name = _parse_name(name)
+        name = _parse_name(name, check_syntax=True)
 
         if self._has_object(name):
             raise IndexError(f'Name "name.decode()" its already in use')

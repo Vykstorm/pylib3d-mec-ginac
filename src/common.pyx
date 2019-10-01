@@ -44,6 +44,8 @@ from functools import partial, partialmethod, wraps
 from itertools import chain
 from operator import attrgetter
 from math import floor
+from re import match
+
 
 # Python imports (external libraries)
 from asciitree import LeftAligned
@@ -165,9 +167,14 @@ def _parse_text(text):
     return text
 
 
-def _parse_name(name):
+def _parse_name(name, check_syntax=False):
     '''
     Check that input argument is a valid name for numeric symbols, vectors, matrices, ...
+
+    :param name: The name to be validated
+    :param check_syntax: If True, the name syntax will be validated
+        Name should be composed with one ore more alphanumeric chars and underscores. Also, the
+        first character cannot be a digit.
 
     :raises TypeError: If the input argument is not str or bytes object
     :raises ValueError: If the input argument is not a valid name
@@ -175,9 +182,15 @@ def _parse_name(name):
     :rtype: bytes
     '''
     try:
-        return _parse_text(name)
+        name = _parse_text(name)
     except TypeError:
         raise TypeError('Name must be a str or bytes object')
+
+    if check_syntax and not match(b'^[a-zA-Z_]\w*$', name):
+        raise ValueError(f'"{name.decode()}" is not a valid name')
+
+    return name
+
 
 
 def _parse_tex_name(tex_name):
