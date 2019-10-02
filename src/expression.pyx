@@ -74,6 +74,13 @@ cdef class Expr:
     def __mul__(self, other):
         return _expr_from_c(Expr(self)._c_handler * Expr(other)._c_handler)
 
+    def __pow__(self, other, modulo):
+        if modulo is not None:
+            return NotImplemented
+        return _expr_from_c(c_pow(Expr(self)._c_handler, Expr(other)._c_handler))
+
+
+
     def __truediv__(self, other):
         return _expr_from_c(Expr(self)._c_handler / Expr(other)._c_handler)
 

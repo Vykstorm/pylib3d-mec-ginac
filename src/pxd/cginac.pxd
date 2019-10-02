@@ -63,7 +63,6 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
 
 
 
-
 ######## Class GiNaC::symbol ########
 
 cdef extern from "ginac/symbol.h" namespace "GiNaC":
@@ -87,3 +86,9 @@ cdef extern from "ginac/ginac.h" namespace "GiNaC":
 cdef extern from "ginac/matrix.h" namespace "GiNaC":
     cdef cppclass matrix(basic):
         pass
+
+
+######## Class GiNaC::power ########
+
+cdef extern from "ginac/power.h" namespace "GiNaC":
+    cdef ex pow(ex& base, ex& exp)

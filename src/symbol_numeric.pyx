@@ -129,6 +129,8 @@ cdef class SymbolNumeric:
     def __truediv__(self, other):
         return NotImplemented if isinstance(other, Expr) else Expr(self) / Expr(other)
 
+    def __pow__(self, other, modulo):
+        return pow(Expr(self), other, modulo)
 
 
 

@@ -35,6 +35,9 @@ from src.pxd.cginac cimport print_python as c_ginac_python_printer
 from src.pxd.cginac cimport print_latex as c_ginac_latex_printer
 from src.pxd.cginac cimport matrix as c_ginac_matrix
 
+# Import GiNaC C++ functions
+from src.pxd.cginac cimport pow as c_pow
+
 
 # Python imports (builtins)
 from collections import OrderedDict
