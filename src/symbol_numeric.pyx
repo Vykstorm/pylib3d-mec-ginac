@@ -124,7 +124,7 @@ cdef class SymbolNumeric:
         return NotImplemented if isinstance(other, Expr) else Expr(self) - Expr(other)
 
     def __mul__(self, other):
-        return NotImplemented if isinstance(other, Expr) else Expr(self) * Expr(other)
+        return NotImplemented if isinstance(other, (Expr, Matrix)) else Expr(self) * Expr(other)
 
     def __truediv__(self, other):
         return NotImplemented if isinstance(other, Expr) else Expr(self) / Expr(other)

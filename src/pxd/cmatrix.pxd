@@ -34,6 +34,13 @@ cdef extern from "Matrix.h":
         # Setters
         void set(int i, int j, ex& value)
 
-        # Operations
+        # Arithmetic operations
+        Matrix operator+(Matrix& other)
+        Matrix operator-(Matrix& other)
+        Matrix operator*(Matrix& other)
+        Matrix operator*(ex& other)
+
+
+        # Misc operations
         Matrix transpose()
         Matrix expand()

@@ -72,6 +72,8 @@ cdef class Expr:
         return _expr_from_c(Expr(self)._c_handler - Expr(other)._c_handler)
 
     def __mul__(self, other):
+        if isinstance(other, Matrix):
+            return NotImplemented
         return _expr_from_c(Expr(self)._c_handler * Expr(other)._c_handler)
 
     def __pow__(self, other, modulo):
