@@ -13,6 +13,22 @@ def to_latex(*args, **kwargs):
     '''
     This function can be used to format one or multiple objects (matrices, symbols or expresions)
     to latex.
+
+    :Example:
+
+    s=System()
+    a = s.new_param('a', r'\alpha')
+    b = s.new_param('b', r'\beta')
+    c = s.new_param('c', r'\gamma')
+    v = s.new_vector('v', a, b, c)
+
+    to_latex(a) # '\\alpha'
+    to_latex(a, b) # '\\alpha\\beta'
+    to_latex(a, r'\times', c) # '\\alpha\\times\\beta'
+    to_latex(r'{} \bmod {}^2 + {}', a, b, c) # '\\alpha \bmod \\beta^2 + \\gamma'
+
+    to_latex(v) # '\\begin{pmatrix}\n\\alpha\\\\\n\\beta\\\\\n\\gamma\n\\end{pmatrix}'
+    to_latex(v.module) # '\\sqrt{\\beta^{2}+\\gamma^{2}+\\alpha^{2}}'
     '''
 
     def parse(x):
