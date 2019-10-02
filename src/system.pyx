@@ -24,7 +24,7 @@ cdef class _System:
     ######## C Attributes ########
 
     cdef c_System* _c_handler
-
+    cdef bint _autogen_latex_names
 
 
     ######## Constructor & Destructor ########
@@ -33,6 +33,8 @@ cdef class _System:
     def __cinit__(self):
         # Initialize C++ System object
         self._c_handler = new c_System(outError)
+
+        self._autogen_latex_names = True
 
 
     def __dealloc__(self):
@@ -434,7 +436,15 @@ cdef class _System:
                 {'tex_name': b'', 'value': 0.0},
                 args, kwargs
             )
-            name, tex_name, value = _parse_name(name, check_syntax=True), _parse_tex_name(tex_name), _parse_numeric_value(value)
+            name = _parse_name(name, check_syntax=True)
+            value = _parse_numeric_value(value)
+
+            if tex_name or not self._autogen_latex_names:
+                tex_name = _parse_text(tex_name)
+            else:
+                # Auto generate latex name
+                tex_name = _gen_latex_name(name)
+
 
             # Check if a symbol with the name specified already exists
             if self._has_object(name):
@@ -452,7 +462,8 @@ cdef class _System:
 
 
         elif kind.endswith(b'coordinate'):
-            # Parse optional arguments
+            # Bind input arguments to signature
+
             if not kwargs and len(args) in range(1, 10):
                 kwargs['name'] = args.pop(0)
 
@@ -466,26 +477,35 @@ cdef class _System:
 
             bounded_args = _apply_signature(
                 ['name', 'vel_name', 'acc_name', 'tex_name', 'vel_tex_name', 'acc_tex_name', 'value', 'vel_value', 'acc_value'],
-                {'vel_name': None, 'acc_name': None, 'tex_name': None, 'vel_tex_name': None, 'acc_tex_name': None,
+                {'vel_name': b'', 'acc_name': b'', 'tex_name': b'', 'vel_tex_name': b'', 'acc_tex_name': b'',
                 'value': 0.0, 'vel_value': 0.0, 'acc_value': 0.0},
                 args, kwargs
             )
 
-            names = [_parse_name(arg, check_syntax=True) if arg is not None else None for arg in bounded_args[:3]]
-            tex_names = [_parse_tex_name(arg) if arg is not None else None for arg in bounded_args[3:6]]
+            # Validate & parse coordinate names
+            names = [_parse_name(bounded_args[0], check_syntax=True)]
+            names += [_parse_name(arg) if arg else None for arg in bounded_args[1:3]]
+            names[1:] = [name or b'd'*k + names[0] for k, name in enumerate(names[1:], 1)]
+
+            # Validate & parse latex names
+            tex_names = [_parse_text(arg) for arg in bounded_args[3:6]]
+
+            # Validate & parse values
             values = [_parse_numeric_value(arg) for arg in bounded_args[6:9]]
 
-            names[1:] = [name or b'd'*k + names[0] for k, name in enumerate(names[1:], 1)]
-            if tex_names[0]:
+            # Auto generate latex
+            if not tex_names[0] and self._autogen_latex_names:
+                tex_names[0] = _gen_latex_name(names[0])
+
+            if tex_names[0] and self._autogen_latex_names:
                 tex_names[1:] = [tex_name or b'\\' + b'd'*k + b'ot{' + tex_names[0] + b'}' for k, tex_name in enumerate(tex_names[1:], 1)]
-            else:
-                tex_names = [tex_name or b'' for tex_name in tex_names]
 
 
             # Check if the name of the coordinate or its components is already in use by other symbol
             for name in names:
                 if self._has_object(name):
                     raise IndexError(f'Name "{name.decode()}" its already in use')
+
 
             # Apply a different constructor for each symbol type
             if kind.startswith(b'aux_'):
