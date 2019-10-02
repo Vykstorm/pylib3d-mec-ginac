@@ -45,7 +45,12 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
         ex() except +
         ex(const double value) except +
         ex(const basic& value) except +
+
+        ex eval() const
+
         void print(print_context&, unsigned level=0) const
+
+
 
 
 ######## Class GiNaC::symbol ########

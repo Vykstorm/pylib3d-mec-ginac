@@ -42,10 +42,17 @@ cdef class Expr:
 
 
 
+    ######## Evaluation ########
+
+
+    cpdef eval(self):
+        return _expr_from_c(self._c_handler.eval())
+
+
 
     ######## Properties ########
 
-
+    
 
 
     ######## Metamethods ########
