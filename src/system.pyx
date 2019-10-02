@@ -646,3 +646,17 @@ cdef class _System:
         cdef c_Vector3D* c_pos_vector = <c_Vector3D*>(<Vector3D>position)._c_handler
         cdef c_Point* c_point = self._c_handler.new_Point(name, c_prev_point, c_pos_vector)
         return Point(<Py_ssize_t>c_point)
+
+
+
+
+
+    ######## Mixin ########
+
+    cpdef _set_autogen_latex_names(self, enabled):
+        if not isinstance(enabled, bool):
+            raise TypeError('Input argument should be a boolean value')
+        self._autogen_latex_names = enabled
+
+    cpdef _is_autogen_latex_names_enabled(self):
+        return self._autogen_latex_names

@@ -530,6 +530,15 @@ class System(_System):
 
 
 
+    @property
+    def autogen_latex_names(self):
+        return self._is_autogen_latex_names_enabled()
+
+    @autogen_latex_names.setter
+    def autogen_latex_names(self, enabled):
+        self._set_autogen_latex_names(enabled)
+
+
 
 
     ######## Mixin methods ########
