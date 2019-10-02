@@ -65,21 +65,21 @@ cdef class Expr:
     def __pos__(self):
         return _expr_from_c(+self._c_handler)
 
-    def __add__(self, other):
-        return _expr_from_c(Expr(self)._c_handler + Expr(other)._c_handler)
+    def __add__(left_op, right_op):
+        return _expr_from_c(Expr(left_op)._c_handler + Expr(right_op)._c_handler)
 
-    def __sub__(self, other):
-        return _expr_from_c(Expr(self)._c_handler - Expr(other)._c_handler)
+    def __sub__(left_op, right_op):
+        return _expr_from_c(Expr(left_op)._c_handler - Expr(right_op)._c_handler)
 
-    def __mul__(self, other):
-        if isinstance(other, Matrix):
+    def __mul__(left_op, right_op):
+        if isinstance(right_op, Matrix):
             return NotImplemented
-        return _expr_from_c(Expr(self)._c_handler * Expr(other)._c_handler)
+        return _expr_from_c(Expr(left_op)._c_handler * Expr(right_op)._c_handler)
 
-    def __pow__(self, other, modulo):
+    def __pow__(base, exp, modulo):
         if modulo is not None:
             return NotImplemented
-        return _expr_from_c(c_pow(Expr(self)._c_handler, Expr(other)._c_handler))
+        return _expr_from_c(c_pow(Expr(base)._c_handler, Expr(exp)._c_handler))
 
 
 
