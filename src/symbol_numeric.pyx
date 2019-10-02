@@ -108,7 +108,47 @@ cdef class SymbolNumeric:
 
 
 
-    ######## Metamethods ########
+    ######## Arithmetic operations ########
+
+
+    def __neg__(self):
+        return -Expr(self)
+
+    def __pos__(self):
+        return +Expr(self)
+
+    def __add__(self, other):
+        return NotImplemented if isinstance(other, Expr) else Expr(self) + Expr(other)
+
+    def __sub__(self, other):
+        return NotImplemented if isinstance(other, Expr) else Expr(self) - Expr(other)
+
+    def __mul__(self, other):
+        return NotImplemented if isinstance(other, Expr) else Expr(self) * Expr(other)
+
+    def __truediv__(self, other):
+        return NotImplemented if isinstance(other, Expr) else Expr(self) / Expr(other)
+
+
+
+
+    ######## Relational operations ########
+
+    def __eq__(self, other):
+        '''
+        Check if two objects refer to the same numeric symbol (have the same name)
+        :param other: Other object to compare this instance with
+        :return: True if the specified object is also an instance of the class SymbolNumeric and have the same name as this object. False otherwise.
+        :rtype: bool
+        '''
+        if not isinstance(other, SymbolNumeric):
+            return False
+        return self.name == other.name
+
+
+
+
+    ######## Number conversions ########
 
 
     def __float__(self):
@@ -134,6 +174,11 @@ cdef class SymbolNumeric:
         return complex(self._c_handler.get_value().real().to_double(), self._c_handler.get_value().imag().to_double())
 
 
+
+
+    ######## Hashing ########
+
+
     def __hash__(self):
         '''
         Returns the hash value for this symbol. One instance of this class is equal to
@@ -142,16 +187,8 @@ cdef class SymbolNumeric:
         return hash((SymbolNumeric, self.name))
 
 
-    def __eq__(self, other):
-        '''
-        Check if two objects refer to the same numeric symbol (have the same name)
-        :param other: Other object to compare this instance with
-        :return: True if the specified object is also an instance of the class SymbolNumeric and have the same name as this object. False otherwise.
-        :rtype: bool
-        '''
-        if not isinstance(other, SymbolNumeric):
-            return False
-        return self.name == other.name
+
+    ######## Printing ########
 
 
     def __str__(self):

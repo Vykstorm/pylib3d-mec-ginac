@@ -28,7 +28,7 @@ cdef class Expr:
     def __cinit__(self, value=None):
         if value is not None:
             if not isinstance(value, (int, float, SymbolNumeric, Expr)):
-                raise TypeError
+                raise TypeError(f'"{type(value)} object cant be converted to an expression"')
 
             if isinstance(value, (int, float)):
                 self._c_handler = c_ex(<double>float(value))
@@ -52,10 +52,35 @@ cdef class Expr:
 
     ######## Properties ########
 
-    
 
 
-    ######## Metamethods ########
+
+
+    ######## Arithmetic operations ########
+
+
+    def __neg__(self):
+        return _expr_from_c(-self._c_handler)
+
+    def __pos__(self):
+        return _expr_from_c(+self._c_handler)
+
+    def __add__(self, other):
+        return _expr_from_c(Expr(self)._c_handler + Expr(other)._c_handler)
+
+    def __sub__(self, other):
+        return _expr_from_c(Expr(self)._c_handler - Expr(other)._c_handler)
+
+    def __mul__(self, other):
+        return _expr_from_c(Expr(self)._c_handler * Expr(other)._c_handler)
+
+    def __truediv__(self, other):
+        return _expr_from_c(Expr(self)._c_handler / Expr(other)._c_handler)
+
+
+
+
+    ######## Printing ########
 
 
     def __str__(self):

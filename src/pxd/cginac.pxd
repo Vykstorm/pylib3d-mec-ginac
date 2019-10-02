@@ -42,12 +42,23 @@ cdef extern from "ginac/basic.h" namespace "GiNaC":
 
 cdef extern from "ginac/ex.h" namespace "GiNaC":
     cdef cppclass ex:
+        # Constructors
         ex() except +
         ex(const double value) except +
         ex(const basic& value) except +
 
+        # Evaluation
         ex eval() const
 
+        # Arithmetic operations
+        ex operator-()
+        ex operator+()
+        ex operator+(ex& other)
+        ex operator-(ex& other)
+        ex operator*(ex& other)
+        ex operator/(ex& other)
+
+        # Printing
         void print(print_context&, unsigned level=0) const
 
 
