@@ -8,26 +8,28 @@ vectors, numeric symbols, ... to latex format
 from lib3d_mec_ginac_ext import SymbolNumeric, Vector3D, Matrix, Expr
 
 
-def _to_latex(x):
-    if isinstance(x, SymbolNumeric):
-        # Print a numeric symbol
-        return x.tex_name or r'\textrm{' + x.name + '}'
-
-    elif isinstance(x, Expr):
-        return _ginac_print_ex((<Expr>x)._c_handler, latex=True)
-
-    elif isinstance(x, Matrix):
-        n, m = x.shape
-        rows = [' & '.join([to_latex(x.get(i, j)) for j in range(0, m)]) for i in range(0, n)]
-        return r'\begin{pmatrix}' + '\n' + (r'\\' + '\n').join(rows) + '\n' + r'\end{pmatrix}'
-
-
 
 def to_latex(*args, **kwargs):
     '''
     This function can be used to format one or multiple objects (matrices, symbols or expresions)
     to latex.
     '''
+
+    def parse(x):
+        if isinstance(x, SymbolNumeric):
+            # Print a numeric symbol
+            return x.tex_name or r'\textrm{' + x.name + '}'
+
+        elif isinstance(x, Expr):
+            return _ginac_print_ex((<Expr>x)._c_handler, latex=True)
+
+        elif isinstance(x, Matrix):
+            n, m = x.shape
+            rows = [' & '.join([to_latex(x.get(i, j)) for j in range(0, m)]) for i in range(0, n)]
+            return r'\begin{pmatrix}' + '\n' + (r'\\' + '\n').join(rows) + '\n' + r'\end{pmatrix}'
+        return x
+
+
     if args and isinstance(args[0], str):
         format, args = args[0], args[1:]
     else:
@@ -35,10 +37,6 @@ def to_latex(*args, **kwargs):
             raise TypeError('No keyword arguments allowed if format string is not specified')
         format = None
 
-    def parse(x):
-        if isinstance(x, (Expr, SymbolNumeric, Matrix)):
-            return _to_latex(x)
-        return x
 
     args = tuple(map(parse, args))
 
