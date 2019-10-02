@@ -78,6 +78,23 @@ cdef class Expr:
         return _expr_from_c(Expr(self)._c_handler / Expr(other)._c_handler)
 
 
+    def __iadd__(self, other):
+        self._c_handler = self._c_handler + Expr(other)._c_handler
+        return self
+
+    def __isub__(self, other):
+        self._c_handler = self._c_handler - Expr(other)._c_handler
+        return self
+
+    def __imul__(self, other):
+        self._c_handler = self._c_handler * Expr(other)._c_handler
+        return self
+
+    def __itruediv__(self, other):
+        self._c_handler = self._c_handler / Expr(other)._c_handler
+        return self
+
+
 
 
     ######## Printing ########
