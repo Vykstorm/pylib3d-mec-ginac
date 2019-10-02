@@ -483,9 +483,9 @@ cdef class _System:
             )
 
             # Validate & parse coordinate names
-            names = [_parse_name(bounded_args[0], check_syntax=True)]
-            names += [_parse_name(arg) if arg else None for arg in bounded_args[1:3]]
-            names[1:] = [name or b'd'*k + names[0] for k, name in enumerate(names[1:], 1)]
+            names = [_parse_text(arg) for arg in bounded_args[:3]]
+            names[0] = _parse_name(names[0], check_syntax=True)
+            names[1:] = [_parse_name(name, check_syntax=True) if name else (b'd'*k + names[0]) for k, name in enumerate(names[1:], 1)]
 
             # Validate & parse latex names
             tex_names = [_parse_text(arg) for arg in bounded_args[3:6]]
@@ -494,11 +494,11 @@ cdef class _System:
             values = [_parse_numeric_value(arg) for arg in bounded_args[6:9]]
 
             # Auto generate latex
-            if not tex_names[0] and self._autogen_latex_names:
-                tex_names[0] = _gen_latex_name(names[0])
-
-            if tex_names[0] and self._autogen_latex_names:
-                tex_names[1:] = [tex_name or b'\\' + b'd'*k + b'ot{' + tex_names[0] + b'}' for k, tex_name in enumerate(tex_names[1:], 1)]
+            if self._autogen_latex_names:
+                if not tex_names[0]:
+                    tex_names[0] = _gen_latex_name(names[0])
+                if tex_names[0]:
+                    tex_names[1:] = [tex_name or b'\\' + b'd'*k + b'ot{' + tex_names[0] + b'}' for k, tex_name in enumerate(tex_names[1:], 1)]
 
 
             # Check if the name of the coordinate or its components is already in use by other symbol
