@@ -17,28 +17,23 @@ from src.pxd.cginac cimport matrix, ex
 ######## Class Matrix ########
 cdef extern from "Matrix.h":
     cdef cppclass Matrix:
+        # Constructors
         Matrix() except +
         Matrix(long rows, long cols) except +
         Matrix(matrix m) except +
 
+        # Getters
         string get_name()
         void set_name(string name)
-
-        matrix get_matrix()
-
         long rows()
         long cols()
 
+        matrix get_matrix()
         ex& get(int i, int j)
+
+        # Setters
         void set(int i, int j, ex& value)
 
-
-        Matrix get_row(int i)
-        Matrix get_col(int j)
-        void set_row(const int i, Matrix values)
-        void set_col(const int j, Matrix values)
-        Matrix remove_row(const int i)
-        Matrix remove_col(const int j)
-
+        # Operations
         Matrix transpose()
         Matrix expand()

@@ -18,7 +18,7 @@ from src.pxd.cginac cimport ex
 
 cdef extern from "Base.h":
     cdef cppclass Base:
-        ## Getters
+        # Getters
         string get_name()
         # Matrix get_Rotation_Tupla()
         Base* get_Previous_Base()
