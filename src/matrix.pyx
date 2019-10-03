@@ -151,9 +151,14 @@ cdef class Matrix:
         return (<bytes>self._get_c_handler().get_name()).decode()
 
 
+    def __len__(self):
+        return self.get_size()
+
+
 
 
     ######## Accessing values ########
+
 
     def _parse_row_index(self, i):
         if not isinstance(i, int):
@@ -201,6 +206,13 @@ cdef class Matrix:
 
 
 
+    def __getitem__(self, index):
+        if not isinstance(index, tuple) or len(index) != 2:
+            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
+        return self.get(*index)
+
+
+
 
     ######## Changing values ########
 
@@ -220,8 +232,28 @@ cdef class Matrix:
 
 
 
+    def __setitem__(self, index, value):
+        if not isinstance(index, tuple) or len(index) != 2:
+            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
+        i, j = index
+        self.set(i, j, value)
+
+
+
+    ######## Iteration ########
+
+
+    def __iter__(self):
+        n, m = self.get_shape()
+        for i in range(0, n):
+            for j in range(0, m):
+                yield _expr_from_c(self._get_c_handler().get(i, j))
+
+
+
 
     ######## Arithmetic operations ########
+
 
     def __pos__(self):
         return _matrix_from_c_value(c_deref(self._get_c_handler()))
@@ -269,7 +301,7 @@ cdef class Matrix:
     ######## Misc operations ########
 
 
-    def transpose(self):
+    cpdef transpose(self):
         '''
         Tranpose this matrix
         :returns: Returns this matrix transposed
@@ -283,6 +315,9 @@ cdef class Matrix:
         Alias of transpose
         '''
         return self.transpose()
+
+
+
 
 
 
@@ -347,6 +382,10 @@ cdef class Matrix:
         return self.transpose()
 
     @property
+    def module(self):
+        return self.get_module()
+
+    @property
     def values(self):
         '''
         Read only property that returns all the items of this matrix
@@ -356,30 +395,7 @@ cdef class Matrix:
 
 
 
-    ######## Metamethods ########
-
-    def __len__(self):
-        return self.get_size()
-
-
-    def __iter__(self):
-        n, m = self.get_shape()
-        for i in range(0, n):
-            for j in range(0, m):
-                yield _expr_from_c(self._get_c_handler().get(i, j))
-
-
-
-    def __getitem__(self, index):
-        if not isinstance(index, tuple) or len(index) != 2:
-            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
-        return self.get(*index)
-
-    def __setitem__(self, index, value):
-        if not isinstance(index, tuple) or len(index) != 2:
-            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
-        i, j = index
-        self.set(i, j, value)
+    ######## Printing ########
 
 
     def __str__(self):
