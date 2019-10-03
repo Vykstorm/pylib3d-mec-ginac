@@ -191,9 +191,6 @@ cdef class Vector3D(Matrix):
             self.set(index, value)
 
 
-    def __str__(self):
-        return '[ ' + ', '.join(map(str, self)) + ' ]'
-
 
 
 

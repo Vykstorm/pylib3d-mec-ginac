@@ -151,8 +151,28 @@ cdef class Matrix:
         return (<bytes>self._get_c_handler().get_name()).decode()
 
 
+
     def __len__(self):
         return self.get_size()
+
+
+    def __getattr__(self, key):
+        if key not in ('get_module', 'get_skew', 'module', 'skew') or type(self) != Matrix:
+            raise AttributeError(f'"Matrix" object has no attribute "{key}"')
+        if self.get_size() != 3:
+            raise AttributeError(f'Only 1x3 or 3x1 matrices have access to "{key}" method or property')
+
+        values = self.get_values()
+        cdef c_ex x = (<Expr>values[0])._c_handler
+        cdef c_ex y = (<Expr>values[1])._c_handler
+        cdef c_ex z = (<Expr>values[2])._c_handler
+        return getattr(_vector_from_c_value(c_Vector3D(b'', x, y, z, NULL)), key)
+
+
+    def __dir__(self):
+        if self.get_size() != 3 or type(self) != Matrix:
+            return super().__dir__()
+        return super().__dir__() + ['get_module', 'get_skew', 'module', 'skew']
 
 
 
@@ -381,9 +401,6 @@ cdef class Matrix:
         '''
         return self.transpose()
 
-    @property
-    def module(self):
-        return self.get_module()
 
     @property
     def values(self):
@@ -399,25 +416,30 @@ cdef class Matrix:
 
 
     def __str__(self):
-        values = tuple(map(str, self))
-        n, m = self.shape
+        values = tuple(map(str, self.get_values()))
+        n, m = self.get_shape()
+        if m == 1:
+            m, n = n, 1
 
         col_sizes = [max([len(values[i*m + j]) for i in range(0, n)])+1 for j in range(0, m)]
+        delimiters = '[]' if n == 1 or m == 1 else '\u2502'*2
 
         lines = []
         for i in range(0, n):
             line = ' '.join([values[i*m + j].rjust(col_size) for j, col_size in zip(range(0, m), col_sizes)])
-            line = '\u2502' + line + ' \u2502'
+            line = delimiters[0] + line + ' ' + delimiters[1]
             lines.append(line)
 
-        # Insert decoratives
-        row_width = len(lines[0]) - 2
-        head = '\u256d' + ' '*row_width + '\u256e'
-        tail = '\u2570' + ' '*row_width + '\u256f'
-        lines.insert(0, head)
-        lines.append(tail)
+        if n > 1 and m > 1:
+            # Insert decoratives
+            row_width = len(lines[0]) - 2
+            head = '\u256d' + ' '*row_width + '\u256e'
+            tail = '\u2570' + ' '*row_width + '\u256f'
+            lines.insert(0, head)
+            lines.append(tail)
 
         return '\n'.join(lines)
+
 
     def __repr__(self):
         return self.__str__()
