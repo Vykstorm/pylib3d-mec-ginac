@@ -223,6 +223,12 @@ cdef class Matrix:
 
     ######## Arithmetic operations ########
 
+    def __pos__(self):
+        return _matrix_from_c_value(c_deref(self._get_c_handler()))
+
+    def __neg__(self):
+        return _matrix_from_c_value(-c_deref(self._get_c_handler()))
+
 
     def __add__(Matrix self, other):
         if not isinstance(other, Matrix):
@@ -243,16 +249,18 @@ cdef class Matrix:
 
 
     def __mul__(left_op, right_op):
-        if not isinstance(left_op, Matrix) and not isinstance(right_op, Matrix):
-            raise TypeError
         if isinstance(left_op, Matrix) and isinstance(right_op, Matrix):
-            raise NotImplementedError
+            return _matrix_from_c_value(
+                c_deref((<Matrix>left_op)._get_c_handler()) * c_deref((<Matrix>right_op)._get_c_handler())
+            )
 
-        if isinstance(right_op, Matrix):
-            left_op, right_op = right_op, Expr(left_op)
-        else:
+        if not isinstance(left_op, Matrix) and not isinstance(right_op, Matrix):
+            raise TypeError(f'Unsupported operand type for @: {type(left_op).__name__} and {type(right_op).__name__}')
+
+        if isinstance(left_op, Matrix):
             right_op = Expr(right_op)
-
+        else:
+            left_op, right_op = right_op, Expr(left_op)
         return _matrix_from_c_value(c_deref((<Matrix>left_op)._get_c_handler()) * (<Expr>right_op)._c_handler)
 
 
