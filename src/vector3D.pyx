@@ -97,42 +97,6 @@ cdef class Vector3D(Matrix):
         return _matrix_from_c_value(c_skew)
 
 
-    def _parse_row_index(self, i):
-        if not isinstance(i, int):
-            raise TypeError('Matrix indices must be numbers')
-        if i not in range(0, 3):
-            raise IndexError('Row index out of bounds')
-        return i
-
-    def _parse_col_index(self, i):
-        if not isinstance(i, int):
-            raise TypeError('Matrix indices must be numbers')
-        if i != 0:
-            raise IndexError('Column index out of bounds')
-        return i
-
-
-    def get(self, *args):
-        if len(args) not in (1, 2):
-            raise TypeError('Invalid number of indices specified')
-        if len(args) == 1:
-            return super().get(args[0], 0)
-        return super().get(*args)
-
-
-
-
-    ######## Change values ########
-
-
-    def set(self, *args):
-        if len(args) not in (2, 3):
-            raise TypeError
-        if len(args) == 2:
-            return super().set(args[0], 0, args[1])
-        return super().set(*args)
-
-
 
 
     ######## Properties ########
@@ -173,22 +137,6 @@ cdef class Vector3D(Matrix):
     @z.setter
     def z(self, value):
         self.set(2, value)
-
-
-
-
-    ######## Metamethods ########
-
-    def __getitem__(self, index):
-        if isinstance(index, tuple):
-            return super().__getitem__(index)
-        return self.get(index)
-
-    def __setitem__(self, index, value):
-        if isinstance(index, tuple):
-            super().__setitem__(index, value)
-        else:
-            self.set(index, value)
 
 
 
