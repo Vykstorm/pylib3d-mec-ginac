@@ -79,6 +79,8 @@ cdef class Vector3D(Matrix):
         return self._c_handler
 
 
+
+
     ######## Getters ########
 
 
@@ -97,6 +99,53 @@ cdef class Vector3D(Matrix):
         return _matrix_from_c_value(c_skew)
 
 
+
+
+    ######## Arithmetic operations ########
+
+
+    def __pos__(self):
+        return _vector_from_c_value(c_deref(<c_Vector3D*>self._get_c_handler()))
+
+    def __neg__(self):
+        return _vector_from_c_value(-c_deref(<c_Vector3D*>self._get_c_handler()))
+
+
+    def __add__(Vector3D self, other):
+        if not isinstance(other, Vector3D):
+            raise TypeError(f'Unsupported operand type for +: Vector3D and {type(other).__name__}')
+        return _vector_from_c_value(
+            c_deref(<c_Vector3D*>self._get_c_handler()) +\
+            c_deref(<c_Vector3D*>(<Vector3D>other)._get_c_handler())
+        )
+
+
+    def __sub__(Vector3D self, other):
+        if not isinstance(other, Vector3D):
+            raise TypeError(f'Unsupported operand type for -: Vector3D and {type(other).__name__}')
+        return _vector_from_c_value(
+            c_deref(<c_Vector3D*>self._get_c_handler()) -\
+            c_deref(<c_Vector3D*>(<Vector3D>other)._get_c_handler())
+        )
+
+
+    def __mul__(left_op, right_op):
+        if isinstance(left_op, Vector3D) and isinstance(right_op, Vector3D):
+            return _expr_from_c(
+                c_deref(<c_Vector3D*>(<Vector3D>left_op)._get_c_handler()) *\
+                c_deref(<c_Vector3D*>(<Vector3D>right_op)._get_c_handler())
+            )
+
+        if not isinstance(left_op, Vector3D) and not isinstance(right_op, Vector3D):
+            raise TypeError(f'Unsupported operand type for *: {type(left_op).__name__} and {type(right_op).__name__}')
+
+        if isinstance(left_op, Vector3D):
+            right_op = Expr(right_op)
+        else:
+            left_op, right_op = right_op, Expr(left_op)
+
+        # TODO
+        raise NotImplementedError()
 
 
     ######## Properties ########

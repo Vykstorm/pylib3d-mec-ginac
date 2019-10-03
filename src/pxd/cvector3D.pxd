@@ -29,3 +29,11 @@ cdef extern from "Vector3D.h":
 
         ex get_module()
         Matrix skew()
+
+        # Arithmetic operations
+        Vector3D operator-()
+        Vector3D operator+(Vector3D&)
+        Vector3D operator-(Vector3D&)
+        ex operator*(Vector3D&)
+        Vector3D operator^(Vector3D&)
+    Vector3D operator*(Vector3D&, ex&)

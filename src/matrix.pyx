@@ -315,12 +315,6 @@ cdef class Matrix:
         return _matrix_from_c_value(c_deref(self._get_c_handler()) - c_deref((<Matrix>other)._get_c_handler()))
 
 
-    def __matmul__(Matrix self, other):
-        if not isinstance(other, Matrix):
-            raise TypeError(f'Unsupported operand type for @: Matrix and {type(other).__name__}')
-        return _matrix_from_c_value(c_deref(self._get_c_handler()) * c_deref((<Matrix>other)._get_c_handler()))
-
-
     def __mul__(left_op, right_op):
         if isinstance(left_op, Matrix) and isinstance(right_op, Matrix):
             return _matrix_from_c_value(
@@ -328,7 +322,7 @@ cdef class Matrix:
             )
 
         if not isinstance(left_op, Matrix) and not isinstance(right_op, Matrix):
-            raise TypeError(f'Unsupported operand type for @: {type(left_op).__name__} and {type(right_op).__name__}')
+            raise TypeError(f'Unsupported operand type for *: {type(left_op).__name__} and {type(right_op).__name__}')
 
         if isinstance(left_op, Matrix):
             right_op = Expr(right_op)
