@@ -183,14 +183,20 @@ cdef class Matrix:
     def _parse_row_index(self, i):
         if not isinstance(i, int):
             raise TypeError('Matrix indices must be numbers')
-        if i not in range(0, self.get_num_rows()):
+        n = self.get_num_rows()
+        if i < 0:
+            i += n
+        if i not in range(0, n):
             raise IndexError('Row index out of bounds')
         return i
 
     def _parse_col_index(self, j):
         if not isinstance(j, int):
             raise TypeError('Matrix indices must be numbers')
-        if j not in range(0, self.get_num_cols()):
+        m = self.get_num_cols()
+        if j < 0:
+            j += m
+        if j not in range(0, m):
             raise IndexError('Column index out of bounds')
         return j
 
