@@ -211,25 +211,27 @@ cdef class Matrix:
 
 
 
-    def get(self, i, j):
-        '''
-        Get the value at ith row and jth column
-        :param int i: The row index
-        :param int j: The column index
-        :returns: The item at the given position
-        :rtype: Expr
-        :raises TypeError: If indices are not int objects
-        :raises IndexError: If indices are out of bounds
-        '''
+    def get(self, i, j=None):
+        if j is None:
+            n, m = self.get_shape()
+            if n > 1 and m > 1:
+                raise TypeError('Missing column index')
+            j = 0
+            if n == 1:
+                i, j = j, i
+
         i, j = self._parse_indices(i, j)
         return _expr_from_c(self._get_c_handler().get(i, j))
 
 
 
     def __getitem__(self, index):
-        if not isinstance(index, tuple) or len(index) != 2:
-            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
-        return self.get(*index)
+        if isinstance(index, tuple):
+            if len(index) not in (1, 2):
+                raise TypeError('Wrong number of indices')
+            return self.get(*index)
+        return self.get(index)
+
 
 
 
@@ -237,14 +239,24 @@ cdef class Matrix:
     ######## Changing values ########
 
 
-    def set(self, i, j, value):
-        '''
-        Set the value at ith row and jth column
-        :param int i: The row index
-        :param int j: The column index
-        :raises TypeError: If indices are not int objects
-        :raises IndexError: If indices are out of bounds
-        '''
+    def set(self, i, *args):
+        if len(args) == 0:
+            raise TypeError('Missing column index')
+        if len(args) == 1:
+            j, value = None, args[0]
+        else:
+            if len(args) > 2:
+                raise TypeError('Wrong number of indices')
+            j, value = args[0:2]
+
+        if j is None:
+            n, m = self.get_shape()
+            if n > 1 and m > 1:
+                raise TypeError('Missing column index')
+            j = 0
+            if n == 1:
+                i, j = j, i
+
         i, j = self._parse_indices(i, j)
         if not isinstance(value, Expr):
             value = Expr(value)
@@ -253,10 +265,13 @@ cdef class Matrix:
 
 
     def __setitem__(self, index, value):
-        if not isinstance(index, tuple) or len(index) != 2:
-            raise TypeError('Matrix index must be a pair of numbers (row and column indices)')
-        i, j = index
-        self.set(i, j, value)
+        if isinstance(index, tuple):
+            if len(index) != 2:
+                raise TypeError('Wrong number of indices')
+            i, j = index
+            self.set(i, j, value)
+        else:
+            self.set(index, value)
 
 
 
