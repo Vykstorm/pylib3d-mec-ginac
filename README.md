@@ -21,13 +21,7 @@ e.g: In ubuntu 18.04 bionic, you can do:
 For the rest of this document, it is assumed that the default version of python and pip are 3.7 and 3 respectively.
 
 
--Install all library dependencies via pip:
-```bash
-    pip install -r requirements.txt
-```
-
-
--Now clone the repository of this module in the same location as the lib3d_mec_ginac library (this is important if you didn't install it in the system, so that dynamic libraries can be found).
+-Clone the repository of this module in the same location as the lib3d_mec_ginac library (this is important if you didn't install it in the system, so that dynamic libraries can be found).
 ```bash
     git clone https://Vykstorm@bitbucket.org/lib3d-mec-ginac/pylib3d-mec-ginac.git
     cd pylib3d-mec-ginac
@@ -35,6 +29,10 @@ For the rest of this document, it is assumed that the default version of python 
 Note: You can also tune ```LD_LIBRARY_PATH``` and ```CFLAGS``` to indicate where lib3d_mec_ginac headers and dynamic libraries are located.
 
 
+-Install all library dependencies via pip:
+```bash
+    pip install -r requirements.txt
+```
 
 -Finally build & install the module in your system via setup script:
 ```bash
