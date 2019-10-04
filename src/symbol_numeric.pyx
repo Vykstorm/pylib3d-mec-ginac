@@ -194,7 +194,7 @@ cdef class SymbolNumeric:
 
 
     def __str__(self):
-        return f'Symbol {self.name}, value = {round(self.value, 4)}'
+        return str(round(self.get_value(), 4))
 
     def __repr__(self):
         return self.__str__()
