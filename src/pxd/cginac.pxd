@@ -77,9 +77,16 @@ cdef extern from "ginac/ginac.h" namespace "GiNaC":
     cdef cppclass numeric(basic):
         numeric(double value)
 
+        bint is_integer() const
+        bint is_rational() const
+        bint is_real() const
+        bint is_zero()
         double to_double() const
+        long to_long() const
         const numeric real() const
         const numeric imag() const
+        const numeric numer() const
+        const numeric denom() const
 
 
 ######## Class GiNaC::matrix ########
@@ -93,3 +100,10 @@ cdef extern from "ginac/matrix.h" namespace "GiNaC":
 
 cdef extern from "ginac/power.h" namespace "GiNaC":
     cdef ex pow(ex& base, ex& exp)
+
+
+
+######## Function set_print_func ########
+
+cdef extern from "ginac/registrar.h" namespace "GiNaC":
+    cdef void set_print_func[T, C](void (*func)(const T&, const C&, unsigned))

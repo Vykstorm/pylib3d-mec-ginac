@@ -16,6 +16,8 @@ from libcpp.string cimport string as c_string
 from libcpp.vector cimport vector as c_vector
 from libcpp.map cimport map as c_map
 from libcpp.utility cimport pair as c_pair
+from libc.math cimport modf as c_modf
+from src.pxd.cpp cimport ostream as c_ostream
 from src.pxd.cpp cimport stringstream as c_sstream
 
 # Import lib3d-mec-ginac C++ classes
@@ -36,8 +38,8 @@ from src.pxd.cginac cimport print_latex as c_ginac_latex_printer
 from src.pxd.cginac cimport matrix as c_ginac_matrix
 
 # Import GiNaC C++ functions
+from src.pxd.cginac cimport set_print_func as c_ginac_set_print_func
 from src.pxd.cginac cimport pow as c_pow
-
 
 # Python imports (builtins)
 from collections import OrderedDict

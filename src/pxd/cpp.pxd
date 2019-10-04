@@ -9,7 +9,7 @@ from the standard C++ library that are going to be used by this extension
 
 # Imports from the standard C++ library
 from libcpp.string cimport string
-
+from src.pxd.cginac cimport basic
 
 
 
@@ -17,7 +17,10 @@ from libcpp.string cimport string
 
 cdef extern from "<ostream>" namespace "std":
     cdef cppclass ostream:
-        pass
+        ostream& operator<<(long value)
+        ostream& operator<<(double value)
+        ostream& operator<<(string value)
+        ostream& operator<<(const basic& ex)
 
 
 ######## Class std::stringstream ########
