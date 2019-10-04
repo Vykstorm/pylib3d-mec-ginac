@@ -101,6 +101,20 @@ cdef class Vector3D(Matrix):
 
 
 
+    ######## Operations ########
+
+
+    def dot(self, other):
+        if not isinstance(other, Vector3D):
+            raise TypeError('Input argument must be a Vector3D')
+        return _expr_from_c(
+            c_deref(<c_Vector3D*>(<Vector3D>self)._get_c_handler()) *\
+            c_deref(<c_Vector3D*>(<Vector3D>other)._get_c_handler())
+        )
+
+
+
+
     ######## Arithmetic operations ########
 
 
@@ -131,10 +145,8 @@ cdef class Vector3D(Matrix):
 
     def __mul__(left_op, right_op):
         if isinstance(left_op, Vector3D) and isinstance(right_op, Vector3D):
-            return _expr_from_c(
-                c_deref(<c_Vector3D*>(<Vector3D>left_op)._get_c_handler()) *\
-                c_deref(<c_Vector3D*>(<Vector3D>right_op)._get_c_handler())
-            )
+            # Dot product between vectors
+            return left_op.dot(right_op)
 
         if not isinstance(left_op, Vector3D) and not isinstance(right_op, Vector3D):
             raise TypeError(f'Unsupported operand type for *: {type(left_op).__name__} and {type(right_op).__name__}')
@@ -146,6 +158,9 @@ cdef class Vector3D(Matrix):
 
         # TODO
         raise NotImplementedError()
+
+
+
 
 
     ######## Properties ########
@@ -188,6 +203,14 @@ cdef class Vector3D(Matrix):
         self.set(2, value)
 
 
+
+
+######## Operations (global functions) ########
+
+def dot(v, w):
+    if not isinstance(v, Vector3D) or not isinstance(w, Vector3D):
+        raise TypeError('Input arguments must be Vector3D objects')
+    return v.dot(w)
 
 
 
