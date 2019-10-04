@@ -50,6 +50,8 @@ from itertools import chain
 from operator import attrgetter
 from math import floor
 from re import match
+from abc import ABC
+from types import MethodType
 
 
 # Python imports (external libraries)

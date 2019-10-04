@@ -4,12 +4,14 @@ Description: This file defines the class Object which is the base class of the
 rest of the classes defined by this extension (except System).
 '''
 
-from abc import ABC
-from types import MethodType
+
+
+######## Mixin classes ########
 
 
 class NamedObject(ABC):
     pass
+
 
 class LatexRenderable(ABC):
     def print_latex(self):
@@ -19,6 +21,10 @@ class LatexRenderable(ABC):
             raise ImportError('You must have installed IPython to use print_latex function')
         display(Math(self.to_latex()))
 
+
+
+
+######## Class Object ########
 
 
 cdef class Object:
@@ -51,3 +57,26 @@ cdef class Object:
 
     def __repr__(self):
         return self.__str__()
+
+
+
+
+
+######## Global methods ########
+
+def get_name(obj):
+    if not isinstance(obj, NamedObject):
+        raise TypeError('Invalid input argument: Expected SymbolNumeric, Base, Matrix, Vector3D or Point')
+    return obj.get_name()
+
+
+def to_latex(obj):
+    if not isinstance(obj, LatexRenderable):
+        raise TypeError('Invalid input argument: Expected SymbolNumeric, Expr, Matrix or Vector3D')
+    return obj.to_latex()
+
+
+def print_latex(obj):
+    if not isinstance(obj, LatexRenderable):
+        raise TypeError('Invalid input argument: Expected SymbolNumeric, Expr, Matrix or Vector3D')
+    obj.print_latex()
