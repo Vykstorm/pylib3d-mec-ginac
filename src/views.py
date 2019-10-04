@@ -17,6 +17,14 @@ from lib3d_mec_ginac_ext import _symbol_types, _parse_symbol_type
 
 
 
+######## Helper variables & methods ########
+
+def quote(x):
+    # Quote a string
+    return '"' + x + '"'
+
+
+
 ######## Class ObjectsView ########
 
 class ObjectsView(Mapping):
@@ -111,13 +119,13 @@ class SymbolsView(ObjectsTableView):
             partial(system._get_symbol, kind=kind),
             partial(system._has_symbol, kind=kind),
             columns=columns,
-            show_headers=kind is None
+            show_headers=True
         )
         self.system, self.kind = system, kind
 
 
     def get_row_values(self, symbol):
-        values = [symbol.name, symbol.value]
+        values = [quote(symbol.name), symbol.value]
         if self.kind is None:
             for symbol_type in _symbol_types:
                 if symbol in self.system._get_symbols(symbol_type):
@@ -149,11 +157,12 @@ class MatricesView(ObjectsTableView):
     def __init__(self, system):
         super().__init__(
             system._get_matrices, system._get_matrix, system._has_matrix,
-            columns=('name', 'size')
+            columns=('name', 'size'),
+            show_headers=True
         )
 
     def get_row_values(self, matrix):
-        return matrix.name, f'{matrix.num_rows}x{matrix.num_cols}'
+        return quote(matrix.name), f'{matrix.num_rows}x{matrix.num_cols}'
 
     def __str__(self):
         if len(self) == 0:
@@ -173,7 +182,7 @@ class VectorsView(ObjectsTableView):
         )
 
     def get_row_values(self, vector):
-        return vector.name, vector.x, vector.y, vector.z, vector.base.name
+        return quote(vector.name), vector.x, vector.y, vector.z, quote(vector.base.name)
 
     def __str__(self):
         if len(self) == 0:
@@ -193,11 +202,11 @@ class PointsView(ObjectsTableView):
         )
 
     def get_row_values(self, point):
-        values = [point.name]
+        values = [quote(point.name)]
         if point.has_previous():
             values.extend(point.offset.values)
-            values.append(point.offset.base.name)
-            values.append(point.previous.name)
+            values.append(quote(point.offset.base.name))
+            values.append(quote(point.previous.name))
         else:
             values.extend([None]*5)
         return values

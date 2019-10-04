@@ -8,7 +8,7 @@ This module defines the class System
 ######## Import statements ########
 
 from lib3d_mec_ginac_ext import _System
-from .views import *
+from .views import BasesView, SymbolsView, MatricesView, VectorsView, PointsView
 
 
 
