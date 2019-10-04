@@ -40,9 +40,7 @@ def to_latex(*args, **kwargs):
             return _ginac_print_ex((<Expr>x)._c_handler, latex=True)
 
         elif isinstance(x, Matrix):
-            n, m = x.shape
-            rows = [' & '.join([to_latex(x.get(i, j)) for j in range(0, m)]) for i in range(0, n)]
-            return r'\begin{pmatrix}' + '\n' + (r'\\' + '\n').join(rows) + '\n' + r'\end{pmatrix}'
+            return _ginac_print_ex(c_ex((<Matrix>x)._get_c_handler().get_matrix()), latex=True)
         return x
 
 

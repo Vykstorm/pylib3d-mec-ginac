@@ -30,6 +30,7 @@ cdef extern from "ginac/print.h" namespace "GiNaC":
         print_latex(ostream& os) except +
 
 
+
 ######## Class GiNaC::basic ########
 
 cdef extern from "ginac/basic.h" namespace "GiNaC":

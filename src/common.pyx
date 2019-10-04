@@ -114,7 +114,7 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
 
 
 
-cdef _ginac_print_ex(c_ex x, latex=False):
+cdef _ginac_print_ex(c_ex x, bint latex=0):
     # Prints a GiNaC::ex to a Python unicode string
     # The expression will be formatted with latex if latex is set to True
     cdef c_ginac_printer* c_printer
