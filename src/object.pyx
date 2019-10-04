@@ -10,7 +10,9 @@ rest of the classes defined by this extension (except System).
 
 
 class NamedObject(ABC):
-    pass
+    def __eq__(self, other):
+        return (self is other) or ((type(self) == type(other)) and self.get_name() == other.get_name())
+
 
 
 class LatexRenderable(ABC):
@@ -53,6 +55,12 @@ cdef class Object:
         if isinstance(self, LatexRenderable):
             entries.extend(['latex', 'print_latex'])
         return entries
+
+
+    def __eq__(self, other):
+        if isinstance(self, NamedObject) and isinstance(other, NamedObject):
+            return NamedObject.__eq__(self, other)
+        return super().__eq__(self, other)
 
 
     def __repr__(self):
