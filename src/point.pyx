@@ -6,7 +6,7 @@ Description: This file contains the definition of the class Point
 
 ######## Class Point ########
 
-cdef class Point:
+cdef class Point(Object):
 
 
     ######## C Attributes ########
@@ -77,7 +77,7 @@ cdef class Point:
 
 
 
-    ######## Metamethods ########
+    ######## Printing ########
 
 
     def __str__(self):
@@ -91,5 +91,5 @@ cdef class Point:
         ]], headers=('name', 'x', 'y', 'z', 'base', 'previous'), tablefmt='plain')
 
 
-    def __repr__(self):
-        return self.__str__()
+
+NamedObject.register(Point)

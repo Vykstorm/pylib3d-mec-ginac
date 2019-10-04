@@ -99,6 +99,20 @@ LIBRARIES = [
 ]
 
 
+# All .pyx file definitions of the extension (relative to the directory src/)
+EXTENSION_DEFINITION_FILES = map(partial(join, 'src'), [
+    'common.pyx',
+    'object.pyx',
+    'symbol_numeric.pyx',
+    'base.pyx',
+    'matrix.pyx',
+    'vector3D.pyx',
+    'point.pyx',
+    'system.pyx',
+    'expression.pyx'
+])
+
+
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     Extension(
@@ -144,10 +158,8 @@ if __name__ == '__main__':
         ]))
         f_out.write('\n'*3)
 
-        for filename in chain(['common.pyx'], set(listdir('src')) - {'common.pyx'}):
-            if not filename.endswith('.pyx') or filename.startswith('main'):
-                continue
-            with open(join('src', filename), 'r') as f_in:
+        for filename in EXTENSION_DEFINITION_FILES:
+            with open(filename, 'r') as f_in:
                 code = sub("'''.*?'''", '#'*8 + f' {filename} ' + '#'*8, f_in.read(), count=1, flags=DOTALL)
                 f_out.write(code)
                 f_out.write('\n'*3)

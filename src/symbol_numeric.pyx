@@ -9,7 +9,7 @@ Description: This module defines the wrapper class SymbolNumeric.
 ######## Class SymbolNumeric ########
 
 
-cdef class SymbolNumeric:
+cdef class SymbolNumeric(Object):
     '''
     Objects of this class can be used to perform math symbolic computation.
     '''
@@ -89,15 +89,6 @@ cdef class SymbolNumeric:
 
 
     @property
-    def name(self):
-        '''
-        Only read property that returns the name of this symbol.
-        :rtype: str
-        '''
-        return self.get_name()
-
-
-    @property
     def tex_name(self):
         '''
         Only read property that returns the name in latex of this symbol.
@@ -134,21 +125,6 @@ cdef class SymbolNumeric:
 
 
 
-    ######## Relational operations ########
-
-    def __eq__(self, other):
-        '''
-        Check if two objects refer to the same numeric symbol (have the same name)
-        :param other: Other object to compare this instance with
-        :return: True if the specified object is also an instance of the class SymbolNumeric and have the same name as this object. False otherwise.
-        :rtype: bool
-        '''
-        if not isinstance(other, SymbolNumeric):
-            return False
-        return self.name == other.name
-
-
-
 
     ######## Number conversions ########
 
@@ -178,23 +154,20 @@ cdef class SymbolNumeric:
 
 
 
-    ######## Hashing ########
-
-
-    def __hash__(self):
-        '''
-        Returns the hash value for this symbol. One instance of this class is equal to
-        another one if they refer to the same numeric symbol (same name)
-        '''
-        return hash((SymbolNumeric, self.name))
-
-
 
     ######## Printing ########
+
+
+    def to_latex(self):
+        return self.get_tex_name() or r'\textrm{' + self.get_name()  + '}'
 
 
     def __str__(self):
         return str(round(self.get_value(), 4))
 
-    def __repr__(self):
-        return self.__str__()
+
+
+
+
+NamedObject.register(SymbolNumeric)
+LatexRenderable.register(SymbolNumeric)

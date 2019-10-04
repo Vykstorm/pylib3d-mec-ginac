@@ -9,7 +9,7 @@ the C++ class GiNac::ex
 
 ######## Class Expr ########
 
-cdef class Expr:
+cdef class Expr(Object):
     '''
     This class represents a symbolic expression.
     It implements a subset of the features provided by the C++ class GiNac::ex
@@ -109,6 +109,10 @@ cdef class Expr:
     ######## Printing ########
 
 
+    def to_latex(self):
+        return _ginac_print_ex(self._c_handler, latex=True)
+
+
     def __str__(self):
         # Use GiNac print method
         x = _ginac_print_ex(self._c_handler)
@@ -126,5 +130,11 @@ cdef class Expr:
 
 
 
-    def __repr__(self):
-        return self.__str__()
+LatexRenderable.register(Expr)
+
+
+
+######## Aliases for class Expr ########
+
+Expression = Expr
+Ex = Expr

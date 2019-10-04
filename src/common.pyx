@@ -290,3 +290,57 @@ def _apply_signature(params, defaults, args, kwargs):
     bounded_args = sig.bind(*args, **kwargs)
     bounded_args.apply_defaults()
     return bounded_args.args
+
+
+
+
+
+
+_latin_to_greek_latex = {
+    'a': r'\alpha',
+    'b': r'\beta',
+    'c': r'\gamma', 'C': r'\Gamma',
+    'd': r'\delta', 'D': r'\Delta',
+    'e': r'\varepsilon',
+    'h': r'\eta',
+    'i': r'\iota',
+    'k': r'\kappa',
+    'l': r'\lambda', 'L': r'\Lambda',
+    'm': r'\mu',
+    'n': r'\nu',
+    'p': r'\rho',
+    's': r'\sigma', 'S': r'\Sigma',
+    't': r'\tau',
+    'u': r'\upsilon', 'U': r'\Upsilon',
+    'x': r'\chi'
+}
+
+
+def _gen_latex_name(name):
+    '''
+    Generate a latex name for the symbol name specified (this is used when the user doesnt
+    specify the symbol latex name explicitly to autogenerate it).
+
+    :Example:
+
+    gen_latex_name('a') # '\\alpha'
+    gen_latex_name('U') # '\\Upsilon'
+    gen_latex_name('p_2') # '\\rho_2'
+    gen_latex_name('s2') # '\\sigma_2'
+    gen_latex_name('foo') # ''
+    '''
+    if not isinstance(name, (str, bytes)):
+        raise TypeError('Name must be a str or bytes object')
+
+    if isinstance(name, bytes):
+        name = name.decode()
+
+    result = match('^([a-zA-Z])_?(\d*)$', name)
+    if not result:
+        return name.encode()
+    letter, subindex = result.group(1), result.group(2)
+
+    if letter in _latin_to_greek_latex:
+        letter = _latin_to_greek_latex[letter]
+
+    return (letter if not subindex else f'{letter}_' + '{' + subindex + '}').encode()

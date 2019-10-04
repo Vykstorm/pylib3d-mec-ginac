@@ -9,7 +9,7 @@ Description: This module defines the class Base
 ######## Class Base ########
 
 
-cdef class Base:
+cdef class Base(Object):
     '''
     Objects of this class represent geometric bases defined within a system.
     '''
@@ -85,15 +85,6 @@ cdef class Base:
 
 
     @property
-    def name(self):
-        '''
-        Read only property that returns the name of this base
-        :rtype: str
-        '''
-        return self.get_name()
-
-
-    @property
     def previous_base(self):
         '''
         Read only property that returns the previous base
@@ -120,19 +111,8 @@ cdef class Base:
 
 
 
-    ######## Metamethods ########
 
-
-    def __eq__(self, other):
-        if not isinstance(other, Base):
-            return False
-        return self.get_name() == other.get_name()
-
-
-
-    def __hash__(self):
-        return hash((Base, self.get_name()))
-
+    ######## Printing ########
 
 
     def __str__(self):
@@ -151,5 +131,5 @@ cdef class Base:
         return s
 
 
-    def __repr__(self):
-        return self.__str__()
+
+NamedObject.register(Base)

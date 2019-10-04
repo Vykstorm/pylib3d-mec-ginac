@@ -9,7 +9,7 @@ Description: This module defines the class Matrix
 
 ######## Class Matrix ########
 
-cdef class Matrix:
+cdef class Matrix(Object):
 
     ######## C Attributes ########
 
@@ -157,6 +157,11 @@ cdef class Matrix:
 
 
     def __getattr__(self, key):
+        try:
+            return super().__getattr__(key)
+        except AttributeError:
+            pass
+
         if key not in ('get_module', 'get_skew', 'module', 'skew') or type(self) != Matrix:
             raise AttributeError(f'"Matrix" object has no attribute "{key}"')
         if self.get_size() != 3:
@@ -392,13 +397,6 @@ cdef class Matrix:
         '''
         return self.get_size()
 
-    @property
-    def name(self):
-        '''
-        Read only property that returns the name of this matrix
-        :rtype: int
-        '''
-        return self.get_name()
 
     @property
     def T(self):
@@ -429,6 +427,9 @@ cdef class Matrix:
 
     ######## Printing ########
 
+    def to_latex(self):
+        return _ginac_print_ex(c_ex(self._get_c_handler().get_matrix()), latex=True)
+
 
     def __str__(self):
         values = tuple(map(str, self.get_values()))
@@ -456,5 +457,6 @@ cdef class Matrix:
         return '\n'.join(lines)
 
 
-    def __repr__(self):
-        return self.__str__()
+
+NamedObject.register(Matrix)
+LatexRenderable.register(Matrix)
