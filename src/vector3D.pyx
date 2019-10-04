@@ -113,6 +113,14 @@ cdef class Vector3D(Matrix):
         )
 
 
+    def cross(self, other):
+        if not isinstance(other, Vector3D):
+            raise TypeError('Input argument must be a Vector3D')
+        return _vector_from_c_value(
+            c_deref(<c_Vector3D*>(<Vector3D>self)._get_c_handler()) ^\
+            c_deref(<c_Vector3D*>(<Vector3D>other)._get_c_handler())
+        )
+
 
 
     ######## Arithmetic operations ########
@@ -159,6 +167,11 @@ cdef class Vector3D(Matrix):
         # TODO
         raise NotImplementedError()
 
+
+    def __xor__(Vector3D self, other):
+        if not isinstance(other, Vector3D):
+            raise TypeError(f'Unsupported operand type for ^: Vector3D and {type(other).__name__}')
+        return self.cross(other)
 
 
 
@@ -207,10 +220,18 @@ cdef class Vector3D(Matrix):
 
 ######## Operations (global functions) ########
 
+
 def dot(v, w):
     if not isinstance(v, Vector3D) or not isinstance(w, Vector3D):
         raise TypeError('Input arguments must be Vector3D objects')
     return v.dot(w)
+
+
+def cross(v, w):
+    if not isinstance(v, Vector3D) or not isinstance(w, Vector3D):
+        raise TypeError('Input arguments must be Vector3D objects')
+    return v.cross(w)
+
 
 
 
