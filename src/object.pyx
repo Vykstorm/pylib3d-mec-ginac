@@ -1,6 +1,7 @@
 '''
 Author: Víctor Ruiz Gómez
-Description: This method represents the
+Description: This file defines the class Object which is the base class of the
+rest of the classes defined by this extension (except System).
 '''
 
 from abc import ABC
@@ -21,6 +22,10 @@ class LatexRenderable(ABC):
 
 
 cdef class Object:
+    '''
+    This is the base class of Expr, SymbolNumeric, Base, Matrix, Vector and Point
+    classes
+    '''
     def __getattr__(self, key):
         if isinstance(self, NamedObject):
             if key == 'name':
