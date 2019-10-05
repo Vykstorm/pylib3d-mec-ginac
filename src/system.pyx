@@ -654,15 +654,24 @@ cdef class _System:
         name = _parse_name(name, check_syntax=True)
 
         # Check if a matrix with the same name already exists
-        if self._has_object(name):
+        if self._has_object(name) and not self._has_vector(name):
             raise IndexError(f'Name "{name.decode()}" its already in use')
 
         # Create the vector
         kwargs['system'] = self
         vector = Vector3D(*args, **kwargs)
+        cdef c_Vector3D* c_vector = <c_Vector3D*>vector._get_c_handler()
+
+        if self._has_vector(name):
+            # Vector with the same name already exists. Only update its values and base
+            warn(f'Vector "{name.decode()}" already exists. Only updating its base & values', UserWarning)
+
+            _vector = self._get_vector(name)
+            _vector.set_base(vector.get_base())
+            (<Vector3D>_vector)._get_c_handler().set_matrix((<c_Matrix*>c_vector).get_matrix())
+            return _vector
 
         # Register the matrix with the given name in the system
-        cdef c_Vector3D* c_vector = <c_Vector3D*>vector._get_c_handler()
         c_vector.set_name(name)
         self._c_handler.new_Vector3D(c_vector)
         (<Vector3D>vector)._owns_c_handler = False
