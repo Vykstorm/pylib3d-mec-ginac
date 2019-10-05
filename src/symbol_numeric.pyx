@@ -18,13 +18,15 @@ cdef class SymbolNumeric(Object):
 
 
     cdef c_symbol_numeric* _c_handler
+    cdef object _owner
 
 
 
     ######## Constructor & Destructor  ########
 
-    def __cinit__(self, Py_ssize_t ptr):
+    def __cinit__(self, Py_ssize_t ptr, owner):
         self._c_handler = <c_symbol_numeric*>ptr
+        self._owner = owner
 
 
     ######## Getters ########
@@ -53,6 +55,19 @@ cdef class SymbolNumeric(Object):
         '''
         return (<bytes>self._c_handler.print_TeX_name()).decode()
 
+
+    def get_owner(self):
+        return self._owner
+
+
+    def get_type(self):
+        owner = self.get_owner()
+        if self == owner._get_time():
+            return 'time'
+        for symbol_type in _symbol_types:
+            if self in owner._get_symbols(symbol_type):
+                return symbol_type.decode()
+        raise RuntimeError
 
 
 
@@ -96,6 +111,19 @@ cdef class SymbolNumeric(Object):
         '''
         return self.get_tex_name()
 
+
+    @property
+    def owner(self):
+        return self.get_owner()
+
+
+    @property
+    def type(self):
+        return self.get_type()
+
+    @property
+    def kind(self):
+        return self.get_type()
 
 
 

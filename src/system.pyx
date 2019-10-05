@@ -239,7 +239,7 @@ cdef class _System:
                     c_symbol = x
 
         if c_symbol != NULL:
-            return SymbolNumeric(<Py_ssize_t>c_symbol)
+            return SymbolNumeric(<Py_ssize_t>c_symbol, self)
 
         if kind is None:
             raise IndexError(f'Symbol "{name.decode()}" not created yet')
@@ -273,7 +273,7 @@ cdef class _System:
 
 
     cpdef _get_time(self):
-        return SymbolNumeric(<Py_ssize_t>&self._c_handler.t)
+        return SymbolNumeric(<Py_ssize_t>&self._c_handler.t, self)
 
 
 
@@ -341,7 +341,7 @@ cdef class _System:
 
     cpdef _get_all_symbols(self):
         cdef c_symbol_numeric_list c_symbols = self._get_all_c_symbols()
-        symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
+        symbols = [SymbolNumeric(<Py_ssize_t>c_symbol, self) for c_symbol in c_symbols]
         return symbols
 
 
@@ -349,7 +349,7 @@ cdef class _System:
         if kind is None:
             return self._get_all_symbols()
         cdef c_symbol_numeric_list c_symbols = self._get_c_symbols(_parse_symbol_type(kind))
-        symbols = [SymbolNumeric(<Py_ssize_t>c_symbol) for c_symbol in c_symbols]
+        symbols = [SymbolNumeric(<Py_ssize_t>c_symbol, self) for c_symbol in c_symbols]
         return symbols
 
 
@@ -458,7 +458,7 @@ cdef class _System:
             elif kind == b'joint_unknown':
                 c_symbol = self._new_c_joint_unknown(name, tex_name, value)
 
-            return SymbolNumeric(<Py_ssize_t>c_symbol)
+            return SymbolNumeric(<Py_ssize_t>c_symbol, self)
 
 
         elif kind.endswith(b'coordinate'):
@@ -515,7 +515,7 @@ cdef class _System:
                 c_symbol = self._new_c_coordinate(names[0], names[1], names[2], tex_names[0], tex_names[1], tex_names[2], values[0], values[1], values[2])
                 vel_c_symbol, acc_c_symbol = self._c_handler.get_Velocity(names[1]), self._c_handler.get_Acceleration(names[2])
 
-            return SymbolNumeric(<Py_ssize_t>c_symbol), SymbolNumeric(<Py_ssize_t>vel_c_symbol), SymbolNumeric(<Py_ssize_t>acc_c_symbol)
+            return SymbolNumeric(<Py_ssize_t>c_symbol, self), SymbolNumeric(<Py_ssize_t>vel_c_symbol, self), SymbolNumeric(<Py_ssize_t>acc_c_symbol, self)
 
         else:
             raise RuntimeError
