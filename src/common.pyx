@@ -347,3 +347,38 @@ def _gen_latex_name(name):
         letter = _latin_to_greek_latex[letter]
 
     return (letter if not subindex else f'{letter}_' + '{' + subindex + '}').encode()
+
+
+
+
+
+
+######## Custom GiNaC print formatting ########
+
+cdef void _c_ginac_print_numeric_latex(const c_numeric& num, const c_ginac_latex_printer& c, unsigned level):
+    if not num.is_integer() and not num.is_rational() and not num.is_real():
+        # For the moment, its supposed that we only work with integers, reals or rationals
+        raise RuntimeError('Latex printing on numbers only supports integers, rationals and reals')
+
+    if num.is_zero():
+        c.s << 0
+        return
+
+    if num.is_rational():
+        c.s << <c_string>b'\\frac{'
+        c.s << num.numer()
+        c.s << <c_string>b'}{'
+        c.s << num.denom()
+        c.s << <c_string>b'}'
+        return
+
+    cdef double value = num.to_double()
+    cdef double intpart
+    if c_modf(value, &intpart) == 0.0:
+        c.s << <long>value
+    else:
+        c.s << value
+
+
+# Register the function above on GiNaC using set_print_func
+c_ginac_set_print_func[c_numeric, c_ginac_latex_printer](_c_ginac_print_numeric_latex)
