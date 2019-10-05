@@ -38,4 +38,3 @@ cdef extern from "Vector3D.h":
         Vector3D operator-(Vector3D&)
         ex operator*(Vector3D&)
         Vector3D operator^(Vector3D&)
-    Vector3D operator*(Vector3D&, ex&)

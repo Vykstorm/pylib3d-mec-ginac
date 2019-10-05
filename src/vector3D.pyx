@@ -184,8 +184,23 @@ cdef class Vector3D(Matrix):
         else:
             left_op, right_op = right_op, Expr(left_op)
 
-        # TODO
-        raise NotImplementedError()
+        return _vector_from_c_value(
+            (<Expr>right_op)._c_handler *\
+            c_deref(<c_Vector3D*>((<Vector3D>left_op)._get_c_handler()))
+        )
+
+
+
+    def __truediv__(Vector3D self, other):
+        if not isinstance(other, Expr):
+            expr = Expr(other)
+        inverted_expr = 1 / expr
+
+        return _vector_from_c_value(
+            (<Expr>inverted_expr)._c_handler *\
+            c_deref(<c_Vector3D*>(self._get_c_handler()))
+        )
+
 
 
     def __xor__(Vector3D self, other):

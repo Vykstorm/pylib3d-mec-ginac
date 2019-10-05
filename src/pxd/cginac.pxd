@@ -14,6 +14,7 @@ from libcpp.string cimport string
 
 # Imports from other .pxd definition files
 from src.pxd.cpp cimport ostream
+from src.pxd.cvector3D cimport Vector3D
 
 
 
@@ -58,6 +59,7 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
         ex operator-(ex& other)
         ex operator*(ex& other)
         ex operator/(ex& other)
+        Vector3D operator*(Vector3D&)
 
         # Printing
         void print(print_context&, unsigned level=0) const

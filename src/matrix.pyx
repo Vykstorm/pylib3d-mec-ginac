@@ -337,6 +337,15 @@ cdef class Matrix(Object):
 
 
 
+    def __truediv__(Matrix self, other):
+        if not isinstance(other, Expr):
+            expr = Expr(other)
+        inverted_expr = 1 / expr
+        return _matrix_from_c_value(c_deref(self._get_c_handler()) * (<Expr>inverted_expr)._c_handler)
+
+
+
+
 
     ######## Misc operations ########
 
