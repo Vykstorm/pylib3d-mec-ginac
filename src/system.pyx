@@ -65,7 +65,7 @@ cdef class _System:
         if kind == b'aux_velocity':
             return <void*>self._c_handler.get_AuxVelocity(name)
         if kind == b'aux_acceleration':
-            return <void*>self._c_handler.get_Acceleration(name)
+            return <void*>self._c_handler.get_AuxAcceleration(name)
 
         if kind == b'parameter':
             return <void*>self._c_handler.get_Parameter(name)

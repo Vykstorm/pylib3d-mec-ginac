@@ -104,7 +104,7 @@ class System(_System):
         return self.get_symbol(name, b'aux_velocity')
 
     def get_aux_acceleration(self, name):
-        return self.get_symbol(name, b'acceleration')
+        return self.get_symbol(name, b'aux_acceleration')
 
     def get_parameter(self, name):
         return self.get_symbol(name, b'parameter')
@@ -179,7 +179,7 @@ class System(_System):
         return self.has_symbol(name, b'aux_velocity')
 
     def has_aux_acceleration(self, name):
-        return self.has_symbol(name, b'acceleration')
+        return self.has_symbol(name, b'aux_acceleration')
 
     def has_parameter(self, name):
         return self.has_symbol(name, b'parameter')
