@@ -46,7 +46,7 @@ from collections import OrderedDict
 from collections.abc import Iterable
 from inspect import Signature, Parameter
 from functools import partial, partialmethod, wraps
-from itertools import chain
+from itertools import chain, starmap
 from operator import attrgetter
 from math import floor
 from re import match

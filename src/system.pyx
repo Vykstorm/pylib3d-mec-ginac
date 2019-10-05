@@ -448,7 +448,16 @@ cdef class _System:
 
             # Check if a symbol with the name specified already exists
             if self._has_object(name):
+                if self._has_symbol(name, kind):
+                    # The symbol already exists and has the same type
+                    # Only update its latex name and value
+                    symbol = self._get_symbol(name, kind)
+                    symbol.set_value(value)
+                    symbol.set_tex_name(tex_name)
+                    return symbol
+
                 raise IndexError(f'Name "{name.decode()}" its already in use')
+
 
             # Apply a different constructor for each symbol type
             if kind == b'parameter':
@@ -502,6 +511,22 @@ cdef class _System:
 
 
             # Check if the name of the coordinate or its components is already in use by other symbol
+            symbol_types = [b'coordinate', b'velocity', b'acceleration']
+            if kind.startswith(b'aux_'):
+                symbol_types = [b'aux_' + symbol_type for symbol_type in symbol_types]
+
+            if all(starmap(self._has_symbol, zip(names, symbol_types))):
+                # The coordinate and its derivatives already exists.
+                # Only update their values and latex names
+                symbols = tuple(starmap(self._get_symbol, zip(names, symbol_types)))
+
+                for symbol, tex_name, value in zip(symbols, tex_names, values):
+                    symbol.set_tex_name(tex_name)
+                    symbol.set_value(value)
+
+                return symbols
+
+
             for name in names:
                 if self._has_object(name):
                     raise IndexError(f'Name "{name.decode()}" its already in use')
