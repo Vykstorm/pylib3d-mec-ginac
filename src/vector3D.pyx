@@ -9,6 +9,13 @@ Description: This file contains the definition of the class Vector3D
 cdef class Vector3D(Matrix):
 
 
+    ######## Attributes ########
+
+    cdef object _owner
+
+
+
+
     ######## Constructor & Destructor ########
 
     def __init__(self, *args, **kwargs):
@@ -71,6 +78,7 @@ cdef class Vector3D(Matrix):
 
         self._c_handler = <c_Matrix*>c_vector
         self._owns_c_handler = True
+        self._owner = system
 
 
     cdef c_Matrix* _get_c_handler(self) except? NULL:
@@ -97,6 +105,18 @@ cdef class Vector3D(Matrix):
     cpdef get_skew(self):
         cdef c_Matrix c_skew = (<c_Vector3D*>self._get_c_handler()).skew()
         return _matrix_from_c_value(c_skew)
+
+
+
+
+    ######## Setters ########
+
+
+    cpdef set_base(self, base):
+        if not isinstance(base, Base):
+            raise TypeError('Input argument must be a Base object')
+
+        (<c_Vector3D*>self._get_c_handler()).set_Base((<Base>base)._c_handler)
 
 
 
@@ -182,6 +202,11 @@ cdef class Vector3D(Matrix):
     @property
     def base(self):
         return self.get_base()
+
+    @base.setter
+    def base(self, base):
+        self.set_base(base)
+
 
     @property
     def module(self):

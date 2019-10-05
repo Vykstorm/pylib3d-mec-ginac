@@ -25,6 +25,8 @@ cdef extern from "Vector3D.h":
         Vector3D(string name, ex x, ex y, ex z, Base* base) except +
 
         Base* get_Base()
+        void set_Base(Base* base)
+
         string get_Name()
 
         ex get_module()
