@@ -20,7 +20,7 @@ cdef extern from "Matrix.h":
         # Constructors
         Matrix() except +
         Matrix(long rows, long cols) except +
-        Matrix(matrix m) except +
+        Matrix(matrix mat) except +
 
         # Getters
         string get_name()
@@ -29,6 +29,7 @@ cdef extern from "Matrix.h":
         long cols()
 
         matrix get_matrix()
+        void set_matrix(matrix mat)
         ex& get(int i, int j)
 
         # Setters

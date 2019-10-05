@@ -623,19 +623,28 @@ cdef class _System:
         # Validate & parse name argument
         name = _parse_name(name, check_syntax=True)
 
-        # Check if a matrix with the same name already exists
-        if self._has_object(name):
+        # Check if an object with the same name already exists
+        if self._has_object(name) and not self._has_matrix(name):
             raise IndexError(f'Name "{name.decode()}" its already in use')
 
         # Create the matrix
         matrix = Matrix(*args, **kwargs)
+        cdef c_Matrix* c_matrix = (<Matrix>matrix)._get_c_handler()
+
+
+        if self._has_matrix(name):
+            # An existing matrix with the same name already exists.
+            # Only update its values
+            warn(f'Matrix "{name.decode()}" already exists. Only updating its values', UserWarning)
+            _matrix = self._get_matrix(name)
+            (<Matrix>_matrix)._get_c_handler().set_matrix(c_matrix.get_matrix())
+            return _matrix
+
 
         # Register the matrix with the given name in the system
-        cdef c_Matrix* c_matrix = matrix._get_c_handler()
         c_matrix.set_name(name)
         self._c_handler.new_Matrix(c_matrix)
         (<Matrix>matrix)._owns_c_handler = False
-
         return matrix
 
 
