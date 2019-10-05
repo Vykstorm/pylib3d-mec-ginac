@@ -85,6 +85,11 @@ cdef class SymbolNumeric(Object):
 
 
 
+    cpdef set_tex_name(self, tex_name):
+        self._c_handler.set_TeX_name(_parse_text(tex_name))
+
+
+
 
     ######## Properties  ########
 
@@ -106,10 +111,15 @@ cdef class SymbolNumeric(Object):
     @property
     def tex_name(self):
         '''
-        Only read property that returns the name in latex of this symbol.
+        Property that returns the name in latex of this symbol.
         :rtype: str
         '''
         return self.get_tex_name()
+
+
+    @tex_name.setter
+    def tex_name(self, tex_name):
+        self.set_tex_name(tex_name)
 
 
     @property

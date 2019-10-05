@@ -69,6 +69,8 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
 cdef extern from "ginac/symbol.h" namespace "GiNaC":
     cdef cppclass symbol:
         void set_name(string& name)
+        void set_TeX_name(string& tex_name)
+
 
 
 ######## Class GiNaC::numeric ########
