@@ -26,6 +26,7 @@ class LatexRenderable(ABC):
 
 
 
+
 ######## Class Object ########
 
 
@@ -78,13 +79,15 @@ def get_name(obj):
     return obj.get_name()
 
 
-def to_latex(obj):
-    if not isinstance(obj, LatexRenderable):
-        raise TypeError('Invalid input argument: Expected SymbolNumeric, Expr, Matrix or Vector3D')
-    return obj.to_latex()
+def to_latex(*args):
+    if not all(map(lambda arg: isinstance(arg, LatexRenderable), args)):
+        raise TypeError('Invalid input arguments: Expected SymbolNumeric, Expr, Matrix or Vector3D ')
+    return r'\:'.join(map(attrgetter('latex'), args))
 
 
-def print_latex(obj):
-    if not isinstance(obj, LatexRenderable):
-        raise TypeError('Invalid input argument: Expected SymbolNumeric, Expr, Matrix or Vector3D')
-    obj.print_latex()
+def print_latex(*args):
+    try:
+        from IPython.display import display, Math
+    except ImportError:
+        raise ImportError('You must have installed IPython to use print_latex function')
+    display(Math(to_latex(*args)))
