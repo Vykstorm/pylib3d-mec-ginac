@@ -340,7 +340,7 @@ def _gen_latex_name(name):
 
     result = match('^([a-zA-Z])_?(\d*)$', name)
     if not result:
-        return name.encode()
+        return b''
     letter, subindex = result.group(1), result.group(2)
 
     if letter in _latin_to_greek_latex:
