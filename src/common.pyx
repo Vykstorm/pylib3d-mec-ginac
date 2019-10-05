@@ -52,6 +52,7 @@ from math import floor
 from re import match
 from abc import ABC
 from types import MethodType
+from warnings import warn
 
 
 # Python imports (external libraries)

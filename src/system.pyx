@@ -451,6 +451,10 @@ cdef class _System:
                 if self._has_symbol(name, kind):
                     # The symbol already exists and has the same type
                     # Only update its latex name and value
+
+                    # Print a warning message
+                    warn(f'{kind.decode().replace("_", " ")} "{name.decode()}" already exists. Updating only its latex name and value', UserWarning)
+
                     symbol = self._get_symbol(name, kind)
                     symbol.set_value(value)
                     symbol.set_tex_name(tex_name)
@@ -519,6 +523,9 @@ cdef class _System:
                 # The coordinate and its derivatives already exists.
                 # Only update their values and latex names
                 symbols = tuple(starmap(self._get_symbol, zip(names, symbol_types)))
+
+                # Print a warning message
+                warn(f'Coordinate "{names[0].decode()}" and its derivatives already exists. Updating only their values and latex names', UserWarning)
 
                 for symbol, tex_name, value in zip(symbols, tex_names, values):
                     symbol.set_tex_name(tex_name)
