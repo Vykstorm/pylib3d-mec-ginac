@@ -80,10 +80,10 @@ def to_latex(*args):
     def _to_latex(x):
         if isinstance(x, LatexRenderable):
             return x.to_latex()
-        return x.decode() if isinstance(x, bytes) else x
+        if isinstance(x, bytes):
+            x = x.decode()
+        return str(x)
 
-    if not all(map(lambda arg: isinstance(arg, (LatexRenderable, str, bytes)), args)):
-        raise TypeError('Invalid input arguments: Expected SymbolNumeric, Expr, Matrix, Vector3D, str or bytes')
     return r'\:'.join(map(_to_latex, args))
 
 
