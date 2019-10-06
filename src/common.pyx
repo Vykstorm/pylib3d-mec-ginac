@@ -351,6 +351,16 @@ def _gen_latex_name(name):
 
 
 
+def _print_latex_ipython(text):
+    # Print latex code in Ipython.
+    try:
+        from IPython.display import display, Math
+    except ImportError:
+        raise ImportError('You must have installed IPython to render latex')
+    display(Math(text))
+
+
+
 
 
 ######## Custom GiNaC print formatting ########

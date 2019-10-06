@@ -17,11 +17,7 @@ class NamedObject(ABC):
 
 class LatexRenderable(ABC):
     def print_latex(self):
-        try:
-            from IPython.display import display, Math
-        except ImportError:
-            raise ImportError('You must have installed IPython to use print_latex function')
-        display(Math(self.to_latex()))
+        _print_latex_ipython(self.to_latex())
 
 
 
@@ -73,6 +69,7 @@ cdef class Object:
 
 ######## Global methods ########
 
+
 def get_name(obj):
     if not isinstance(obj, NamedObject):
         raise TypeError('Invalid input argument: Expected SymbolNumeric, Base, Matrix, Vector3D or Point')
@@ -86,8 +83,4 @@ def to_latex(*args):
 
 
 def print_latex(*args):
-    try:
-        from IPython.display import display, Math
-    except ImportError:
-        raise ImportError('You must have installed IPython to use print_latex function')
-    display(Math(to_latex(*args)))
+    _print_latex_ipython(to_latex(*args))
