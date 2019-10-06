@@ -43,7 +43,7 @@ cdef class Matrix(Object):
                     if m.ndim not in (1, 2):
                         raise ValueError('Input numpy array must have one or two dimensions')
                     shape = m.shape if m.ndim == 2 else (1, m.shape[0])
-                    values = m.flat
+                    values = m.tolist()
 
             except ImportError:
                 pass
