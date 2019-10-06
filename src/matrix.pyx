@@ -30,6 +30,26 @@ cdef class Matrix(Object):
             return
 
 
+        if shape is None and values is not None:
+            # Check if values is a numpy array
+            try:
+                import numpy as np
+                if isinstance(values, np.ndarray):
+                    dtype = values.dtype
+                    if dtype not in (np.float64, np.int64):
+                        dtype = np.float64
+                    m = np.array(values, dtype=dtype, copy=False, order='C')
+                    # Check numpy array dimensions
+                    if m.ndim not in (1, 2):
+                        raise ValueError('Input numpy array must have one or two dimensions')
+                    shape = m.shape if m.ndim == 2 else (1, m.shape[0])
+                    values = m.flat
+
+            except ImportError:
+                pass
+
+
+
         # Validate & parse shape argument
         if shape is not None:
             if not isinstance(shape, (Iterable, int)):
@@ -90,12 +110,12 @@ cdef class Matrix(Object):
         self._c_handler = new c_Matrix(shape[0], shape[1])
         self._owns_c_handler = True
 
-
         if values is not None:
             # Assign values to the matrix
             for k, value in enumerate(map(Expr, values)):
                 i, j = k // shape[1], k % shape[1]
                 self._c_handler.set(i, j, (<Expr>value)._c_handler)
+
 
 
     def __dealloc__(self):
