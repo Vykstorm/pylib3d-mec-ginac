@@ -127,6 +127,9 @@ class System(_System):
     def get_point(self, name):
         return self._get_point(name)
 
+    def get_frame(sefl, name):
+        return self._get_frame(name)
+
 
 
     get_coord = get_coordinate
@@ -203,6 +206,9 @@ class System(_System):
     def has_point(self, name):
         return self._has_point(name)
 
+    def has_frame(self, name):
+        return self._has_frame(name)
+
 
     has_coord = has_coordinate
     has_vel = has_velocity
@@ -270,6 +276,9 @@ class System(_System):
 
     def get_points(self):
         return PointsView(self)
+
+    def get_frames(self):
+        return self._get_frames()
 
 
     get_coords = get_coordinates
@@ -442,6 +451,10 @@ class System(_System):
         return self._new_point(name, previous, position)
 
 
+    def new_frame(self, name, point, base=None):
+        return self._new_frame(name, point, base)
+
+
 
     new_coord = new_coordinate
     new_aux_coord = new_aux_coordinate,
@@ -521,6 +534,10 @@ class System(_System):
     @property
     def points(self):
         return self.get_points()
+
+    @property
+    def frames(self):
+        return self.get_frames()
 
 
     coords = coordinates

@@ -59,6 +59,8 @@ cdef class Object:
             return NamedObject.__eq__(self, other)
         return super().__eq__(self, other)
 
+    def __str__(self):
+        return f'{self.__class__.__name__} object'
 
     def __repr__(self):
         return self.__str__()

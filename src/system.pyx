@@ -82,6 +82,8 @@ cdef class _System:
             return <void*>self._c_handler.get_Vector3D(name)
         if kind == b'point':
             return <void*>self._c_handler.get_Point(name)
+        if kind == b'frame':
+            return <void*>self._c_handler.get_Frame(name)
         return NULL
 
 
@@ -216,6 +218,10 @@ cdef class _System:
         return self._c_handler.get_Points()
 
 
+    cdef c_vector[c_Frame*] _get_c_frames(self):
+        return self._c_handler.get_Frames()
+
+
 
 
 
@@ -309,6 +315,16 @@ cdef class _System:
         return Point(<Py_ssize_t>c_point)
 
 
+    cpdef _get_frame(self, name):
+        name = _parse_name(name)
+        cdef c_Frame* c_frame = <c_Frame*>self._get_c_object(name, b'frame')
+        if c_frame == NULL:
+            raise IndexError(f'Frame "{name.decode()}" doesnt exist')
+        return Frame(<Py_ssize_t>c_frame)
+
+
+
+
     cpdef _has_base(self, name):
         return self._has_c_object(_parse_name(name), b'base')
 
@@ -321,6 +337,9 @@ cdef class _System:
     cpdef _has_point(self, name):
         return self._has_c_object(_parse_name(name), b'point')
 
+    cpdef _has_frame(self, name):
+        return self._has_c_object(_parse_name(name), b'frame')
+
 
     cpdef _has_object(self, name):
         name = _parse_name(name)
@@ -328,7 +347,9 @@ cdef class _System:
             return True
         if self._has_base(name):
             return True
-        if self._has_matrix(name) or self._has_vector(name) or self._has_point(name):
+        if self._has_matrix(name) or self._has_vector(name):
+            return True
+        if self._has_point(name) or self._has_frame(name):
             return True
         return False
 
@@ -369,6 +390,11 @@ cdef class _System:
         cdef c_vector[c_Point*] c_points = self._c_handler.get_Points()
         return [Point(<Py_ssize_t>c_point) for c_point in c_points]
 
+    cpdef _get_frames(self):
+        cdef c_vector[c_Frame*] c_frames = self._c_handler.get_Frames()
+        return [Frame(<Py_ssize_t>c_frame) for c_frame in c_frames]
+
+
 
 
 
@@ -405,6 +431,7 @@ cdef class _System:
             name, vel_name, acc_name,
             tex_name, vel_tex_name, acc_tex_name,
             c_numeric(value), c_numeric(vel_value), c_numeric(acc_value))
+
 
 
 
@@ -696,6 +723,27 @@ cdef class _System:
         cdef c_Vector3D* c_pos_vector = <c_Vector3D*>(<Vector3D>position)._c_handler
         cdef c_Point* c_point = self._c_handler.new_Point(name, c_prev_point, c_pos_vector)
         return Point(<Py_ssize_t>c_point)
+
+
+
+
+    cpdef _new_frame(self, name, point, base=None):
+        name = _parse_name(name, check_syntax=True)
+
+        if self._has_object(name):
+            raise IndexError(f'Name "name.decode()" its already in use')
+
+        if not isinstance(point, Point):
+            point = self._get_point(point)
+
+        if base is not None:
+            if not isinstance(base, Base):
+                base = self._get_base(base)
+        else:
+            base = self._get_base('xyz')
+
+        return Frame(<Py_ssize_t>self._c_handler.new_Frame(name, (<Point>point)._c_handler, (<Base>base)._c_handler))
+
 
 
 
