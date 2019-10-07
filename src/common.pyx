@@ -132,6 +132,25 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
     return v
 
 
+cdef Tensor3D _tensor_from_c(c_Tensor3D* x):
+    # Converts C++ Tensor3D object to Python class Tensor3D instance
+    # It doesnt make a copy of the contents of the C++ tensor
+    tensor = Tensor3D()
+    tensor._c_handler, tensor._owns_c_handler = x, False
+    return tensor
+
+
+cdef Tensor3D _tensor_from_c_value(c_Tensor3D* x):
+    # Convert C++ Tensor3D object to Python class Tensor3D instance
+    # It perform a copy of the contents of the given C++ Vector3D
+    tensor = Tensor3D()
+    tensor._c_handler = new c_Tensor3D(c_deref(<c_Matrix*>x), x.get_Base())
+    tensor._c_handler.set_name(x.get_name())
+    tensor._owns_c_handler = True
+    return tensor
+
+
+
 
 cdef _ginac_print_ex(c_ex x, bint latex=0):
     # Prints a GiNaC::ex to a Python unicode string

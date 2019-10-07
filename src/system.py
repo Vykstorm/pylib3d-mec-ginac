@@ -124,6 +124,9 @@ class System(_System):
     def get_vector(self, name):
         return self._get_vector(name)
 
+    def get_tensor(self, name):
+        return self._get_tensor(name)
+
     def get_point(self, name):
         return self._get_point(name)
 
@@ -203,6 +206,9 @@ class System(_System):
     def has_vector(self, name):
         return self._has_vector(name)
 
+    def has_tensor(self, name):
+        return self._has_tensor(name)
+
     def has_point(self, name):
         return self._has_point(name)
 
@@ -273,6 +279,9 @@ class System(_System):
 
     def get_vectors(self):
         return VectorsView(self)
+
+    def get_tensors(self):
+        return self._get_tensors()
 
     def get_points(self):
         return PointsView(self)
@@ -447,6 +456,10 @@ class System(_System):
         return self._new_vector(name, args, kwargs)
 
 
+    def new_tensor(self, name, values, base):
+        return self._new_tensor(name, values, base)
+
+
     def new_point(self, name, previous, position):
         return self._new_point(name, previous, position)
 
@@ -530,6 +543,10 @@ class System(_System):
     @property
     def vectors(self):
         return self.get_vectors()
+
+    @property
+    def tensors(self):
+        return self.get_tensors()
 
     @property
     def points(self):

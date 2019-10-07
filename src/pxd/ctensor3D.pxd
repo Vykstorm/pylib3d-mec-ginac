@@ -22,4 +22,9 @@ from src.pxd.cbase cimport Base
 
 cdef extern from "Tensor3D.h":
     cdef cppclass Tensor3D(Matrix):
+        # Constructor
+        Tensor3D(Matrix values, Base* base)
+
+        # Getters
         Base* get_Base()
+        void set_Base(Base* base)

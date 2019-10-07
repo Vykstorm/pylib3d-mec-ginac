@@ -22,6 +22,7 @@ from src.pxd.cginac cimport numeric, ex
 from src.pxd.cbase cimport Base
 from src.pxd.cmatrix cimport Matrix
 from src.pxd.cvector3D cimport Vector3D
+from src.pxd.ctensor3D cimport Tensor3D
 from src.pxd.cpoint cimport Point
 from src.pxd.cframe cimport Frame
 
@@ -77,12 +78,14 @@ cdef extern from "System.h":
         vector[Base*] get_Bases()
         vector[Matrix*] get_Matrixs()
         vector[Vector3D*] get_Vectors()
+        vector[Tensor3D*] get_Tensors()
         vector[Point*] get_Points()
         vector[Frame*] get_Frames()
 
         Base* get_Base(string name)
         Matrix* get_Matrix(string name)
         Vector3D* get_Vector3D(string name)
+        Tensor3D* get_Tensor3D(string name)
         Point* get_Point(string name)
         Frame* get_Frame(string name)
 
@@ -97,5 +100,6 @@ cdef extern from "System.h":
         Base* new_Base(string name, string previous, ex a, ex b, ex c, ex rotation_angle)
         Matrix* new_Matrix(Matrix* m)
         void new_Vector3D(Vector3D* v)
+        void new_Tensor3D(Tensor3D* t)
         Point* new_Point(string name, Point* previous, Vector3D* position_vector)
         Frame* new_Frame(string name, Point* point, Base* base)

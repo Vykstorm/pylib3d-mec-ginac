@@ -80,6 +80,8 @@ cdef class _System:
             return <void*>self._c_handler.get_Matrix(name)
         if kind == b'vector':
             return <void*>self._c_handler.get_Vector3D(name)
+        if kind == b'tensor':
+            return <void*>self._c_handler.get_Tensor3D(name)
         if kind == b'point':
             return <void*>self._c_handler.get_Point(name)
         if kind == b'frame':
@@ -210,6 +212,10 @@ cdef class _System:
         return self._c_handler.get_Vectors()
 
 
+    cdef c_vector[c_Tensor3D*] _get_c_tensors(self):
+        return self._c_handler.get_Tensors()
+
+
     cdef c_vector[c_Point*] _get_c_points(self):
         '''
         Get all points defined within this system
@@ -220,6 +226,8 @@ cdef class _System:
 
     cdef c_vector[c_Frame*] _get_c_frames(self):
         return self._c_handler.get_Frames()
+
+
 
 
 
@@ -307,6 +315,15 @@ cdef class _System:
         return _vector_from_c(c_vector)
 
 
+    cpdef _get_tensor(self, name):
+        name = _parse_name(name)
+        cdef c_Tensor3D* c_tensor = <c_Tensor3D*>self._get_c_object(name, b'tensor')
+        if c_tensor == NULL:
+            raise IndexError(f'Tensor "{name.decode()}" doesnt exist')
+        return _tensor_from_c(c_tensor)
+
+
+
     cpdef _get_point(self, name):
         name = _parse_name(name)
         cdef c_Point* c_point = <c_Point*>self._get_c_object(name, b'point')
@@ -334,11 +351,15 @@ cdef class _System:
     cpdef _has_vector(self, name):
         return self._has_c_object(_parse_name(name), b'vector')
 
+    cpdef _has_tensor(self, name):
+        return self._has_c_object(_parse_name(name), b'tensor')
+
     cpdef _has_point(self, name):
         return self._has_c_object(_parse_name(name), b'point')
 
     cpdef _has_frame(self, name):
         return self._has_c_object(_parse_name(name), b'frame')
+
 
 
     cpdef _has_object(self, name):
@@ -385,6 +406,10 @@ cdef class _System:
     cpdef _get_vectors(self):
         cdef c_vector[c_Vector3D*] c_vectors = self._c_handler.get_Vectors()
         return [_vector_from_c(c_vector) for c_vector in c_vectors]
+
+    cpdef _get_tensors(self):
+        cdef c_vector[c_Tensor3D*] c_tensors = self._c_handler.get_Tensors()
+        return [_tensor_from_c(c_tensor) for c_tensor in c_tensors]
 
     cpdef _get_points(self):
         cdef c_vector[c_Point*] c_points = self._c_handler.get_Points()
@@ -704,6 +729,35 @@ cdef class _System:
         (<Vector3D>vector)._owns_c_handler = False
 
         return vector
+
+
+
+    cpdef _new_tensor(self, name, values, base):
+        name = _parse_name(name)
+
+        if self._has_object(name) and not self._has_tensor(name):
+            raise IndexError(f'Name "{name.decode()}" its already in use')
+
+        tensor = Tensor3D(values, base, self)
+        cdef c_Tensor3D* c_tensor = <c_Tensor3D*>(<Tensor3D>tensor)._get_c_handler()
+        cdef c_Tensor3D* _c_tensor
+
+        if self._has_tensor(name):
+            # Vector with the same name already exists. Only update its values and base
+            warn(f'Tensor "{name.decode()}" already exists. Only updating its base & values', UserWarning)
+
+            _tensor = self._get_tensor(name)
+            _c_tensor = <c_Tensor3D*>(<Tensor3D>_tensor)._get_c_handler()
+            _c_tensor.set_Base(c_tensor.get_Base())
+            _c_tensor.set_matrix(c_tensor.get_matrix())
+            return _tensor
+
+
+        c_tensor.set_name(name)
+        self._c_handler.new_Tensor3D(c_tensor)
+        (<Tensor3D>tensor)._owns_c_handler = False
+        return tensor
+
 
 
 
