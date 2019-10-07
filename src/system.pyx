@@ -731,7 +731,7 @@ cdef class _System:
         name = _parse_name(name, check_syntax=True)
 
         if self._has_object(name):
-            raise IndexError(f'Name "name.decode()" its already in use')
+            raise IndexError(f'Name "{name.decode()}" its already in use')
 
         if not isinstance(point, Point):
             point = self._get_point(point)
