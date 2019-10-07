@@ -350,15 +350,17 @@ def _gen_latex_name(name):
     if isinstance(name, bytes):
         name = name.decode()
 
-    result = match('^([a-zA-Z])_?(\d*)$', name)
+    result = match('^([a-zA-Z]+)_?(\d*)$', name)
     if not result:
-        return b''
-    letter, subindex = result.group(1), result.group(2)
+        return (r'\textrm{' + name  + '}').encode()
 
-    if letter in _latin_to_greek_latex:
-        letter = _latin_to_greek_latex[letter]
+    name, subindex = result.group(1), result.group(2)
+    if name in _latin_to_greek_latex:
+        name = _latin_to_greek_latex[name]
+    else:
+        name = r'\textrm{' + name + '}'
 
-    return (letter if not subindex else f'{letter}_' + '{' + subindex + '}').encode()
+    return (name if not subindex else f'{name}_' + '{' + subindex + '}').encode()
 
 
 
