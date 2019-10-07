@@ -316,6 +316,12 @@ cdef class Matrix(Object):
                 yield _expr_from_c(self._get_c_handler().get(i, j))
 
 
+    def __reversed__(self):
+        n, m = self.get_shape()
+        for i in reversed(range(0, n)):
+            for j in reversed(range(0, m)):
+                yield _expr_from_c(self._get_c_handler().get(i, j))
+
 
 
     ######## Arithmetic operations ########
