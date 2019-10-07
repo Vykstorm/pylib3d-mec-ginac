@@ -16,6 +16,12 @@ cdef class Frame(Object):
 
 
 
+    ######## Constructor ########
+
+    def __cinit__(self, Py_ssize_t handler):
+        self._c_handler = <c_Frame*>handler
+
+
 
     ######## Getters ########
 
