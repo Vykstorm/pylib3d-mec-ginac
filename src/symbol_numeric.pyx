@@ -81,7 +81,7 @@ cdef class SymbolNumeric(Object):
         :type value: int, float
         :raises TypeError: If value has an incorrect type.
         '''
-        self._c_handler.set_value(c_numeric(_parse_numeric_value(value)))
+        self._c_handler.set_value(c_numeric(<double>_parse_numeric_value(value)))
 
 
 

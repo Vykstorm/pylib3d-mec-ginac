@@ -387,11 +387,14 @@ cdef void _c_ginac_print_numeric_latex(const c_numeric& num, const c_ginac_latex
         return
 
     if num.is_rational():
-        c.s << <c_string>b'\\frac{'
-        c.s << num.numer()
-        c.s << <c_string>b'}{'
-        c.s << num.denom()
-        c.s << <c_string>b'}'
+        if num.denom().compare(c_numeric(1)) == 0:
+            c.s << num.numer()
+        else:
+            c.s << <c_string>b'\\frac{'
+            c.s << num.numer()
+            c.s << <c_string>b'}{'
+            c.s << num.denom()
+            c.s << <c_string>b'}'
         return
 
     cdef double value = num.to_double()

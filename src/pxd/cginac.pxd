@@ -80,11 +80,14 @@ cdef extern from "ginac/symbol.h" namespace "GiNaC":
 cdef extern from "ginac/ginac.h" namespace "GiNaC":
     cdef cppclass numeric(basic):
         numeric(double value)
+        numeric(long value)
 
         bint is_integer() const
         bint is_rational() const
         bint is_real() const
-        bint is_zero()
+        bint is_zero() const
+        int compare(numeric& other) const
+
         double to_double() const
         long to_long() const
         const numeric real() const
