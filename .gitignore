@@ -143,3 +143,6 @@ src/main.pyx
 # Ignore ipython notebook & python script tests
 examples/test*.py
 examples/test*.ipynb
+
+# Ignore untitled ipython notebook
+examples/Untitled.ipynb
