@@ -108,6 +108,7 @@ EXTENSION_DEFINITION_FILES = map(partial(join, 'src'), [
     'matrix.pyx',
     'vector3D.pyx',
     'point.pyx',
+    'frame.pyx',
     'system.pyx',
     'expression.pyx'
 ])

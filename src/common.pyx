@@ -27,6 +27,7 @@ from src.pxd.cbase cimport Base as c_Base
 from src.pxd.cmatrix cimport Matrix as c_Matrix
 from src.pxd.cvector3D cimport Vector3D as c_Vector3D
 from src.pxd.cpoint cimport Point as c_Point
+from src.pxd.cframe cimport Frame as c_Frame
 
 # Import GiNaC C++ classes
 from src.pxd.cginac cimport numeric as c_numeric
@@ -41,23 +42,34 @@ from src.pxd.cginac cimport matrix as c_ginac_matrix
 from src.pxd.cginac cimport set_print_func as c_ginac_set_print_func
 from src.pxd.cginac cimport pow as c_pow
 
-# Python imports (builtins)
+
+## Python imports (builtins)
+
+# Data structures
 from collections import OrderedDict
 from collections.abc import Iterable
-from inspect import Signature, Parameter
+
+# Common imports
 from functools import partial, partialmethod, wraps
 from itertools import chain, starmap
 from operator import attrgetter
-from math import floor
+from warnings import warn
 from re import match
 from abc import ABC
-from types import MethodType
-from warnings import warn
 
+# Math functions
+from math import floor
 
-# Python imports (external libraries)
+# Third party libraries
 from asciitree import LeftAligned
 from tabulate import tabulate
+
+# Other
+from types import MethodType
+from inspect import Signature, Parameter
+
+
+
 
 
 ######## C type aliases ########
