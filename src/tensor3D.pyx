@@ -41,18 +41,17 @@ cdef class Tensor3D(Matrix):
 
 
     def get_base(self):
-        pass
+        return Base(<Py_ssize_t>(<c_Vector3D*>self._get_c_handler()).get_Base())
+
+
 
 
     ######## Setters ########
 
 
-    def set_base(self, base):
-        pass
-
-
 
     ######## Operations ########
+
 
 
     ######## Properties ########
