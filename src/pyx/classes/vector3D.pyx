@@ -137,13 +137,6 @@ cdef class Vector3D(Matrix):
     ######## Setters ########
 
 
-    cpdef set_base(self, base):
-        if not isinstance(base, Base):
-            raise TypeError('Input argument must be a Base object')
-
-        (<c_Vector3D*>self._get_c_handler()).set_Base((<Base>base)._c_handler)
-
-
 
 
     ######## Operations ########
@@ -242,11 +235,6 @@ cdef class Vector3D(Matrix):
     @property
     def base(self):
         return self.get_base()
-
-    @base.setter
-    def base(self, base):
-        self.set_base(base)
-
 
     @property
     def module(self):
