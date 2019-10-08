@@ -65,12 +65,6 @@ cdef class Tensor3D(Matrix):
     ######## Getters ########
 
 
-    def get_base(self):
-        return Base(<Py_ssize_t>(<c_Vector3D*>self._get_c_handler()).get_Base())
-
-
-
-
     ######## Setters ########
 
 
@@ -82,10 +76,11 @@ cdef class Tensor3D(Matrix):
     ######## Properties ########
 
 
-    @property
-    def base(self):
-        return self.get_base()
 
 
 
-    ######## Printing ########
+
+
+
+
+GeometricObject.register(Vector3D)

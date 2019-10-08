@@ -34,15 +34,6 @@ cdef class Base(Object):
     ######## Getters ########
 
 
-    cpdef get_name(self):
-        '''get_name() -> str
-        :returns: The name of this base
-        :rtype: str
-        '''
-        return self._c_handler.get_name().decode()
-
-
-
     cpdef get_previous_base(self):
         '''get_previous_base() -> Base
         Get the previous base.

@@ -130,7 +130,7 @@ class System(_System):
     def get_point(self, name):
         return self._get_point(name)
 
-    def get_frame(sefl, name):
+    def get_frame(self, name):
         return self._get_frame(name)
 
 

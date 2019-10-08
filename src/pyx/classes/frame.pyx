@@ -25,15 +25,6 @@ cdef class Frame(Object):
 
     ######## Getters ########
 
-
-    cpdef get_name(self):
-        return (<bytes>self._c_handler.get_name()).decode()
-
-
-    cpdef get_base(self):
-        return Base(<Py_ssize_t>self._c_handler.get_Base())
-
-
     cpdef get_point(self):
         return Point(<Py_ssize_t>self._c_handler.get_Point())
 
@@ -46,12 +37,6 @@ cdef class Frame(Object):
     ######## Setters ########
 
 
-    cpdef set_base(self, base):
-        if not isinstance(base, Base):
-            raise TypeError('Input argument must be a Base object')
-        self._c_handler.set_Base((<Base>base)._c_handler)
-
-
     cpdef set_point(self, point):
         if not isinstance(point, Point):
             raise TypeError('Input argument must be a Point object')
@@ -60,16 +45,6 @@ cdef class Frame(Object):
 
 
     ######## Properties ########
-
-
-    @property
-    def base(self):
-        return self.get_base()
-
-    @base.setter
-    def base(self, base):
-        self.set_base(base)
-
 
     @property
     def point(self):
@@ -89,6 +64,5 @@ cdef class Frame(Object):
 
 
 
-
-
 NamedObject.register(Frame)
+GeometricObject.register(Frame)

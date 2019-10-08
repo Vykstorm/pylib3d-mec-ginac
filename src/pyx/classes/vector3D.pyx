@@ -116,12 +116,6 @@ cdef class Vector3D(Matrix):
 
     ######## Getters ########
 
-
-    cpdef get_base(self):
-        cdef c_Base* c_base = (<c_Vector3D*>self._get_c_handler()).get_Base()
-        return Base(<Py_ssize_t>c_base)
-
-
     cpdef get_module(self):
         cdef c_ex c_expr = (<c_Vector3D*>self._get_c_handler()).get_module()
         return _expr_from_c(c_expr)
@@ -231,11 +225,6 @@ cdef class Vector3D(Matrix):
 
     ######## Properties ########
 
-
-    @property
-    def base(self):
-        return self.get_base()
-
     @property
     def module(self):
         return self.get_module()
@@ -267,6 +256,12 @@ cdef class Vector3D(Matrix):
     @z.setter
     def z(self, value):
         self.set(2, value)
+
+
+
+
+
+GeometricObject.register(Vector3D)
 
 
 

@@ -186,14 +186,6 @@ cdef class Matrix(Object):
         '''
         return self.get_num_rows() * self.get_num_cols()
 
-    def get_name(self):
-        '''
-        Get the name of this matrix
-        :rtype: int
-        '''
-        return (<bytes>self._get_c_handler().get_name()).decode()
-
-
 
     def __len__(self):
         return self.get_size()

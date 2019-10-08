@@ -40,14 +40,6 @@ cdef class SymbolNumeric(Object):
         return self._c_handler.get_value().to_double()
 
 
-    cpdef get_name(self):
-        '''get_name() -> str
-        Get the name of this symbol
-        :rtype: str
-        '''
-        return (<bytes>self._c_handler.get_name()).decode()
-
-
     cpdef get_tex_name(self):
         '''get_tex_name() -> str
         Get the name in latex of this symbol

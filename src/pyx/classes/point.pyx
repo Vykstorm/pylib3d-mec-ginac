@@ -28,10 +28,6 @@ cdef class Point(Object):
     ######## Getters ########
 
 
-    def get_name(self):
-        return (<bytes>self._c_handler.get_name()).decode()
-
-
     def get_position_vector(self):
         return _vector_from_c(self._c_handler.get_Position_Vector())
 
@@ -54,12 +50,6 @@ cdef class Point(Object):
 
 
     ######## Properties ########
-
-
-    @property
-    def name(self):
-        return self.get_name()
-
 
     @property
     def position_vector(self):
