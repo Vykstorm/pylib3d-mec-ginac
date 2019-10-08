@@ -5,20 +5,6 @@ modules and helper methods/variables/types
 '''
 
 
-
-######## C type aliases ########
-
-# C type alias representing a list of numeric symbols (std::vector[symbol_numeric*])
-ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
-
-# C type alias representing a list of bases (std::vector[Base*])
-ctypedef c_vector[c_Base*] c_base_list
-
-# Same for std::vector[Matrix*]
-ctypedef c_vector[c_Matrix*] c_matrix_list
-
-
-
 ######## C helper functions ########
 
 cdef Expr _expr_from_c(c_ex x):

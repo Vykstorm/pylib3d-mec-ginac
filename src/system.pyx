@@ -5,11 +5,16 @@ class System
 '''
 
 
-######## Helper variables & methods ########
+######## Helper types, variables & methods ########
 
 cdef void outError(const char* msg):
     # Redefinition of outError function (to suppress error messages)
     pass
+
+
+# C type alias representing a list of numeric symbols (std::vector[symbol_numeric*])
+ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
+
 
 
 
