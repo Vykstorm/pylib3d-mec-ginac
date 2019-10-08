@@ -78,13 +78,12 @@ from functools import partial, partialmethod, wraps
 from itertools import chain, starmap
 from operator import attrgetter
 from warnings import warn
-from re import match
 from abc import ABC
 from types import MethodType
-from inspect import Signature, Parameter
 
 # Math
 from math import floor
+
 
 # Third party libraries
 from asciitree import LeftAligned
