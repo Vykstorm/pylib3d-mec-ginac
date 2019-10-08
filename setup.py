@@ -99,20 +99,25 @@ LIBRARIES = [
 ]
 
 
-# All .pyx file definitions of the extension (relative to the directory src/)
-EXTENSION_DEFINITION_FILES = map(partial(join, 'src'), [
-    'imports.pyx', 'parse.pyx', 'print.pyx',
-    'object.pyx', 'system.pyx', 'symbol_numeric.pyx', 'expression.pyx',
-    'base.pyx', 'matrix.pyx', 'vector3D.pyx', 'tensor3D.pyx',
-    'point.pyx', 'frame.pyx'
-])
+# All .pyx file definitions of the extension
+EXTENSION_DEFINITION_FILES = map(partial(join, 'src/pyx'), chain(
+    # Modules at src/pyx
+    ['imports.pyx', 'parse.pyx', 'print.pyx'],
+
+    # Modules at src/pyx/classes
+    map(partial(join, 'classes'), [
+        'object.pyx', 'system.pyx', 'symbol_numeric.pyx', 'expression.pyx',
+        'base.pyx', 'matrix.pyx', 'vector3D.pyx', 'tensor3D.pyx',
+        'point.pyx', 'frame.pyx'
+    ])
+))
 
 
 # This list holds all the extensions defined by this library
 EXTENSIONS = [
     Extension(
         name=f'{PACKAGE}_ext',
-        sources=['src/main.pyx', 'src/extern.cpp'],
+        sources=['src/pyx/main.pyx', 'src/cpp/extern.cpp'],
         include_dirs=INCLUDE_DIRS,
         library_dirs=LIBRARY_DIRS,
         runtime_library_dirs=RUNTIME_LIBRARY_DIRS,
@@ -141,7 +146,7 @@ if __name__ == '__main__':
 
     ## Merge .pyx definition files into one
     print(f"Generating src/main.pyx file")
-    with open('src/main.pyx', 'w') as f_out: # All source code will be merged to this file
+    with open('src/pyx/main.pyx', 'w') as f_out: # All source code will be merged to this file
         # Insert a header comment in the output file
         f_out.write('\n'.join([
             "'"*3,
