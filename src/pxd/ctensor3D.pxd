@@ -12,7 +12,9 @@ from libcpp.string cimport string
 
 # Imports from .pxd file definitions
 from src.pxd.cmatrix cimport Matrix
+from src.pxd.cvector3D cimport Vector3D
 from src.pxd.cbase cimport Base
+from src.pxd.cginac cimport ex
 
 
 
@@ -28,3 +30,10 @@ cdef extern from "Tensor3D.h":
         # Getters
         Base* get_Base()
         void set_Base(Base* base)
+
+        # Operations
+        Tensor3D operator+(Tensor3D& other)
+        Tensor3D operator-(Tensor3D& other)
+        Tensor3D operator*(Tensor3D& other)
+        Vector3D operator*(Vector3D& other)
+        Tensor3D operator*(ex& other)
