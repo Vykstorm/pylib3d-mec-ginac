@@ -140,11 +140,11 @@ cdef Tensor3D _tensor_from_c(c_Tensor3D* x):
     return tensor
 
 
-cdef Tensor3D _tensor_from_c_value(c_Tensor3D* x):
+cdef Tensor3D _tensor_from_c_value(c_Tensor3D x):
     # Convert C++ Tensor3D object to Python class Tensor3D instance
     # It perform a copy of the contents of the given C++ Vector3D
     tensor = Tensor3D()
-    tensor._c_handler = new c_Tensor3D(c_deref(<c_Matrix*>x), x.get_Base())
+    tensor._c_handler = new c_Tensor3D(x, x.get_Base())
     tensor._c_handler.set_name(x.get_name())
     tensor._owns_c_handler = True
     return tensor
