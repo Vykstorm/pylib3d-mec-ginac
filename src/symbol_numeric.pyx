@@ -193,14 +193,6 @@ cdef class SymbolNumeric(Object):
 
 
 
-    ######## Printing ########
-
-
-    def __str__(self):
-        return f'{self.get_name()} = {round(self.get_value(), 4)}'
-
-
-
 
 
 NamedObject.register(SymbolNumeric)

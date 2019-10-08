@@ -483,34 +483,6 @@ cdef class Matrix(Object):
 
 
 
-    ######## Printing ########
-
-
-    def __str__(self):
-        values = tuple(map(str, self.get_values()))
-        n, m = self.get_shape()
-        if m == 1:
-            m, n = n, 1
-
-        col_sizes = [max([len(values[i*m + j]) for i in range(0, n)])+1 for j in range(0, m)]
-        delimiters = '[]' if n == 1 or m == 1 else '\u2502'*2
-
-        lines = []
-        for i in range(0, n):
-            line = ' '.join([values[i*m + j].rjust(col_size) for j, col_size in zip(range(0, m), col_sizes)])
-            line = delimiters[0] + line + ' ' + delimiters[1]
-            lines.append(line)
-
-        if n > 1 and m > 1:
-            # Insert decoratives
-            row_width = len(lines[0]) - 2
-            head = '\u256d' + ' '*row_width + '\u256e'
-            tail = '\u2570' + ' '*row_width + '\u256f'
-            lines.insert(0, head)
-            lines.append(tail)
-
-        return '\n'.join(lines)
-
 
 
 NamedObject.register(Matrix)

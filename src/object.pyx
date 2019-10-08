@@ -65,7 +65,7 @@ cdef class Object:
         return super().__eq__(self, other)
 
     def __str__(self):
-        return f'{self.__class__.__name__} object'
+        return _to_str(self)
 
     def __repr__(self):
         return self.__str__()

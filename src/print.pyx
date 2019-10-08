@@ -6,10 +6,10 @@ in latex or string format.
 '''
 
 
+
 ######## Custom GiNaC latex print formatting ########
 
 # This function will tell GiNaC how to format numeric values in latex format.
-
 cdef void _c_ginac_print_numeric_latex(const c_numeric& num, const c_ginac_latex_printer& c, unsigned level):
     if not num.is_integer() and not num.is_rational() and not num.is_real():
         # For the moment, its supposed that we only work with integers, reals or rationals
@@ -43,15 +43,13 @@ c_ginac_set_print_func[c_numeric, c_ginac_latex_printer](_c_ginac_print_numeric_
 
 
 
-cdef _ginac_print_ex(c_ex x, bint latex=0):
-    # Prints a GiNaC::ex to a Python unicode string
-    # The expression will be formatted with latex if latex is set to True
-    cdef c_ginac_printer* c_printer
-    if latex:
-        c_printer = new c_ginac_latex_printer(c_sstream())
-    else:
-        c_printer = new c_ginac_python_printer(c_sstream())
 
+######## GiNaC expressions to latex ########
+
+
+cdef _ginac_expr_to_latex(c_ex x):
+    # Converts a GiNaC expression to a string using the latex printer
+    cdef c_ginac_printer* c_printer = new c_ginac_latex_printer(c_sstream())
     x.print(c_deref(c_printer))
     text = (<bytes>(<c_sstream*>&c_printer.s).str()).decode()
     del c_printer
@@ -60,10 +58,12 @@ cdef _ginac_print_ex(c_ex x, bint latex=0):
 
 
 
+
+
 ######## Latex printing on IPython  ########
 
 
-def _print_latex_ipython(text):
+cpdef _print_latex_ipython(str text):
     '''
     This function displays the given latex text on IPython.
     :param text: The latex text to be displayed
@@ -75,7 +75,7 @@ def _print_latex_ipython(text):
         from IPython.display import display, Math
     except ImportError:
         raise ImportError('You must have installed IPython to render latex')
-    display(Math(_parse_text(text).decode()))
+    display(Math(text))
 
 
 
@@ -83,34 +83,32 @@ def _print_latex_ipython(text):
 ######## Expressions, Symbols and Matrices to latex ########
 
 
-def _symbol_to_latex(symbol):
+cpdef _symbol_to_latex(SymbolNumeric symbol):
     '''
     Converts a numeric symbol to latex.
     The latex name of the symbol is returned if its not an empty string.
     Otherwise, it returns the name of the symbol wrapped with a textrm statement: '\\textrm{name}'
     '''
-    assert isinstance(symbol, SymbolNumeric)
     return symbol.get_tex_name() or r'\textrm{' + symbol.get_name()  + '}'
 
 
 
-def _expr_to_latex(expr):
+cpdef _expr_to_latex(Expr expr):
     '''
     Converts an expression to latex.
     It uses the routines provided by GiNaC behind the scenes.
     '''
-    assert isinstance(expr, Expr)
-    return _ginac_print_ex((<Expr>expr)._c_handler, latex=True)
+    return _ginac_expr_to_latex(expr._c_handler)
 
 
 
-def _matrix_to_latex(matrix):
+cpdef _matrix_to_latex(Matrix matrix):
     '''
     Converts a matrix to latex.
     It uses the routines provided by GiNaC behind the scenes.
     '''
     assert isinstance(matrix, Matrix)
-    return _ginac_print_ex(c_ex((<Matrix>matrix)._get_c_handler().get_matrix()), latex=True)
+    return _ginac_expr_to_latex(c_ex(matrix._get_c_handler().get_matrix()))
 
 
 
@@ -254,3 +252,150 @@ def _gen_latex_name(name):
         name = r'\textrm{' + name + '}'
 
     return (name if not subindex else f'{name}_' + '{' + subindex + '}').encode()
+
+
+
+
+
+
+
+######## GiNaC expressions to strings ########
+
+cdef _ginac_expr_to_str(c_ex x):
+    # Converts a GiNaC expression to a string
+    cdef c_ginac_printer* c_printer = new c_ginac_python_printer(c_sstream())
+    x.print(c_deref(c_printer))
+    text = (<bytes>(<c_sstream*>&c_printer.s).str()).decode()
+    del c_printer
+    return text
+
+
+
+
+######## Expressions, Symbols and Matrices to text (terminal mode) ########
+
+
+
+cpdef _symbol_to_str(SymbolNumeric symbol):
+    # Prints a numeric symbol to a string.
+    return f'{symbol.get_name()} = {round(symbol.get_value(), 4)}'
+
+
+
+cpdef _matrix_to_str(Matrix matrix):
+    # Prints a matrix object to a string nicely
+
+    values = tuple(map(str, matrix.get_values()))
+    n, m = matrix.get_shape()
+    if m == 1:
+        m, n = n, 1
+
+    col_sizes = [max([len(values[i*m + j]) for i in range(0, n)])+1 for j in range(0, m)]
+    delimiters = '[]' if n == 1 or m == 1 else '\u2502'*2
+
+    lines = []
+    for i in range(0, n):
+        line = ' '.join([values[i*m + j].rjust(col_size) for j, col_size in zip(range(0, m), col_sizes)])
+        line = delimiters[0] + line + ' ' + delimiters[1]
+        lines.append(line)
+
+    if n > 1 and m > 1:
+        # Insert decoratives
+        row_width = len(lines[0]) - 2
+        head = '\u256d' + ' '*row_width + '\u256e'
+        tail = '\u2570' + ' '*row_width + '\u256f'
+        lines.insert(0, head)
+        lines.append(tail)
+
+    return '\n'.join(lines)
+
+
+
+
+cpdef _expr_to_str(Expr expr):
+    '''
+    Prints an expression to a string.
+    It uses the GiNaC printing routines behind the scenes
+    '''
+    x = _ginac_expr_to_str(expr._c_handler)
+
+    try:
+        # Try to format the expression as a number (remove decimals if its integer)
+        x = float(x)
+        if floor(x) == x:
+            x = floor(x)
+        else:
+            x = round(x, 4)
+        return str(x)
+    except:
+        # Otherwise, returns the whole expression as-is
+        return x
+
+
+
+cpdef _base_to_str(Base base):
+    # Prints a base object to a string
+    s = f'Base {base.name}'
+
+    if base.has_previous():
+        ancestors = []
+        prev = base.get_previous()
+        ancestors.append(prev)
+        while prev.has_previous():
+            prev = prev.get_previous()
+            ancestors.append(prev)
+
+        s += ', ancestors: ' + ' -> '.join(map(attrgetter('name'), ancestors))
+
+    return s
+
+
+
+
+cpdef _point_to_str(Point point):
+    # Prints a point object to a string
+    #if self.has_previous():
+    #    return f'Point "{self.name}", position = {self.offset} (base {self.offset.base.name}), previous = {self.previous.name}'
+    if not point.has_previous():
+        return 'Origin point'
+
+    name = point.name
+    previous_name = point.previous.name
+    x, y, z = point.offset.x, point.offset.y, point.offset.z
+    base_name = point.offset.base.name
+
+
+    return tabulate([[
+        point.name, x, y, z, base_name, previous_name
+    ]], headers=('name', 'x', 'y', 'z', 'base', 'previous'), tablefmt='plain')
+
+
+
+
+cpdef _frame_to_str(Frame frame):
+    # Prints a frame object to a string
+    # TODO
+    return 'Frame object'
+
+
+
+def _to_str(obj):
+    '''
+    Converts an object to a string.
+    If the input object is a numeric symbol, matrix, expression, base, point or
+    frame, returns the object as a string formatted nicely (when visualized on a
+    terminal)
+    '''
+    if isinstance(obj, SymbolNumeric):
+        return _symbol_to_str(obj)
+    if isinstance(obj, Matrix):
+        return _matrix_to_str(obj)
+    if isinstance(obj, Expr):
+        return _expr_to_str(obj)
+    if isinstance(obj, Base):
+        return _base_to_str(obj)
+    if isinstance(obj, Point):
+        return _point_to_str(obj)
+    if isinstance(obj, Frame):
+        return _frame_to_str(obj)
+    return f'{obj.__class__.__name__} object'

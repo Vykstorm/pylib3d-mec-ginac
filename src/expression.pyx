@@ -119,26 +119,6 @@ cdef class Expr(Object):
 
 
 
-    ######## Printing ########
-
-
-    def __str__(self):
-        # Use GiNac print method
-        x = _ginac_print_ex(self._c_handler)
-
-        # Try to format the expression as a number (remove decimals if its integer)
-        try:
-            x = float(x)
-            if floor(x) == x:
-                x = floor(x)
-            else:
-                x = round(x, 4)
-            return str(x)
-        except:
-            return x
-
-
-
 LatexRenderable.register(Expr)
 
 

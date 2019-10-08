@@ -77,19 +77,6 @@ cdef class Point(Object):
 
 
 
-    ######## Printing ########
-
-
-    def __str__(self):
-        #if self.has_previous():
-        #    return f'Point "{self.name}", position = {self.offset} (base {self.offset.base.name}), previous = {self.previous.name}'
-        if not self.has_previous():
-            return 'Origin point'
-
-        return tabulate([[
-            self.name, self.offset.x, self.offset.y, self.offset.z, self.offset.base.name, self.previous.name
-        ]], headers=('name', 'x', 'y', 'z', 'base', 'previous'), tablefmt='plain')
-
 
 
 NamedObject.register(Point)

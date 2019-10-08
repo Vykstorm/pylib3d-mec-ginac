@@ -87,9 +87,6 @@ cdef class Frame(Object):
 
 
 
-    ######## Printing ########
-
-
 
 
 

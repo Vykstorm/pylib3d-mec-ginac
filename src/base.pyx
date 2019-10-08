@@ -112,24 +112,6 @@ cdef class Base(Object):
 
 
 
-    ######## Printing ########
-
-
-    def __str__(self):
-        s = f'Base {self.name}'
-
-        if self.has_previous():
-            ancestors = []
-            prev = self.get_previous()
-            ancestors.append(prev)
-            while prev.has_previous():
-                prev = prev.get_previous()
-                ancestors.append(prev)
-
-            s += ', ancestors: ' + ' -> '.join(map(attrgetter('name'), ancestors))
-
-        return s
-
 
 
 NamedObject.register(Base)
