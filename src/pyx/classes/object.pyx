@@ -1,27 +1,22 @@
 '''
 Author: Víctor Ruiz Gómez
 Description:
-Cython classes doesnt support multiple inheritance, but part of the features of
-the classes SymbolNumeric, Expr, Matrix, Vector3D, Tensor3D, Base, Point and Frame
-are shared.
-These are:
-* All kind of objects except expressions (Expr) have name.
-They define the method get_name and the property "name" to query the object name
-Those classes implements the abstract interface "NamedObject"
 
 
-* SymbolNumeric, Expr, Matrix, Vector3D and Tensor3D can be formatted to latex.
-They have the methods print_latex and to_latex and also the property "latex"
-Classes on this category implements the interface "LatexRenderable"
+This file defines the base class for SymbolNumeric, Expr, Matrix, Vector3D,
+Tensor3D, Base, Point and Frame classes
 
-* Objects like Vector3D Tensor3D and Frame are defined within a base.
-They declare the methods get_base and the property "base" to query the base and
-also the method in_base to perform a base change operation. They implement
-the interface "GeometricObject"
+The base class is called "Object", and it defines a few properties
+& methods:
 
+* get_name method and "name" property avaliable for:
+SymbolNumeric, Matrix, Vector3D, Tensor3D, Base, Point and Frame
 
-The mechanism
+* print_latex, to_latex methods and "latex" property for:
+SymbolNumeric, Expr, Matrix, Vector3D and Tensor3D
 
+* get_base, in_base methods and "base" property for:
+Vector3D, Tensor3D and Frame
 '''
 
 
