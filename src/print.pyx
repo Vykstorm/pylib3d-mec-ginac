@@ -2,11 +2,11 @@
 Author: Víctor Ruiz Gómez
 Description:
 This module defines internal helper functions to print symbols, expressions and matrices
-in latex format.
+in latex or string format.
 '''
 
 
-######## Custom GiNaC print formatting ########
+######## Custom GiNaC latex print formatting ########
 
 # This function will tell GiNaC how to format numeric values in latex format.
 
@@ -67,16 +67,93 @@ def _print_latex_ipython(text):
 ######## Expressions, Symbols and Matrices to latex ########
 
 
-def _symbol_to_latex(self, symbol):
-    pass
+def _symbol_to_latex(symbol):
+    '''
+    Converts a numeric symbol to latex.
+    The latex name of the symbol is returned if its not an empty string.
+    Otherwise, it returns the name of the symbol wrapped with a textrm statement: '\\textrm{name}'
+    '''
+    assert isinstance(symbol, SymbolNumeric)
+    return symbol.get_tex_name() or r'\textrm{' + symbol.get_name()  + '}'
 
 
-def _expr_to_latex(self, expr):
-    pass
+
+def _expr_to_latex(expr):
+    '''
+    Converts an expression to latex.
+    It uses the routines provided by GiNaC behind the scenes.
+    '''
+    assert isinstance(expr, Expr)
+    return _ginac_print_ex((<Expr>expr)._c_handler, latex=True)
 
 
-def _matrix_to_latex(self, matrix):
-    pass
+
+def _matrix_to_latex(matrix):
+    '''
+    Converts a matrix to latex.
+    It uses the routines provided by GiNaC behind the scenes.
+    '''
+    assert isinstance(matrix, Matrix)
+    return _ginac_print_ex(c_ex((<Matrix>matrix)._get_c_handler().get_matrix()), latex=True)
+
+
+
+def _to_latex(obj):
+    # Converts any given object to latex
+    if isinstance(obj, SymbolNumeric):
+        return _symbol_to_latex(obj)
+    if isinstance(obj, Expr):
+        return _expr_to_latex(obj)
+    if isinstance(obj, Matrix):
+        return _matrix_to_latex(obj)
+
+    if isinstance(obj, bytes):
+        return obj.decode()
+    if isinstance(obj, str):
+        return obj
+    return r'\textrm{' + str(obj) + '}'
+
+
+
+def to_latex(*args):
+    '''
+    Convert one or more objects in a single latex inline formula.
+    Objects can be of any kind; numeric symbols, expressions, matrices, vectors and tensors are
+    printed nicely. The rest of objects are converted to a string using the metamethod
+    __str__ and wrapped in a latex textrm statement: '\\textrm{str(object))}'
+
+
+        :Example:
+
+        >> to_latex(new_param('a', tex_name='\\alpha'))
+        '\\alpha'
+
+        >> u, x = new_param('u', tex_name='\\upsilon'), new_param('x', tex_name=r'\chi')
+        >> to_latex(u, x)
+        '\\upsilon\:\\chi'
+
+        >> to_latex(u, '\\times', x, '=', u * x)
+        '\\upsilon\\:\\times\\:\\chi\\:=\\: \\upsilon \\chi'
+
+        >> to_latex(new_matrix(shape=[3, 3]))
+        '\\left(\\begin{array}{ccc}0&0&0\\\\0&0&0\\\\0&0&0\\end{array}\\right)'
+
+    '''
+    return r'\:'.join(map(_to_latex, args))
+
+
+
+
+def print_latex(*args):
+    '''
+    This method calls to_latex to convert the input arguments to an inline latex formula.
+    Then, the formula is displayed on IPython.
+
+    :raise ImportError: If IPython module couldnt be imported
+    '''
+    _print_latex_ipython(to_latex(*args))
+
+
 
 
 

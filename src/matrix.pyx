@@ -462,9 +462,6 @@ cdef class Matrix(Object):
 
     ######## Printing ########
 
-    def to_latex(self):
-        return _ginac_print_ex(c_ex(self._get_c_handler().get_matrix()), latex=True)
-
 
     def __str__(self):
         values = tuple(map(str, self.get_values()))

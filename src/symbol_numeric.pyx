@@ -196,10 +196,6 @@ cdef class SymbolNumeric(Object):
     ######## Printing ########
 
 
-    def to_latex(self):
-        return self.get_tex_name() or r'\textrm{' + self.get_name()  + '}'
-
-
     def __str__(self):
         return f'{self.get_name()} = {round(self.get_value(), 4)}'
 

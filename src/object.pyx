@@ -20,6 +20,9 @@ class LatexRenderable(ABC):
         _print_latex_ipython(self.to_latex())
 
 
+    def to_latex(self):
+        return _to_latex(self)
+
 
 
 
@@ -38,7 +41,9 @@ cdef class Object:
 
         if isinstance(self, LatexRenderable):
             if key == 'latex':
-                return self.to_latex()
+                return LatexRenderable.to_latex(self)
+            if key == 'to_latex':
+                return MethodType(LatexRenderable.to_latex, self)
             if key == 'print_latex':
                 return MethodType(LatexRenderable.print_latex, self)
 
@@ -64,30 +69,3 @@ cdef class Object:
 
     def __repr__(self):
         return self.__str__()
-
-
-
-
-
-######## Global methods ########
-
-
-def get_name(obj):
-    if not isinstance(obj, NamedObject):
-        raise TypeError('Invalid input argument: Expected SymbolNumeric, Base, Matrix, Vector3D or Point')
-    return obj.get_name()
-
-
-def to_latex(*args):
-    def _to_latex(x):
-        if isinstance(x, LatexRenderable):
-            return x.to_latex()
-        if isinstance(x, bytes):
-            x = x.decode()
-        return str(x)
-
-    return r'\:'.join(map(_to_latex, args))
-
-
-def print_latex(*args):
-    _print_latex_ipython(to_latex(*args))
