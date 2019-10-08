@@ -101,7 +101,7 @@ LIBRARIES = [
 
 # All .pyx file definitions of the extension (relative to the directory src/)
 EXTENSION_DEFINITION_FILES = map(partial(join, 'src'), [
-    'imports.pyx', 'parse.pyx', 'print.pyx', 'common.pyx',
+    'imports.pyx', 'parse.pyx', 'print.pyx',
     'object.pyx', 'system.pyx', 'symbol_numeric.pyx', 'expression.pyx',
     'base.pyx', 'matrix.pyx', 'vector3D.pyx', 'tensor3D.pyx',
     'point.pyx', 'frame.pyx'

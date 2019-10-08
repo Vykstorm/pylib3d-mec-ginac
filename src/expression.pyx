@@ -7,6 +7,19 @@ the C++ class GiNac::ex
 
 
 
+######## Helper functions ########
+
+
+cdef Expr _expr_from_c(c_ex x):
+    # Converts GiNac::ex to Python class Expr instance
+    expr = Expr()
+    expr._c_handler = x
+    return expr
+
+
+
+
+
 ######## Class Expr ########
 
 cdef class Expr(Object):

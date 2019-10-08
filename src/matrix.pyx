@@ -5,6 +5,29 @@ Description: This module defines the class Matrix
 
 
 
+######## Helper functions ########
+
+cdef Matrix _matrix_from_c(c_Matrix* x):
+    # Converts C++ Matrix object to Python class Matrix instance
+    # (it doesnt make a copy, only stores the given pointer to the C++ matrix)
+    mat = Matrix()
+    mat._c_handler, mat._owns_c_handler = x, False
+    return mat
+
+
+
+cdef Matrix _matrix_from_c_value(c_Matrix x):
+    # Converts C++ Matrix object to Python class Matrix instance
+    # It performs a copy of the given C++ matrix
+    mat = Matrix()
+    cdef c_Matrix* c_mat = new c_Matrix(x.get_matrix())
+    c_mat.set_name(x.get_name())
+
+    mat._c_handler, mat._owns_c_handler = c_mat, True
+    return mat
+
+
+
 
 
 ######## Class Matrix ########

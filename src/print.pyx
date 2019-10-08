@@ -43,6 +43,22 @@ c_ginac_set_print_func[c_numeric, c_ginac_latex_printer](_c_ginac_print_numeric_
 
 
 
+cdef _ginac_print_ex(c_ex x, bint latex=0):
+    # Prints a GiNaC::ex to a Python unicode string
+    # The expression will be formatted with latex if latex is set to True
+    cdef c_ginac_printer* c_printer
+    if latex:
+        c_printer = new c_ginac_latex_printer(c_sstream())
+    else:
+        c_printer = new c_ginac_python_printer(c_sstream())
+
+    x.print(c_deref(c_printer))
+    text = (<bytes>(<c_sstream*>&c_printer.s).str()).decode()
+    del c_printer
+    return text
+
+
+
 
 ######## Latex printing on IPython  ########
 

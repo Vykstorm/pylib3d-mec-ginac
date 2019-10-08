@@ -16,6 +16,20 @@ cdef void outError(const char* msg):
 ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
 
 
+# All numeric symbol types
+_symbol_types = frozenset(map(str.encode, (
+    'coordinate', 'velocity', 'acceleration',
+    'aux_coordinate', 'aux_velocity', 'aux_acceleration',
+    'parameter', 'joint_unknown', 'input'
+)))
+
+# All symbol types that cannot be created by the user (they are generated
+# automatically when other kind of symbols are created)
+_derivable_symbol_types = frozenset(map(str.encode, (
+    'velocity', 'acceleration', 'aux_velocity', 'aux_acceleration'
+)))
+
+
 
 
 
