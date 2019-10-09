@@ -732,14 +732,17 @@ cdef class _System:
         kwargs['system'] = self
         vector = Vector3D(*args, **kwargs)
         cdef c_Vector3D* c_vector = <c_Vector3D*>vector._get_c_handler()
+        cdef c_Vector3D* _c_vector
 
         if self._has_vector(name):
             # Vector with the same name already exists. Only update its values and base
             warn(f'Vector "{name.decode()}" already exists. Only updating its base & values', UserWarning)
 
             _vector = self._get_vector(name)
-            _vector.set_base(vector.get_base())
-            (<Vector3D>_vector)._get_c_handler().set_matrix((<c_Matrix*>c_vector).get_matrix())
+            _c_vector = <c_Vector3D*>(<Vector3D>_vector)._get_c_handler()
+            _c_vector.set_Base(c_vector.get_Base())
+            _c_vector.set_matrix(c_vector.get_matrix())
+
             return _vector
 
         # Register the matrix with the given name in the system
