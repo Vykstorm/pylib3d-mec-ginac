@@ -563,6 +563,7 @@ class System(_System):
             │  0.75  0.875      1 │
             ╰                     ╯
 
+        :param str name: Name of the new matrix
 
         :param shape: Must be the shape of the new array (number of rows and columns)
             If shape is not specified, the length of both dimensions of the new array
@@ -600,10 +601,61 @@ class System(_System):
         return self._new_matrix(name, args, kwargs)
 
 
+
     def new_vector(self, name, *args, **kwargs):
-        '''
+        '''new_vector(name: str[, values][, base: Base]) -> Vector3D
+        Creates a new 3D vector in this system with the given name, values and geometric base.
+
+            :Example:
+
+            >> new_vector('v')
+            [ 0 0 0 ]
+
+            >> new_vector('v', 1, 2, 3)
+            [ 1 2 3 ]
+
+            >> new_vector('v', [4, 5, 6])
+            [ 4 5 6 ]
+
+            >> new_vector('v', values=[7, 8, 9])
+            [ 7 8 9 ]
+
+
+        The geometric base of the vector will be xyz on the examples above.
+        You can indicate a different base:
+
+            :Example:
+
+            >> foo = new_base('foo', 'xyz')
+            >> new_vector('v', [1, 2, 3], foo)
+            >> new_vector('v', foo)
+            >> new_vector('v', 'foo')
+            >> new_vector('v', base='foo', values=[1, 2, 3])
+
+
+        :param str name: Name of the new vector
+
+        :param values: A list of three expressions indicating the initial values
+            of the elements in the vector. These values can be also specified as
+            three different positional arguments (they must precede the base argument)
+
+        :param base: The geometric base for the new the vector
+        :type base: str or Base
+
+        :rtype: Vector3D
+
+        :raises TypeError: If any of the input arguments has an invalid type.
+        :raises ValueError: If any of the input arguments has an inorrect or inconsistent value.
+        :raises IndexError: If an object with the specified name already exists within the system and its
+            not a Vector object
+
+        .. warning:: If a vector with the given name already exists in the system, this method
+            only updates its values and geometric base using the arguments specified (also raises
+            a user warning)
+
         '''
         return self._new_vector(name, args, kwargs)
+
 
 
     def new_tensor(self, name, values, base):
@@ -612,10 +664,12 @@ class System(_System):
         return self._new_tensor(name, values, base)
 
 
+
     def new_point(self, name, previous, position):
         '''
         '''
         return self._new_point(name, previous, position)
+
 
 
     def new_frame(self, name, point, base=None):
