@@ -783,11 +783,22 @@ cdef class _System:
 
 
 
-    cpdef _new_point(self, name, previous, position):
+    cpdef _new_point(self, name, args, kwargs):
         name = _parse_name(name, check_syntax=True)
 
         if self._has_object(name):
             raise IndexError(f'Name "name.decode()" its already in use')
+
+        if len(args) < 2 and 'previous' not in kwargs:
+            args = list(args)
+            args.insert(0, 'O')
+
+        previous, position = _apply_signature(
+            ['previous', 'position'],
+            {},
+            args,
+            kwargs
+        )
 
         if not isinstance(previous, Point):
             previous = self._get_point(previous)

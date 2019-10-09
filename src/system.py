@@ -603,7 +603,7 @@ class System(_System):
 
 
     def new_vector(self, name, *args, **kwargs):
-        '''new_vector(name: str[, values][, base: Base]) -> Vector3D
+        '''new_vector(name: str[, values][, base: Union[Base, str]]) -> Vector3D
         Creates a new 3D vector in this system with the given name, values and geometric base.
 
             :Example:
@@ -665,10 +665,11 @@ class System(_System):
 
 
 
-    def new_point(self, name, previous, position):
+    def new_point(self, name, *args, **kwargs):
+        '''new_point(name: str, previous: Union[str, Point], position: Union[str, Vector3D]) -> Point
+        Creates a new point in the system with the given name, position vector and previous point
         '''
-        '''
-        return self._new_point(name, previous, position)
+        return self._new_point(name, args, kwargs)
 
 
 
