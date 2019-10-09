@@ -668,6 +668,55 @@ class System(_System):
     def new_point(self, name, *args, **kwargs):
         '''new_point(name: str, previous: Union[str, Point], position: Union[str, Vector3D]) -> Point
         Creates a new point in the system with the given name, position vector and previous point
+
+        Any of the next calls to new_point will create a point with the default
+        point (O) as the previous one, and the vector [1, 2, 3] as its position:
+
+            :Example:
+
+            >> v = new_vector('v', 1, 2, 3)
+
+            >> new_point('p', v)
+            >> new_point('p', 'v')
+            >> p = new_point('p', position=v)
+            >> p.position
+            [ 1 2 3 ]
+            >> p.previous.name
+            'O'
+
+
+        You can specify a different previous point:
+
+            >> v, w = new_vector('v', 1, 2, 3), new_vector('w', 4, 5, 6)
+            >> q = new_point('q', v)
+
+            # The next calls are the same:
+            >> new_point('p', q, w)
+            >> new_point('p', 'q', 'w')
+            >> new_point('p', previous=q, position=w)
+            >> p = new_point('p', previous='q', position='w')
+
+            >> p.previous == q
+            True
+
+
+        :param previous: Previous point. By default is the 'O' point
+        :type previous: str or Point
+
+        :param position: Position vector for the new point.
+        :type position: str or Vector3D
+
+        :rtype: Point
+
+
+        :raises TypeError: If any of the input arguments has an invalid type.
+        :raises ValueError: If any of the input arguments has an inorrect or inconsistent value.
+        :raises IndexError: If an object with the specified name already exists within the system and its
+            not a Point object
+
+        .. warning:: If a point with the given name already exists in the system, this method
+            only updates its position vector and changes the previous point (also raises
+            a user warning)
         '''
         return self._new_point(name, args, kwargs)
 
