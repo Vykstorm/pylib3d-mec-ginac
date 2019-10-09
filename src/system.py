@@ -342,6 +342,7 @@ class System(_System):
 
 
     def new_symbol(self, kind, *args, **kwargs):
+
         return super()._new_symbol(kind, args, kwargs)
 
 
@@ -349,6 +350,26 @@ class System(_System):
     def new_coordinate(self, *args, **kwargs):
         '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
         Creates a new coordinate symbol and its derivative components (velocity and acceleration)
+
+            :Example:
+
+            >> a, da, dda = new_coordinate('a', 1, 2, 3)
+
+            >> a.value, a.type
+            1, 'coordinate'
+
+            >> da.value, da.type
+            2, 'velocity'
+
+            >> dda.value, dda.type
+            3, 'acceleration'
+
+            >> a.name, da.name, dda.name
+            'a', 'da', 'dda'
+
+            >> a + b + c
+            da+dda+a
+
 
         :param str name: Name of the coordinate
         :param str vel_name: Name of the first derivative
@@ -369,19 +390,28 @@ class System(_System):
 
         :returns: The new coordinate and its derivatives created on success
         :rtype: Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
+
         :raises TypeError: If any input argument has an invalid type
         :raises ValueError: If any input argument has an invalid value
-        :raises IndexError: If a symbol with the name indicated for the new coordinate (or its derivatives)
-            is already created in the system
+
+        :raises IndexError: If a cordinate was already created with the same name, but the
+            names of its derivatives doesnt match with the ones indicated as arguments.
+
+        .. warning::
+
+            If a coordinate was already created with the same names (also for the
+            derivatives), this method dont create a new one, only updates the latex names & the values
+            specified in the arguments (but it raises a user warning)
 
         .. note::
 
             You can specify the initial values of the coordinate and its derivatives
             right after the first argument (name) or any other string parameter (if all arguments are positional):
 
+            :Example:
+
             >>> new_coordinate('a', 1, 2, 3)
             >>> new_coordinate('a', 'a2', 'a3', 1, 2)
-
         '''
         return self.new_symbol(b'coordinate', *args, **kwargs)
 
