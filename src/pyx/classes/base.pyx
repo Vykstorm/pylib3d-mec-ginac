@@ -87,7 +87,8 @@ cdef class Base(Object):
     @property
     def previous(self):
         '''
-        This is an alias of previous_base
+        This is an alias of previous_base property
+        .. seealso:: previous_base
         '''
         return self.get_previous_base()
 
