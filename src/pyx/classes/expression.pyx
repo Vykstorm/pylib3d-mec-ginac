@@ -69,27 +69,74 @@ cdef class Expr(Object):
 
 
 
-    ######## Arithmetic operations ########
+    ######## Arithmetic unary operations ########
 
 
     def __neg__(self):
+        '''
+        Get this expression negated.
+        :rtype: Expr
+        '''
         return _expr_from_c(-self._c_handler)
 
+
     def __pos__(self):
+        '''
+        This method implements the unary positive operator for this expression.
+        :rtype: Expr
+        '''
         return _expr_from_c(+self._c_handler)
 
+
+
+
+    ######## Arithmetic binary operations ########
+
+
     def __add__(left_op, right_op):
+        '''
+        Sum two expressions.
+        :rtype: Expr
+        :raise TypeError: If the operands have incorrect types
+        .. note:: One of the operands can also be any object which can be converted to
+            an expression (a numeric symbol or number)
+        '''
         return _expr_from_c(Expr(left_op)._c_handler + Expr(right_op)._c_handler)
 
+
     def __sub__(left_op, right_op):
+        '''
+        Subtract two expressions.
+        :rtype: Expr
+        :raise TypeError: If the operands have incorrect types
+        .. note:: One of the operands can also be any object which can be converted to
+            an expression (a numeric symbol or number)
+        '''
         return _expr_from_c(Expr(left_op)._c_handler - Expr(right_op)._c_handler)
 
+
     def __mul__(left_op, right_op):
+        '''
+        Computes the product of two expressions.
+        :rtype: Expr
+        :raise TypeError: If the operands have incorrect types
+        .. note:: One of the operands can also be any object which can be converted to
+            an expression (a numeric symbol or number)
+        '''
         if isinstance(right_op, Matrix):
             return NotImplemented
         return _expr_from_c(Expr(left_op)._c_handler * Expr(right_op)._c_handler)
 
+
     def __pow__(base, exp, modulo):
+        '''
+        Returns this expression raised to the power of another expression.
+        :rtype: Expr
+        :raise TypeError: If the operands have incorrect types
+        .. note:: One of the operands (either the base or the exponent)
+            can also be any object which can be converted to
+            an expression (a numeric symbol or number)
+        '''
         if modulo is not None:
             return NotImplemented
         return _expr_from_c(c_pow(Expr(base)._c_handler, Expr(exp)._c_handler))
@@ -97,22 +144,68 @@ cdef class Expr(Object):
 
 
     def __truediv__(self, other):
+        '''
+        Returns this expression divided by another
+        :rtype: Expr
+        :raise TypeError: If the operands have incorrect types
+        .. note:: One of the operands can also be any object which can be converted to
+            an expression (a numeric symbol or number)
+        '''
         return _expr_from_c(Expr(self)._c_handler / Expr(other)._c_handler)
 
 
+
+
+    ######## Arithmetic binary operations (inplace) ########
+
+
     def __iadd__(self, other):
+        '''
+        Perform an inplace sum operation with another expression
+        :rtype: Expr
+        :return: This instance
+        :raise TypeError: If the operands have incorrect types
+        .. note:: The input argument must be an expression or any object which can
+            be converted to an expression (a numeric symbol or number)
+        '''
         self._c_handler = self._c_handler + Expr(other)._c_handler
         return self
 
+
     def __isub__(self, other):
+        '''
+        Perform an inplace subtract operation with another expression
+        :rtype: Expr
+        :return: This instance
+        :raise TypeError: If the operands have incorrect types
+        .. note:: The input argument must be an expression or any object which can
+            be converted to an expression (a numeric symbol or number)
+        '''
         self._c_handler = self._c_handler - Expr(other)._c_handler
         return self
 
+
     def __imul__(self, other):
+        '''
+        Perform an inplace product operation with another expression
+        :rtype: Expr
+        :return: This instance
+        :raise TypeError: If the operands have incorrect types
+        .. note:: The input argument must be an expression or any object which can
+            be converted to an expression (a numeric symbol or number)
+        '''
         self._c_handler = self._c_handler * Expr(other)._c_handler
         return self
 
     def __itruediv__(self, other):
+        '''
+        Perform an inplace division operation with another expression
+        :rtype: Expr
+        :return: This instance
+        :raise TypeError: If the operands have incorrect types
+        .. note:: The input argument must be an expression or any object which can
+            be converted to an expression (a numeric symbol or number)
+        '''
         self._c_handler = self._c_handler / Expr(other)._c_handler
         return self
 
