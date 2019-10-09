@@ -7,7 +7,7 @@ This module defines the class System
 
 ######## Import statements ########
 
-from lib3d_mec_ginac_ext import _System
+from lib3d_mec_ginac_ext import _System, _symbol_types
 from .views import BasesView, SymbolsView, MatricesView, VectorsView, PointsView
 
 
@@ -62,6 +62,32 @@ class System(_System):
     def get_symbol(self, name, kind=None):
         '''get_symbol(name: str[, kind: str]) -> SymbolNumeric
         Search a numeric symbol defined within this system with the given name and type.
+
+            :Example:
+
+            >> new_param('a', 1)
+            a = 1
+            >> new_input('b', 2)
+            b = 2
+
+            >> get_symbol('a')
+            a = 1
+            >> get_symbol('b')
+            b = 2
+
+            >> get_symbol('a', 'parameter')
+            a = 1
+            >> get_symbol('b', 'input')
+            b = 2
+
+            >> get_symbol('a', 'joint_unknown')
+            IndexError: Symbol "a" is not a joint unknown
+
+            >> get_symbol('x')
+            IndexError: Symbol "x" not created yet
+
+
+
 
         :param str name: Name of the numeric symbol to fetch
         :param str kind: Type of symbol.
@@ -876,3 +902,15 @@ class System(_System):
 
 
 ######## Docstrings autogeneration for System class ########
+
+
+'''get_{kind}(name: str) -> {class}
+Get a {} by name defined within this system.
+
+    :Example:
+
+    >> new_{kind}('{var}')
+    {var} = 0.0
+
+    >> get_{kind}('{}')
+'''
