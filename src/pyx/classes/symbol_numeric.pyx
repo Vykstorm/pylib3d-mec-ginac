@@ -49,10 +49,23 @@ cdef class SymbolNumeric(Object):
 
 
     def get_owner(self):
+        '''get_owner() -> System
+        Get the system where this numeric symbol was created
+        :rtype: System
+        '''
         return self._owner
 
 
     def get_type(self):
+        '''get_type() -> str
+        Get the type of this symbol.
+        :returns: One of the next values:
+            'parameter', 'joint_unknown', 'input',
+            'coordinate', 'velocity', 'acceleration',
+            'aux_coordinate', 'aux_velocity', 'aux_acceleration'
+            'time' (the last one only if this instance is the time symbol)
+        :rtype: str
+        '''
         owner = self.get_owner()
         if self == owner._get_time():
             return 'time'
@@ -78,6 +91,11 @@ cdef class SymbolNumeric(Object):
 
 
     cpdef set_tex_name(self, tex_name):
+        '''set_tex_name(tex_name: str)
+        Changes the latex name of this symbol
+        :param str tex_name: The new latex name
+        :raise TypeError: If the input argument has an incorrect type
+        '''
         self._c_handler.set_TeX_name(_parse_text(tex_name))
 
 
@@ -103,7 +121,7 @@ cdef class SymbolNumeric(Object):
     @property
     def tex_name(self):
         '''
-        Property that returns the name in latex of this symbol.
+        Property that returns the name in latex of this symbol. It also supports assignment.
         :rtype: str
         '''
         return self.get_tex_name()
@@ -116,15 +134,27 @@ cdef class SymbolNumeric(Object):
 
     @property
     def owner(self):
+        '''
+        Property that returns the system where this symbol was created
+        :rtype: System
+        '''
         return self.get_owner()
 
 
     @property
     def type(self):
+        '''
+        Only read property that returns the kind of symbol
+        :rtype: str
+        '''
         return self.get_type()
 
     @property
     def kind(self):
+        '''
+        This is an alias of property "type"
+        :rtype: str
+        '''
         return self.get_type()
 
 
@@ -133,24 +163,70 @@ cdef class SymbolNumeric(Object):
 
 
     def __neg__(self):
+        '''
+        Negates this symbol. The result is a symbolic expression.
+        :rtype: Expr
+        '''
         return -Expr(self)
 
+
     def __pos__(self):
+        '''
+        Performs unary positive operation on this symbol. The result is a symbol
+        expression.
+        :rtype: Expr
+        '''
         return +Expr(self)
 
+
     def __add__(self, other):
+        '''
+        Performs the sum operation with another symbol. The result is a symbolic
+        expression.
+        :rtype: Expr
+        .. note:: Sum operation can be performed between symbols and expressions, but
+            this logic is implemented in Expr.__add__ metamethod
+        '''
         return NotImplemented if isinstance(other, Expr) else Expr(self) + Expr(other)
 
+
     def __sub__(self, other):
+        '''
+        Performs the subtraction operation with another symbol. The result is a symbolic
+        expression.
+        :rtype: Expr
+        .. note:: Subtraction operation can be performed between symbols and expressions, but
+            this logic is implemented in Expr.__sub__ metamethod
+        '''
         return NotImplemented if isinstance(other, Expr) else Expr(self) - Expr(other)
 
+
     def __mul__(self, other):
+        '''
+        Multiplies this symbol with another. The result is a symbolic expression.
+        :rtype: Expr
+        .. note:: Symbols can be multiplied with matrices (or its subclasses) and expressions, but this is implemented
+            in the metamethods Expr.__mul__, Matrix.__mul__, Vector3D.__mul__ and Tensor3D.__mul__
+        '''
         return NotImplemented if isinstance(other, (Expr, Matrix)) else Expr(self) * Expr(other)
 
+
     def __truediv__(self, other):
+        '''
+        :rtype: Expr
+        Divides this symbol with another. The result is a symbolic expression.
+        .. note:: Symbols can also divide or be divided by expressions. This
+            functionality is implemented in Expr.__truediv__
+        '''
         return NotImplemented if isinstance(other, Expr) else Expr(self) / Expr(other)
 
+
     def __pow__(self, other, modulo):
+        '''
+        :rtype: Expr
+        Raises this symbol by another one (the exponent could also be an expression).
+        The result is an expression.
+        '''
         return pow(Expr(self), other, modulo)
 
 
@@ -169,7 +245,6 @@ cdef class SymbolNumeric(Object):
     def __int__(self):
         '''
         Returns the numeric value of this symbol truncated (as an integer)
-        :rtype: int
         '''
         return int(self.get_value())
 
@@ -177,7 +252,7 @@ cdef class SymbolNumeric(Object):
     def __complex__(self):
         '''
         Returns the numeric value of this symbol as a complex number.
-        :rtype: complex
+        .. note:: The imaginary part is set to zero
         '''
         return complex(self._c_handler.get_value().real().to_double(), self._c_handler.get_value().imag().to_double())
 
