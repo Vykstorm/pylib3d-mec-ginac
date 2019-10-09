@@ -395,6 +395,8 @@ class System(_System):
 
         :raises IndexError: If a cordinate was already created with the same name, but the
             names of its derivatives doesnt match with the ones indicated as arguments.
+            It can also be raised if the an object which is not a numeric symbol,
+            with the given name was created already
 
         .. warning::
 
@@ -512,19 +514,107 @@ class System(_System):
 
     def new_matrix(self, name, *args, **kwargs):
         '''new_matrix(name[, shape][, values]) -> Matrix
+        Creates a new matrix with the given name, shape and values in the system
+
+            :Example:
+
+            >> new_matrix('a')
+            [ 0 ]
+
+            >> new_matrix('a', shape=[2, 2])
+            ╭      ╮
+            │ 0  0 │
+            │ 0  0 │
+            ╰      ╯
+
+            >> new_matrix('a', [0, 1, 2, 3, 4])
+            [ 0 1 2 3 4 5 ]
+
+            >> new_matrix('a', [[0, 1], [2, 3]])
+            ╭      ╮
+            │ 0  1 │
+            │ 2  3 │
+            ╰      ╯
+
+            >> new_matrix('a', values=range(0, 9), shape=[3, 3])
+            ╭         ╮
+            │ 0  1  2 │
+            │ 3  4  5 │
+            │ 6  7  8 │
+            ╰         ╯
+
+        It is also possible to create matrix from a numpy array with one or two
+        dimensions (numpy must be installed):
+
+            :Example:
+
+            >> import numpy as np
+            >> new_matrix('a', np.eye(3))
+            ╭         ╮
+            │ 1  0  0 │
+            │ 0  1  0 │
+            │ 0  0  1 │
+            ╰         ╯
+
+            >> new_matrix('a', values=np.linspace(0, 1, 9), shape=[3,3])
+            ╭                     ╮
+            │     0  0.125   0.25 │
+            │ 0.375    0.5  0.625 │
+            │  0.75  0.875      1 │
+            ╰                     ╯
+
+
+        :param shape: Must be the shape of the new array (number of rows and columns)
+            If shape is not specified, the length of both dimensions of the new array
+            are determined by the argument "values"
+        :type shape: Tuple[int, int]
+
+        :param values: Must be the initial values of the matrix. If specified, it can
+            be a list or a list of sublists of expressions (or anything convertible to
+            expressions like numbers). It can also be a numpy array
+
+            If its a list and shape argument was not specified, the resulting matrix
+            will have one row with the values indicated in it (the list cant be empty)
+
+            If its a list of sublists of expressions, each sublist will represent a row
+            in the matrix (the number of sublists must be greater than zero and the length
+            of sublists must be greater than zero and all equal)
+
+            If both shape and values was specified, the resulting matrix will have the given
+            shape and values (the number of values must match the number of rows and columns
+            indicated).
+
+        :type values: List[Expr], ndarray
+
+        :rtype: Matrix
+
+        :raises TypeError: If any of the input arguments has an invalid type.
+        :raises ValueError: If any of the input arguments has an inorrect or inconsistent value.
+        :raises IndexError: If an object with the specified name already exists within the system and its
+            not a Matrix object
+
+        .. warning:: If a matrix with the given name was already created, this method only
+            updates the shape & values of the existing matrix (also throws a user warning).
+
         '''
         return self._new_matrix(name, args, kwargs)
 
 
     def new_vector(self, name, *args, **kwargs):
+        '''
+        '''
         return self._new_vector(name, args, kwargs)
 
 
     def new_tensor(self, name, values, base):
+        '''
+        '''
         return self._new_tensor(name, values, base)
 
 
     def new_point(self, name, previous, position):
+        '''
+        '''
         return self._new_point(name, previous, position)
 
 
