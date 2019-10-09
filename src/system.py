@@ -342,8 +342,6 @@ class System(_System):
 
 
     def new_symbol(self, kind, *args, **kwargs):
-        '''
-        '''
         return super()._new_symbol(kind, args, kwargs)
 
 
@@ -411,8 +409,8 @@ class System(_System):
 
             :Example:
 
-            >>> new_coordinate('a', 1, 2, 3)
-            >>> new_coordinate('a', 'a2', 'a3', 1, 2)
+            >> new_coordinate('a', 1, 2, 3)
+            >> new_coordinate('a', 'a2', 'a3', 1, 2)
         '''
         return self.new_symbol(b'coordinate', *args, **kwargs)
 
@@ -463,6 +461,30 @@ class System(_System):
         '''new_base(name: str[, previous: Union[str, Base]][...][, rotation_angle: Expr]) -> Base
         Creates a new base in this system with the given name, rotation tupla & angle
 
+        Any of the next calls creates a base named 'a' with xyz as parent base and
+        with a rotation tupla with values [0, 1, 2]:
+
+            :Example:
+
+            >> new_base('a', 'xyz', 0, 1, 2)
+            >> new_base('a', None, 0, 1, 2)
+            >> new_base('a', 0, 1, 2)
+            >> new_base('a', [0, 1, 2])
+            >> new_base('a', rotation_tupla=[0, 1, 2])
+            m = Matrix([0, 1, 2])
+            >> new_base('a', rotation_tupla=m)
+
+        These are the same as the above, but rotation angle is set to pi:
+
+            :Example:
+
+            >> new_base('a', 'xyz', 0, 1, 2, pi)
+            >> new_base('a', 0, 1, 2, pi)
+            >> new_base('a', [0, 1, 2], pi)
+            >> new_base('a', rotation_tupla=[0, 1, 2], rotation_angle=pi)
+
+
+
         :param str name: Must be the name of the new base
         :param previous: Is the previous base of the new base.
             By default is the "xyz" base
@@ -483,17 +505,6 @@ class System(_System):
             The rotation tupla can be specified with three positional arguments
             or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers) or
             a Matrix object
-
-            :Example:
-
-            >>> new_base('a', 'xyz', 0, 1, 2)
-            >>> new_base('a', None, 0, 1, 2)
-            >>> new_base('a', 0, 1, 2)
-            >>> new_base('a', [0, 1, 2])
-            >>> new_base('a', rotation_tupla=[0, 1, 2])
-            m = Matrix([0, 1, 2])
-            >>> new_base('a', rotation_tupla=m)
-
         '''
         return self._new_base(name, args, kwargs)
 
