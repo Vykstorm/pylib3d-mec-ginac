@@ -342,7 +342,8 @@ class System(_System):
 
 
     def new_symbol(self, kind, *args, **kwargs):
-
+        '''
+        '''
         return super()._new_symbol(kind, args, kwargs)
 
 
@@ -420,7 +421,29 @@ class System(_System):
     def new_aux_coordinate(self, *args, **kwargs):
         '''new_aux_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
         Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
-        The signature is the same as for new_coordinate method
+
+            :Example:
+
+            >> a, da, dda = new_aux_coordinate('a', 1, 2, 3)
+
+            >> a.value, a.type
+            1, 'aux_coordinate'
+
+            >> da.value, da.type
+            2, 'aux_velocity'
+
+            >> dda.value, dda.type
+            3, 'aux_acceleration'
+
+            >> a.name, da.name, dda.name
+            'a', 'da', 'dda'
+
+            >> a + b + c
+            da+dda+a
+
+
+        The behaviour is the same as for new_coordinate method.
+        .. seealso:: new_coordinate
         '''
         return self.new_symbol(b'aux_coordinate', *args, **kwargs)
 
