@@ -32,6 +32,10 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
 ######## Class Vector ########
 
 cdef class Vector3D(Matrix):
+    '''
+    Represents a 3D vector defined within a base. Its a matrix with three rows
+    and only one column.
+    '''
 
 
     ######## Attributes ########
@@ -117,11 +121,38 @@ cdef class Vector3D(Matrix):
     ######## Getters ########
 
     cpdef get_module(self):
+        '''get_module() -> Expr
+        Get the module of the vector
+        :rtype: Expr
+
+            :Example:
+
+            >> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >> v = new_vector('v', a, b, c)
+            >> v.get_module()
+            (c**2+a**2+b**2)**(1/2)
+
+        '''
         cdef c_ex c_expr = (<c_Vector3D*>self._get_c_handler()).get_module()
         return _expr_from_c(c_expr)
 
 
     cpdef get_skew(self):
+        '''get_skew() -> Matrix
+        Get the skew matrix of this vector.
+        :rtype: Matrix
+
+            :Example:
+
+            >> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >> v = new_vector('v', a, b, c)
+            >> v.skew
+            ╭            ╮
+            │  0  -c   b │
+            │  c   0  -a │
+            │ -b   a   0 │
+            ╰            ╯
+        '''
         cdef c_Matrix c_skew = (<c_Vector3D*>self._get_c_handler()).skew()
         return _matrix_from_c_value(c_skew)
 
@@ -137,6 +168,19 @@ cdef class Vector3D(Matrix):
 
 
     def dot(self, other):
+        '''
+        Computes the dot product of two vectors. The result is an expression.
+        :rtype: Expr
+        :raise TypeError: If the input argument is not a vector
+
+            :Example:
+
+            >> a, b = new_param('a'), new_param('b')
+            >> v = new_vector('v', a, b, 1)
+            >> w = new_vector('w', 1, b, a)
+            >> v.dot(w)
+            2*a+b**2
+        '''
         if not isinstance(other, Vector3D):
             raise TypeError('Input argument must be a Vector3D')
         return _expr_from_c(
@@ -146,6 +190,21 @@ cdef class Vector3D(Matrix):
 
 
     def cross(self, other):
+        '''
+        Computes the cross product of two vectors. The result is another vector.
+        :rtype: Vector3D
+        :raise TypeError: If the input argument is not a vector
+
+            :Example:
+
+            >> a, b = new_param('a'), new_param('b')
+            >> v = new_vector('v', a, b, 1)
+            >> w = new_vector('w', 1, b, a)
+            >> v.cross(w)
+            [ a*b-b  1.0-a**2  a*b-b ]
+            >> w.cross(v)
+            [ -a*b+b  -1.0+a**2  -a*b+b ]
+        '''
         if not isinstance(other, Vector3D):
             raise TypeError('Input argument must be a Vector3D')
         return _vector_from_c_value(
@@ -159,13 +218,26 @@ cdef class Vector3D(Matrix):
 
 
     def __pos__(self):
+        '''
+        Performs the unary positive operation on this vector. The result is another
+        vector.
+        :rtype: Vector3D
+        '''
         return _vector_from_c_value(c_deref(<c_Vector3D*>self._get_c_handler()))
 
     def __neg__(self):
+        '''
+        Get this vector negated.
+        :rtype: Vector3D
+        '''
         return _vector_from_c_value(-c_deref(<c_Vector3D*>self._get_c_handler()))
 
 
     def __add__(Vector3D self, other):
+        '''
+        Perform the sum operation between two vectors. The result is another vector.
+        :rtype: Vector3D
+        '''
         if not isinstance(other, Vector3D):
             raise TypeError(f'Unsupported operand type for +: Vector3D and {type(other).__name__}')
         return _vector_from_c_value(
@@ -175,6 +247,10 @@ cdef class Vector3D(Matrix):
 
 
     def __sub__(Vector3D self, other):
+        '''
+        Perform the subtraction operation between two vectors. The result is another vector.
+        :rtype: Vector3D
+        '''
         if not isinstance(other, Vector3D):
             raise TypeError(f'Unsupported operand type for -: Vector3D and {type(other).__name__}')
         return _vector_from_c_value(
@@ -184,6 +260,15 @@ cdef class Vector3D(Matrix):
 
 
     def __mul__(left_op, right_op):
+        '''
+        Perform the product operation between two vectors or a vector and a expression.
+        If the product is between two vectors, computes the dot product between them and the
+        result is a expression.
+        Otherwise, computes the scalar product of the vector with the given expression and
+        the result is a vector.
+
+        .. seealso:: dot
+        '''
         if isinstance(left_op, Vector3D) and isinstance(right_op, Vector3D):
             # Dot product between vectors
             return left_op.dot(right_op)
@@ -204,6 +289,11 @@ cdef class Vector3D(Matrix):
 
 
     def __truediv__(Vector3D self, other):
+        '''
+        Performs the scalar product between this vector and the given expression inverted.
+        The result is also a vector.
+        :rtype: Vector3D
+        '''
         if not isinstance(other, Expr):
             expr = Expr(other)
         inverted_expr = 1 / expr
@@ -216,6 +306,11 @@ cdef class Vector3D(Matrix):
 
 
     def __xor__(Vector3D self, other):
+        '''
+        Performs the cross product of this vector with another.
+        :rtype: Vector3D
+        .. sealso:: cross
+        '''
         if not isinstance(other, Vector3D):
             raise TypeError(f'Unsupported operand type for ^: Vector3D and {type(other).__name__}')
         return self.cross(other)
@@ -227,14 +322,29 @@ cdef class Vector3D(Matrix):
 
     @property
     def module(self):
+        '''
+        Only read property that returns the module of this vector.
+        :rtype: Expr
+        .. sealso:: get_module
+        '''
         return self.get_module()
 
     @property
     def skew(self):
+        '''
+        Only read property that returns the skew matrix of this vector.
+        :rtype: Matrix
+        .. sealso:: get_skew
+        '''
         return self.get_skew()
 
     @property
     def x(self):
+        '''
+        Returns the first component of the vector. You can also use this property
+        to assign a new value to it.
+        :rtype: Expr
+        '''
         return self.get(0)
 
     @x.setter
@@ -243,6 +353,11 @@ cdef class Vector3D(Matrix):
 
     @property
     def y(self):
+        '''
+        Returns the second component of the vector. You can also use this property
+        to assign a new value to it.
+        :rtype: Expr
+        '''
         return self.get(1)
 
     @y.setter
@@ -251,6 +366,11 @@ cdef class Vector3D(Matrix):
 
     @property
     def z(self):
+        '''
+        Returns the third component of the vector. You can also use this property
+        to assign a new value to it.
+        :rtype: Expr
+        '''
         return self.get(2)
 
     @z.setter
@@ -270,12 +390,47 @@ GeometricObject.register(Vector3D)
 
 
 def dot(v, w):
+    '''dot(v: Vector3D, w: Vector3D) -> Expr
+    Computes the dot product of two vectors.
+    :rtype: Expr
+    :raise TypeError: If the input arguments are not vectors
+
+        :Example:
+
+        >> a, b = new_param('a'), new_param('b')
+        >> v = new_vector('v', a, b, 1)
+        >> w = new_vector('w', 1, b, a)
+        >> dot(v, w)
+        2*a+b**2
+
+    .. note:: Its equivalent to v.dot(w) or w.dot(v)
+    .. seealso:: Vector3D.dot
+    '''
     if not isinstance(v, Vector3D) or not isinstance(w, Vector3D):
         raise TypeError('Input arguments must be Vector3D objects')
     return v.dot(w)
 
 
 def cross(v, w):
+    '''cross(v: Vector3D, w: Vector3D) -> Vector3D
+    Computes the cross product between two vectors.
+    :rtype: Vector3D
+    :raise TypeError: If the input arguments are not vectors
+
+        :Example:
+
+        >> a, b = new_param('a'), new_param('b')
+        >> v = new_vector('v', a, b, 1)
+        >> w = new_vector('w', 1, b, a)
+        >> cross(v, w)
+        [ a*b-b  1.0-a**2  a*b-b ]
+        >> cross(w, v)
+        [ -a*b+b  -1.0+a**2  -a*b+b ]
+
+
+    .. note:: Its equivalent to v.cross(w)
+    .. seealso:: Vector3D.cross
+    '''
     if not isinstance(v, Vector3D) or not isinstance(w, Vector3D):
         raise TypeError('Input arguments must be Vector3D objects')
     return v.cross(w)
