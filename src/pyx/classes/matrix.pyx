@@ -33,6 +33,9 @@ cdef Matrix _matrix_from_c_value(c_Matrix x):
 ######## Class Matrix ########
 
 cdef class Matrix(Object):
+    '''
+    Represents a 2D matrix of symbolic expressions of arbitrary sizes.
+    '''
 
     ######## C Attributes ########
 
@@ -165,6 +168,7 @@ cdef class Matrix(Object):
         '''
         return self._get_c_handler().rows(), self._get_c_handler().cols()
 
+
     def get_num_rows(self):
         '''
         Get the number of rows of this matrix
@@ -172,12 +176,14 @@ cdef class Matrix(Object):
         '''
         return self._get_c_handler().rows()
 
+
     def get_num_cols(self):
         '''
         Get the number of columns of this matrix
         :rtype: int
         '''
         return self._get_c_handler().cols()
+
 
     def get_size(self):
         '''
@@ -188,6 +194,9 @@ cdef class Matrix(Object):
 
 
     def __len__(self):
+        '''
+        Alias of get_size()
+        '''
         return self.get_size()
 
 
@@ -250,7 +259,7 @@ cdef class Matrix(Object):
         '''
         Get all the items of this matrix
         :returns: A list containing all the items of this matrix, where the item
-        at ith row and jth column is located at i*num_cols + j index
+        at ith row and jth column will be located at i*num_cols + j index in that list
         :rtype: List[Expr]
         '''
         return list(self)
@@ -258,6 +267,46 @@ cdef class Matrix(Object):
 
 
     def get(self, i, j=None):
+        '''
+        Get an element of this matrix.
+        If two arguments are passed, they will be interpreted as the row and column
+        indices of the element to fetch:
+
+            :Example:
+
+            m = new_matrix('m', [[0, 1], [2, 3]])
+            >> matrix.get(0, 0)
+            0
+            >> matrix.get(1, 1)
+            3
+
+        You can pass also one index value if the matrix has only one row or
+        column.
+        The returned value will be the element at ith column or ith row respectively
+
+            :Example:
+
+            >> m = new_matrix('m', [1, 3, 5, 7])
+            >> m.shape
+            (1, 4)
+            >> m.get(2)
+            5
+            >> m.transpose().get(3)
+            7
+
+        Indices can also be negative values:
+
+            :Example:
+
+            >> m = new_matrix('m', [[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+            >> m.get(2, 2)
+            3
+            >> m.get(-1, -1)
+            3
+
+        :raise TypeError: If the indices passed are not valid
+        :raise IndexError: If the indices are out of bounds
+        '''
         if j is None:
             n, m = self.get_shape()
             if n > 1 and m > 1:
@@ -272,6 +321,18 @@ cdef class Matrix(Object):
 
 
     def __getitem__(self, index):
+        '''
+        Implements the indexing operator. You can use it to fetch an element of
+        the matrix by index.
+
+            :Example:
+
+            >> m = new_matrix('m', [[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+            >> m[1, 1]
+            2
+
+        .. seealso:: get
+        '''
         if isinstance(index, tuple):
             if len(index) not in (1, 2):
                 raise TypeError('Wrong number of indices')
@@ -286,6 +347,48 @@ cdef class Matrix(Object):
 
 
     def set(self, i, *args):
+        '''
+        Change the value of an element in the matrix.
+        The arguments must be the indices of the element to change followed
+        by its new value
+
+            :Example:
+
+            >> m = new_matrix('m', [[0, 1], [2, 3]])
+            >> m.get(1, 1)
+            3
+            >> m.set(1, 1, 4)
+            >> m.get(1, 1)
+            4
+
+        You could also specify just one index if the matrix has only one row or
+        column.
+        The element to be changed will be at ith column or ith row respectively
+
+            :Example:
+
+            >> m = new_matrix('m', [1, 2, 3, 4])
+            >> m.get(2)
+            3
+            >> m.set(2, 0)
+            >> m.get(2)
+            0
+
+        And indices can also be negative:
+
+            :Example:
+
+            >> m = new_matrix('m', [[1, 2], [3, 4]])
+            >> m.set(-1, -1, 0)
+            >> m.get(1, 1)
+            4
+
+
+        :raise TypeError: If the given indices or the new value for the element are not valid
+        :raise IndexError: If the indices are out of bounds
+        .. sealso:: get
+
+        '''
         if len(args) == 0:
             raise TypeError('Missing column index')
         if len(args) == 1:
@@ -311,6 +414,19 @@ cdef class Matrix(Object):
 
 
     def __setitem__(self, index, value):
+        '''
+        Implements the assignment indexing operator. You can use it to change
+        the value of an specific element in the matrix.
+
+            :Example:
+
+            >> m = new_matrix('m', [[1, 2], [3, 4]])
+            >> m[0, 1] = 0
+            >> m.get(0, 1)
+            0
+
+        .. seealso:: set
+        '''
         if isinstance(index, tuple):
             if len(index) != 2:
                 raise TypeError('Wrong number of indices')
@@ -325,6 +441,19 @@ cdef class Matrix(Object):
 
 
     def __iter__(self):
+        '''
+        This metamethod allow matrices to be iterated efficiently
+        The returned iterator yields all the elements of this matrix
+
+            :Example:
+
+            >> m = new_matrix('m', [[0, 1], [2, 3]])
+            >> [pow(el, 2)+1 for el in m]
+            [1, 2, 5, 10]
+
+            >> list(m)
+            [0, 1, 2, 3]
+        '''
         n, m = self.get_shape()
         for i in range(0, n):
             for j in range(0, m):
@@ -332,6 +461,11 @@ cdef class Matrix(Object):
 
 
     def __reversed__(self):
+        '''
+        Same as __iter__ but returns the elements in reversed order.
+
+        ..seealso:: __iter__
+        '''
         n, m = self.get_shape()
         for i in reversed(range(0, n)):
             for j in reversed(range(0, m)):
@@ -343,25 +477,57 @@ cdef class Matrix(Object):
 
 
     def __pos__(self):
+        '''
+        Get a matrix with their elements are the result of a unary positive operation
+        of the elements of this matrix.
+        :rtype: Matrix
+        '''
         return _matrix_from_c_value(c_deref(self._get_c_handler()))
 
     def __neg__(self):
+        '''
+        Get a matrix with the elements of this one negated.
+        :rtype: Matrix
+        '''
         return _matrix_from_c_value(-c_deref(self._get_c_handler()))
 
 
     def __add__(Matrix self, other):
+        '''
+        Performs the sum operation between two matrices. The result
+        is also a matrix.
+        :rtype: Matrix
+        :raise TypeError: If the operands are not matrices
+        '''
         if not isinstance(other, Matrix):
             raise TypeError(f'Unsupported operand type for +: Matrix and {type(other).__name__}')
         return _matrix_from_c_value(c_deref(self._get_c_handler()) + c_deref((<Matrix>other)._get_c_handler()))
 
 
     def __sub__(Matrix self, other):
+        '''
+        Performs the subtraction operation between two matrices. The result
+        is also a matrix.
+        :rtype: Matrix
+        :raise TypeError: If the operands are not matrices
+        '''
         if not isinstance(other, Matrix):
             raise TypeError(f'Unsupported operand type for -: Matrix and {type(other).__name__}')
         return _matrix_from_c_value(c_deref(self._get_c_handler()) - c_deref((<Matrix>other)._get_c_handler()))
 
 
     def __mul__(left_op, right_op):
+        '''
+        If both operands are matrices, performs the matrix product.
+        If one operand is a matrix and the other is an expression, performs
+        the scalar product (each element is multiplied by the given expression).
+
+        In both cases, the result is another matrix object.
+
+        :rtype: Matrix
+        :raises TypeError: If the input operands are not either two matrices or a matrix
+            and a expression.
+        '''
         if isinstance(left_op, Matrix) and isinstance(right_op, Matrix):
             return _matrix_from_c_value(
                 c_deref((<Matrix>left_op)._get_c_handler()) * c_deref((<Matrix>right_op)._get_c_handler())
@@ -379,6 +545,13 @@ cdef class Matrix(Object):
 
 
     def __truediv__(Matrix self, other):
+        '''
+        Perform the scalar division operation. Elements of the matrix are divided by
+        the given expression (second operand).
+
+        :rtype: Matrix
+        .. sealso:: __mul__
+        '''
         if not isinstance(other, Expr):
             other = Expr(other)
         inverted = 1 / other
@@ -402,11 +575,10 @@ cdef class Matrix(Object):
 
     def get_transposed(self):
         '''
-        Alias of transpose
+        Alias of transpose method
+        .. seealso:: transpose
         '''
         return self.transpose()
-
-
 
 
 
@@ -468,7 +640,7 @@ cdef class Matrix(Object):
     @property
     def values(self):
         '''
-        Read only property that returns all the items of this matrix
+        Read only property that returns all the items of this matrix as a regular list
         :rtype: List[Expr]
         '''
         return self.get_values()
