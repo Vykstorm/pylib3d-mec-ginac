@@ -904,13 +904,41 @@ class System(_System):
 ######## Docstrings autogeneration for System class ########
 
 
-'''get_{kind}(name: str) -> {class}
-Get a {} by name defined within this system.
+# Template docstring for get_param, get_input, get_joint_unknown, ...
+_getter_docstring_template = '''get_{kind}(name: str) -> SymbolNumeric
+Get a {name} by name defined within this system.
 
-    :Example:
+:param str name: Name of the {name} to fetch
+:rtype: SymbolNumeric
 
-    >> new_{kind}('{var}')
-    {var} = 0.0
+:raises TypeError: If the input argument has an invalid type.
+:raises IndexError: If no {name} with the given name exists.
 
-    >> get_{kind}('{}')
+.. note:: This is equivalent to get_symbol(name, '{kind}')
+.. seealso:: get_symbol
 '''
+
+# Template docstring for get_params, get_inputs, get_joint_unknowns, ...
+_pgetter_docstring_template = '''get_{pkind}() -> Mapping[str, SymbolNumeric]
+Get all the {pname} defined within this system.
+:rtype: Mapping[str, SymblNumeric]
+'''
+
+
+for _symbol_type in map(bytes.decode, _symbol_types):
+    _symbol_ptype = _symbol_type + 's' if not _symbol_type.endswith('velocity') else _symbol_type[:-1] + 'ies'
+    _symbol_name = _symbol_type.replace('_', ' ')
+    _symbol_pname = _symbol_ptype.replace('_', ' ')
+
+    _getter_docstring = _getter_docstring_template.format(
+        kind=_symbol_type,
+        name=_symbol_name
+    )
+
+    _pgetter_docstring = _pgetter_docstring_template.format(
+        pkind=_symbol_ptype,
+        pname=_symbol_pname
+    )
+
+    getattr(System, f'get_{_symbol_type}').__doc__ = _getter_docstring
+    getattr(System, f'get_{_symbol_ptype}').__doc__ = _pgetter_docstring
