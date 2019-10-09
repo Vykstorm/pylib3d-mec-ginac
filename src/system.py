@@ -824,6 +824,24 @@ class System(_System):
 
     @property
     def autogen_latex_names(self):
+        '''
+        This property can be used to turn on/off numeric symbols latex name
+        autogeneration (by default is turned on)
+
+            :Example:
+
+            >> sys = System()
+            >> sys.autogen_latex_names = True
+
+            >> a = sys.new_param('a')
+            >> a.tex_name
+            '\\alpha'
+
+            >> sys.autogen_latex_names = False
+            >> b = sys.new_param('b')
+            >> b.tex_name
+            ''
+        '''
         return self._is_autogen_latex_names_enabled()
 
     @autogen_latex_names.setter
@@ -846,3 +864,15 @@ class System(_System):
 
 
     ######## Metamethods ########
+    # TODO
+
+
+
+
+
+
+
+
+
+
+######## Docstrings autogeneration for System class ########
