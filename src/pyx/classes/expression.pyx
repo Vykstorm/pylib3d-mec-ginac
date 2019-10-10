@@ -212,6 +212,16 @@ cdef class Expr(Object):
 
 
 
+    ######## Comparision binary operations ########
+
+
+    def __eq__(Expr self, other):
+        if other == 0:
+            return self._c_handler.is_zero()
+        return self._c_handler.is_equal(Expr(other)._c_handler)
+
+
+
 LatexRenderable.register(Expr)
 
 
