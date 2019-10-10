@@ -202,10 +202,12 @@ cdef class _System:
 
         for container in containers:
             num_symbols += container.size()
+        num_symbols += 1
         symbols.reserve(num_symbols)
 
         for container in containers:
             symbols.insert(symbols.end(), container.begin(), container.end())
+        symbols.push_back(&self._c_handler.t)
 
         return symbols
 

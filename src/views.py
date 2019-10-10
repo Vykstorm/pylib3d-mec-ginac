@@ -127,10 +127,7 @@ class SymbolsView(ObjectsTableView):
     def get_row_values(self, symbol):
         values = [quote(symbol.name), symbol.value]
         if self.kind is None:
-            for symbol_type in _symbol_types:
-                if symbol in self.system._get_symbols(symbol_type):
-                    break
-            values.insert(1, symbol_type.decode().replace('_', ' '))
+            values.insert(1, symbol.get_type().replace('_', ' '))
         return values
 
     def __getattr__(self, key):
