@@ -355,14 +355,14 @@ cpdef _base_to_str(Base base):
 cpdef _point_to_str(Point point):
     # Prints a point object to a string
     #if self.has_previous():
-    #    return f'Point "{self.name}", position = {self.offset} (base {self.offset.base.name}), previous = {self.previous.name}'
+    #    return f'Point "{self.name}", position = {self.position} (base {self.position.base.name}), previous = {self.previous.name}'
     if not point.has_previous():
         return 'Origin point'
 
     name = point.name
     previous_name = point.previous.name
-    x, y, z = point.offset.x, point.offset.y, point.offset.z
-    base_name = point.offset.base.name
+    x, y, z = point.position.x, point.position.y, point.position.z
+    base_name = point.position.base.name
 
 
     return tabulate([[

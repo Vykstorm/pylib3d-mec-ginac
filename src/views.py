@@ -204,8 +204,8 @@ class PointsView(ObjectsTableView):
     def get_row_values(self, point):
         values = [quote(point.name)]
         if point.has_previous():
-            values.extend(point.offset.values)
-            values.append(quote(point.offset.base.name))
+            values.extend(point.position.values)
+            values.append(quote(point.position.base.name))
             values.append(quote(point.previous.name))
         else:
             values.extend([None]*5)

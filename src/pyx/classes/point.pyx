@@ -39,8 +39,8 @@ cdef class Point(Object):
         return _vector_from_c(self._c_handler.get_Position_Vector())
 
 
-    def get_offset(self):
-        '''get_offset() -> Vector3D
+    def get_position(self):
+        '''get_position() -> Vector3D
         This is an alias of get_position_vector()
         :rtype: Vector3D
         .. seealso:: get_position_vector
@@ -82,13 +82,13 @@ cdef class Point(Object):
 
 
     @property
-    def offset(self):
+    def position(self):
         '''
         This is an alias of position_vector property
         :rtype: Vector3D
         .. seealso:: position_vector
         '''
-        return self.get_offset()
+        return self.get_position()
 
 
     @property
