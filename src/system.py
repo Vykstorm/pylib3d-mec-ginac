@@ -919,6 +919,20 @@ Get a {name} by name defined within this system.
 .. seealso:: get_symbol
 '''
 
+# Template docstring for has_param, has_input, has_joint_unknown, ...
+_symbol_checker_docstring_template = '''has_{kind}(name: str) -> bool
+Check if a {name} with the given name is defined within the system
+
+:param str name: Name of the {name} to check
+:rtype: bool
+
+:raises TypeError: If the input argument has an invalid type.
+
+.. note:: This is equivalent to has_symbol(name, '{kind}')
+.. sealso:: has_symbol
+'''
+
+
 # Template docstring for get_matrix, get_tensor, get_vector, ...
 _geom_object_getter_docstring_template = '''get_{kind}(name: str) -> {class}
 Get a {name} by name defined within this system.
@@ -928,6 +942,16 @@ Get a {name} by name defined within this system.
 
 :raises TypeError: If the input argument has an invalid type.
 :raises IndexError: If no {name} with the given name exists.
+'''
+
+# Template docstring for has_matrix, has_tensor, has_vector, ...
+_geom_object_checker_docstring_template = '''has_{kind}(name: str) -> bool
+Check if a {name} with the given name is defined within the system
+
+:param str name: Name of the {name} to check
+:rtype bool
+
+:raises TypeError: If the input argument has an invalid type.
 '''
 
 
@@ -965,10 +989,12 @@ for _symbol_type in map(bytes.decode, _symbol_types):
     _getter_docstring = _symbol_getter_docstring_template.format(**_context)
     _pgetter_docstring = _symbol_pgetter_docstring_template.format(**_context)
     _matrix_getter_docstring = _symbol_matrix_getter_docstring_template.format(**_context)
+    _checker_docstring = _symbol_checker_docstring_template.format(**_context)
 
     getattr(System, f'get_{_symbol_type}').__doc__ = _getter_docstring
     getattr(System, f'get_{_symbol_ptype}').__doc__ = _pgetter_docstring
     getattr(System, f'get_{_symbol_ptype}_matrix').__doc__ = _matrix_getter_docstring
+    getattr(System, f'has_{_symbol_type}').__doc__ = _checker_docstring
 
 
 
@@ -989,7 +1015,8 @@ for _geom_type in map(bytes.decode, _geom_types):
     }
     _getter_docstring = _geom_object_getter_docstring_template.format(**_context)
     _pgetter_docstring = _geom_object_pgetter_docstring_template.format(**_context)
-
+    _checker_docstring = _geom_object_checker_docstring_template.format(**_context)
 
     getattr(System, f'get_{_geom_type}').__doc__ = _getter_docstring
     getattr(System, f'get_{_geom_ptype}').__doc__ = _pgetter_docstring
+    getattr(System, f'has_{_geom_type}').__doc__ = _checker_docstring
