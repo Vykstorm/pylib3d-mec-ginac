@@ -56,7 +56,7 @@ cdef class Matrix(Object):
             return
 
 
-        if shape is None and values is not None:
+        if shape is None and values is not None and not isinstance(values, (range, list, tuple, set, frozenset)):
             # Check if values is a numpy array
             try:
                 import numpy as np
