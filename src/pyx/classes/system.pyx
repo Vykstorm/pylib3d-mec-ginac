@@ -9,6 +9,7 @@ class System
 
 cdef void outError(const char* msg):
     # Redefinition of outError function (to suppress error messages)
+    #print((<bytes>msg).decode())
     pass
 
 
