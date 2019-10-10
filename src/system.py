@@ -1018,6 +1018,15 @@ Creates a new {name} with the given name and value in the system.
 '''
 
 
+# Template docstring for properties "coordinates", "parameters", "inputs", ...
+_symbol_pgetter_prop_docstring_template = '''
+Read only property that returns all the {pname} defined within this system.
+:rtype: Mapping[str, SymbolNumeric]
+.. note: Its equivalent to get_symbols('{kind}')
+.. seealso:: get_symbols
+'''
+
+
 
 
 # Its time to autogenerate docstrings...
@@ -1035,11 +1044,13 @@ for _symbol_type in map(bytes.decode, _symbol_types):
     _pgetter_docstring = _symbol_pgetter_docstring_template.format(**_context)
     _matrix_getter_docstring = _symbol_matrix_getter_docstring_template.format(**_context)
     _checker_docstring = _symbol_checker_docstring_template.format(**_context)
+    _pgetter_prop_docstring = _symbol_pgetter_prop_docstring_template.format(**_context)
 
     getattr(System, f'get_{_symbol_type}').__doc__ = _getter_docstring
     getattr(System, f'get_{_symbol_ptype}').__doc__ = _pgetter_docstring
     getattr(System, f'get_{_symbol_ptype}_matrix').__doc__ = _matrix_getter_docstring
     getattr(System, f'has_{_symbol_type}').__doc__ = _checker_docstring
+    getattr(System, _symbol_ptype).__doc__ = _pgetter_prop_docstring
 
     if _symbol_type in ('input', 'joint_unknown', 'parameter'):
         _constructor_docstring = _symbol_constructor_docstring_template.format(**_context)
