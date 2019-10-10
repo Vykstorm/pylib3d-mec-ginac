@@ -218,7 +218,7 @@ cdef class SymbolNumeric(Object):
         .. note:: Symbols can also divide or be divided by expressions. This
             functionality is implemented in Expr.__truediv__
         '''
-        return NotImplemented if isinstance(other, Expr) else Expr(self) / Expr(other)
+        return NotImplemented if isinstance(other, Expr) else Expr(self) / other
 
 
     def __pow__(self, other, modulo):

@@ -151,6 +151,8 @@ cdef class Expr(Object):
         .. note:: One of the operands can also be any object which can be converted to
             an expression (a numeric symbol or number)
         '''
+        if other == 0:
+            raise ZeroDivisionError('Expression divided by zero')
         return _expr_from_c(Expr(self)._c_handler / Expr(other)._c_handler)
 
 
