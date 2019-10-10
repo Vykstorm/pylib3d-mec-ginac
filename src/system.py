@@ -7,7 +7,7 @@ This module defines the class System
 
 ######## Import statements ########
 
-from lib3d_mec_ginac_ext import _System, _symbol_types
+from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
 from .views import BasesView, SymbolsView, MatricesView, VectorsView, PointsView
 
 
@@ -904,8 +904,9 @@ class System(_System):
 ######## Docstrings autogeneration for System class ########
 
 
+
 # Template docstring for get_param, get_input, get_joint_unknown, ...
-_getter_docstring_template = '''get_{kind}(name: str) -> SymbolNumeric
+_symbol_getter_docstring_template = '''get_{kind}(name: str) -> SymbolNumeric
 Get a {name} by name defined within this system.
 
 :param str name: Name of the {name} to fetch
@@ -918,11 +919,30 @@ Get a {name} by name defined within this system.
 .. seealso:: get_symbol
 '''
 
+# Template docstring for get_matrix, get_tensor, get_vector, ...
+_geom_object_getter_docstring_template = '''get_{kind}(name: str) -> {class}
+Get a {name} by name defined within this system.
+
+:param str name: Name of the {name} to fetch
+:rtype: {class}
+
+:raises TypeError: If the input argument has an invalid type.
+:raises IndexError: If no {name} with the given name exists.
+'''
+
+
 # Template docstring for get_params, get_inputs, get_joint_unknowns, ...
-_pgetter_docstring_template = '''get_{pkind}() -> Mapping[str, SymbolNumeric]
+_symbol_pgetter_docstring_template = '''get_{pkind}() -> Mapping[str, SymbolNumeric]
 Get all the {pname} defined within this system.
 :rtype: Mapping[str, SymblNumeric]
 '''
+
+_geom_object_pgetter_docstring_template = '''get_{pkind}() -> Mapping[str, {class}]
+Get all the {pname} defined within this system
+:rtype: Mapping[str, {class}]
+'''
+
+
 
 
 for _symbol_type in map(bytes.decode, _symbol_types):
@@ -930,15 +950,39 @@ for _symbol_type in map(bytes.decode, _symbol_types):
     _symbol_name = _symbol_type.replace('_', ' ')
     _symbol_pname = _symbol_ptype.replace('_', ' ')
 
-    _getter_docstring = _getter_docstring_template.format(
+    _getter_docstring = _symbol_getter_docstring_template.format(
         kind=_symbol_type,
         name=_symbol_name
     )
 
-    _pgetter_docstring = _pgetter_docstring_template.format(
+    _pgetter_docstring = _symbol_pgetter_docstring_template.format(
         pkind=_symbol_ptype,
         pname=_symbol_pname
     )
 
     getattr(System, f'get_{_symbol_type}').__doc__ = _getter_docstring
     getattr(System, f'get_{_symbol_ptype}').__doc__ = _pgetter_docstring
+
+
+
+# matrix, tensor, vector, point, frame
+for _geom_type in map(bytes.decode, _geom_types):
+    _geom_class = _geom_type.title()
+    if _geom_type in ('vector', 'tensor'):
+        _geom_class = _geom_class + '3D'
+
+    _geom_ptype = _geom_type + 's' if _geom_type != 'matrix' else 'matrices'
+    _geom_name = _geom_type
+    _geom_pname = _geom_ptype
+
+    context = {
+        'kind': _geom_type, 'pkind': _geom_ptype,
+        'class': _geom_class,
+        'name': _geom_name, 'pname': _geom_pname
+    }
+    _getter_docstring = _geom_object_getter_docstring_template.format(**context)
+    _pgetter_docstring = _geom_object_pgetter_docstring_template.format(**context)
+
+
+    getattr(System, f'get_{_geom_type}').__doc__ = _getter_docstring
+    getattr(System, f'get_{_geom_ptype}').__doc__ = _pgetter_docstring

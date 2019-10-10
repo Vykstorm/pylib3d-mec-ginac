@@ -29,6 +29,10 @@ _derivable_symbol_types = frozenset(map(str.encode, (
     'velocity', 'acceleration', 'aux_velocity', 'aux_acceleration'
 )))
 
+# All geometric object types
+_geom_types = frozenset(map(str.encode, (
+    'matrix', 'vector', 'tensor', 'base', 'point', 'frame'
+)))
 
 
 
