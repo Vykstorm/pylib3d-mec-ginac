@@ -937,31 +937,38 @@ Get all the {pname} defined within this system.
 :rtype: Mapping[str, SymblNumeric]
 '''
 
+# Template docstring for get_vectors, get_tensors, get_matrices, ...
 _geom_object_pgetter_docstring_template = '''get_{pkind}() -> Mapping[str, {class}]
 Get all the {pname} defined within this system
 :rtype: Mapping[str, {class}]
 '''
 
+# Template docstring for get_vectors_matrix
+_symbol_matrix_getter_docstring_template = '''get_{pkind}_matrix(name: str) -> Matrix
+Get a matrix with all the {pname} defined within this system
+:rtype: Matrix
+'''
 
 
+
+# Its time to autogenerate docstrings...
 
 for _symbol_type in map(bytes.decode, _symbol_types):
     _symbol_ptype = _symbol_type + 's' if not _symbol_type.endswith('velocity') else _symbol_type[:-1] + 'ies'
     _symbol_name = _symbol_type.replace('_', ' ')
     _symbol_pname = _symbol_ptype.replace('_', ' ')
 
-    _getter_docstring = _symbol_getter_docstring_template.format(
-        kind=_symbol_type,
-        name=_symbol_name
-    )
-
-    _pgetter_docstring = _symbol_pgetter_docstring_template.format(
-        pkind=_symbol_ptype,
-        pname=_symbol_pname
-    )
+    _context = {
+        'kind':_symbol_type, 'pkind':_symbol_ptype,
+        'name':_symbol_name, 'pname':_symbol_pname
+    }
+    _getter_docstring = _symbol_getter_docstring_template.format(**_context)
+    _pgetter_docstring = _symbol_pgetter_docstring_template.format(**_context)
+    _matrix_getter_docstring = _symbol_matrix_getter_docstring_template.format(**_context)
 
     getattr(System, f'get_{_symbol_type}').__doc__ = _getter_docstring
     getattr(System, f'get_{_symbol_ptype}').__doc__ = _pgetter_docstring
+    getattr(System, f'get_{_symbol_ptype}_matrix').__doc__ = _matrix_getter_docstring
 
 
 
@@ -975,13 +982,13 @@ for _geom_type in map(bytes.decode, _geom_types):
     _geom_name = _geom_type
     _geom_pname = _geom_ptype
 
-    context = {
+    _context = {
         'kind': _geom_type, 'pkind': _geom_ptype,
         'class': _geom_class,
         'name': _geom_name, 'pname': _geom_pname
     }
-    _getter_docstring = _geom_object_getter_docstring_template.format(**context)
-    _pgetter_docstring = _geom_object_pgetter_docstring_template.format(**context)
+    _getter_docstring = _geom_object_getter_docstring_template.format(**_context)
+    _pgetter_docstring = _geom_object_pgetter_docstring_template.format(**_context)
 
 
     getattr(System, f'get_{_geom_type}').__doc__ = _getter_docstring
