@@ -100,7 +100,7 @@ LIBRARIES = [
 
 
 # All .pyx file definitions of the extension
-EXTENSION_DEFINITION_FILES = map(partial(join, 'src/pyx'), chain(
+EXTENSION_DEFINITION_FILES = list(map(partial(join, 'src/pyx'), chain(
     # Modules at src/pyx
     ['imports.pyx', 'parse.pyx', 'print.pyx'],
 
@@ -110,7 +110,7 @@ EXTENSION_DEFINITION_FILES = map(partial(join, 'src/pyx'), chain(
         'base.pyx', 'matrix.pyx', 'vector3D.pyx', 'tensor3D.pyx',
         'point.pyx', 'frame.pyx'
     ])
-))
+)))
 
 
 # This list holds all the extensions defined by this library
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
 
     ## Merge .pyx definition files into one
-    print(f"Generating src/main.pyx file")
+    print(f"Generating src/pyx/main.pyx file")
     with open('src/pyx/main.pyx', 'w') as f_out: # All source code will be merged to this file
         # Insert a header comment in the output file
         f_out.write('\n'.join([
