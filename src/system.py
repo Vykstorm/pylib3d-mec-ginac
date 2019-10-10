@@ -1026,6 +1026,12 @@ Read only property that returns all the {pname} defined within this system.
 .. seealso:: get_symbols
 '''
 
+# Template docstring for properties "matrices", "vectors", "tensors", ...
+_geom_object_pgetter_prop_docstring_template = '''
+Read only property that returns all the {pname} defined within this system.
+:rtype: Mapping[str, {class}]
+'''
+
 
 
 
@@ -1076,7 +1082,9 @@ for _geom_type in map(bytes.decode, _geom_types):
     _getter_docstring = _geom_object_getter_docstring_template.format(**_context)
     _pgetter_docstring = _geom_object_pgetter_docstring_template.format(**_context)
     _checker_docstring = _geom_object_checker_docstring_template.format(**_context)
+    _pgetter_prop_docstring = _geom_object_pgetter_prop_docstring_template.format(**_context)
 
     getattr(System, f'get_{_geom_type}').__doc__ = _getter_docstring
     getattr(System, f'get_{_geom_ptype}').__doc__ = _pgetter_docstring
     getattr(System, f'has_{_geom_type}').__doc__ = _checker_docstring
+    getattr(System, _geom_ptype).__doc__ = _pgetter_prop_docstring
