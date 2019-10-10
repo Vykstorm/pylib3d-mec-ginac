@@ -37,6 +37,8 @@ cdef extern from "Tensor3D.h":
 
         # Setters
         void set_Base(Base* base)
+        Tensor3D in_Base(Base* base)
+
 
         # Operations
         Tensor3D operator+(Tensor3D& other)

@@ -167,6 +167,19 @@ cdef class Vector3D(Matrix):
     ######## Operations ########
 
 
+    cpdef in_base(self, new_base):
+        '''in_base(new_base: Base) -> Vector3D
+        Performs a base change operation on this vector.
+        :param Base base: The new base
+        :return: A new vector which is the same as this but with its base changed
+        :rtype: Vector3D
+        '''
+        if not isinstance(new_base, Base):
+            raise TypeError('Input argument must be a Base object')
+        return _vector_from_c_value((<c_Vector3D*>self._get_c_handler()).in_Base((<Base>new_base)._c_handler))
+
+
+
     def dot(self, other):
         '''
         Computes the dot product of two vectors. The result is an expression.

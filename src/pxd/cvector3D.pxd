@@ -26,6 +26,7 @@ cdef extern from "Vector3D.h":
 
         Base* get_Base()
         void set_Base(Base* base)
+        Vector3D in_Base(Base* base)
 
         string get_Name()
 

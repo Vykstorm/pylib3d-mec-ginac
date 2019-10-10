@@ -24,8 +24,7 @@ SymbolNumeric            yes        yes         no
 
 * Those classes with the method "get_name" avaliable, also will have the property "name"
 * Classes with "to_latex" will have also the method "print_latex" and property "latex"
-* Finally, objects with geometric base (with "get_base" method) have also "in_base" method
-    to perform a base change operation and the property "base"
+* Finally, objects with geometric base will have the property "base"
 '''
 
 
@@ -148,14 +147,6 @@ class GeometricObject(ABC):
 
         return Base(<Py_ssize_t>c_base)
 
-
-    def in_base(self, base):
-        '''in_base(base: Base)
-        Perform a base change operation to the given base
-        :param Base base: The new base
-        :raise TypeError: If the input argument is not a Base object
-        '''
-        raise NotImplementedError()
 
 
     @property
