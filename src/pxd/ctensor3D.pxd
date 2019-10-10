@@ -14,7 +14,10 @@ from libcpp.string cimport string
 from src.pxd.cmatrix cimport Matrix
 from src.pxd.cvector3D cimport Vector3D
 from src.pxd.cbase cimport Base
-from src.pxd.cginac cimport ex
+from src.pxd.ginac.cexpr cimport ex
+from src.pxd.csystem cimport System
+
+
 
 
 
@@ -25,10 +28,14 @@ from src.pxd.cginac cimport ex
 cdef extern from "Tensor3D.h":
     cdef cppclass Tensor3D(Matrix):
         # Constructor
-        Tensor3D(Matrix values, Base* base)
+        Tensor3D(Matrix values, Base* base, System* system)
 
         # Getters
         Base* get_Base()
+        System* get_System()
+
+
+        # Setters
         void set_Base(Base* base)
 
         # Operations
@@ -36,4 +43,3 @@ cdef extern from "Tensor3D.h":
         Tensor3D operator-(Tensor3D& other)
         Tensor3D operator*(Tensor3D& other)
         Vector3D operator*(Vector3D& other)
-        Tensor3D operator*(ex& other)

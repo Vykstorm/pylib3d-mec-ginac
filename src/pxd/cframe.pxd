@@ -13,7 +13,7 @@ from libcpp.string cimport string
 # Imports from other .pxd files
 from src.pxd.cpoint cimport Point
 from src.pxd.cbase cimport Base
-from src.pxd.cginac cimport numeric
+from src.pxd.ginac.cnumeric cimport numeric
 
 
 

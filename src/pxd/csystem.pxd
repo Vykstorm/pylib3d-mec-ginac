@@ -15,10 +15,11 @@ from libcpp.string cimport string
 # Imports from other .pxd files
 
 # GiNaC classes
-from src.pxd.csymbol_numeric cimport symbol_numeric
-from src.pxd.cginac cimport numeric, ex
+from src.pxd.ginac.cnumeric cimport numeric
+from src.pxd.ginac.cexpr cimport ex
 
 # lib3d-mec-ginac classes
+from src.pxd.csymbol_numeric cimport symbol_numeric
 from src.pxd.cbase cimport Base
 from src.pxd.cmatrix cimport Matrix
 from src.pxd.cvector3D cimport Vector3D

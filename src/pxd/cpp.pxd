@@ -9,7 +9,7 @@ from the standard C++ library that are going to be used by this extension
 
 # Imports from the standard C++ library
 from libcpp.string cimport string
-from src.pxd.cginac cimport basic
+from src.pxd.ginac.cbasic cimport basic
 
 
 

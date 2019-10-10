@@ -49,19 +49,19 @@ from src.pxd.ctensor3D       cimport Tensor3D       as c_Tensor3D
 
 ######## C++ GiNaC imports ########
 
-from src.pxd.cginac cimport numeric as c_numeric
-from src.pxd.cginac cimport ex      as c_ex
-from src.pxd.cginac cimport basic   as c_basic
-from src.pxd.cginac cimport matrix  as c_ginac_matrix
+from src.pxd.ginac.cnumeric cimport numeric as c_numeric
+from src.pxd.ginac.cexpr    cimport ex      as c_ex
+from src.pxd.ginac.cbasic   cimport basic   as c_basic
+from src.pxd.ginac.cmatrix  cimport matrix  as c_ginac_matrix
 
 # Printing classes & functions
-from src.pxd.cginac cimport print_context  as c_ginac_printer
-from src.pxd.cginac cimport print_python   as c_ginac_python_printer
-from src.pxd.cginac cimport print_latex    as c_ginac_latex_printer
-from src.pxd.cginac cimport set_print_func as c_ginac_set_print_func
+from src.pxd.ginac.cprint cimport print_context  as c_ginac_printer
+from src.pxd.ginac.cprint cimport print_python   as c_ginac_python_printer
+from src.pxd.ginac.cprint cimport print_latex    as c_ginac_latex_printer
+from src.pxd.ginac.cprint cimport set_print_func as c_ginac_set_print_func
 
 # Symbolic math functions
-from src.pxd.cginac cimport pow as c_pow
+from src.pxd.ginac.cmath cimport pow as c_pow
 
 
 

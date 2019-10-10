@@ -12,7 +12,7 @@ from libcpp.string cimport string
 
 
 # Imports from .pxd file definitions
-from src.pxd.cginac cimport ex
+from src.pxd.ginac.cexpr cimport ex
 from src.pxd.cmatrix cimport Matrix
 from src.pxd.cbase cimport Base
 
