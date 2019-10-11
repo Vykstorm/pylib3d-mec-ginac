@@ -75,7 +75,7 @@ from collections.abc import Iterable
 
 # Utilities
 from functools import partial, partialmethod, wraps
-from itertools import chain, starmap
+from itertools import chain, starmap, repeat
 from operator import attrgetter
 from warnings import warn
 from abc import ABC

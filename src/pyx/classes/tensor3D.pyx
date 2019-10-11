@@ -37,23 +37,52 @@ cdef class Tensor3D(Matrix):
 
     ######## Constructor ########
 
-    def __init__(self, values=None, base=None, system=None):
-        if values is None and base is None and system is None:
+    def __init__(self, *args, **kwargs):
+        if not args and not kwargs:
             # Construct without arguments is reserved for internal implementation purposes
             self._c_handler = NULL
             return
 
+        # Validate & parse arguments
+        if args:
+            args = list(args)
+            try:
+                if isinstance(args[-1], (str, Base)):
+                    base, values = args[-1], args[:-1]
+                    if len(values) not in (0, 1, 9):
+                        raise TypeError
+                    if len(values) != 1:
+                        if len(values) == 0:
+                            values = tuple(repeat(0, 9))
+                        args = [values, base]
+                else:
+                    values = args
+                    if len(values) not in (1, 9):
+                        raise TypeError
+                    if len(values) == 9:
+                        args = [values]
+
+            except TypeError:
+                raise TypeError('You must specify exactly nine values for the vector components')
+
+        values, base, system = _apply_signature(
+            ['values', 'base', 'system'],
+            {'values': tuple(repeat(0, 9)), 'base': 'xyz', 'system': None},
+            args, kwargs
+        )
+
+
         if not isinstance(system, _System):
             raise TypeError(f'system must be a valid System object')
 
-        if base is not None:
-            if not isinstance(base, Base):
-                base = system.get_base(base)
-        else:
-            base = system.get_base('xyz')
+        if not isinstance(base, (str, Base)):
+            raise TypeError('base must be an instance of the class Base or a str')
+
+        if isinstance(base, str):
+            base = system.get_base(base)
 
 
-        values = Matrix(shape=(3, 3), values=list(values))
+        values = Matrix(shape=(3, 3), values=values)
 
 
         # Call matrix initializer

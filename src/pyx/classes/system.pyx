@@ -761,13 +761,14 @@ cdef class _System:
 
 
 
-    cpdef _new_tensor(self, name, values, base=None):
+    cpdef _new_tensor(self, name, args, kwargs):
         name = _parse_name(name)
 
         if self._has_object(name) and not self._has_tensor(name):
             raise IndexError(f'Name "{name.decode()}" its already in use')
 
-        tensor = Tensor3D(values, base, self)
+        kwargs['system'] = self
+        tensor = Tensor3D(*args, **kwargs)
         cdef c_Tensor3D* c_tensor = <c_Tensor3D*>(<Tensor3D>tensor)._get_c_handler()
         cdef c_Tensor3D* _c_tensor
 

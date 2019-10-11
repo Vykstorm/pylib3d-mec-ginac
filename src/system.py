@@ -684,10 +684,10 @@ class System(_System):
 
 
 
-    def new_tensor(self, name, values, base=None):
+    def new_tensor(self, name, *args, **kwargs):
+        '''new_tensor(name: str[, values][, base: Union[Base, str]]) -> Tensor3D
         '''
-        '''
-        return self._new_tensor(name, values, base)
+        return self._new_tensor(name, args, kwargs)
 
 
 
