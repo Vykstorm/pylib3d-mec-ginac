@@ -22,6 +22,7 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
         ex() except +
         ex(const double value) except +
         ex(const basic& value) except +
+        ex(long value) except +
 
         # Queries
         bint is_equal(ex& other)
