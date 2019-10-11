@@ -554,7 +554,7 @@ class System(_System):
             ╰      ╯
 
             >> new_matrix('a', [0, 1, 2, 3, 4])
-            [ 0 1 2 3 4 5 ]
+            [ 0 1 2 3 4 ]
 
             >> new_matrix('a', [[0, 1], [2, 3]])
             ╭      ╮
