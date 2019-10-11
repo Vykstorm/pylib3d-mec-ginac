@@ -40,10 +40,10 @@ from src.pxd.csystem         cimport System         as c_System
 from src.pxd.cbase           cimport Base           as c_Base
 from src.pxd.cmatrix         cimport Matrix         as c_Matrix
 from src.pxd.cvector3D       cimport Vector3D       as c_Vector3D
+from src.pxd.ctensor3D       cimport Tensor3D       as c_Tensor3D
 from src.pxd.cpoint          cimport Point          as c_Point
 from src.pxd.cframe          cimport Frame          as c_Frame
-from src.pxd.ctensor3D       cimport Tensor3D       as c_Tensor3D
-
+from src.pxd.csolid          cimport Solid          as c_Solid
 
 
 
