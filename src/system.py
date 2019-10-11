@@ -684,7 +684,7 @@ class System(_System):
 
 
 
-    def new_tensor(self, name, values, base):
+    def new_tensor(self, name, values, base=None):
         '''
         '''
         return self._new_tensor(name, values, base)

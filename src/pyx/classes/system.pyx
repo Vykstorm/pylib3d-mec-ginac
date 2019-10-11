@@ -761,7 +761,7 @@ cdef class _System:
 
 
 
-    cpdef _new_tensor(self, name, values, base):
+    cpdef _new_tensor(self, name, values, base=None):
         name = _parse_name(name)
 
         if self._has_object(name) and not self._has_tensor(name):

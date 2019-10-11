@@ -46,8 +46,12 @@ cdef class Tensor3D(Matrix):
         if not isinstance(system, _System):
             raise TypeError(f'system must be a valid System object')
 
-        if not isinstance(base, Base):
-            base = system.get_base(base)
+        if base is not None:
+            if not isinstance(base, Base):
+                base = system.get_base(base)
+        else:
+            base = system.get_base('xyz')
+
 
         values = Matrix(shape=(3, 3), values=list(values))
 
