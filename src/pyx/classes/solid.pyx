@@ -19,7 +19,7 @@ cdef class Solid(Frame):
 
 
     cpdef get_IT(self):
-        return _tensor_from_c((<c_Solid*>self._c_handler).get_CM())
+        return _tensor_from_c((<c_Solid*>self._c_handler).get_IT())
 
 
     cpdef get_G(self):

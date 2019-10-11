@@ -24,7 +24,7 @@ cdef class SymbolNumeric(Object):
 
     ######## Constructor & Destructor  ########
 
-    def __cinit__(self, Py_ssize_t ptr, owner):
+    def __cinit__(self, Py_ssize_t ptr, _System owner=None):
         self._c_handler = <c_symbol_numeric*>ptr
         self._owner = owner
 
@@ -53,6 +53,8 @@ cdef class SymbolNumeric(Object):
         Get the system where this numeric symbol was created
         :rtype: System
         '''
+        if self._owner is None:
+            raise RuntimeError
         return self._owner
 
 

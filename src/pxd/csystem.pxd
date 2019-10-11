@@ -26,6 +26,7 @@ from src.pxd.cvector3D cimport Vector3D
 from src.pxd.ctensor3D cimport Tensor3D
 from src.pxd.cpoint cimport Point
 from src.pxd.cframe cimport Frame
+from src.pxd.csolid cimport Solid
 
 
 
@@ -104,3 +105,4 @@ cdef extern from "System.h":
         void new_Tensor3D(Tensor3D* t)
         Point* new_Point(string name, Point* previous, Vector3D* position_vector)
         Frame* new_Frame(string name, Point* point, Base* base)
+        Solid* new_Solid(string name, Point* point, Base* base, symbol_numeric* mass, Vector3D* CM, Tensor3D* IT)

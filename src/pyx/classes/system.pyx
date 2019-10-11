@@ -842,6 +842,58 @@ cdef class _System:
 
 
 
+    cpdef _new_solid(self, name, point, base, mass, CM, IT):
+        name = _parse_name(name, check_syntax=True)
+
+        if self._has_object(name):
+            raise IndexError(f'Name "{name.decode()}" its already in use')
+
+        if not isinstance(point, (str, Point)):
+            raise TypeError('point argument must be an instance of the class Point or str')
+
+        if not isinstance(point, Point):
+            point = self._get_point(point)
+
+
+        if not isinstance(base, (str, Base)):
+            raise TypeError('base argument must be an instance of the class Base or str')
+
+        if not isinstance(base, Base):
+            base = self._get_base(base)
+
+
+        if not isinstance(mass, (str, SymbolNumeric)):
+            raise TypeError('base argument must be an instance of the class SymbolNumeric or str')
+
+        if not isinstance(mass, SymbolNumeric):
+            mass = self._get_symbol(mass)
+
+
+        if not isinstance(CM, (str, Vector3D)):
+            raise TypeError('base argument must be an instance of the class Vector3D or str')
+
+        if not isinstance(CM, Vector3D):
+            CM = self._get_vector(CM)
+
+
+        if not isinstance(IT, (str, Tensor3D)):
+            raise TypeError('base argument must be an instance of the class Tensor3D or str')
+
+        if not isinstance(IT, Tensor3D):
+            IT = self._get_tensor(IT)
+
+
+        return Solid(<Py_ssize_t>self._c_handler.new_Solid(
+            name,
+            (<Point>point)._c_handler,
+            (<Base>base)._c_handler,
+            (<SymbolNumeric>mass)._c_handler,
+            <c_Vector3D*>(<Vector3D>CM)._get_c_handler(),
+            <c_Tensor3D*>(<Tensor3D>IT)._get_c_handler()
+        ))
+
+
+
 
 
     ######## Mixin ########

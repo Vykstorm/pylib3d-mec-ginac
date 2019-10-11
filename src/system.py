@@ -853,6 +853,13 @@ class System(_System):
 
 
 
+    def new_solid(self, name, point, base, mass, CM, IT):
+        return self._new_solid(name, point, base, mass, CM, IT)
+
+
+
+
+
     new_coord = new_coordinate
     new_aux_coord = new_aux_coordinate,
     new_param = new_parameter
