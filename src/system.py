@@ -749,6 +749,50 @@ class System(_System):
 
 
     def new_frame(self, name, point, base=None):
+        '''new_frame(name: str, point: Union[Point, str][, base: Union[Base, str]]) -> Frame
+        Creates a new frame on the system with the given name, point and base.
+
+        The next calls will create a frame called 'f' with 'O' as point and xyz as its base:
+
+            :Example:
+
+            >> new_frame('f', get_point('O')
+            >> new_frame('f', 'O')
+            >> new_frame('f', 'O', 'xyz')
+            >> new_frame('f', base='xyz', point='O')
+
+        You can indicate a different point & base:
+
+            >> b = new_base('b', previous='xyz')
+
+            >> v = new_vector('v', 1, 2, 3)
+            >> p = new_point('p', position=v, previous='O')
+
+            >> new_frame('f', p, b)
+            >> new_frame('f', 'p', 'b')
+            >> new_frame('f', base='b', point='p')
+
+
+        :param str name: The name of the new frame
+
+        :param point: The point of the new frame.
+        :type point: str, Point
+
+        :param base: The base of the new frame
+        :type base: str, Base
+
+        :rtype: Frame
+
+
+        :raise TypeError: If the given input arguments have an invalid type.
+        :raise IndexError: If an object with the given name already exists and
+            its not a frame.
+
+        .. warning:: If an frame object already exists with the given name, this
+            method only updates its values & properties using the arguments
+            provided (point and base) on the existing frame. Then, its returned
+            (also raises a user warning)
+        '''
         return self._new_frame(name, point, base)
 
 
