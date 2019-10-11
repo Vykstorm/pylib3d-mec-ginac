@@ -43,10 +43,10 @@ cdef class Expr(Object):
             if not isinstance(value, (int, float, SymbolNumeric, Expr)):
                 raise TypeError(f'"{type(value)} object cant be converted to an expression"')
 
-            if isinstance(value, float):
-                self._c_handler = c_ex(<double>value)
-            elif isinstance(value, int):
+            if isinstance(value, (int, float)) and floor(value) == value:
                 self._c_handler = c_ex(<long>value)
+            elif isinstance(value, float):
+                self._c_handler = c_ex(<double>value)
             elif isinstance(value, SymbolNumeric):
                 self._c_handler = c_ex(c_deref(<c_basic*>((<SymbolNumeric>value)._c_handler)))
             else:
