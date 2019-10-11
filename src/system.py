@@ -686,6 +686,62 @@ class System(_System):
 
     def new_tensor(self, name, *args, **kwargs):
         '''new_tensor(name: str[, values][, base: Union[Base, str]]) -> Tensor3D
+        Creates a new tensor with the given name, values and geometric base.
+
+            :Example:
+
+            >> new_tensor('q')
+            ╭         ╮
+            │ 0  0  0 │
+            │ 0  0  0 │
+            │ 0  0  0 │
+            ╰         ╯
+            >> new_tensor('q', range(0, 9), 'xyz')
+            ╭         ╮
+            │ 0  1  2 │
+            │ 3  4  5 │
+            │ 6  7  8 │
+            ╰         ╯
+            >> new_tensor('q', 1, 2, 3, 1, 2, 3, 1, 2, 3, 'xyz')
+            ╭         ╮
+            │ 1  2  3 │
+            │ 1  2  3 │
+            │ 1  2  3 │
+            ╰         ╯
+
+            >> import numpy as np
+            >> new_tensor('q', np.eye(3), base='xyz')
+            ╭         ╮
+            │ 1  0  0 │
+            │ 0  1  0 │
+            │ 0  0  1 │
+            ╰         ╯
+            >> new_tensor('q', values=np.linspace(0, 1, 9), base=get_base('xyz'))
+            ╭                     ╮
+            │     0  0.125   0.25 │
+            │ 0.375    0.5  0.625 │
+            │  0.75  0.875      1 │
+            ╰                     ╯
+
+
+        :param str name: The name of the new tensor
+        :param values: Initial values of the tensor. It can be a list of expressions,
+            matrix or numpy array. It can also be specified as nine different positional arguments
+            (all of them expressions)
+        :param base: The base of the argument (by default is the xyz base)
+        :type base: str, Base
+
+        :rtype: Tensor3D
+
+        :raises TypeError: If any of the input arguments has an invalid type.
+        :raises ValueError: If any of the input arguments has an inconsistent value.
+        :raises IndexError: If an object in the system already exists with the given name
+            and its not a tensor.
+
+        .. warning:: If an object already exists with the given name and its a tensor,
+            this method only updates its values & base (also raises a warning message).
+            Then the existing tensor is returned.
+
         '''
         return self._new_tensor(name, args, kwargs)
 
