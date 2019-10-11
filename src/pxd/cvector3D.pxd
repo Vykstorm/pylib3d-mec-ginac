@@ -15,6 +15,7 @@ from libcpp.string cimport string
 from src.pxd.ginac.cexpr cimport ex
 from src.pxd.cmatrix cimport Matrix
 from src.pxd.cbase cimport Base
+from src.pxd.csystem cimport System
 
 
 
@@ -32,6 +33,9 @@ cdef extern from "Vector3D.h":
 
         ex get_module()
         Matrix skew()
+
+        void set_System(System * system)
+        System * get_System()
 
         # Arithmetic operations
         Vector3D operator-()

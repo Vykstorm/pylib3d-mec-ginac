@@ -21,6 +21,7 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
     # It performs a copy of the contents of the given C++ Vector3D
     v = Vector3D()
     v._c_handler = new c_Vector3D(x.get_Name(), x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get_Base())
+    (<c_Vector3D*>v._c_handler).set_System(x.get_System())
     v._owns_c_handler = True
     return v
 
@@ -39,10 +40,6 @@ cdef class Vector3D(Matrix):
 
 
     ######## Attributes ########
-
-    cdef object _owner
-
-
 
 
     ######## Constructor & Destructor ########
@@ -86,12 +83,10 @@ cdef class Vector3D(Matrix):
         if not isinstance(base, (str, Base)):
             raise TypeError('base must be an instance of the class Base or a str')
 
-        if system is not None and not isinstance(system, _System):
-            raise TypeError('system must be an instance of the class System or None')
+        if not isinstance(system, _System):
+            raise TypeError('system must be an instance of the class System')
 
         if isinstance(base, str):
-            if system is None:
-                raise TypeError('base cannot be a string if system is not given')
             base = system.get_base(base)
 
         values = tuple(map(Expr, values))
@@ -107,7 +102,9 @@ cdef class Vector3D(Matrix):
 
         self._c_handler = <c_Matrix*>c_vector
         self._owns_c_handler = True
-        self._owner = system
+        c_vector.set_System((<_System>system)._c_handler)
+
+
 
 
     cdef c_Matrix* _get_c_handler(self) except? NULL:

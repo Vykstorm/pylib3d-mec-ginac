@@ -207,4 +207,4 @@ cdef class Tensor3D(Matrix):
 
 
 
-GeometricObject.register(Vector3D)
+GeometricObject.register(Tensor3D)
