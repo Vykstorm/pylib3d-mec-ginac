@@ -162,6 +162,9 @@ class System(_System):
     def get_solid(self, name):
         return self._get_solid(name)
 
+    def get_wrench(self, name):
+        return self._get_wrench(name)
+
 
 
     get_coord = get_coordinate
@@ -247,6 +250,10 @@ class System(_System):
     def has_solid(self, name):
         return self._has_solid(name)
 
+    def has_wrench(self, name):
+        return self._has_wrench(name)
+
+
 
     has_coord = has_coordinate
     has_vel = has_velocity
@@ -323,6 +330,9 @@ class System(_System):
 
     def get_solids(self):
         return SolidsView(self)
+
+    def get_wrenches(self):
+        return self._get_wrenches()
 
 
     get_coords = get_coordinates
@@ -902,6 +912,11 @@ class System(_System):
 
 
 
+    def new_wrench(self, name, point, base, mass, CM, IT):
+        return self._new_wrench(name, point, base, mass, CM, IT)
+
+
+
 
     new_coord = new_coordinate
     new_aux_coord = new_aux_coordinate,
@@ -993,6 +1008,11 @@ class System(_System):
     @property
     def solids(self):
         return self.get_solids()
+
+    @property
+    def wrenches(self):
+        return self.get_wrenches()
+
 
 
     coords = coordinates
@@ -1224,7 +1244,12 @@ for _geom_type in map(bytes.decode, _geom_types):
     if _geom_type in ('vector', 'tensor'):
         _geom_class = _geom_class + '3D'
 
-    _geom_ptype = _geom_type + 's' if _geom_type != 'matrix' else 'matrices'
+    if _geom_type == 'matrix':
+        _geom_ptype = 'matrices'
+    elif _geom_type == 'wrench':
+        _geom_ptype = 'wrenches'
+    else:
+        _geom_ptype = _geom_type + 's'
     _geom_name = _geom_type
     _geom_pname = _geom_ptype
 
