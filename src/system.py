@@ -159,6 +159,9 @@ class System(_System):
     def get_frame(self, name):
         return self._get_frame(name)
 
+    def get_solid(self, name):
+        return self._get_solid(name)
+
 
 
     get_coord = get_coordinate
@@ -241,6 +244,9 @@ class System(_System):
     def has_frame(self, name):
         return self._has_frame(name)
 
+    def has_solid(self, name):
+        return self._has_solid(name)
+
 
     has_coord = has_coordinate
     has_vel = has_velocity
@@ -314,6 +320,9 @@ class System(_System):
 
     def get_frames(self):
         return self._get_frames()
+
+    def get_solids(self):
+        return self._get_solids()
 
 
     get_coords = get_coordinates
@@ -859,12 +868,14 @@ class System(_System):
 
             :Example:
 
-mass = new_param('m')
-CM = new_vector('cm', 0, 5, 10)
-IT = new_tensor('it', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-s = new_solid('s', 'O', 'xyz', mass, CM, IT)
-
-
+            >> mass = new_param('m', 2)
+            >> CM = new_vector('cm', 0, 5, 10)
+            >> IT = new_tensor('it', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+            >> s = new_solid('s', 'O', 'xyz', mass, CM, IT)
+            >> s.get_G().name
+            'Gs'
+            >> s.get_mass().value
+            2
 
 
         :param str name: Name of the new solid
@@ -978,6 +989,10 @@ s = new_solid('s', 'O', 'xyz', mass, CM, IT)
     @property
     def frames(self):
         return self.get_frames()
+
+    @property
+    def solids(self):
+        return self.get_solids()
 
 
     coords = coordinates

@@ -33,7 +33,7 @@ _derivable_symbol_types = frozenset(map(str.encode, (
 
 # All geometric object types
 _geom_types = frozenset(map(str.encode, (
-    'matrix', 'vector', 'tensor', 'base', 'point', 'frame'
+    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid'
 )))
 
 
@@ -111,6 +111,8 @@ cdef class _System:
             return <void*>self._c_handler.get_Point(name)
         if kind == b'frame':
             return <void*>self._c_handler.get_Frame(name)
+        if kind == b'solid':
+            pass
         return NULL
 
 
@@ -255,6 +257,8 @@ cdef class _System:
         return self._c_handler.get_Frames()
 
 
+    cdef c_vector[c_Solid*] _get_c_solids(self):
+        return self._c_handler.get_Solids()
 
 
 
@@ -367,6 +371,13 @@ cdef class _System:
         return Frame(<Py_ssize_t>c_frame)
 
 
+    cpdef _get_solid(self, name):
+        name = _parse_name(name)
+        cdef c_Solid* c_solid = <c_Solid*>self._get_c_object(name, b'solid')
+        if c_solid == NULL:
+            raise IndexError(f'Solid "{name.decode()}" doesnt exist')
+        return Solid(<Py_ssize_t>c_solid)
+
 
 
     cpdef _has_base(self, name):
@@ -387,6 +398,9 @@ cdef class _System:
     cpdef _has_frame(self, name):
         return self._has_c_object(_parse_name(name), b'frame')
 
+    cpdef _has_solid(self, name):
+        return self._has_c_object(_parse_name(name), b'solid')
+
 
 
     cpdef _has_object(self, name):
@@ -398,6 +412,8 @@ cdef class _System:
         if self._has_matrix(name) or self._has_vector(name):
             return True
         if self._has_point(name) or self._has_frame(name):
+            return True
+        if self._has_solid(name):
             return True
         return False
 
@@ -446,7 +462,9 @@ cdef class _System:
         cdef c_vector[c_Frame*] c_frames = self._c_handler.get_Frames()
         return [Frame(<Py_ssize_t>c_frame) for c_frame in c_frames]
 
-
+    cpdef _get_solids(self):
+        cdef c_vector[c_Solid*] c_solids = self._c_handler.get_Solids()
+        return [Solid(<Py_ssize_t>c_solid) for c_solid in c_solids]
 
 
 

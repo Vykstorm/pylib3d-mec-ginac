@@ -83,6 +83,7 @@ cdef extern from "System.h":
         vector[Tensor3D*] get_Tensors()
         vector[Point*] get_Points()
         vector[Frame*] get_Frames()
+        vector[Solid*] get_Solids()
 
         Base* get_Base(string name)
         Matrix* get_Matrix(string name)
@@ -90,6 +91,7 @@ cdef extern from "System.h":
         Tensor3D* get_Tensor3D(string name)
         Point* get_Point(string name)
         Frame* get_Frame(string name)
+        Solid* get_Solid(string name)
 
         # Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
