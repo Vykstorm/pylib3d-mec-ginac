@@ -366,8 +366,8 @@ cpdef _point_to_str(Point point):
 
 
     return tabulate([[
-        point.name, x, y, z, base_name, previous_name
-    ]], headers=('name', 'x', 'y', 'z', 'base', 'previous'), tablefmt='plain')
+        f'"{point.name}"', x, y, z, f'"{base_name}"', f'"{previous_name}"'
+    ]], headers=('name', 'pos.x', 'pos.y', 'pos.z', 'pos.base', 'previous point'), tablefmt='plain')
 
 
 
