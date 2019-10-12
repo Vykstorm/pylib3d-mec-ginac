@@ -854,6 +854,38 @@ class System(_System):
 
 
     def new_solid(self, name, point, base, mass, CM, IT):
+        '''new_solid(name: str, point: Union[str, Point], base: Union[str, Base], mass: Union[str, SymbolNumeric], CM: Union[str, Vector3D], IT: Union[str, Tensor3D])
+        Creates a new solid object
+
+            :Example:
+
+mass = new_param('m')
+CM = new_vector('cm', 0, 5, 10)
+IT = new_tensor('it', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+s = new_solid('s', 'O', 'xyz', mass, CM, IT)
+
+
+
+
+        :param str name: Name of the new solid
+
+        :param point:
+        :type point: str, Point
+
+        :param base: The geometric base of the solid
+        :type base: str, Base
+
+        :param mass: The mass of the solid
+        :type mass: str, SymbolNumeric
+
+        :param CM: Center of mass point of the solid
+        :type CM: str, Vector3D
+
+        :param IT: Intertia tensor of the solid
+        :type IT: str, Tensor3D
+
+        :rtype: Solid
+        '''
         return self._new_solid(name, point, base, mass, CM, IT)
 
 

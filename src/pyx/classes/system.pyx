@@ -13,6 +13,7 @@ cdef void outError(const char* msg):
     pass
 
 
+
 # C type alias representing a list of numeric symbols (std::vector[symbol_numeric*])
 ctypedef c_vector[c_symbol_numeric*] c_symbol_numeric_list
 
@@ -863,25 +864,26 @@ cdef class _System:
 
 
         if not isinstance(mass, (str, SymbolNumeric)):
-            raise TypeError('base argument must be an instance of the class SymbolNumeric or str')
+            raise TypeError('mass argument must be an instance of the class SymbolNumeric or str')
 
         if not isinstance(mass, SymbolNumeric):
-            mass = self._get_symbol(mass)
+            mass = self._get_symbol(mass, kind=b'parameter')
+        elif mass.get_type() != 'parameter':
+            raise TypeError('mass must be a parameter symbol')
 
 
         if not isinstance(CM, (str, Vector3D)):
-            raise TypeError('base argument must be an instance of the class Vector3D or str')
+            raise TypeError('CM argument must be an instance of the class Vector3D or str')
 
         if not isinstance(CM, Vector3D):
             CM = self._get_vector(CM)
 
 
         if not isinstance(IT, (str, Tensor3D)):
-            raise TypeError('base argument must be an instance of the class Tensor3D or str')
+            raise TypeError('IT argument must be an instance of the class Tensor3D or str')
 
         if not isinstance(IT, Tensor3D):
             IT = self._get_tensor(IT)
-
 
         return Solid(<Py_ssize_t>self._c_handler.new_Solid(
             name,
@@ -891,7 +893,6 @@ cdef class _System:
             <c_Vector3D*>(<Vector3D>CM)._get_c_handler(),
             <c_Tensor3D*>(<Tensor3D>IT)._get_c_handler()
         ))
-
 
 
 

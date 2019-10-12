@@ -23,6 +23,7 @@ cdef class Solid(Frame):
 
 
     cpdef get_G(self):
+        # TODO fix me
         return Point(<Py_ssize_t>(<c_Solid*>self._c_handler).get_G())
 
 
