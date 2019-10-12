@@ -112,7 +112,7 @@ cdef class _System:
         if kind == b'frame':
             return <void*>self._c_handler.get_Frame(name)
         if kind == b'solid':
-            pass
+            return <void*>self._c_handler.get_Solid(name)
         return NULL
 
 

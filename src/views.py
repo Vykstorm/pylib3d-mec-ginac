@@ -225,3 +225,22 @@ class FramesView(ObjectsTableView):
             quote(frame.name), quote(frame.point.name),
             quote(frame.base.name), frame.scale
         ]
+
+
+
+######## SolidsView ########
+
+class SolidsView(ObjectsTableView):
+    def __init__(self, system):
+        super().__init__(
+            system._get_solids, system._get_solid, system._has_solid,
+            columns=('name', 'point', 'base', 'scale', 'mass', 'CM', 'IT'),
+            show_headers=True
+        )
+
+    def get_row_values(self, solid):
+        return [
+            quote(solid.name), quote(solid.point.name),
+            quote(solid.base.name), solid.scale,
+            str(solid.mass), quote(solid.CM.name), quote(solid.IT.name)
+        ]
