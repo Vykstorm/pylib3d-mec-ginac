@@ -914,6 +914,49 @@ cdef class _System:
 
 
 
+    cpdef _new_wrench(self, name, force, moment, point, solid, type):
+        name = _parse_name(name)
+
+        if not isinstance(force, (Vector3D, str)):
+            raise TypeError('Force must be a Vector3D or str object')
+
+        if not isinstance(force, Vector3D):
+            force = self._get_vector(force)
+
+
+        if not isinstance(moment, (Vector3D, str)):
+            raise TypeError('Moment must be a Vector3D or str object')
+
+        if not isinstance(moment, Vector3D):
+            moment = self._get_vector(moment)
+
+
+        if not isinstance(point, (Point, str)):
+            raise TypeError('Point must be a Point or str object')
+
+        if not isinstance(point, Point):
+            point = self._get_point(point)
+
+
+        if not isinstance(solid, (Solid, str)):
+            raise TypeError('Moment must be a Solid or str object')
+
+        if not isinstance(solid, Solid):
+            solid = self._get_solid(solid)
+
+        type = _parse_text(type)
+
+
+        return _wrench_from_c(self._c_handler.new_Wrench3D(
+            name,
+            c_deref(<c_Vector3D*>(<Vector3D>force)._get_c_handler()),
+            c_deref(<c_Vector3D*>(<Vector3D>moment)._get_c_handler()),
+            (<Point>point)._c_handler,
+            <c_Solid*>(<Solid>solid)._c_handler,
+            type
+        ))
+
+
 
     ######## Mixin ########
 
