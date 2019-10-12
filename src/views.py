@@ -194,7 +194,7 @@ class PointsView(ObjectsTableView):
     def __init__(self, system):
         super().__init__(
             system._get_points, system._get_point, system._has_point,
-            columns=('name', 'x', 'y', 'z', 'base', 'previous'),
+            columns=('name', 'pos.x', 'pos.y', 'pos.z', 'pos.base', 'previous point'),
             show_headers=True
         )
 
@@ -207,3 +207,21 @@ class PointsView(ObjectsTableView):
         else:
             values.extend([None]*5)
         return values
+
+
+
+######## FramesView ########
+
+class FramesView(ObjectsTableView):
+    def __init__(self, system):
+        super().__init__(
+            system._get_frames, system._get_frame, system._has_frame,
+            columns=('name', 'point', 'base', 'scale'),
+            show_headers=True
+        )
+
+    def get_row_values(self, frame):
+        return [
+            quote(frame.name), quote(frame.point.name),
+            quote(frame.base.name), frame.scale
+        ]
