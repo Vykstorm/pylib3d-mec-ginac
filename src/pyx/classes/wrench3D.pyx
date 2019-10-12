@@ -6,9 +6,43 @@ This file defines the Wrench3D class
 
 
 
+
+cdef Wrench3D _wrench_from_c(c_Wrench3D* x):
+    wrench = Wrench3D()
+    wrench._c_handler, wrench._owns_c_handler = x, False
+    return wrench
+
+
+cdef Wrench3D _wrench_from_c_value(c_Wrench3D x):
+    wrench = Wrench3D()
+    wrench._c_handler = new c_Wrench3D(
+        x.get_name(), x.get_Force(), x.get_Moment(), x.get_Point(),
+        x.get_Solid(), x.get_Type()
+    )
+    wrench._owns_c_handler = True
+    return wrench
+
+
+
+
 cdef class Wrench3D(Object):
 
     ######## Constructor ########
+
+    cdef c_Wrench3D* _c_handler
+    cdef bint _owns_c_handler
+
+
+
+    ######## Constructor & Destructor ########
+
+    def __cinit__(self):
+        self._c_handler = NULL
+
+
+    def __dealloc__(self):
+        if self._c_handler != NULL and self._owns_c_handler:
+            del self._c_handler
 
 
 
@@ -16,30 +50,34 @@ cdef class Wrench3D(Object):
 
 
     cpdef get_force(self):
-        pass
+        return _vector_from_c_value(self._c_handler.get_Force())
 
 
     cpdef get_moment(self):
-        pass
+        return _vector_from_c_value(self._c_handler.get_Moment())
 
 
     cpdef get_solid(self):
-        pass
+        return Solid(<Py_ssize_t>self._c_handler.get_Solid())
 
 
     cpdef get_type(self):
-        pass
+        return (<bytes>self._c_handler.get_Type()).decode()
+
 
 
     ######## Operations ########
 
 
     cpdef unatomize(self):
-        pass
+        return _wrench_from_c_value(self._c_handler.unatomize())
 
 
     cpdef at_point(self, point):
-        pass
+        if not isinstance(point, Point):
+            raise TypeError('Input argument must be a Point object')
+        return _wrench_from_c_value(self._c_handler.at_Point((<Point>point)._c_handler))
+
 
 
     ######## Unary arithmetic operations ########

@@ -125,7 +125,7 @@ cdef class Expr(Object):
         .. note:: One of the operands can also be any object which can be converted to
             an expression (a numeric symbol or number)
         '''
-        if isinstance(right_op, Matrix):
+        if isinstance(right_op, (Matrix, Wrench3D)):
             return NotImplemented
         return _expr_from_c(Expr(left_op)._c_handler * Expr(right_op)._c_handler)
 

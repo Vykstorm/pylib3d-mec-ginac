@@ -27,7 +27,7 @@ from src.pxd.ctensor3D cimport Tensor3D
 from src.pxd.cpoint cimport Point
 from src.pxd.cframe cimport Frame
 from src.pxd.csolid cimport Solid
-
+from src.pxd.cwrench3D cimport Wrench3D
 
 
 
@@ -84,6 +84,7 @@ cdef extern from "System.h":
         vector[Point*] get_Points()
         vector[Frame*] get_Frames()
         vector[Solid*] get_Solids()
+        vector[Wrench3D*] get_Wrenches()
 
         Base* get_Base(string name)
         Matrix* get_Matrix(string name)
@@ -92,6 +93,7 @@ cdef extern from "System.h":
         Point* get_Point(string name)
         Frame* get_Frame(string name)
         Solid* get_Solid(string name)
+        Wrench3D* get_Wrench3D(string name)
 
         # Symbol constructors
         symbol_numeric* new_Coordinate(string name, string vel_name, string acc_name, string tex_name, string vel_tex_name, string acc_tex_name, numeric value, numeric vel_value, numeric acc_value)
@@ -108,3 +110,4 @@ cdef extern from "System.h":
         Point* new_Point(string name, Point* previous, Vector3D* position_vector)
         Frame* new_Frame(string name, Point* point, Base* base)
         Solid* new_Solid(string name, Point* point, Base* base, symbol_numeric* mass, Vector3D* CM, Tensor3D* IT)
+        Wrench3D* new_Wrench3D(string name, Vector3D force, Vector3D moment, Point* point, Solid* solid, string type)
