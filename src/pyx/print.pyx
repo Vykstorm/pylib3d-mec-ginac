@@ -379,6 +379,14 @@ cpdef _frame_to_str(Frame frame):
 
 
 
+cpdef _solid_to_str(Solid solid):
+    # Prints a frame object to a string
+    return 'Solid object'
+
+
+
+
+
 def _to_str(obj):
     '''
     Converts an object to a string.
@@ -396,6 +404,8 @@ def _to_str(obj):
         return _base_to_str(obj)
     if isinstance(obj, Point):
         return _point_to_str(obj)
+    if isinstance(obj, Solid):
+        return _solid_to_str(obj)
     if isinstance(obj, Frame):
         return _frame_to_str(obj)
     return f'{obj.__class__.__name__} object'
