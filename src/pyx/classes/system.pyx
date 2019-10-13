@@ -990,3 +990,118 @@ cdef class _System:
 
     cpdef _is_autogen_latex_names_enabled(self):
         return self._autogen_latex_names
+
+
+
+
+
+
+
+
+
+
+
+######## Class SymbolsMapping ########
+
+
+class SymbolsMapping(ObjectsMapping):
+    def __init__(self, system, kind=None):
+        super().__init__(
+            partial(system._get_symbol, kind=kind),
+            partial(system._get_symbols, kind=kind),
+            partial(system._has_symbol, kind=kind)
+        )
+
+
+
+######## Class MatricesMapping ########
+
+class MatricesMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_matrix,
+            system._get_matrices,
+            system._has_matrix
+        )
+
+
+
+######## Class VectorsMapping ########
+
+class VectorsMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_vector,
+            system._get_vectors,
+            system._has_vector
+        )
+
+
+
+######## Class TensorsMapping ########
+
+class TensorsMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_tensor,
+            system._get_tensors,
+            system._has_tensor
+        )
+
+
+
+######## Class BasesMapping ########
+
+class BasesMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_base,
+            system._get_bases,
+            system._has_base
+        )
+
+
+
+######## Class PointsMapping ########
+
+class PointsMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_point,
+            system._get_points,
+            system._has_point
+        )
+
+
+
+######## Class FramesMapping ########
+
+class FramesMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_frame,
+            system._get_frames,
+            system._has_frame
+        )
+
+
+######## Class SolidsMapping ########
+
+class SolidsMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_solid,
+            system._get_solids,
+            system._has_solid
+        )
+
+
+######## Class WrenchesMapping ########
+
+class WrenchesMapping(ObjectsMapping):
+    def __init__(self, system):
+        super().__init__(
+            system._get_wrench,
+            system._get_wrenches,
+            system._has_wrench
+        )

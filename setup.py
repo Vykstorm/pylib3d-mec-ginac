@@ -102,7 +102,7 @@ LIBRARIES = [
 # All .pyx file definitions of the extension
 EXTENSION_DEFINITION_FILES = list(map(partial(join, 'src/pyx'), chain(
     # Modules at src/pyx
-    ['imports.pyx', 'parse.pyx', 'print.pyx'],
+    ['imports.pyx', 'parse.pyx', 'print.pyx', 'latex.pyx'],
 
     # Modules at src/pyx/classes
     map(partial(join, 'classes'), [

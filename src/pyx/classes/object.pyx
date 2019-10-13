@@ -7,7 +7,7 @@ Cython doesn't support multiple inheritance if the derived class is defined with
 prefix "cdef".
 
 To circunvent this and to make the code more reusable and mantainable for
-the classes SymbolNumeric, Expr, Matrix, Vector3D, Tensor3D, Base and Point, which share
+the classes SymbolNumeric, Expr, Matrix, Vector3D, Tensor3D, Base, Point, Frame, Solid and Wrench, which share
 some behaviour, they must be derived from the Object class.
 
 Base class will provide the next instance methods depending on the kind of object:
@@ -21,6 +21,9 @@ SymbolNumeric            yes        yes         no
         Point            yes         no         no
         Frame            yes         no        yes
          Expr             no        yes         no
+        Frame            yes         no        yes
+        Solid            yes         no        yes
+     Wrench3D            yes         no         no
 
 * Those classes with the method "get_name" avaliable, also will have the property "name"
 * Classes with "to_latex" will have also the method "print_latex" and property "latex"
@@ -102,7 +105,7 @@ class LatexRenderable(ABC):
         Get this object formatted to latex
         :rtype: str
         '''
-        return _to_latex(self)
+        return ObjectLatexPrinter().print(self)
 
 
     def print_latex(self):
@@ -257,7 +260,76 @@ cdef class Object:
 
     def __str__(self):
         # Print the object
-        return _to_str(self)
+        return ObjectConsolePrinter().print(self)
+
+
+    def __repr__(self):
+        return self.__str__()
+
+
+
+
+
+######## Class ObjectsMapping ########
+
+class ObjectsMapping(Mapping):
+    '''
+    Instances of this class are used to access objects by their names
+    emulating a Python dictionary structure.
+    They are returned by methods get_parameters, get_inputs, ... of the System
+    class:
+
+        :Example:
+
+        >> new_param('a', 1), new_param('b', 2), new_param('c', 3)
+        >> params = get_params()
+        >> params['a']
+        a = 1
+        >> list(params)
+        'a', 'b', 'c'
+        >> 'b' in params
+        True
+
+    '''
+    def __init__(self, getter, pgetter, checker):
+        self._getter = getter
+        self._pgetter = pgetter
+        self._checker = checker
+
+
+    def __getitem__(self, name):
+        obj = self._getter(name)
+        assert isinstance(obj, Object)
+        return obj
+
+
+    def __len__(self):
+        objs = self._pgetter()
+        assert isinstance(objs, Sized)
+        return len(objs)
+
+
+    def __iter__(self):
+        objs = self._pgetter()
+        assert isinstance(objs, Iterable)
+        for obj in objs:
+            assert isinstance(obj, NamedObject)
+            yield obj.get_name()
+
+
+    def __contains__(self, name):
+        x = self._checker(name)
+        assert isinstance(x, bool)
+        return x
+
+
+    def __bool__(self):
+        return len(self) > 0
+
+
+    def __str__(self):
+        return str(dict(self.items()))
+
 
     def __repr__(self):
         return self.__str__()

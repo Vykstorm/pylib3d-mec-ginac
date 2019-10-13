@@ -8,7 +8,8 @@ This module defines the class System
 ######## Import statements ########
 
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
-from .views import BasesView, SymbolsView, MatricesView, VectorsView, PointsView, FramesView, SolidsView
+from lib3d_mec_ginac_ext import SymbolsMapping, MatricesMapping, VectorsMapping, TensorsMapping
+from lib3d_mec_ginac_ext import BasesMapping, PointsMapping, FramesMapping, SolidsMapping, WrenchesMapping
 
 
 
@@ -279,7 +280,7 @@ class System(_System):
             symbol names and values, instances of the class SymbolNumeric
         :rtype: Mapping[str, SymbolNumeric]
         '''
-        return SymbolsView(self, kind)
+        return SymbolsMapping(self, kind)
 
 
     def get_coordinates(self):
@@ -311,28 +312,28 @@ class System(_System):
 
 
     def get_bases(self):
-        return BasesView(self)
+        return BasesMapping(self)
 
     def get_matrices(self):
-        return MatricesView(self)
+        return MatricesMapping(self)
 
     def get_vectors(self):
-        return VectorsView(self)
+        return VectorsMapping(self)
 
     def get_tensors(self):
-        return self._get_tensors()
+        return TensorsMapping(self)
 
     def get_points(self):
-        return PointsView(self)
+        return PointsMapping(self)
 
     def get_frames(self):
-        return FramesView(self)
+        return FramesMapping(self)
 
     def get_solids(self):
-        return SolidsView(self)
+        return SolidsMapping(self)
 
     def get_wrenches(self):
-        return self._get_wrenches()
+        return WrenchesMapping(self)
 
 
     get_coords = get_coordinates
@@ -958,7 +959,7 @@ class System(_System):
         :rtype: Wrench3D
 
         :raises TypeError: If any of the given input arguments has an invalid type.
-        :raise IndexError: If there exists another object with the given name already        
+        :raise IndexError: If there exists another object with the given name already
         '''
         return self._new_wrench(name, force, moment, point, solid, type)
 

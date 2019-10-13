@@ -72,7 +72,7 @@ from src.pxd.ginac.cmath cimport pow as c_pow
 
 # Collections
 from collections import OrderedDict
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping, Sized
 
 # Utilities
 from functools import partial, partialmethod, wraps
