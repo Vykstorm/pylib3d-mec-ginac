@@ -3,11 +3,11 @@
 ## Imports
 from lib3d_mec_ginac import *
 from math import pi, e
+from tabulate import tabulate
 
 
-# Gravity vector
-gravity_vector = Vector3D(0, 0, get_param('g'), get_base('xyz'))
-
+# Set gravity value
+set_value('g', 9.80665)
 
 
 ######## Solver parameters ########
@@ -46,16 +46,16 @@ new_base('Barm2', 'xyz', 0, 1, 0, theta2)
 new_base('Barm3', 'xyz', rotation_tupla=[0, 1, 0], rotation_angle=theta3)
 
 
-OA = new_vector('O_A', l1, 0, 0, 'Barm1')
-AB = new_vector('A_B', l2, 0, 0, 'Barm2')
-BC = new_vector('B_C', [l3, 0, 0], 'Barm3')
-OO2 = new_vector('OO2', values=[l4, 0, 0], base='xyz')
+new_vector('O_A', l1, 0, 0, 'Barm1')
+new_vector('A_B', l2, 0, 0, 'Barm2')
+new_vector('B_C', [l3, 0, 0], 'Barm3')
+new_vector('O_O2', values=[l4, 0, 0], base='xyz')
 
 
-new_point('OA', 'O', OA)
-new_point('OB', 'OA', AB)
-new_point('OC', 'OB', BC)
-new_point('O2', 'O', OO2)
+new_point('OA', 'O', 'O_A')
+new_point('OB', 'OA', 'A_B')
+new_point('OC', 'OB', 'B_C')
+new_point('O2', 'O', 'O_O2')
 
 
 m1, m2, m3 = new_param('m1', 1), new_param('m2', 1), new_param('m3', 1)
@@ -66,15 +66,34 @@ cg2x, cg2z = new_param('cg2x', 1),   new_param('cg2z', 0.1)
 cg3x, cg3z = new_param('cg3x', 0.6), new_param('cg3z', 0.1)
 
 
-OArm1GArm1 = new_vector('OArm1_Garm1', cg1x, 0, cg1z, 'Barm1')
-OArm2GArm2 = new_vector('OArm2_GArm2', cg2x, 0, cg2z, 'Barm2')
-OArm3GArm3 = new_vector('OArm3_GArm3', cg3x, 0, cg3z, 'Barm3')
+new_vector('OArm1_GArm1', cg1x, 0, cg1z, 'Barm1')
+new_vector('OArm2_GArm2', cg2x, 0, cg2z, 'Barm2')
+new_vector('OArm3_GArm3', cg3x, 0, cg3z, 'Barm3')
 
 
 I1yy, I2yy, I3yy = [new_param(name, 1) for name in ('I1yy', 'I2yy', 'I3yy')]
 
-# Frames, solids and tensors are not defined yet
-# ...
+I_Arm1 = new_tensor('Iarm1', base='Barm1')
+I_Arm2 = new_tensor('Iarm2', base='Barm2')
+I_Arm3 = new_tensor('Iarm3', base='Barm3')
+I_Arm1[1, 1], I_Arm2[1, 1], I_Arm3[1, 1] = I1yy, I2yy, I3yy
+
+
+new_frame('Fra_arm1', 'O',  'Barm1')
+new_frame('Fra_arm2', 'OA', 'Barm2')
+new_frame('Fra_arm3', 'OB', 'Barm3')
+new_frame('Fra_ABS2', 'O2', 'xyz')
+
+
+
+######## Solids ########
+
+new_solid('arm1', 'O',  'Barm1', 'm1', 'OArm1_GArm1', 'Iarm1')
+new_solid('arm2', 'OA', 'Barm2', 'm2', 'OArm2_GArm2', 'Iarm2')
+new_solid('arm3', 'OB', 'Barm3', 'm3', 'OArm3_GArm3', 'Iarm3')
+
+
+
 
 
 ######## System introspection ########
@@ -97,4 +116,9 @@ print()
 print('#'*10 + ' Points ' + '#'*10)
 print()
 print(get_points())
+print()
+
+print('#'*10 + ' Frames ' + '#'*10)
+print()
+print(get_frames())
 print()
