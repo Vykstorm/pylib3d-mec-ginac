@@ -878,14 +878,15 @@ class System(_System):
 
             :Example:
 
-            >> mass = new_param('m', 2)
-            >> CM = new_vector('cm', 0, 5, 10)
-            >> IT = new_tensor('it', [[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-            >> s = new_solid('s', 'O', 'xyz', mass, CM, IT)
-            >> s.get_G().name
-            'Gs'
-            >> s.get_mass().value
-            2
+            >> new_base('Barm', 0, 1, 0)
+            >> new_param('m', 1)
+            >> new_vector('Oarm_Garm', 0, 0, 1, 'Barm')
+            >> new_tensor('Iarm', base='Barm')
+            >> arm = new_solid('arm', 'O', 'Barm', 'm', 'Oarm_Garm', 'Iarm')
+            >> arm.get_G().name
+            'Garm'
+            >> s.get_mass()
+            m = 1.0
 
 
         :param str name: Name of the new solid
@@ -896,7 +897,7 @@ class System(_System):
         :param base: The geometric base of the solid
         :type base: str, Base
 
-        :param mass: The mass of the solid
+        :param mass: The mass of the solid (must be a parameter symbol)
         :type mass: str, SymbolNumeric
 
         :param CM: Center of mass point of the solid
@@ -906,14 +907,60 @@ class System(_System):
         :type IT: str, Tensor3D
 
         :rtype: Solid
+
+        :raise TypeError: If any of the input arguments has an invalid type.
+            Also raised if the mass symbol is not a parameter
+        :raise IndexError: If there exists another object with the given name already
         '''
         return self._new_solid(name, point, base, mass, CM, IT)
 
 
 
 
-    def new_wrench(self, name, point, base, mass, CM, IT):
-        return self._new_wrench(name, point, base, mass, CM, IT)
+    def new_wrench(self, name, force, moment, point, solid, type):
+        '''new_wrench(name: str, point: Union[str, Point], base: Union[str, Base], mass: Union[]) -> Wrench3D
+        Create a new wrench with the given name, force and moment vectors, point, solid object
+        and with the given type.
+
+            :Example:
+
+            >> new_base('Barm', 0, 1, 0)
+            >> new_param('m', 1)
+            >> new_vector('Oarm_Garm', 0, 0, 1, 'Barm')
+            >> new_tensor('Iarm', base='Barm')
+            >> new_solid('arm', 'O', 'Barm', 'm', 'Oarm_Garm', 'Iarm')
+
+            >> force = new_vector('f', 0, 1, 0, 'xyz')
+            >> moment = new_vector('mt', 0, 0, 0, 'xyz')
+            >> point = new_point('p', position=new_vector('v', 0, 1, 2, 'xyz'))
+
+            >> w = new_wrench('w', force, moment, point, 'arm', 'Constraint')
+            >> w.get_force().name
+            'f'
+
+
+        :param str name: Name of the wrench
+
+        :param force: The Force vector
+        :type force: str, Vector3D
+
+        :param moment: The moment vector
+        :type moment: str, Vector3D
+
+        :param point: The point of the wrench
+        :type point: str, Point
+
+        :param solid: The solid of the wrench
+        :type solid: str, Solid
+
+        :param str type: The kind of wrench
+
+        :rtype: Wrench3D
+
+        :raises TypeError: If any of the given input arguments has an invalid type.
+        :raise IndexError: If there exists another object with the given name already        
+        '''
+        return self._new_wrench(name, force, moment, point, solid, type)
 
 
 

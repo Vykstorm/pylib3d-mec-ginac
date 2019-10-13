@@ -58,6 +58,8 @@ class NamedObject(ABC):
             c_name = (<Point>self)._c_handler.get_name()
         elif isinstance(self, Frame):
             c_name = (<Frame>self)._c_handler.get_name()
+        elif isinstance(self, Wrench3D):
+            c_name = (<Wrench3D>self)._c_handler.get_name()
         else:
             raise RuntimeError
 
