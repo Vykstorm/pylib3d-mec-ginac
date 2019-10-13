@@ -8,9 +8,7 @@ This module defines the class System
 ######## Import statements ########
 
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
-from lib3d_mec_ginac_ext import SymbolsMapping, MatricesMapping, VectorsMapping, TensorsMapping
-from lib3d_mec_ginac_ext import BasesMapping, PointsMapping, FramesMapping, SolidsMapping, WrenchesMapping
-
+from lib3d_mec_ginac_ext import *
 
 
 
