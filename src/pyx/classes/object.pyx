@@ -105,7 +105,7 @@ class LatexRenderable(ABC):
         Get this object formatted to latex
         :rtype: str
         '''
-        return ObjectLatexPrinter().print(self)
+        return LatexPrinter().print(self)
 
 
     def print_latex(self):
@@ -260,7 +260,10 @@ cdef class Object:
 
     def __str__(self):
         # Print the object
-        return ObjectConsolePrinter().print(self)
+        try:
+            return ConsolePrinter().print(self)
+        except NotImplementedError:
+            return f'{self.__class__.__name__} object'
 
 
     def __repr__(self):
@@ -328,7 +331,7 @@ class ObjectsMapping(Mapping):
 
 
     def __str__(self):
-        return str(dict(self.items()))
+        return ConsolePrinter().print(self)
 
 
     def __repr__(self):

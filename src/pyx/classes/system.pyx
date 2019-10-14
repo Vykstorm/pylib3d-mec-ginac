@@ -1004,104 +1004,123 @@ cdef class _System:
 ######## Class SymbolsMapping ########
 
 
-class SymbolsMapping(ObjectsMapping):
+class SymbolsMapping(ObjectsMapping, SymbolsTableView):
     def __init__(self, system, kind=None):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             partial(system._get_symbol, kind=kind),
             partial(system._get_symbols, kind=kind),
             partial(system._has_symbol, kind=kind)
         )
+        SymbolsTableView.__init__(self, system, kind)
+
+
+
 
 
 
 ######## Class MatricesMapping ########
 
-class MatricesMapping(ObjectsMapping):
+class MatricesMapping(ObjectsMapping, MatricesTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_matrix,
             system._get_matrices,
             system._has_matrix
         )
+        MatricesTableView.__init__(self, system)
+
 
 
 
 ######## Class VectorsMapping ########
 
-class VectorsMapping(ObjectsMapping):
+class VectorsMapping(ObjectsMapping, VectorsTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_vector,
             system._get_vectors,
             system._has_vector
         )
+        VectorsTableView.__init__(self, system)
+
 
 
 
 ######## Class TensorsMapping ########
 
-class TensorsMapping(ObjectsMapping):
+class TensorsMapping(ObjectsMapping, TensorsTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_tensor,
             system._get_tensors,
             system._has_tensor
         )
+        TensorsTableView.__init__(self, system)
+
 
 
 
 ######## Class BasesMapping ########
 
-class BasesMapping(ObjectsMapping):
+class BasesMapping(ObjectsMapping, BasesTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_base,
             system._get_bases,
             system._has_base
         )
+        BasesTableView.__init__(self, system)
+
 
 
 
 ######## Class PointsMapping ########
 
-class PointsMapping(ObjectsMapping):
+class PointsMapping(ObjectsMapping, PointsTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_point,
             system._get_points,
             system._has_point
         )
+        PointsTableView.__init__(self, system)
 
 
 
 ######## Class FramesMapping ########
 
-class FramesMapping(ObjectsMapping):
+class FramesMapping(ObjectsMapping, FramesTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_frame,
             system._get_frames,
             system._has_frame
         )
+        FramesTableView.__init__(self, system)
+
+
 
 
 ######## Class SolidsMapping ########
 
-class SolidsMapping(ObjectsMapping):
+class SolidsMapping(ObjectsMapping, SolidsTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_solid,
             system._get_solids,
             system._has_solid
         )
+        SolidsTableView.__init__(self, system)
+
 
 
 ######## Class WrenchesMapping ########
 
-class WrenchesMapping(ObjectsMapping):
+class WrenchesMapping(ObjectsMapping, WrenchesTableView):
     def __init__(self, system):
-        super().__init__(
+        ObjectsMapping.__init__(self,
             system._get_wrench,
             system._get_wrenches,
             system._has_wrench
         )
+        WrenchesTableView.__init__(self, system)

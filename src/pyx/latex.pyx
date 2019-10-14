@@ -49,7 +49,7 @@ c_ginac_set_print_func[c_numeric, c_ginac_latex_printer](_c_ginac_print_numeric_
 ######## Class LatexObjectPrinter ########
 
 
-cdef class ObjectLatexPrinter(ObjectPrinter):
+cdef class LatexPrinter(Printer):
     '''
     This is an specialization of the class Printer to print objects of this library
     in latex format.
@@ -69,7 +69,7 @@ cdef class ObjectLatexPrinter(ObjectPrinter):
 
 
 
-    def print_symbol(self, SymbolNumeric symbol):
+    cpdef print_symbol(self, SymbolNumeric symbol):
         # This method is used to print a numeric symbol
         return symbol.get_tex_name() or r'\textrm{' + symbol.get_name()  + '}'
 
@@ -130,7 +130,7 @@ def to_latex(*args):
         >> to_latex(new_matrix(shape=[3, 3]))
         '\\left(\\begin{array}{ccc}0&0&0\\\\0&0&0\\\\0&0&0\\end{array}\\right)'
     '''
-    printer = ObjectLatexPrinter()
+    printer = LatexPrinter()
     def _to_latex(x):
         try:
             return printer.print(x)

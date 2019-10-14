@@ -1,41 +1,55 @@
 '''
 Author: Víctor Ruiz Gómez
 Description:
-This module defines the class ObjectPrinter, which can be used to print symbols,
+This module defines the class Printer, which can be used to print symbols,
 matrices, expressions or any other kind of object defined by this extension.
 
-ConsoleObjectPrinter and LatexObjectPrinter are subclasses of Printer. The first one is used
+ConsolePrinter and LatexPrinter are subclasses of Printer. The first one is used
 to visualize objects in terminal mode and the second to print them in latex format
 
-..note:: The class LatexObjectPrinter is defined in the module latex.pyx
-
-                ObjectPrinter
-                     ^
-      ---------------|--------------
-      |                            |
-ObjectConsolePrinter          ObjectLatexPrinter
-
+..note:: The class LatexPrinter is defined in the module latex.pyx
 '''
 
 
 
 ######## Class printer ########
 
-cdef class ObjectPrinter:
+cdef class Printer:
     '''
-    Subclasses of Printer can be used to print any kind of objects defined by this extension:
+    Subclasses of Printer can be used to print any kind of object which inherits from
+    Object or View class:
 
         :Example:
 
-        >> ConsolePrinter().print(new_param('a', 1))
+        >> printer = ConsolePrinter()
+
+        # Print a symbol
+        >> printer.print(new_param('a', 1))
         a = 1
 
-        >> b, c = new_param('b', tex_name='\\beta'), new_param('c', tex_name='\\gamma')
-        >> LatexPrinter().print(b + c)
+        # Print a expression
+        >> b, c = new_param('b', tex_name='\\beta', 2), new_param('c', tex_name='\\gamma', 3)
+        >> printer.print(b + c)
         '\\beta+\\gamma'
+
+        # Print a table of parameters (a view)
+        >> printer.print(get_params())
+        name   value
+        a        1.0
+        b        2.0
+        c        3.0
     '''
 
     def print(self, x):
+        if isinstance(x, Object):
+            return self.print_object(x)
+        if isinstance(x, View):
+            return self.print_view(x)
+        raise NotImplementedError
+
+
+
+    def print_object(self, Object obj):
         '''
         Prints the given object using this printer.
 
@@ -44,29 +58,26 @@ cdef class ObjectPrinter:
 
         :raises NotImplementedError if the object couldnt be printed
         '''
-        if not isinstance(x, Object):
-            raise NotImplementedError
+        if isinstance(obj, Expr):
+            return self.print_expr(obj)
 
-        if isinstance(x, Expr):
-            return self.print_expr(x)
+        if isinstance(obj, SymbolNumeric):
+            return self.print_symbol(obj)
 
-        if isinstance(x, SymbolNumeric):
-            return self.print_symbol(x)
+        if isinstance(obj, Matrix):
+            return self.print_matrix(obj)
 
-        if isinstance(x, Matrix):
-            return self.print_matrix(x)
+        if isinstance(obj, Base):
+            return self.print_base(obj)
 
-        if isinstance(x, Base):
-            return self.print_base(x)
+        if isinstance(obj, Point):
+            return self.print_point(obj)
 
-        if isinstance(x, Point):
-            return self.print_point(x)
+        if isinstance(obj, Frame):
+            return self.print_frame(obj)
 
-        if isinstance(x, Frame):
-            return self.print_frame(x)
-
-        if isinstance(x, Wrench3D):
-            return self.print_wrench(x)
+        if isinstance(obj, Wrench3D):
+            return self.print_wrench(obj)
 
         raise NotImplementedError
 
@@ -103,6 +114,18 @@ cdef class ObjectPrinter:
 
 
 
+    def print_view(self, View view):
+        # This method is used to print views
+        if isinstance(view, TableView):
+            return self.print_table_view(view)
+        raise NotImplementedError
+
+
+    def print_table_view(self, TableView table_view):
+        raise NotImplementedError
+
+
+
 
 
 
@@ -112,7 +135,7 @@ cdef class ObjectPrinter:
 ######## Class ConsolePrinter ########
 
 
-cdef class ObjectConsolePrinter(ObjectPrinter):
+cdef class ConsolePrinter(Printer):
     '''
     Specialization of the class Printer to print objects in terminal mode.
     '''
@@ -190,3 +213,10 @@ cdef class ObjectConsolePrinter(ObjectPrinter):
             s += ', ancestors: ' + ' -> '.join(map(attrgetter('name'), ancestors))
 
         return s
+
+
+
+
+    cpdef print_table_view(self, TableView table_view):
+        # This method is used to print table views
+        return tabulate(table_view.data, table_view.headers, tablefmt='plain')
