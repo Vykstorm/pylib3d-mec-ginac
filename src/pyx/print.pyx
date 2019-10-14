@@ -17,7 +17,7 @@ to visualize objects in terminal mode and the second to print them in latex form
 cdef class Printer:
     '''
     Subclasses of Printer can be used to print any kind of object which inherits from
-    Object or View class:
+    Object class:
 
         :Example:
 
@@ -41,15 +41,6 @@ cdef class Printer:
     '''
 
     def print(self, x):
-        if isinstance(x, Object):
-            return self.print_object(x)
-        if isinstance(x, View):
-            return self.print_view(x)
-        raise NotImplementedError
-
-
-
-    def print_object(self, Object obj):
         '''
         Prints the given object using this printer.
 
@@ -58,26 +49,32 @@ cdef class Printer:
 
         :raises NotImplementedError if the object couldnt be printed
         '''
-        if isinstance(obj, Expr):
-            return self.print_expr(obj)
+        if not isinstance(x, Object):
+            raise NotImplementedError
 
-        if isinstance(obj, SymbolNumeric):
-            return self.print_symbol(obj)
+        if isinstance(x, Expr):
+            return self.print_expr(x)
 
-        if isinstance(obj, Matrix):
-            return self.print_matrix(obj)
+        if isinstance(x, SymbolNumeric):
+            return self.print_symbol(x)
 
-        if isinstance(obj, Base):
-            return self.print_base(obj)
+        if isinstance(x, Matrix):
+            return self.print_matrix(x)
 
-        if isinstance(obj, Point):
-            return self.print_point(obj)
+        if isinstance(x, Base):
+            return self.print_base(x)
 
-        if isinstance(obj, Frame):
-            return self.print_frame(obj)
+        if isinstance(x, Point):
+            return self.print_point(x)
 
-        if isinstance(obj, Wrench3D):
-            return self.print_wrench(obj)
+        if isinstance(x, Frame):
+            return self.print_frame(x)
+
+        if isinstance(x, Wrench3D):
+            return self.print_wrench(x)
+
+        if isinstance(x, View):
+            return self.print_view(x)
 
         raise NotImplementedError
 

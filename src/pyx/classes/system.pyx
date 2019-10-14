@@ -1017,7 +1017,6 @@ class SymbolsMapping(ObjectsMapping, SymbolsTableView):
 
 
 
-
 ######## Class MatricesMapping ########
 
 class MatricesMapping(ObjectsMapping, MatricesTableView):

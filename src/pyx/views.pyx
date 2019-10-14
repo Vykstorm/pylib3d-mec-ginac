@@ -11,8 +11,11 @@ This file defines the class View and all its subclasses
 
 ######## Class View ########
 
-cdef class View:
+cdef class View(Object):
     pass
+
+
+LatexRenderable.register(View)
 
 
 

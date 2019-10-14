@@ -328,11 +328,3 @@ class ObjectsMapping(Mapping):
 
     def __bool__(self):
         return len(self) > 0
-
-
-    def __str__(self):
-        return ConsolePrinter().print(self)
-
-
-    def __repr__(self):
-        return self.__str__()
