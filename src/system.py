@@ -27,12 +27,12 @@ class System(_System):
 
 
     def get_value(self, name):
-        '''get_value(name: str) -> float
+        '''get_value(name: str) -> numeric
         Get the value of a numeric symbol
 
         :param str name: Name of the symbol
         :return: The value of the symbol on success
-        :rtype: float
+        :rtype: numeric
         :raises TypeError: If input argument is not a valid symbol name
         :raises IndexError: If there is no symbol with that name in the system
         '''
@@ -41,12 +41,12 @@ class System(_System):
 
 
     def set_value(self, name, value):
-        '''get_value(name: str, value: float) -> float
+        '''get_value(name: str, value: numeric) -> numeric
         Changes the value of a numeric symbol
 
         :param str name: Name of the symbol
         :param value: New value for the symbol
-        :type value: int, float
+        :type value: numeric
         :raises TypeError: If input arguments have invalid types
         :raises IndexError: If there is no symbol with that name in the system
         '''
@@ -64,25 +64,25 @@ class System(_System):
 
             :Example:
 
-            >> new_param('a', 1)
+            >>> new_param('a', 1)
             a = 1
-            >> new_input('b', 2)
+            >>> new_input('b', 2)
             b = 2
 
-            >> get_symbol('a')
+            >>> get_symbol('a')
             a = 1
-            >> get_symbol('b')
+            >>> get_symbol('b')
             b = 2
 
-            >> get_symbol('a', 'parameter')
+            >>> get_symbol('a', 'parameter')
             a = 1
-            >> get_symbol('b', 'input')
+            >>> get_symbol('b', 'input')
             b = 2
 
-            >> get_symbol('a', 'joint_unknown')
+            >>> get_symbol('a', 'joint_unknown')
             IndexError: Symbol "a" is not a joint unknown
 
-            >> get_symbol('x')
+            >>> get_symbol('x')
             IndexError: Symbol "x" not created yet
 
 
@@ -90,12 +90,15 @@ class System(_System):
 
         :param str name: Name of the numeric symbol to fetch
         :param str kind: Type of symbol.
-            It can be one None (by default) or one of the next values:
+            It can be None (by default) or one of the next values:
             'coordinate', 'velocity', 'acceleration',
             'aux_coordinate', 'aux_velocity', 'aux_acceleration',
             'parameter', 'input', 'joint_unknown'
-            If set to None, the search is performed over all symbols defined by this system
-            regarding their types.
+
+            .. note::
+                If set to None, the search is performed over all symbols defined by this system
+                regarding their types.
+
         :returns: The numeric symbol with that name & type if it exists
         :rtype: SymbolNumeric
         :raises TypeError: If input arguments have incorrect types
@@ -106,8 +109,9 @@ class System(_System):
 
 
     def get_time(self):
-        '''
-        Get the time symbol
+        '''get_time() -> SymbolNumeric
+        Get the time symbol.
+
         :rtype: SymbolNumeric
         '''
         return self._get_time()
@@ -184,13 +188,28 @@ class System(_System):
         '''has_symbol(name: str[, kind: str]) -> bool
         Check if a symbol with the given name and type exists in this system
 
+            :Example:
+
+            >>> a, b = new_param('a'), new_input('b')
+            >>> has_symbol('a')
+            True
+            >>> has_symbol('b')
+            True
+            >>> has_symbol('a', 'parameter')
+            True
+            >>> has_symbol('b', 'parameter')
+            False
+
+
         :param str name: Name of the symbol to check
         :param str kind: Type of symbol.
             It can be one None (by default) or one of the next values:
             'coordinate', 'velocity', 'acceleration',
             'aux_coordinate', 'aux_velocity', 'aux_acceleration',
             'parameter', 'input', 'joint_unknown'
-            If set to None, it does not take into account the symbol type.
+
+            .. note::
+                If set to None, it does not take into account the symbol type.
         :returns: True if a symbol with the given name and type exists, False otherwise
         :rtype: bool
         :raises TypeError: If input arguments have incorrect types
@@ -270,10 +289,38 @@ class System(_System):
 
     def get_symbols(self, kind=None):
         '''get_symbols([kind: str]) -> Mapping[str, SymbolNumeric]
-        Get all symbols defined within this system
+        Get all symbols defined within this system with the given type.
+
+            :Example:
+
+            >>> a, b, c = new_param('a', 1), new_joint_unknown('b', 2), new_input('c', 3)
+            >>> symbols = get_symbols()
+            >>> list(symbols)
+            ['a', 'b', 'c']
+            >>> symbols['a'].value
+            3
+            >>> 'b' in symbols
+            True
+
+            >>> inputs = get_symbols('input')
+            >>> list(inputs)
+            ['c']
+            >>> inputs['c'].value
+            3
+            >>> 'b' in inputs
+            False
+
+
 
         :param str kind: Its an optional argument that can be used to retrieve
-            only symbols with the given type e.g: 'parameter', 'input', ...
+            only symbols with the given type. Must be one of the next values:
+            ‘coordinate’, ‘velocity’, ‘acceleration’, ‘aux_coordinate’,
+            ‘aux_velocity’, ‘aux_acceleration’, ‘parameter’, ‘input’, ‘joint_unknown’
+
+            .. note::
+                If set to None (by default), return all numeric symbols regarding
+                their types
+
         :returns: Returns all the symbols defined in a dictionary, where keys are
             symbol names and values, instances of the class SymbolNumeric
         :rtype: Mapping[str, SymbolNumeric]
@@ -391,7 +438,7 @@ class System(_System):
 
 
     def new_coordinate(self, *args, **kwargs):
-        '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
+        '''new_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: numeric[, vel_value: numeric[, acc_value: numeric]]])) -> Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
         Creates a new coordinate symbol and its derivative components (velocity and acceleration)
 
             :Example:
@@ -435,9 +482,9 @@ class System(_System):
         :param str acc_tex_name: Name in latex of the second derivative
             By default its \ddot{tex_name} if tex_name argument is set. Otherwise, its an empty string
 
-        :param float value: The initial numeric value of the coordinate. By default 0
-        :param float vel_value: The intial numeric value of the first derivative. By default 0
-        :param float acc_value: The initial numeric value of the first derivative. By default 0
+        :param numeric value: The initial numeric value of the coordinate. By default 0
+        :param numeric vel_value: The intial numeric value of the first derivative. By default 0
+        :param numeric acc_value: The initial numeric value of the first derivative. By default 0
 
         :returns: The new coordinate and its derivatives created on success
         :rtype: Tuple[SymbolNumeric, SymbolNumeric, SymbolNumeric]
@@ -462,7 +509,7 @@ class System(_System):
 
 
     def new_aux_coordinate(self, *args, **kwargs):
-        '''new_aux_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: float[, vel_value: float[, acc_value: float]]])) -> SymbolNumeric
+        '''new_aux_coordinate(name: str[, vel_name: str[, acc_name: str[, tex_name: str[, vel_tex_name: str][, acc_tex_name: str]]]]], [value: numeric[, vel_value: numeric[, acc_value: numeric]]])) -> SymbolNumeric
         Creates a new "auxiliar" coordinate symbol and its derivative components (velocity and acceleration)
 
             :Example:
@@ -502,7 +549,7 @@ class System(_System):
 
 
     def new_base(self, name, *args, **kwargs):
-        '''new_base(name: str[, previous: Union[str, Base]][rotation_tupla][, rotation_angle: Expr]) -> Base
+        '''new_base(name: str[, previous: Base][rotation_tupla][, rotation_angle: Expr]) -> Base
         Creates a new base in this system with the given name, rotation tupla & angle
 
         Any of the next calls creates a base named 'a' with xyz as parent base and
@@ -646,7 +693,7 @@ class System(_System):
 
 
     def new_vector(self, name, *args, **kwargs):
-        '''new_vector(name: str[, values][, base: Union[Base, str]]) -> Vector3D
+        '''new_vector(name: str[, values][, base: Base]) -> Vector3D
         Creates a new 3D vector in this system with the given name, values and geometric base.
 
             :Example:
@@ -702,7 +749,7 @@ class System(_System):
 
 
     def new_tensor(self, name, *args, **kwargs):
-        '''new_tensor(name: str[, values][, base: Union[Base, str]]) -> Tensor3D
+        '''new_tensor(name: str[, values][, base: Base]) -> Tensor3D
         Creates a new tensor with the given name, values and geometric base.
 
             :Example:
@@ -769,7 +816,7 @@ class System(_System):
 
 
     def new_point(self, name, *args, **kwargs):
-        '''new_point(name: str, previous: Union[str, Point], position: Union[str, Vector3D]) -> Point
+        '''new_point(name: str, previous: Point, position: Vector3D) -> Point
         Creates a new point in the system with the given name, position vector and previous point
 
         Any of the next calls to new_point will create a point with the "O" point
@@ -829,28 +876,30 @@ class System(_System):
 
 
     def new_frame(self, name, point, base=None):
-        '''new_frame(name: str, point: Union[Point, str][, base: Union[Base, str]]) -> Frame
+        '''new_frame(name: str, point: Point[, base: Base]) -> Frame
         Creates a new frame on the system with the given name, point and base.
 
         The next calls will create a frame called 'f' with 'O' as point and xyz as its base:
 
             :Example:
 
-            >> new_frame('f', get_point('O')
-            >> new_frame('f', 'O')
-            >> new_frame('f', 'O', 'xyz')
-            >> new_frame('f', base='xyz', point='O')
+            >>> new_frame('f', get_point('O')
+            >>> new_frame('f', 'O')
+            >>> new_frame('f', 'O', 'xyz')
+            >>> new_frame('f', base='xyz', point='O')
 
         You can indicate a different point & base:
 
-            >> b = new_base('b', previous='xyz')
+            :Example
 
-            >> v = new_vector('v', 1, 2, 3)
-            >> p = new_point('p', position=v, previous='O')
+            >>> b = new_base('b', previous='xyz')
 
-            >> new_frame('f', p, b)
-            >> new_frame('f', 'p', 'b')
-            >> new_frame('f', base='b', point='p')
+            >>> v = new_vector('v', 1, 2, 3)
+            >>> p = new_point('p', position=v, previous='O')
+
+            >>> new_frame('f', p, b)
+            >>> new_frame('f', 'p', 'b')
+            >>> new_frame('f', base='b', point='p')
 
 
         :param str name: The name of the new frame
@@ -878,19 +927,19 @@ class System(_System):
 
 
     def new_solid(self, name, point, base, mass, CM, IT):
-        '''new_solid(name: str, point: Union[str, Point], base: Union[str, Base], mass: Union[str, SymbolNumeric], CM: Union[str, Vector3D], IT: Union[str, Tensor3D])
+        '''new_solid(name: str, point: Point, base: Base, mass: SymbolNumeric, CM: Vector3D, IT: Tensor3D)
         Creates a new solid object
 
             :Example:
 
-            >> new_base('Barm', 0, 1, 0)
-            >> new_param('m', 1)
-            >> new_vector('Oarm_Garm', 0, 0, 1, 'Barm')
-            >> new_tensor('Iarm', base='Barm')
-            >> arm = new_solid('arm', 'O', 'Barm', 'm', 'Oarm_Garm', 'Iarm')
-            >> arm.get_G().name
+            >>> new_base('Barm', 0, 1, 0)
+            >>> new_param('m', 1)
+            >>> new_vector('Oarm_Garm', 0, 0, 1, 'Barm')
+            >>> new_tensor('Iarm', base='Barm')
+            >>> arm = new_solid('arm', 'O', 'Barm', 'm', 'Oarm_Garm', 'Iarm')
+            >>> arm.get_G().name
             'Garm'
-            >> s.get_mass()
+            >>> s.get_mass()
             m = 1.0
 
 
@@ -1141,8 +1190,8 @@ Get a {name} by name defined within this system.
 :raises TypeError: If the input argument has an invalid type.
 :raises IndexError: If no {name} with the given name exists.
 
-.. note:: This is equivalent to get_symbol(name, '{kind}')
-.. seealso:: get_symbol
+.. note:: This is equivalent to ``get_symbol(name, '{kind}')``
+.. seealso:: :func:`get_symbol`
 '''
 
 # Template docstring for has_param, has_input, has_joint_unknown, ...
@@ -1154,8 +1203,9 @@ Check if a {name} with the given name is defined within the system
 
 :raises TypeError: If the input argument has an invalid type.
 
-.. note:: This is equivalent to has_symbol(name, '{kind}')
-.. sealso:: has_symbol
+.. note:: This is equivalent to ``has_symbol(name, '{kind}')``
+
+.. seealso::  :func:`has_symbol`
 '''
 
 
@@ -1172,10 +1222,10 @@ Get a {name} by name defined within this system.
 
 # Template docstring for has_matrix, has_tensor, has_vector, ...
 _geom_object_checker_docstring_template = '''has_{kind}(name: str) -> bool
-Check if a {name} with the given name is defined within the system
+Check if a {name} with the given name is defined within the system.
 
 :param str name: Name of the {name} to check
-:rtype bool
+:rtype: bool
 
 :raises TypeError: If the input argument has an invalid type.
 '''
@@ -1189,18 +1239,18 @@ Get all the {pname} defined within this system.
 
 # Template docstring for get_vectors, get_tensors, get_matrices, ...
 _geom_object_pgetter_docstring_template = '''get_{pkind}() -> Mapping[str, {class}]
-Get all the {pname} defined within this system
+Get all the {pname} defined within this system.
 :rtype: Mapping[str, {class}]
 '''
 
-# Template docstring for get_vectors_matrix
+# Template docstring for get_inputs_matrix, get_parameters_matrix, ...
 _symbol_matrix_getter_docstring_template = '''get_{pkind}_matrix(name: str) -> Matrix
 Get a matrix with all the {pname} defined within this system
 :rtype: Matrix
 '''
 
 # Template docstring for new_input, new_joint_unknown and new_parameter
-_symbol_constructor_docstring_template = r'''new_{kind}(name: str[, tex_name: str][, value: float]) -> SymbolNumeric
+_symbol_constructor_docstring_template = r'''new_{kind}(name: str[, tex_name: str][, value: numeric]) -> SymbolNumeric
 Creates a new {name} with the given name and value in the system.
 
     :Example:
@@ -1226,7 +1276,7 @@ Creates a new {name} with the given name and value in the system.
 
     .. seealso:: :attr:`autogen_latex_names`
 
-:param float value: The initial numeric value (by default its 0). This can be specified
+:param numeric value: The initial numeric value (by default its 0). This can be specified
     as positional argument before the latex name.
 
 :rtype: SymbolNumeric
