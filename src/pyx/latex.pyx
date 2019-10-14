@@ -84,6 +84,7 @@ cdef class LatexPrinter(Printer):
 
 
 
+
 ######## Latex printing on IPython  ########
 
 

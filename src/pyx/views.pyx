@@ -11,12 +11,9 @@ This file defines the class View and all its subclasses
 
 ######## Class View ########
 
-cdef class View(Object):
-    pass
-
-
-LatexRenderable.register(View)
-
+cdef class View:
+    def __str__(self):
+        return ConsolePrinter().print(self)
 
 
 
