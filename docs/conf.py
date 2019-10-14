@@ -42,6 +42,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 if 'sphinx.ext.autodoc' in extensions:
     autodoc_typehints = 'signature'
     autodoc_docstring_signature = True
+    autodoc_member_order = 'bysource'
 
 
 ######## INTERSPHINX CONFIGURATION ########

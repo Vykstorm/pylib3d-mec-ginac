@@ -396,22 +396,30 @@ class System(_System):
 
             :Example:
 
-            >> a, da, dda = new_coordinate('a', 1, 2, 3)
+            >>> a, da, dda = new_coordinate('a', 1, 2, 3)
 
-            >> a.value, a.type
+            >>> a.value, a.type
             1, 'coordinate'
 
-            >> da.value, da.type
+            >>> da.value, da.type
             2, 'velocity'
 
-            >> dda.value, dda.type
+            >>> dda.value, dda.type
             3, 'acceleration'
 
-            >> a.name, da.name, dda.name
+            >>> a.name, da.name, dda.name
             'a', 'da', 'dda'
 
-            >> a + b + c
-            da+dda+a
+
+        .. note::
+
+            You can specify the initial values of the coordinate and its derivatives
+            right after the first argument (name) or any other string parameter (if all arguments are positional):
+
+            :Example:
+
+            >>> new_coordinate('a', 1, 2, 3)
+            >>> new_coordinate('a', 'a2', 'a3', 1, 2)
 
 
         :param str name: Name of the coordinate
@@ -439,24 +447,15 @@ class System(_System):
 
         :raises IndexError: If a cordinate was already created with the same name, but the
             names of its derivatives doesnt match with the ones indicated as arguments.
-            It can also be raised if the an object which is not a numeric symbol,
+            It can also be raised if an object which is not a numeric symbol
             with the given name was created already
 
         .. warning::
 
-            If a coordinate was already created with the same names (also for the
+            If a coordinate was already created with the same name (also for the
             derivatives), this method dont create a new one, only updates the latex names & the values
             specified in the arguments (but it raises a user warning)
 
-        .. note::
-
-            You can specify the initial values of the coordinate and its derivatives
-            right after the first argument (name) or any other string parameter (if all arguments are positional):
-
-            :Example:
-
-            >> new_coordinate('a', 1, 2, 3)
-            >> new_coordinate('a', 'a2', 'a3', 1, 2)
         '''
         return self.new_symbol(b'coordinate', *args, **kwargs)
 
@@ -468,26 +467,25 @@ class System(_System):
 
             :Example:
 
-            >> a, da, dda = new_aux_coordinate('a', 1, 2, 3)
+            >>> a, da, dda = new_aux_coordinate('a', 1, 2, 3)
 
-            >> a.value, a.type
+            >>> a.value, a.type
             1, 'aux_coordinate'
 
-            >> da.value, da.type
+            >>> da.value, da.type
             2, 'aux_velocity'
 
-            >> dda.value, dda.type
+            >>> dda.value, dda.type
             3, 'aux_acceleration'
 
-            >> a.name, da.name, dda.name
+            >>> a.name, da.name, dda.name
             'a', 'da', 'dda'
 
-            >> a + b + c
-            da+dda+a
 
 
-        The behaviour is the same as for new_coordinate method.
-        .. seealso:: new_coordinate
+        The behaviour and signature is the same as for new_coordinate method.
+
+        .. seealso:: :func:`new_coordinate()`
         '''
         return self.new_symbol(b'aux_coordinate', *args, **kwargs)
 
@@ -504,7 +502,7 @@ class System(_System):
 
 
     def new_base(self, name, *args, **kwargs):
-        '''new_base(name: str[, previous: Union[str, Base]][...][, rotation_angle: Expr]) -> Base
+        '''new_base(name: str[, previous: Union[str, Base]][rotation_tupla][, rotation_angle: Expr]) -> Base
         Creates a new base in this system with the given name, rotation tupla & angle
 
         Any of the next calls creates a base named 'a' with xyz as parent base and
@@ -512,22 +510,22 @@ class System(_System):
 
             :Example:
 
-            >> new_base('a', 'xyz', 0, 1, 2)
-            >> new_base('a', None, 0, 1, 2)
-            >> new_base('a', 0, 1, 2)
-            >> new_base('a', [0, 1, 2])
-            >> new_base('a', rotation_tupla=[0, 1, 2])
+            >>> new_base('a', 'xyz', 0, 1, 2)
+            >>> new_base('a', None, 0, 1, 2)
+            >>> new_base('a', 0, 1, 2)
+            >>> new_base('a', [0, 1, 2])
+            >>> new_base('a', rotation_tupla=[0, 1, 2])
             m = Matrix([0, 1, 2])
-            >> new_base('a', rotation_tupla=m)
+            >>> new_base('a', rotation_tupla=m)
 
-        These are the same as the above, but rotation angle is set to pi:
+        The same but rotation angle is set to pi:
 
             :Example:
 
-            >> new_base('a', 'xyz', 0, 1, 2, pi)
-            >> new_base('a', 0, 1, 2, pi)
-            >> new_base('a', [0, 1, 2], pi)
-            >> new_base('a', rotation_tupla=[0, 1, 2], rotation_angle=pi)
+            >>> new_base('a', 'xyz', 0, 1, 2, pi)
+            >>> new_base('a', 0, 1, 2, pi)
+            >>> new_base('a', [0, 1, 2], pi)
+            >>> new_base('a', rotation_tupla=[0, 1, 2], rotation_angle=pi)
 
 
 
@@ -538,6 +536,11 @@ class System(_System):
         :param rotation_angle: Must be the rotation angle
         :param rotation_tupla: A list of three components that represents the base rotation tupla.
             It can also be a Matrix 1x3 or 3x1
+
+            .. note::
+                The rotation tupla can be specified also three different positional arguments
+                (all of them expressions or numbers)
+
         :type rotation_angle: Expr
         :type rotation_tupla: Tuple[Expr, Expr, Expr], Matrix
 
@@ -546,11 +549,6 @@ class System(_System):
         :raises TypeError: If any argument supplied has an invalid type
         :raises ValueError: If any argument supplied has an incorrect value (e.g: previous base doesnt exist)
         :raises IndexError: If there is already a base with the name specified
-
-        .. note::
-            The rotation tupla can be specified with three positional arguments
-            or a unique positional or keyword argument as a list with 3 items (all of them expressions or numbers) or
-            a Matrix object
         '''
         return self._new_base(name, args, kwargs)
 
@@ -562,25 +560,25 @@ class System(_System):
 
             :Example:
 
-            >> new_matrix('a')
+            >>> new_matrix('a')
             [ 0 ]
 
-            >> new_matrix('a', shape=[2, 2])
+            >>> new_matrix('a', shape=[2, 2])
             ╭      ╮
             │ 0  0 │
             │ 0  0 │
             ╰      ╯
 
-            >> new_matrix('a', [0, 1, 2, 3, 4])
+            >>> new_matrix('a', [0, 1, 2, 3, 4])
             [ 0 1 2 3 4 ]
 
-            >> new_matrix('a', [[0, 1], [2, 3]])
+            >>> new_matrix('a', [[0, 1], [2, 3]])
             ╭      ╮
             │ 0  1 │
             │ 2  3 │
             ╰      ╯
 
-            >> new_matrix('a', values=range(0, 9), shape=[3, 3])
+            >>> new_matrix('a', values=range(0, 9), shape=[3, 3])
             ╭         ╮
             │ 0  1  2 │
             │ 3  4  5 │
@@ -592,15 +590,15 @@ class System(_System):
 
             :Example:
 
-            >> import numpy as np
-            >> new_matrix('a', np.eye(3))
+            >>> import numpy as np
+            >>> new_matrix('a', np.eye(3))
             ╭         ╮
             │ 1  0  0 │
             │ 0  1  0 │
             │ 0  0  1 │
             ╰         ╯
 
-            >> new_matrix('a', values=np.linspace(0, 1, 9), shape=[3,3])
+            >>> new_matrix('a', values=np.linspace(0, 1, 9), shape=[3,3])
             ╭                     ╮
             │     0  0.125   0.25 │
             │ 0.375    0.5  0.625 │
@@ -614,20 +612,21 @@ class System(_System):
             are determined by the argument "values"
         :type shape: Tuple[int, int]
 
-        :param values: Must be the initial values of the matrix. If specified, it can
-            be a list or a list of sublists of expressions (or anything convertible to
-            expressions like numbers). It can also be a numpy array
+        :param values: Must be the initial values of the matrix:
 
-            If its a list and shape argument was not specified, the resulting matrix
-            will have one row with the values indicated in it (the list cant be empty)
+            * If specified, it can be a list or a list of sublists of expressions (or anything convertible to
+                expressions like numbers). It can also be a numpy array.
 
-            If its a list of sublists of expressions, each sublist will represent a row
-            in the matrix (the number of sublists must be greater than zero and the length
-            of sublists must be greater than zero and all equal)
+            * If its a list and shape argument was not specified, the resulting matrix
+                will have one row with the values indicated in it (the list cant be empty).
 
-            If both shape and values was specified, the resulting matrix will have the given
-            shape and values (the number of values must match the number of rows and columns
-            indicated).
+            * If its a list of sublists of expressions, each sublist will represent a row
+                in the matrix (the number of sublists must be greater than zero and the length
+                of sublists must be greater than zero and all equal).
+
+            * If both shape and values was specified, the resulting matrix will have the given
+                shape and values (the number of values must match the number of rows and columns
+                indicated).
 
         :type values: List[Expr], ndarray
 
@@ -652,16 +651,16 @@ class System(_System):
 
             :Example:
 
-            >> new_vector('v')
+            >>> new_vector('v')
             [ 0 0 0 ]
 
-            >> new_vector('v', 1, 2, 3)
+            >>> new_vector('v', 1, 2, 3)
             [ 1 2 3 ]
 
-            >> new_vector('v', [4, 5, 6])
+            >>> new_vector('v', [4, 5, 6])
             [ 4 5 6 ]
 
-            >> new_vector('v', values=[7, 8, 9])
+            >>> new_vector('v', values=[7, 8, 9])
             [ 7 8 9 ]
 
 
@@ -670,11 +669,11 @@ class System(_System):
 
             :Example:
 
-            >> foo = new_base('foo', 'xyz')
-            >> new_vector('v', [1, 2, 3], foo)
-            >> new_vector('v', foo)
-            >> new_vector('v', 'foo')
-            >> new_vector('v', base='foo', values=[1, 2, 3])
+            >>> foo = new_base('foo', 'xyz')
+            >>> new_vector('v', [1, 2, 3], foo)
+            >>> new_vector('v', foo)
+            >>> new_vector('v', 'foo')
+            >>> new_vector('v', base='foo', values=[1, 2, 3])
 
 
         :param str name: Name of the new vector
@@ -708,33 +707,37 @@ class System(_System):
 
             :Example:
 
-            >> new_tensor('q')
+            >>> new_tensor('q')
             ╭         ╮
             │ 0  0  0 │
             │ 0  0  0 │
             │ 0  0  0 │
             ╰         ╯
-            >> new_tensor('q', range(0, 9), 'xyz')
+            >>> new_tensor('q', range(0, 9), 'xyz')
             ╭         ╮
             │ 0  1  2 │
             │ 3  4  5 │
             │ 6  7  8 │
             ╰         ╯
-            >> new_tensor('q', 1, 2, 3, 1, 2, 3, 1, 2, 3, 'xyz')
+            >>> new_tensor('q', 1, 2, 3, 1, 2, 3, 1, 2, 3, 'xyz')
             ╭         ╮
             │ 1  2  3 │
             │ 1  2  3 │
             │ 1  2  3 │
             ╰         ╯
 
-            >> import numpy as np
-            >> new_tensor('q', np.eye(3), base='xyz')
+        You can use a numpy array to indicate the initial values:
+
+            :Example:
+
+            >>> import numpy as np
+            >>> new_tensor('q', np.eye(3), base='xyz')
             ╭         ╮
             │ 1  0  0 │
             │ 0  1  0 │
             │ 0  0  1 │
             ╰         ╯
-            >> new_tensor('q', values=np.linspace(0, 1, 9), base=get_base('xyz'))
+            >>> new_tensor('q', values=np.linspace(0, 1, 9), base=get_base('xyz'))
             ╭                     ╮
             │     0  0.125   0.25 │
             │ 0.375    0.5  0.625 │
@@ -769,35 +772,38 @@ class System(_System):
         '''new_point(name: str, previous: Union[str, Point], position: Union[str, Vector3D]) -> Point
         Creates a new point in the system with the given name, position vector and previous point
 
-        Any of the next calls to new_point will create a point with the default
-        point (O) as the previous one, and the vector [1, 2, 3] as its position:
+        Any of the next calls to new_point will create a point with the "O" point
+        as the previous one and a vector 'v' as its position:
 
             :Example:
 
-            >> v = new_vector('v', 1, 2, 3)
+            >>> v = new_vector('v', 1, 2, 3)
 
-            >> new_point('p', v)
-            >> new_point('p', 'v')
-            >> p = new_point('p', position=v)
-            >> p.position
+            >>> new_point('p', v)
+            >>> new_point('p', 'v')
+            >>> p = new_point('p', position=v)
+            >>> p.position
             [ 1 2 3 ]
-            >> p.previous.name
+            >>> p.previous.name
             'O'
 
 
         You can specify a different previous point:
 
-            >> v, w = new_vector('v', 1, 2, 3), new_vector('w', 4, 5, 6)
-            >> q = new_point('q', v)
+            :Example:
 
-            # The next calls are the same:
-            >> new_point('p', q, w)
-            >> new_point('p', 'q', 'w')
-            >> new_point('p', previous=q, position=w)
-            >> p = new_point('p', previous='q', position='w')
+            >>> v, w = new_vector('v', 1, 2, 3), new_vector('w', 4, 5, 6)
+            >>> q = new_point('q', v)
+            >>> new_point('p', q, w)
 
-            >> p.previous == q
-            True
+        The next calls are equivalent to the last one above:
+
+            :Example:
+
+            >>> new_point('p', 'q', 'w')
+            >>> new_point('p', previous=q, position=w)
+            >>> new_point('p', previous='q', position='w')
+
 
 
         :param previous: Previous point. By default is the 'O' point
@@ -1199,25 +1205,26 @@ Creates a new {name} with the given name and value in the system.
 
     :Example:
 
-    >> new_{kind}('a')
+    >>> new_{kind}('a')
     a = 0.0
 
-    >> new_{kind}('a', 1.5)
+    >>> new_{kind}('a', 1.5)
     a = 1.5
 
-    >> a = new_{kind}('a', '\\sigma', 2)
-    >> a.tex_name, a.value
+    >>> a = new_{kind}('a', '\\sigma', 2)
+    >>> a.tex_name, a.value
     '\\sigma', 2
 
-    >> a = new_{kind}('a', value=3, tex_name='\\beta')
-    >> a.tex_name, a.value
+    >>> a = new_{kind}('a', value=3, tex_name='\\beta')
+    >>> a.tex_name, a.value
     '\\beta', 3
 
 :param str name: The name of the {name}
 :param str tex_name: Name in latex for the {name}. By default is autogenerated based
     on the given name if autogen_latex_names is enabled. Otherwise, its set to
     an empty string.
-    .. seealso:: autogen_latex_names
+
+    .. seealso:: :attr:`autogen_latex_names`
 
 :param float value: The initial numeric value (by default its 0). This can be specified
     as positional argument before the latex name.
@@ -1228,13 +1235,10 @@ Creates a new {name} with the given name and value in the system.
 :raises IndexError: If there is already an object defined in the system with the given
     name and its not a {name}
 
-.. note:: This method is equivalent to new_symbol('{kind}', name, tex_name, value)
-
 .. warning:: If there is already a {name} with the given name defined in the system,
     this method will only update the latex name & numeric value of such symbol and
     return it (it will also raise a user warning)
 
-.. seealso:: new_symbol
 '''
 
 
