@@ -113,6 +113,12 @@ print()
 print(get_vectors())
 print()
 
+print('#'*10 + ' Tensors ' + '#'*10)
+print()
+print(get_vectors())
+print()
+
+
 print('#'*10 + ' Points ' + '#'*10)
 print()
 print(get_points())
@@ -121,4 +127,9 @@ print()
 print('#'*10 + ' Frames ' + '#'*10)
 print()
 print(get_frames())
+print()
+
+print('#'*10 + ' Solids ' + '#'*10)
+print()
+print(get_vectors())
 print()
