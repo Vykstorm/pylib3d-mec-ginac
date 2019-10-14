@@ -42,39 +42,42 @@ cdef class Printer:
 
     def print(self, x):
         '''
-        Prints the given object using this printer.
+        Prints the given object or view using this printer.
 
         :param obj: The object to be printed
         :rtype: str
 
         :raises NotImplementedError if the object couldnt be printed
         '''
-        if not isinstance(x, Object):
-            raise NotImplementedError
-
-        if isinstance(x, Expr):
-            return self.print_expr(x)
-
-        if isinstance(x, SymbolNumeric):
-            return self.print_symbol(x)
-
-        if isinstance(x, Matrix):
-            return self.print_matrix(x)
-
-        if isinstance(x, Base):
-            return self.print_base(x)
-
-        if isinstance(x, Point):
-            return self.print_point(x)
-
-        if isinstance(x, Frame):
-            return self.print_frame(x)
-
-        if isinstance(x, Wrench3D):
-            return self.print_wrench(x)
-
+        if isinstance(x, Object):
+            return self.print_object(x)
         if isinstance(x, View):
             return self.print_view(x)
+        raise NotImplementedError
+
+
+
+    def print_object(self, Object obj):
+        if isinstance(obj, Expr):
+            return self.print_expr(obj)
+
+        if isinstance(obj, SymbolNumeric):
+            return self.print_symbol(obj)
+
+        if isinstance(obj, Matrix):
+            return self.print_matrix(obj)
+
+        if isinstance(obj, Base):
+            return self.print_base(obj)
+
+        if isinstance(obj, Point):
+            return self.print_point(obj)
+
+        if isinstance(obj, Frame):
+            return self.print_frame(obj)
+
+        if isinstance(obj, Wrench3D):
+            return self.print_wrench(obj)
 
         raise NotImplementedError
 
