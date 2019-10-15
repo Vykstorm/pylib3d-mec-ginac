@@ -52,3 +52,14 @@ API Reference
         set_value, set_tex_name,
         value, tex_name, owner, type,
         __float__, __int__, __complex__
+
+
+
+.. autoclass:: Matrix
+    :members:
+        get_shape, get_num_rows, get_num_cols, get_size, __len__,
+        get_values, get, __getitem__,
+        __iter__, __reversed__,
+        set,
+        tranpose,
+        shape, num_rows, num_cols, size, T, tranposed, values

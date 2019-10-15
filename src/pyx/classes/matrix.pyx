@@ -161,41 +161,62 @@ cdef class Matrix(Object):
 
 
     def get_shape(self):
-        '''
+        '''get_shape() -> Tuple[int, int]
         Get the shape of this matrix.
-        :returns: A tuple with two numbers (number of rows and columns)
+
+        :return: A tuple with two numbers (number of rows and columns)
         :rtype: Tuple[int, int]
+
+        .. seealso:: :func:`get_num_rows` :func:`get_num_cols`
         '''
         return self._get_c_handler().rows(), self._get_c_handler().cols()
 
 
     def get_num_rows(self):
-        '''
+        '''get_num_rows() -> int
         Get the number of rows of this matrix
+
         :rtype: int
+
         '''
         return self._get_c_handler().rows()
 
 
     def get_num_cols(self):
-        '''
+        '''get_num_cols() -> int
         Get the number of columns of this matrix
+
         :rtype: int
+
         '''
         return self._get_c_handler().cols()
 
 
     def get_size(self):
-        '''
+        '''get_size() -> int
         Get the total number of items of this matrix (number of rows x number of columns)
+
         :rtype: int
+
+        .. seealso:: :func:`get_num_rows` :func:`get_num_cols`
+
         '''
         return self.get_num_rows() * self.get_num_cols()
 
 
     def __len__(self):
         '''
-        Alias of get_size()
+        You can use the built-in method len to get the size of the matrix:
+
+            :Example:
+
+            >>> m = new_matrix('m', shape=[3,3])
+            >>> m.get_size()
+            9
+            >>> len(m)
+            9
+
+        .. seealso:: :func:`get_size`
         '''
         return self.get_size()
 
@@ -256,28 +277,36 @@ cdef class Matrix(Object):
 
 
     def get_values(self):
-        '''
+        '''get_values() -> List[Expr]
         Get all the items of this matrix
+
         :returns: A list containing all the items of this matrix, where the item
-        at ith row and jth column will be located at i*num_cols + j index in that list
+            at ith row and jth column will be located at i*num_cols + j index in that list
+
         :rtype: List[Expr]
+
         '''
         return list(self)
 
 
 
     def get(self, i, j=None):
-        '''
+        '''get(i: int[, j: int]) -> Expr
         Get an element of this matrix.
         If two arguments are passed, they will be interpreted as the row and column
         indices of the element to fetch:
 
             :Example:
 
-            m = new_matrix('m', [[0, 1], [2, 3]])
-            >> matrix.get(0, 0)
+            >>> m = new_matrix('m', [[0, 1], [2, 3]])
+            >>> m
+            ╭      ╮
+            │ 0  1 │
+            │ 2  3 │
+            ╰      ╯
+            >>> matrix.get(0, 0)
             0
-            >> matrix.get(1, 1)
+            >>> matrix.get(1, 1)
             3
 
         You can pass also one index value if the matrix has only one row or
@@ -286,22 +315,27 @@ cdef class Matrix(Object):
 
             :Example:
 
-            >> m = new_matrix('m', [1, 3, 5, 7])
-            >> m.shape
-            (1, 4)
-            >> m.get(2)
+            >>> m = new_matrix('m', [1, 3, 5, 7])
+            >>> m
+            [ 1  3  5  7 ]
+            >>> m.get(2)
             5
-            >> m.transpose().get(3)
+            >>> m.transpose().get(3)
             7
 
         Indices can also be negative values:
 
             :Example:
 
-            >> m = new_matrix('m', [[1, 0, 0], [0, 2, 0], [0, 0, 3]])
-            >> m.get(2, 2)
+            >>> m = new_matrix('m', [[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+            ╭         ╮
+            │ 1  0  0 │
+            │ 0  2  0 │
+            │ 0  0  3 │
+            ╰         ╯
+            >>> m.get(2, 2)
             3
-            >> m.get(-1, -1)
+            >>> m.get(-1, -1)
             3
 
         :raise TypeError: If the indices passed are not valid
@@ -327,11 +361,19 @@ cdef class Matrix(Object):
 
             :Example:
 
-            >> m = new_matrix('m', [[1, 0, 0], [0, 2, 0], [0, 0, 3]])
-            >> m[1, 1]
+            >>> m = new_matrix('m', [[1, 0, 0], [0, 2, 0], [0, 0, 3]])
+            >>> m
+            ╭         ╮
+            │ 1  0  0 │
+            │ 0  2  0 │
+            │ 0  0  3 │
+            ╰         ╯
+            >>> m[1, 1]
             2
 
-        .. seealso:: get
+        .. note:: It calls internally to the method ``get``
+
+            .. seealso:: :func:`get`
         '''
         if isinstance(index, tuple):
             if len(index) not in (1, 2):
@@ -347,46 +389,60 @@ cdef class Matrix(Object):
 
 
     def set(self, i, *args):
-        '''
+        '''set(i: int[, j: int], value: Expr)
         Change the value of an element in the matrix.
         The arguments must be the indices of the element to change followed
         by its new value
 
             :Example:
 
-            >> m = new_matrix('m', [[0, 1], [2, 3]])
-            >> m.get(1, 1)
-            3
-            >> m.set(1, 1, 4)
-            >> m.get(1, 1)
-            4
+            >>> m = new_matrix('m', [[0, 1], [2, 3]])
+            >>> m
+            ╭      ╮
+            │ 0  1 │
+            │ 2  3 │
+            ╰      ╯
+            >>> m.set(1, 1, 4)
+            >>> m
+            ╭      ╮
+            │ 0  1 │
+            │ 2  4 │
+            ╰      ╯
 
         You could also specify just one index if the matrix has only one row or
         column.
-        The element to be changed will be at ith column or ith row respectively
+        The element to be changed will be at ith column or row respectively
 
             :Example:
 
-            >> m = new_matrix('m', [1, 2, 3, 4])
-            >> m.get(2)
-            3
-            >> m.set(2, 0)
-            >> m.get(2)
-            0
+            >>> m = new_matrix('m', [1, 2, 3, 4])
+            >>> m
+            [ 1  2  3  4 ]
+            >>> m.set(2, 0)
+            >>> m
+            [ 1  2  0  4 ]
 
         And indices can also be negative:
 
             :Example:
 
-            >> m = new_matrix('m', [[1, 2], [3, 4]])
-            >> m.set(-1, -1, 0)
-            >> m.get(1, 1)
-            4
+            >>> m = new_matrix('m', [[1, 2], [3, 4]])
+            >>> m
+            ╭      ╮
+            │ 1  2 │
+            │ 3  4 │
+            ╰      ╯
+            >>> m.set(-1, -1, 0)
+            ╭      ╮
+            │ 1  2 │
+            │ 3  0 │
+            ╰      ╯
 
 
         :raise TypeError: If the given indices or the new value for the element are not valid
         :raise IndexError: If the indices are out of bounds
-        .. sealso:: get
+
+        .. seealso:: :func:`get`
 
         '''
         if len(args) == 0:
@@ -420,12 +476,23 @@ cdef class Matrix(Object):
 
             :Example:
 
-            >> m = new_matrix('m', [[1, 2], [3, 4]])
-            >> m[0, 1] = 0
-            >> m.get(0, 1)
-            0
+            >>> m = new_matrix('m', [[1, 2], [3, 4]])
+            >>> m
+            ╭      ╮
+            │ 1  2 │
+            │ 3  4 │
+            ╰      ╯
+            >>> m[0, 1] = 0
+            >>> m
+            ╭      ╮
+            │ 1  0 │
+            │ 3  4 │
+            ╰      ╯
 
-        .. seealso:: set
+        .. note:: It used the method ``set`` internally.
+
+            .. seealso:: :func:`set`
+
         '''
         if isinstance(index, tuple):
             if len(index) != 2:
@@ -447,11 +514,10 @@ cdef class Matrix(Object):
 
             :Example:
 
-            >> m = new_matrix('m', [[0, 1], [2, 3]])
-            >> [pow(el, 2)+1 for el in m]
+            >>> m = new_matrix('m', [[0, 1], [2, 3]])
+            >>> [pow(el, 2)+1 for el in m]
             [1, 2, 5, 10]
-
-            >> list(m)
+            >>> list(m)
             [0, 1, 2, 3]
         '''
         n, m = self.get_shape()
@@ -464,7 +530,16 @@ cdef class Matrix(Object):
         '''
         Same as __iter__ but returns the elements in reversed order.
 
-        ..seealso:: __iter__
+        :Example:
+
+        >>> m = new_matrix('m', [[0, 1], [2, 3]])
+        >>> [pow(el, 2)+1 for el in reversed(m)]
+        [10, 5, 2, 1]
+        >>> list(reversed(m))
+        [3, 2, 1, 0]
+
+        .. seealso:: :func:`__iter__`
+
         '''
         n, m = self.get_shape()
         for i in reversed(range(0, n)):
@@ -566,8 +641,25 @@ cdef class Matrix(Object):
 
     cpdef transpose(self):
         '''
-        Tranpose this matrix
-        :returns: Returns this matrix transposed
+        Get the transposed matrix
+
+            :Example:
+            >>> m = new_matrix('a', range(0, 9), shape=[3, 3])
+            >>> m
+            ╭         ╮
+            │ 0  1  2 │
+            │ 3  4  5 │
+            │ 6  7  8 │
+            ╰         ╯
+            >>> m.tranpose()
+            ╭         ╮
+            │ 0  3  6 │
+            │ 1  4  7 │
+            │ 2  5  8 │
+            ╰         ╯
+
+        :rtype: Matrix
+
         '''
         cdef c_Matrix c_mat = self._get_c_handler().transpose()
         return _matrix_from_c_value(c_mat)
@@ -576,7 +668,9 @@ cdef class Matrix(Object):
     def get_transposed(self):
         '''
         Alias of transpose method
-        .. seealso:: transpose
+
+        .. seealso:: :func:`transpose`
+
         '''
         return self.transpose()
 
@@ -591,7 +685,13 @@ cdef class Matrix(Object):
     def shape(self):
         '''
         Read only property that returns the shape of this matrix
+
         :rtype: Tuple[int, int]
+
+        .. note:: It calls internally to ``get_shape``
+
+            .. seealso:: :func:`get_shape`
+
         '''
         return self.get_shape()
 
@@ -599,7 +699,13 @@ cdef class Matrix(Object):
     def num_rows(self):
         '''
         Read only property that returns the number of rows of this matrix
+
         :rtype: int
+
+
+        .. note:: It calls internally to ``get_num_rows``
+
+            .. seealso:: :func:`get_num_rows`
         '''
         return self.get_num_rows()
 
@@ -607,7 +713,12 @@ cdef class Matrix(Object):
     def num_cols(self):
         '''
         Read only property that returns the number of columns of this matrix
+
         :rtype: int
+
+        .. note:: It calls internally to ``get_num_cols``
+
+            .. seealso:: :func:`get_num_cols`
         '''
         return self.get_num_cols()
 
@@ -615,7 +726,13 @@ cdef class Matrix(Object):
     def size(self):
         '''
         Read only property that returns the total number of items on this matrix
+
         :rtype: int
+
+        .. note:: It calls internally to ``get_size``
+
+            .. seealso:: :func:`get_size`
+
         '''
         return self.get_size()
 
@@ -624,7 +741,13 @@ cdef class Matrix(Object):
     def T(self):
         '''
         Read only property that returns the transposed matrix
+
         :rtype: Matrix
+
+        .. note:: It calls internally to ``transpose``
+
+            .. seealso:: :func:`transpose`
+
         '''
         return self.transpose()
 
@@ -632,7 +755,13 @@ cdef class Matrix(Object):
     def transposed(self):
         '''
         Read only property that returns the transposed matrix
+
         :rtype: Matrix
+
+        .. note:: It calls internally to ``transpose``
+
+            .. seealso:: :func:`transpose`
+
         '''
         return self.transpose()
 
@@ -641,7 +770,13 @@ cdef class Matrix(Object):
     def values(self):
         '''
         Read only property that returns all the items of this matrix as a regular list
+
         :rtype: List[Expr]
+
+        .. note:: It calls internally to ``get_values``
+
+            .. seealso:: :func:`get_values`
+
         '''
         return self.get_values()
 
