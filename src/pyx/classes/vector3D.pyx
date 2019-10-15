@@ -36,6 +36,13 @@ cdef class Vector3D(Matrix):
     '''
     Represents a 3D vector defined within a base. Its a matrix with three rows
     and only one column.
+
+    .. note::
+        This class is not intented to instantiated manually. Use the
+        method ``System.new_vector`` instead
+
+        .. seealso:: :func:`System.new_vector`
+        
     '''
 
 
@@ -120,14 +127,15 @@ cdef class Vector3D(Matrix):
     cpdef get_module(self):
         '''get_module() -> Expr
         Get the module of the vector
-        :rtype: Expr
 
             :Example:
 
-            >> a, b, c = new_param('a'), new_param('b'), new_param('c')
-            >> v = new_vector('v', a, b, c)
-            >> v.get_module()
-            (c**2+a**2+b**2)**(1/2)
+            >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >>> v = new_vector('v', a, b, c)
+            >>> v.get_module()
+            (a**2+b**2+c**2)**(1/2)
+
+        :rtype: Expr
 
         '''
         cdef c_ex c_expr = (<c_Vector3D*>self._get_c_handler()).get_module()
@@ -137,18 +145,20 @@ cdef class Vector3D(Matrix):
     cpdef get_skew(self):
         '''get_skew() -> Matrix
         Get the skew matrix of this vector.
-        :rtype: Matrix
 
             :Example:
 
-            >> a, b, c = new_param('a'), new_param('b'), new_param('c')
-            >> v = new_vector('v', a, b, c)
-            >> v.skew
+            >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >>> v = new_vector('v', a, b, c)
+            >>> v.skew
             ╭            ╮
             │  0  -c   b │
             │  c   0  -a │
             │ -b   a   0 │
             ╰            ╯
+
+        :rtype: Matrix
+
         '''
         cdef c_Matrix c_skew = (<c_Vector3D*>self._get_c_handler()).skew()
         return _matrix_from_c_value(c_skew)
@@ -167,9 +177,14 @@ cdef class Vector3D(Matrix):
     cpdef in_base(self, new_base):
         '''in_base(new_base: Base) -> Vector3D
         Performs a base change operation on this vector.
-        :param Base base: The new base
+
+        :param base: The new base
+        :type base: Base
+
         :return: A new vector which is the same as this but with its base changed
+
         :rtype: Vector3D
+
         '''
         if not isinstance(new_base, Base):
             raise TypeError('Input argument must be a Base object')
@@ -178,18 +193,19 @@ cdef class Vector3D(Matrix):
 
 
     def dot(self, other):
-        '''
-        Computes the dot product of two vectors. The result is an expression.
-        :rtype: Expr
-        :raise TypeError: If the input argument is not a vector
+        '''dot(other: Vector3D) -> Expr
+        Computes the dot product of two vectors.
 
             :Example:
 
-            >> a, b = new_param('a'), new_param('b')
-            >> v = new_vector('v', a, b, 1)
-            >> w = new_vector('w', 1, b, a)
-            >> v.dot(w)
+            >>> a, b = new_param('a'), new_param('b')
+            >>> v = new_vector('v', a, b, 1)
+            >>> w = new_vector('w', 1, b, a)
+            >>> v.dot(w)
             2*a+b**2
+
+        :rtype: Expr
+        :raise TypeError: If the input argument is not a vector
         '''
         if not isinstance(other, Vector3D):
             raise TypeError('Input argument must be a Vector3D')
@@ -200,20 +216,21 @@ cdef class Vector3D(Matrix):
 
 
     def cross(self, other):
-        '''
-        Computes the cross product of two vectors. The result is another vector.
-        :rtype: Vector3D
-        :raise TypeError: If the input argument is not a vector
+        '''cross(other: Vector3D) -> Vector3D
+        Computes the cross product of two vectors.
 
             :Example:
 
-            >> a, b = new_param('a'), new_param('b')
-            >> v = new_vector('v', a, b, 1)
-            >> w = new_vector('w', 1, b, a)
-            >> v.cross(w)
+            >>> a, b = new_param('a'), new_param('b')
+            >>> v = new_vector('v', a, b, 1)
+            >>> w = new_vector('w', 1, b, a)
+            >>> v.cross(w)
             [ a*b-b  1.0-a**2  a*b-b ]
-            >> w.cross(v)
+            >>> w.cross(v)
             [ -a*b+b  -1.0+a**2  -a*b+b ]
+
+            :rtype: Vector3D
+            :raise TypeError: If the input argument is not a vector
         '''
         if not isinstance(other, Vector3D):
             raise TypeError('Input argument must be a Vector3D')

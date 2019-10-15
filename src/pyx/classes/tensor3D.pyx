@@ -34,6 +34,10 @@ cdef Tensor3D _tensor_from_c_value(c_Tensor3D x):
 ######## Class Tensor3D ########
 
 cdef class Tensor3D(Matrix):
+    '''
+    Instances of this class represents a tensor. Tensors are matrices
+    3x3 defined within a geometric base.
+    '''
 
     ######## Constructor ########
 
@@ -111,9 +115,12 @@ cdef class Tensor3D(Matrix):
     cpdef in_base(self, new_base):
         '''in_base(new_base: Base) -> Tensor3D
         Performs a base change operation on this tensor.
+
         :param Base base: The new base
         :return: A new tensor which is the same as this but with its base changed
+
         :rtype: Tensor3D
+
         '''
         if not isinstance(new_base, Base):
             raise TypeError('Input argument must be a Base object')

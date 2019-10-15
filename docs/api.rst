@@ -63,3 +63,14 @@ API Reference
         set,
         tranpose,
         shape, num_rows, num_cols, size, T, tranposed, values
+
+
+
+.. autoclass:: Vector3D
+    :members:
+        get_module, get_skew, in_base, dot, cross
+
+
+.. autoclass:: Tensor3D
+    :members:
+        in_base

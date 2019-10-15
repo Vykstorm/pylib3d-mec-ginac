@@ -651,7 +651,7 @@ cdef class Matrix(Object):
             │ 3  4  5 │
             │ 6  7  8 │
             ╰         ╯
-            >>> m.tranpose()
+            >>> m.transpose()
             ╭         ╮
             │ 0  3  6 │
             │ 1  4  7 │
