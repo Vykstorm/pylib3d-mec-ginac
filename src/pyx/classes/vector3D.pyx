@@ -42,7 +42,7 @@ cdef class Vector3D(Matrix):
         method ``System.new_vector`` instead
 
         .. seealso:: :func:`System.new_vector`
-        
+
     '''
 
 
@@ -351,8 +351,13 @@ cdef class Vector3D(Matrix):
     def module(self):
         '''
         Only read property that returns the module of this vector.
+
         :rtype: Expr
-        .. sealso:: get_module
+
+        .. note:: This calls ``get_module`` internally.
+
+            .. seealso:: get_module
+
         '''
         return self.get_module()
 
@@ -360,8 +365,13 @@ cdef class Vector3D(Matrix):
     def skew(self):
         '''
         Only read property that returns the skew matrix of this vector.
+
         :rtype: Matrix
-        .. sealso:: get_skew
+
+        .. note:: This calls ``get_skew`` internally.
+
+            .. seealso:: get_skew
+
         '''
         return self.get_skew()
 
@@ -370,7 +380,9 @@ cdef class Vector3D(Matrix):
         '''
         Returns the first component of the vector. You can also use this property
         to assign a new value to it.
+
         :rtype: Expr
+
         '''
         return self.get(0)
 
@@ -383,7 +395,9 @@ cdef class Vector3D(Matrix):
         '''
         Returns the second component of the vector. You can also use this property
         to assign a new value to it.
+
         :rtype: Expr
+
         '''
         return self.get(1)
 
@@ -396,7 +410,9 @@ cdef class Vector3D(Matrix):
         '''
         Returns the third component of the vector. You can also use this property
         to assign a new value to it.
+
         :rtype: Expr
+
         '''
         return self.get(2)
 

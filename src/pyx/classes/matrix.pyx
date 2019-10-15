@@ -644,6 +644,7 @@ cdef class Matrix(Object):
         Get the transposed matrix
 
             :Example:
+            
             >>> m = new_matrix('a', range(0, 9), shape=[3, 3])
             >>> m
             ╭         ╮

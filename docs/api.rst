@@ -61,16 +61,22 @@ API Reference
         get_values, get, __getitem__,
         __iter__, __reversed__,
         set,
-        tranpose,
-        shape, num_rows, num_cols, size, T, tranposed, values
+        transpose,
+        shape, num_rows, num_cols, size, T, transposed, values
 
 
 
 .. autoclass:: Vector3D
     :members:
-        get_module, get_skew, in_base, dot, cross
+        get_module, get_skew, in_base, dot, cross,
+        module, skew, x, y, z
 
 
 .. autoclass:: Tensor3D
     :members:
         in_base
+
+.. autoclass:: Base
+    :members:
+        get_previous_base, has_previous_base, get_rotation_angle, get_rotation_tupla,
+        previous_base, rotation_angle, rotation_tupla
