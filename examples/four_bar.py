@@ -3,7 +3,7 @@
 ## Imports
 from lib3d_mec_ginac import *
 from math import pi, e
-from tabulate import tabulate
+
 
 
 # Set gravity value
