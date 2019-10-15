@@ -41,4 +41,14 @@ API Reference
         parameters, inputs, joint_unknowns,
         bases, matrices, vectors, tensors,
         points, frames, solids, wrenches,
-        autogen_latex_names
+        autogen_latex_names,
+        set_as_default
+
+
+
+.. autoclass:: SymbolNumeric
+    :members:
+        get_value, get_tex_name, get_owner, get_type,
+        set_value, set_tex_name,
+        value, tex_name, owner, type,
+        __float__, __int__, __complex__

@@ -12,6 +12,14 @@ Description: This module defines the wrapper class SymbolNumeric.
 cdef class SymbolNumeric(Object):
     '''
     Objects of this class can be used to perform math symbolic computation.
+
+    .. note::
+        Do not instantiate this class manually.
+        Use the methods ``new_symbol``, ``new_parameter``, ``new_coordinate``, ...
+        defined in the System class
+
+        .. seealso:: :class:`System`
+
     '''
 
     ######## C Attributes  ########
@@ -35,7 +43,9 @@ cdef class SymbolNumeric(Object):
     cpdef double get_value(self):
         '''get_value() -> float
         :return: The numeric value of this symbol as a float value.
+
         :rtype: float
+
         '''
         return self._c_handler.get_value().to_double()
 
@@ -43,7 +53,9 @@ cdef class SymbolNumeric(Object):
     cpdef get_tex_name(self):
         '''get_tex_name() -> str
         Get the name in latex of this symbol
+
         :rtype: str
+
         '''
         return (<bytes>self._c_handler.print_TeX_name()).decode()
 
@@ -51,7 +63,9 @@ cdef class SymbolNumeric(Object):
     def get_owner(self):
         '''get_owner() -> System
         Get the system where this numeric symbol was created
+
         :rtype: System
+
         '''
         if self._owner is None:
             raise RuntimeError
@@ -61,12 +75,16 @@ cdef class SymbolNumeric(Object):
     def get_type(self):
         '''get_type() -> str
         Get the type of this symbol.
-        :returns: One of the next values:
-            'parameter', 'joint_unknown', 'input',
-            'coordinate', 'velocity', 'acceleration',
-            'aux_coordinate', 'aux_velocity', 'aux_acceleration'
-            'time' (the last one only if this instance is the time symbol)
+
+        :returns:
+            One of the next values:
+                'parameter', 'joint_unknown', 'input',
+                'coordinate', 'velocity', 'acceleration',
+                'aux_coordinate', 'aux_velocity', 'aux_acceleration'
+                'time' (the last one only if this instance is the time symbol)
+
         :rtype: str
+
         '''
         owner = self.get_owner()
         if self == owner._get_time():
@@ -82,11 +100,12 @@ cdef class SymbolNumeric(Object):
 
 
     cpdef set_value(self, value):
-        '''set_value(value: float)
+        '''set_value(value: numeric)
         Assigns a new numeric value to this symbol.
+
         :param value: It must be the new numeric value to assign for this symbol
-        :type value: int, float
-        :raises TypeError: If value has an incorrect type.
+        :type value: numeric
+        :raises TypeError: If value has an incorrect type
         '''
         self._c_handler.set_value(c_numeric(<double>_parse_numeric_value(value)))
 
@@ -95,6 +114,7 @@ cdef class SymbolNumeric(Object):
     cpdef set_tex_name(self, tex_name):
         '''set_tex_name(tex_name: str)
         Changes the latex name of this symbol
+
         :param str tex_name: The new latex name
         :raise TypeError: If the input argument has an incorrect type
         '''
@@ -111,7 +131,14 @@ cdef class SymbolNumeric(Object):
         '''
         Property that returns the numeric value of this symbol (as a float number). It also supports
         assignment.
+
         :rtype: float
+
+        .. note:: It calls internally the methods ``get_value`` or ``set_value``
+
+            .. seealso::
+                :func:`get_value`
+                :func:`set_value`
         '''
         return self.get_value()
 
@@ -124,7 +151,14 @@ cdef class SymbolNumeric(Object):
     def tex_name(self):
         '''
         Property that returns the name in latex of this symbol. It also supports assignment.
+
         :rtype: str
+
+        .. note:: It calls internally the methods ``get_tex_name`` or ``set_tex_name``
+
+            .. seealso::
+                :func:`get_tex_name`
+                :func:`set_tex_name`
         '''
         return self.get_tex_name()
 
@@ -138,7 +172,9 @@ cdef class SymbolNumeric(Object):
     def owner(self):
         '''
         Property that returns the system where this symbol was created
+
         :rtype: System
+
         '''
         return self.get_owner()
 
@@ -147,15 +183,20 @@ cdef class SymbolNumeric(Object):
     def type(self):
         '''
         Only read property that returns the kind of symbol
+
         :rtype: str
+
         '''
         return self.get_type()
+
 
     @property
     def kind(self):
         '''
         This is an alias of property "type"
+
         :rtype: str
+
         '''
         return self.get_type()
 
@@ -174,8 +215,8 @@ cdef class SymbolNumeric(Object):
 
     def __pos__(self):
         '''
-        Performs unary positive operation on this symbol. The result is a symbol
-        expression.
+        Performs unary positive operation on this symbol.
+        The result is a expression.
         :rtype: Expr
         '''
         return +Expr(self)
@@ -239,22 +280,59 @@ cdef class SymbolNumeric(Object):
 
     def __float__(self):
         '''
-        Alias of get_value().
+        You can use the built-in float function to
+        get the numeric value of this symbol:
+
+            :Example:
+
+            >>> a = new_param('a', 1.5)
+            >>> float(a)
+            1.5
+
+        .. note::
+            Its equivalent to ``get_value()``
+
+            .. seealso:: :func:`get_value`
         '''
         return self.get_value()
 
 
     def __int__(self):
         '''
-        Returns the numeric value of this symbol truncated (as an integer)
+        You can use the built-in int function to
+        get the numeric value of this symbol (as an integer):
+
+            :Example:
+
+            >>> a = new_param('a', 1.5)
+            >>> int(a)
+            1
+
+        .. note::
+            Its equivalent to ``int(get_value())``
+
+            .. seealso:: :func:`get_value`
         '''
         return int(self.get_value())
 
 
+
     def __complex__(self):
         '''
-        Returns the numeric value of this symbol as a complex number.
-        .. note:: The imaginary part is set to zero
+        You can use the built-in complex function to
+        get the numeric value of this symbol as a complex number (the imaginary
+        part is set to zero):
+
+            :Example:
+
+            >>> a = new_param('a', 1.5)
+            >>> complex(a)
+            1.5+0j
+
+        .. note::
+            Its equivalent to ``complex(get_value())``
+
+            .. seealso:: :func:`get_value`
         '''
         return complex(self._c_handler.get_value().real().to_double(), self._c_handler.get_value().imag().to_double())
 

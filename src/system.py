@@ -1193,7 +1193,7 @@ class System(_System):
 
     def set_as_default(self):
         '''
-        Set this instance as the default system
+        Set this instance as the default system.
         '''
         from . import set_default_system
         set_default_system(self)
