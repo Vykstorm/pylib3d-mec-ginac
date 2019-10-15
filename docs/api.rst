@@ -91,3 +91,9 @@ API Reference
     :members:
         get_point, get_scale, set_point,
         point, scale
+
+
+.. autoclass:: Solid
+    :members:
+        get_CM, get_IT, get_mass,
+        CM, IT, mass
