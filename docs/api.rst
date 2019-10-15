@@ -80,3 +80,8 @@ API Reference
     :members:
         get_previous_base, has_previous_base, get_rotation_angle, get_rotation_tupla,
         previous_base, rotation_angle, rotation_tupla
+
+.. autoclass:: Point
+    :members:
+        get_position_vector, get_previous, has_previous,
+        position_vector, previous
