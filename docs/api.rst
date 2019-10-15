@@ -97,3 +97,8 @@ API Reference
     :members:
         get_CM, get_IT, get_mass,
         CM, IT, mass
+
+.. autoclass:: Wrench3D
+    :members:
+        get_force, get_moment, get_solid, get_type,
+        force, moment, solid, type

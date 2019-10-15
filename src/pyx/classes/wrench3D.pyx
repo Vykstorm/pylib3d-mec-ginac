@@ -26,6 +26,10 @@ cdef Wrench3D _wrench_from_c_value(c_Wrench3D x):
 
 
 cdef class Wrench3D(Object):
+    '''
+    An instance of this class represents a wrench which is attached to solid and
+    has a force and momentum vectors.
+    '''
 
     ######## Constructor ########
 
@@ -50,18 +54,42 @@ cdef class Wrench3D(Object):
 
 
     cpdef get_force(self):
+        '''get_force() -> Vector3D
+        Get the force vector of this wrench
+
+        :rtype: Vector3D
+
+        '''
         return _vector_from_c_value(self._c_handler.get_Force())
 
 
     cpdef get_moment(self):
+        '''get_moment() -> Vector3D
+        Get the moment vector of this wrench
+
+        :rtype: Vector3D
+
+        '''
         return _vector_from_c_value(self._c_handler.get_Moment())
 
 
     cpdef get_solid(self):
+        '''get_solid() -> Solid
+        Get the solid of this wrench
+
+        :rtype: Solid
+
+        '''
         return Solid(<Py_ssize_t>self._c_handler.get_Solid())
 
 
     cpdef get_type(self):
+        '''get_solid() -> str
+        Get the type of this wrench
+
+        :rtype: str
+
+        '''
         return (<bytes>self._c_handler.get_Type()).decode()
 
 
@@ -116,21 +144,65 @@ cdef class Wrench3D(Object):
 
     @property
     def force(self):
+        '''
+        Read only property that returns the force vector of this wrench.
+
+        :rtype: Vector3D
+
+        .. note::
+            This calls internally to ``get_force``
+
+            .. seealso:: :func:`get_force`
+
+        '''
         return self.get_force()
 
 
     @property
     def moment(self):
+        '''
+        Read only property that returns the moment vector of this wrench.
+
+        :rtype: Vector3D
+
+        .. note::
+            This calls internally to ``get_moment``
+
+            .. seealso:: :func:`get_moment`
+
+        '''
         return self.get_moment()
 
 
     @property
     def solid(self):
+        '''
+        Read only property that returns the solid of this wrench.
+
+        :rtype: Solid
+
+        .. note::
+            This calls internally to ``get_solid``
+
+            .. seealso:: :func:`get_solid`
+
+        '''
         return self.get_solid()
 
 
     @property
     def type(self):
+        '''
+        Read only property that returns the type of this wrench.
+
+        :rtype: str
+
+        .. note::
+            This calls internally to ``get_type``
+
+            .. seealso:: :func:`get_type`
+
+        '''
         return self.get_type()
 
 
