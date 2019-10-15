@@ -32,14 +32,18 @@ cdef class Frame(Object):
     cpdef get_point(self):
         '''get_point() -> Point
         Get the point of this frame
+
         :rtype: Point
+
         '''
         return Point(<Py_ssize_t>self._c_handler.get_Point())
 
 
     cpdef get_scale(self):
         '''get_scale() -> float
+
         Get the scale of this frame
+
         :rtype: float
         '''
         return self._c_handler.get_scale().to_double()
@@ -52,6 +56,9 @@ cdef class Frame(Object):
     cpdef set_point(self, point):
         '''set_point(point: Point)
         Changes the point of this frame.
+
+        :raise TypeError: If the input argument has not a valid type
+
         '''
         if not isinstance(point, Point):
             raise TypeError('Input argument must be a Point object')
@@ -66,7 +73,14 @@ cdef class Frame(Object):
         '''
         Property that returns the point of this frame. It can also be used to
         assign a new point.
+
         :rtype: Point
+
+        .. note::
+            This uses internally the methods ``get_point`` and ``set_point``
+
+            .. seealso:: :func:`get_point` :func:`set_point`
+
         '''
         return self.get_point()
 
@@ -79,7 +93,13 @@ cdef class Frame(Object):
     def scale(self):
         '''
         Read only property that returns the scale of this frame.
+
         :rtype: float
+
+        .. note::
+            This used internally the method ``get_scale``
+
+            .. seealso:: :func:`get_scale`
         '''
         return self.get_scale()
 

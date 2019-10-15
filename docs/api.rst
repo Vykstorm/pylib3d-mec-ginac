@@ -85,3 +85,9 @@ API Reference
     :members:
         get_position_vector, get_previous, has_previous,
         position_vector, previous
+
+
+.. autoclass:: Frame
+    :members:
+        get_point, get_scale, set_point,
+        point, scale
