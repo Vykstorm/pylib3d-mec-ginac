@@ -251,7 +251,7 @@ cdef class SymbolNumeric(Object):
         .. note:: Symbols can be multiplied with matrices (or its subclasses) and expressions, but this is implemented
             in the metamethods Expr.__mul__, Matrix.__mul__, Vector3D.__mul__ and Tensor3D.__mul__
         '''
-        return NotImplemented if isinstance(other, (Expr, Matrix)) else Expr(self) * Expr(other)
+        return NotImplemented if isinstance(other, (Expr, Matrix, Wrench3D)) else Expr(self) * Expr(other)
 
 
     def __truediv__(self, other):

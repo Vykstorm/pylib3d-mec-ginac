@@ -112,26 +112,47 @@ cdef class Wrench3D(Object):
 
 
     def __pos__(self):
-        pass
+        return _wrench_from_c_value(c_deref(self._c_handler))
 
 
     def __neg__(self):
-        pass
+        return _wrench_from_c_value(-c_deref(self._c_handler))
 
 
     ######## Binary arithmetic operations ########
 
 
     def __add__(Wrench3D self, other):
-        pass
+        if not isinstance(other, Wrench3D):
+            raise TypeError(f'Unsupported operand type for +: Wrench3D and {type(other).__name__}')
+        return _wrench_from_c_value(c_deref(self._c_handler) + c_deref((<Wrench3D>other)._c_handler))
+
 
 
     def __sub__(Wrench3D self, other):
-        pass
+        if not isinstance(other, Wrench3D):
+            raise TypeError(f'Unsupported operand type for -: Wrench3D and {type(other).__name__}')
+        return _wrench_from_c_value(c_deref(self._c_handler) - c_deref((<Wrench3D>other)._c_handler))
+
 
 
     def __mul__(left_op, right_op):
-        pass
+        if isinstance(left_op, Wrench3D) and isinstance(right_op, Wrench3D):
+            # Product between wrenches
+            return _expr_from_c(c_deref((<Wrench3D>left_op)._c_handler) * c_deref((<Wrench3D>right_op)._c_handler))
+
+        if not isinstance(left_op, Wrench3D) and not isinstance(right_op, Wrench3D):
+            raise TypeError(f'Unsupported operand type for *: {type(left_op).__name__} and {type(right_op).__name__}')
+
+        if isinstance(left_op, Wrench3D):
+            right_op = Expr(right_op)
+        else:
+            left_op, right_op = right_op, Expr(left_op)
+
+        return _wrench_from_c_value(
+            (<Expr>right_op)._c_handler *\
+            c_deref((<Wrench3D>left_op)._c_handler))
+
 
 
     def __truediv__(left_op, right_op):

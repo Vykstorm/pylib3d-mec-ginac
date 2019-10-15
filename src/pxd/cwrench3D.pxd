@@ -43,3 +43,4 @@ cdef extern from "Wrench3D.h":
         Wrench3D operator-(Wrench3D& other)
         Wrench3D operator-()
         ex operator*(Wrench3D& other)
+        
