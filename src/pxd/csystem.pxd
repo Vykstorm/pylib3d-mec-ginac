@@ -17,6 +17,7 @@ from libcpp.string cimport string
 # GiNaC classes
 from src.pxd.ginac.cnumeric cimport numeric
 from src.pxd.ginac.cexpr cimport ex
+from src.pxd.ginac.csymbol cimport symbol
 
 # lib3d-mec-ginac classes
 from src.pxd.csymbol_numeric cimport symbol_numeric
@@ -111,3 +112,42 @@ cdef extern from "System.h":
         Frame* new_Frame(string name, Point* point, Base* base)
         Solid* new_Solid(string name, Point* point, Base* base, symbol_numeric* mass, Vector3D* CM, Tensor3D* IT)
         Wrench3D* new_Wrench3D(string name, Vector3D force, Vector3D moment, Point* point, Solid* solid, string type)
+
+
+        # Kinematic operations
+
+        Base* Reduced_Base(Base*, Base*)
+        Point* Reduced_Point(Point*, Point*)
+        Point* Pre_Point_Branch(Point*, Point*)
+        Matrix Rotation_Matrix(Base*, Base*)
+        Vector3D Angular_Velocity(Base*, Base*)
+        Vector3D Angular_Velocity_Tensor(Base*, Base*)
+        Vector3D Velocity_Vector(Frame*, Point*)
+        Vector3D Velocity_Vector(Frame*, Point*, Solid*)
+        Vector3D Angular_Acceleration(Base*, Base*)
+        Vector3D Acceleration_Vector(Frame*, Point*)
+        Vector3D Acceleration_Vector(Frame*, Point*, Solid*)
+
+        Wrench3D twist(Solid*)
+
+        ex dt(ex)
+        Vector3D dt(Vector3D)
+        Matrix Dt(Matrix)
+        Vector3D Dt(Vector3D, Base*)
+        Vector3D Dt(Vector3D, Frame*)
+
+        Matrix jacobian(Matrix, Matrix, ex)
+        Matrix jacobian(Matrix, Matrix)
+        Matrix jacobian(ex, Matrix)
+        Matrix jacobian(Matrix, symbol)
+        Matrix jacobian(ex, symbol)
+
+        ex diff(ex, symbol)
+        Matrix diff(Matrix, symbol)
+        Vector3D diff(Vector3D, symbol)
+        Tensor3D diff(Tensor3D, symbol)
+        Wrench3D diff(Wrench3D, symbol)
+        Wrench3D diff(Wrench3D, ex)
+
+        ex numeric_evaluate(ex)
+        Matrix evaluate_Matrix(Matrix)

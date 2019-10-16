@@ -1051,6 +1051,21 @@ class System(_System):
 
 
 
+    ######## Kinematic operations ########
+
+
+    def reduced_base(self, a, b):
+        return self._reduced_base(a, b)
+
+
+
+    def reduced_point(self, a, b):
+        return self._reduced_point(a, b)
+
+
+
+
+
     ######## Properties ########
 
     @property

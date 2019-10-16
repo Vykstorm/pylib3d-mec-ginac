@@ -55,7 +55,9 @@ def _create_system_global_func(method):
     return func
 
 for name in dir(System):
-    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_'))) or name == 'set_as_default':
+    if name == 'set_as_default':
+        continue
+    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))):
         continue
     __all__.append(name)
     globals()[name] = _create_system_global_func(getattr(System, name))

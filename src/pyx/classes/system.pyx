@@ -981,6 +981,46 @@ cdef class _System:
 
 
 
+
+    ######## Kinematic operations ########
+
+
+    def _reduced_base(self, a, b):
+        if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
+            raise TypeError('Input arguments must be Base or str objects')
+
+        if isinstance(a, str):
+            a = self._get_base(a)
+
+        if isinstance(b, str):
+            b = self._get_base(b)
+
+        return Base(<Py_ssize_t>self._c_handler.Reduced_Base(
+            (<Base>a)._c_handler,
+            (<Base>b)._c_handler)
+        )
+
+
+
+    def _reduced_point(self, a, b):
+        if not isinstance(a, (str, Point)) or not isinstance(b, (str, Point)):
+            raise TypeError('Input arguments must be Point or str objects')
+
+        if isinstance(a, str):
+            a = self._get_point(a)
+
+        if isinstance(b, str):
+            b = self._get_point(b)
+
+        return Point(<Py_ssize_t>self._c_handler.Reduced_Point(
+            (<Point>a)._c_handler,
+            (<Point>b)._c_handler)
+        )
+
+
+
+
+
     ######## Mixin ########
 
     cpdef _set_autogen_latex_names(self, enabled):
