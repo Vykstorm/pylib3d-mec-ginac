@@ -1133,6 +1133,50 @@ cdef class _System:
 
 
 
+    cpdef _angular_acceleration(self, a, b):
+        if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
+            raise TypeError('Input arguments must be Base or str objects')
+
+        if not isinstance(a, Base):
+            a = self._get_base(a)
+
+        if not isinstance(b, Base):
+            b = self._get_base(b)
+
+        return _vector_from_c_value(self._c_handler.Angular_Acceleration(
+            (<Base>a)._c_handler,
+            (<Base>b)._c_handler
+        ))
+
+
+
+    cpdef _acceleration_vector(self, frame, point, solid=None):
+        if not isinstance(frame, (str, Frame)):
+            raise TypeError('frame must be an instance of Frame or str')
+
+        if not isinstance(point, (str, Point)):
+            raise TypeError('point must be an instance of Point or str')
+
+        if solid is not None and not isinstance(solid, (str, Solid)):
+            raise TypeError('solid must be None or either an instance of Solid or str')
+
+        if not isinstance(frame, Frame):
+            frame = self._get_frame(frame)
+
+        if not isinstance(point, Point):
+            point = self._get_point(point)
+
+        if solid is not None and not isinstance(solid, Solid):
+            solid = self._get_solid(solid)
+
+
+        cdef c_Frame* c_frame = (<Frame>frame)._c_handler
+        cdef c_Point* c_point = (<Point>point)._c_handler
+        if solid is None:
+            return _vector_from_c_value(self._c_handler.Acceleration_Vector(c_frame, c_point))
+        return _vector_from_c_value(self._c_handler.Acceleration_Vector(c_frame, c_point, <c_Solid*>(<Solid>solid)._c_handler))
+
+
 
 
 

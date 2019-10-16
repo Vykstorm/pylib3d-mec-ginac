@@ -1225,6 +1225,42 @@ class System(_System):
 
 
 
+    def angular_acceleration(self, a, b):
+        '''angular_acceleration(a: Base, b: Base) -> Vector3D
+        Get the angular acceleration between two bases (from a to b)
+
+        :type a: str, Base
+        :type b: str, Base
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Vector3D
+
+        '''
+        return self._angular_acceleration(a, b)
+
+
+
+    def acceleration_vector(self, frame, point, solid=None):
+        '''acceleration_vector(frame: Frame, point: Point[, solid: Solid]) -> Vector3D
+        Get the acceleration vector of the point with respect the given frame.
+        If solid is specified, the resulting velocity is computed with respect
+        the frame in such solid.
+
+        :type frame: str, Frame
+        :type point: str, Point
+        :type solid: None, str, Solid
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Vector3D
+
+        '''
+        return self._acceleration_vector(frame, point, solid)
+
+
+
+
 
 
     ######## Properties ########
