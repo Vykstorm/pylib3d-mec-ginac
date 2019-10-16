@@ -129,7 +129,7 @@ cdef extern from "System.h":
         Vector3D Acceleration_Vector(Frame*, Point*)
         Vector3D Acceleration_Vector(Frame*, Point*, Solid*)
 
-        Wrench3D twist(Solid*)
+        Wrench3D Twist(Solid*)
 
         ex dt(ex)
         Vector3D dt(Vector3D)

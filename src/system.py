@@ -1261,6 +1261,30 @@ class System(_System):
 
 
 
+    def twist(self, solid):
+        '''twist(solid: Solid) -> Wrench3D
+
+        :type solid: str, Solid
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Vector3D
+
+        '''
+        return self._twist(solid)
+
+
+
+
+    def derivative(self, *args, **kwargs):
+        '''
+        '''
+        return self._derivative(args, kwargs)
+
+
+    dt = derivative
+
+
 
 
     ######## Properties ########

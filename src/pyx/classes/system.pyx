@@ -1179,6 +1179,81 @@ cdef class _System:
 
 
 
+    cpdef _twist(self, solid):
+        if not isinstance(solid, (str, Solid)):
+            raise TypeError('Input argument must be a Solid or str object')
+
+        if not isinstance(solid, Solid):
+            solid = self._get_solid(solid)
+        return _wrench_from_c_value(self._c_handler.Twist(<c_Solid*>(<Solid>solid)._c_handler))
+
+
+
+
+    cpdef _derivative(self, args, kwargs):
+        cdef c_Vector3D* c_vector
+
+        if not args:
+            raise TypeError('Invalid number of inputs (expected at least 1 positional argument)')
+        args = list(args)
+        x = args.pop(0)
+
+        if not isinstance(x, (Expr, SymbolNumeric, Matrix)):
+            raise TypeError('The first argument must be an expression, symbol, matrix or vector')
+
+        if isinstance(x, SymbolNumeric):
+            x = Expr(x)
+
+        if isinstance(x, (Expr, Matrix)) and not isinstance(x, Vector3D):
+            if args or kwargs:
+                raise TypeError('Invalid number of arguments (only 1 expected)')
+            if isinstance(x, Expr):
+                return _expr_from_c(self._c_handler.dt((<Expr>x)._c_handler))
+
+            return _matrix_from_c_value(self._c_handler.Dt(c_deref(<c_Matrix*>(<Matrix>x)._get_c_handler())))
+
+        else:
+            c_vector = <c_Vector3D*>(<Vector3D>x)._get_c_handler()
+
+            if len(args) + len(kwargs) > 1:
+                raise TypeError('Invalid number of arguments (only 2 expected)')
+            elif not args and not kwargs:
+                return _vector_from_c_value(self._c_handler.dt(c_deref(c_vector)))
+
+            if args:
+                y = args[0]
+                if not isinstance(y, (str, Base, Frame)):
+                    raise TypeError('Second argument after the vector must be a Frame, Base or str object')
+                if isinstance(y, str):
+                    if not self._has_base(y) and not self._has_frame(y):
+                        raise IndexError('There is no frame or base called "{y}"')
+                    if self._has_base(y):
+                        y = self._get_base(y)
+                    else:
+                        y = self._get_frame(y)
+            else:
+                key = next(iter(kwargs))
+                if key not in ('base', 'frame'):
+                    raise TypeError(f'Got an unexpected keyword argument "{key}"')
+                y = next(iter(kwargs.values()))
+                if key == 'base':
+                    if not isinstance(y, (str, Base)):
+                        raise TypeError('base must be a Base or str object')
+                    if not isinstance(y, Base):
+                        y = self._get_base(y)
+
+                else:
+                    if not isinstance(y, (str, Frame)):
+                        raise TypeError('frame must be a Frame or str object')
+                    if not isinstance(y, Frame):
+                        y = self._get_frame(y)
+
+            if isinstance(y, Base):
+                return _vector_from_c_value(self._c_handler.Dt(c_deref(c_vector), (<Base>y)._c_handler))
+            return _vector_from_c_value(self._c_handler.Dt(c_deref(c_vector), (<Frame>y)._c_handler))
+
+
+
 
     ######## Mixin ########
 
