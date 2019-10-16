@@ -1123,6 +1123,30 @@ class System(_System):
 
 
 
+    def rotation_matrix(self, a, b):
+        '''rotation_matrix(a: Base, b: Base) -> Matrix
+        Calculate the rotation matrix for the given bases
+
+            :Example:
+
+            >>> a = new_base('a', 'xyz')
+            >>> rotation_matrix(a, 'xyz')
+            ╭         ╮
+            │ 1  0  0 │
+            │ 0  1  0 │
+            │ 0  0  1 │
+            ╰         ╯
+
+        :type a: str, Base
+        :type b: str, Base
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Base
+
+        '''
+        return self._rotation_matrix(a, b)
+
 
 
     ######## Properties ########

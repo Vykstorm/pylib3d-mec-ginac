@@ -59,7 +59,9 @@ for name in dir(System):
     if name == 'set_as_default':
         continue
     if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))) and\
-    not any(map(lambda pattern: fullmatch(pattern, name), [r'\w+_point_branch'])):
+    not any(map(lambda pattern: fullmatch(pattern, name),
+        [r'\w+_point_branch', r'rotation_\w+']
+    )):
         continue
 
     __all__.append(name)

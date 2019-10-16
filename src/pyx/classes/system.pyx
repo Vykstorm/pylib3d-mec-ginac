@@ -1037,6 +1037,24 @@ cdef class _System:
 
 
 
+    def _rotation_matrix(self, a, b):
+        if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
+            raise TypeError('Input arguments must be Base or str objects')
+
+        if isinstance(a, str):
+            a = self._get_base(a)
+
+        if isinstance(b, str):
+            b = self._get_base(b)
+
+        return _matrix_from_c_value(self._c_handler.Rotation_Matrix(
+            (<Base>a)._c_handler,
+            (<Base>b)._c_handler
+        ))
+
+
+
+
     ######## Mixin ########
 
     cpdef _set_autogen_latex_names(self, enabled):
