@@ -1055,11 +1055,51 @@ class System(_System):
 
 
     def reduced_base(self, a, b):
+        '''reduced_base(a: Base, b: Base) -> Base
+        Find the common base in the tree of the given bases.
+
+            :Example:
+
+            >>> a = new_base('a', 'xyz')
+            >>> b = new_base('b', 'xyz')
+            >>> reduced_base(a, b).name
+            'xyz'
+
+
+        :type a: str, Base
+        :type b: str, Base
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Base
+
+        '''
         return self._reduced_base(a, b)
 
 
 
     def reduced_point(self, a, b):
+        '''reduced_point(a: Point, b: Point) -> Point
+        Get the point obtained by reducing the given ones as argument.
+
+            :Example:
+
+            >>> b = new_base('b', 'xyz')
+            >>> b
+            Base b, ancestors: xyz
+            >>> v, w = new_vector('v', base='xyz'), new_vector('w', base=b)
+            >>> p, q = new_point('p', v), new_point('q', w)
+            >>> reduced_point(p, q).name
+            'O'
+
+        :type a: str, Point
+        :type b: str, Point
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Point
+
+        '''
         return self._reduced_point(a, b)
 
 
