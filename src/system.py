@@ -1142,7 +1142,7 @@ class System(_System):
 
         :raises TypeError: If the input arguments dont have a valid type
 
-        :rtype: Base
+        :rtype: Matrix
 
         '''
         return self._rotation_matrix(a, b)
@@ -1183,12 +1183,26 @@ class System(_System):
 
         :raises TypeError: If the input arguments dont have a valid type
 
-        :rtype: Base
+        :rtype: Vector3D
 
         '''
         return self._angular_velocity(a, b)
 
 
+
+    def angular_velocity_tensor(self, a, b):
+        '''
+        Get the angular velocity tensor between two bases (from a to b)
+
+        :type a: str, Base
+        :type b: str, Base
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Tensor3D
+
+        '''
+        return self._angular_velocity_tensor(a, b)
 
 
 

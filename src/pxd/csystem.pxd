@@ -122,7 +122,7 @@ cdef extern from "System.h":
         Matrix Rotation_Matrix(Base*, Base*)
         Vector3D Position_Vector(Point*, Point*)
         Vector3D Angular_Velocity(Base*, Base*)
-        Vector3D Angular_Velocity_Tensor(Base*, Base*)
+        Tensor3D Angular_Velocity_Tensor(Base*, Base*)
         Vector3D Velocity_Vector(Frame*, Point*)
         Vector3D Velocity_Vector(Frame*, Point*, Solid*)
         Vector3D Angular_Acceleration(Base*, Base*)
