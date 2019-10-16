@@ -1277,7 +1277,37 @@ class System(_System):
 
 
     def derivative(self, *args, **kwargs):
-        '''
+        '''derivative(x: Expr | Matrix | Vector[, base: Base][, frame: Frame]) -> Expr | Matrix | Vector3D
+        Compute the time derivative of the given expression:
+
+            :Example:
+
+            >>> a = new_param('a')
+            >>> t = get_time()
+            >>> derivative(a * t ** 2 + 20)
+            2*t*a
+
+
+        You can also compute the time derivatives of the components of a matrix
+        or vector:
+
+            >>> v = new_vector('v', 1, a / t, a / t ** 2 )
+            >>> derivative(v)
+            [ 0  -t**(-2)*a  -2*t**(-3)*a ]
+
+        :param base: Additional argument which is only valid if the first argument
+            is a vector.
+                * If specified, it must be a base.
+                * The time derivatives will be computed with respect such base.
+                * The argument frame cannot be set if this one is indicated.
+
+        :param frame: Additional argument which is only valid if the first argument
+            is a vector.
+                * If specified, it must be a frame.
+                * The time derivatives will be computed with respect such frame.
+                * The argument base cannot be set if this one is indicated.
+        :type frame: str, Frame
+
         '''
         return self._derivative(args, kwargs)
 

@@ -1198,11 +1198,8 @@ cdef class _System:
         args = list(args)
         x = args.pop(0)
 
-        if not isinstance(x, (Expr, SymbolNumeric, Matrix)):
-            raise TypeError('The first argument must be an expression, symbol, matrix or vector')
-
-        if isinstance(x, SymbolNumeric):
-            x = Expr(x)
+        if not isinstance(x, (Expr, Matrix)):
+            raise TypeError('The first argument must be an expression, matrix or vector')
 
         if isinstance(x, (Expr, Matrix)) and not isinstance(x, Vector3D):
             if args or kwargs:
