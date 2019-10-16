@@ -1054,6 +1054,26 @@ cdef class _System:
 
 
 
+    def _position_vector(self, a, b):
+        if not isinstance(a, (str, Point)) or not isinstance(b, (str, Point)):
+            raise TypeError('Input arguments must be Point or str objects')
+
+        if isinstance(a, str):
+            a = self._get_point(a)
+
+        if isinstance(b, str):
+            b = self._get_point(b)
+
+        return _vector_from_c_value(self._c_handler.Position_Vector(
+            (<Point>a)._c_handler,
+            (<Point>b)._c_handler
+        ))
+
+
+
+    
+
+
 
     ######## Mixin ########
 

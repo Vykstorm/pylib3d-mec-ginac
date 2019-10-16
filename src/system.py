@@ -1149,6 +1149,32 @@ class System(_System):
 
 
 
+    def position_vector(self, a, b):
+        '''position_vector(a: Point, b: Point) -> Vector3D
+        Get the position vector between the given points (a to b)
+
+            :Example:
+
+            >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >>> v = new_vector('v', a, b, c, 'xyz')
+            >>> w = new_vector('w', 1, 2, 3, 'xyz')
+            >>> p, q = new_point('p', v), new_point('q', w)
+            >>> position_vector(p, q)
+            [ 1-a  2-b  3-c ]
+
+
+        :type a: str, Point
+        :type b: str, Point
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Vector3D
+
+        '''
+        return self._position_vector(a, b)
+
+
+
     ######## Properties ########
 
 
