@@ -985,14 +985,14 @@ cdef class _System:
     ######## Kinematic operations ########
 
 
-    def _reduced_base(self, a, b):
+    cpdef _reduced_base(self, a, b):
         if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
             raise TypeError('Input arguments must be Base or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Base):
             a = self._get_base(a)
 
-        if isinstance(b, str):
+        if not isinstance(b, Base):
             b = self._get_base(b)
 
         return Base(<Py_ssize_t>self._c_handler.Reduced_Base(
@@ -1002,11 +1002,11 @@ cdef class _System:
 
 
 
-    def _reduced_point(self, a, b):
+    cpdef _reduced_point(self, a, b):
         if not isinstance(a, (str, Point)) or not isinstance(b, (str, Point)):
             raise TypeError('Input arguments must be Point or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Point):
             a = self._get_point(a)
 
         if isinstance(b, str):
@@ -1019,11 +1019,11 @@ cdef class _System:
 
 
 
-    def _pre_point_branch(self, a, b):
+    cpdef _pre_point_branch(self, a, b):
         if not isinstance(a, (str, Point)) or not isinstance(b, (str, Point)):
             raise TypeError('Input arguments must be Point or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Point):
             a = self._get_point(a)
 
         if isinstance(b, str):
@@ -1037,14 +1037,14 @@ cdef class _System:
 
 
 
-    def _rotation_matrix(self, a, b):
+    cpdef _rotation_matrix(self, a, b):
         if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
             raise TypeError('Input arguments must be Base or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Base):
             a = self._get_base(a)
 
-        if isinstance(b, str):
+        if not isinstance(b, Base):
             b = self._get_base(b)
 
         return _matrix_from_c_value(self._c_handler.Rotation_Matrix(
@@ -1054,11 +1054,11 @@ cdef class _System:
 
 
 
-    def _position_vector(self, a, b):
+    cpdef _position_vector(self, a, b):
         if not isinstance(a, (str, Point)) or not isinstance(b, (str, Point)):
             raise TypeError('Input arguments must be Point or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Point):
             a = self._get_point(a)
 
         if isinstance(b, str):
@@ -1071,14 +1071,14 @@ cdef class _System:
 
 
 
-    def _angular_velocity(self, a, b):
+    cpdef _angular_velocity(self, a, b):
         if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
             raise TypeError('Input arguments must be Base or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Base):
             a = self._get_base(a)
 
-        if isinstance(b, str):
+        if not isinstance(b, Base):
             b = self._get_base(b)
 
         return _vector_from_c_value(self._c_handler.Angular_Velocity(
@@ -1088,20 +1088,49 @@ cdef class _System:
 
 
 
-    def _angular_velocity_tensor(self, a, b):
+    cpdef _angular_velocity_tensor(self, a, b):
         if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
             raise TypeError('Input arguments must be Base or str objects')
 
-        if isinstance(a, str):
+        if not isinstance(a, Base):
             a = self._get_base(a)
 
-        if isinstance(b, str):
+        if not isinstance(b, Base):
             b = self._get_base(b)
 
         return _tensor_from_c_value(self._c_handler.Angular_Velocity_Tensor(
             (<Base>a)._c_handler,
             (<Base>b)._c_handler
         ))
+
+
+
+    cpdef _velocity_vector(self, frame, point, solid=None):
+        if not isinstance(frame, (str, Frame)):
+            raise TypeError('frame must be an instance of Frame or str')
+
+        if not isinstance(point, (str, Point)):
+            raise TypeError('point must be an instance of Point or str')
+
+        if solid is not None and not isinstance(solid, (str, Solid)):
+            raise TypeError('solid must be None or either an instance of Solid or str')
+
+        if not isinstance(frame, Frame):
+            frame = self._get_frame(frame)
+
+        if not isinstance(point, Point):
+            point = self._get_point(point)
+
+        if solid is not None and not isinstance(solid, Solid):
+            solid = self._get_solid(solid)
+
+
+        cdef c_Frame* c_frame = (<Frame>frame)._c_handler
+        cdef c_Point* c_point = (<Point>point)._c_handler
+        if solid is None:
+            return _vector_from_c_value(self._c_handler.Velocity_Vector(c_frame, c_point))
+        return _vector_from_c_value(self._c_handler.Velocity_Vector(c_frame, c_point, <c_Solid*>(<Solid>solid)._c_handler))
+
 
 
 

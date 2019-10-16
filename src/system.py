@@ -1191,7 +1191,7 @@ class System(_System):
 
 
     def angular_velocity_tensor(self, a, b):
-        '''
+        '''angular_velocity_tensor(a: Base, b: Base) -> Tensor3D
         Get the angular velocity tensor between two bases (from a to b)
 
         :type a: str, Base
@@ -1203,6 +1203,27 @@ class System(_System):
 
         '''
         return self._angular_velocity_tensor(a, b)
+
+
+
+    def velocity_vector(self, frame, point, solid=None):
+        '''velocity_vector(frame: Frame, point: Point[, solid: Solid]) -> Vector3D
+        Get the velocity vector of the point with respect the given frame.
+        If solid is specified, the resulting velocity is computed with respect
+        the frame in such solid.
+
+        :type frame: str, Frame
+        :type point: str, Point
+        :type solid: None, str, Solid
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Vector3D
+
+        '''
+        return self._velocity_vector(frame, point, solid)
+
+
 
 
 
