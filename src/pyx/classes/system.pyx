@@ -1019,6 +1019,22 @@ cdef class _System:
 
 
 
+    def _pre_point_branch(self, a, b):
+        if not isinstance(a, (str, Point)) or not isinstance(b, (str, Point)):
+            raise TypeError('Input arguments must be Point or str objects')
+
+        if isinstance(a, str):
+            a = self._get_point(a)
+
+        if isinstance(b, str):
+            b = self._get_point(b)
+
+        return Point(<Py_ssize_t>self._c_handler.Pre_Point_Branch(
+            (<Point>a)._c_handler,
+            (<Point>b)._c_handler)
+        )
+
+
 
 
     ######## Mixin ########

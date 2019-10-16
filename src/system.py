@@ -1104,9 +1104,29 @@ class System(_System):
 
 
 
+    def pre_point_branch(self, a, b):
+        '''pre_point_branch(a: Point, b: Point) -> Point
+        Get the previous point in the branch from a to b (gravity down)
+
+        :type a: str, Point
+        :type b: str, Point
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Point
+
+        '''
+        return self._pre_point_branch(a, b)
+
+
+    previous_point_branch = pre_point_branch
+
+
+
 
 
     ######## Properties ########
+
 
     @property
     def symbols(self):

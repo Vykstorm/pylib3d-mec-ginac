@@ -13,6 +13,7 @@ import lib3d_mec_ginac_ext as _ext
 
 # Other imports
 from functools import wraps
+from re import fullmatch
 
 
 # Get all definitions in the extension (add them to __all__ and globals())
@@ -57,8 +58,10 @@ def _create_system_global_func(method):
 for name in dir(System):
     if name == 'set_as_default':
         continue
-    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))):
+    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))) and\
+    not any(map(lambda pattern: fullmatch(pattern, name), [r'\w+_point_branch'])):
         continue
+
     __all__.append(name)
     globals()[name] = _create_system_global_func(getattr(System, name))
 
