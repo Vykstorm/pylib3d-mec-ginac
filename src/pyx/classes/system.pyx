@@ -1071,7 +1071,23 @@ cdef class _System:
 
 
 
-    
+    def _angular_velocity(self, a, b):
+        if not isinstance(a, (str, Base)) or not isinstance(b, (str, Base)):
+            raise TypeError('Input arguments must be Base or str objects')
+
+        if isinstance(a, str):
+            a = self._get_base(a)
+
+        if isinstance(b, str):
+            b = self._get_base(b)
+
+        return _vector_from_c_value(self._c_handler.Angular_Velocity(
+            (<Base>a)._c_handler,
+            (<Base>b)._c_handler
+        ))
+
+
+
 
 
 

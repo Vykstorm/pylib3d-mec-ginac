@@ -1162,7 +1162,6 @@ class System(_System):
             >>> position_vector(p, q)
             [ 1-a  2-b  3-c ]
 
-
         :type a: str, Point
         :type b: str, Point
 
@@ -1172,6 +1171,24 @@ class System(_System):
 
         '''
         return self._position_vector(a, b)
+
+
+
+    def angular_velocity(self, a, b):
+        '''angular_velocity(a: Base, b: Base) -> Vector3D
+        Get the angular velocity between two bases (from a to b)
+
+        :type a: str, Base
+        :type b: str, Base
+
+        :raises TypeError: If the input arguments dont have a valid type
+
+        :rtype: Base
+
+        '''
+        return self._angular_velocity(a, b)
+
+
 
 
 
