@@ -138,10 +138,9 @@ cdef extern from "System.h":
         Vector3D Dt(Vector3D, Frame*)
 
         Matrix jacobian(Matrix, Matrix, ex)
-        Matrix jacobian(Matrix, Matrix)
         Matrix jacobian(ex, Matrix)
         Matrix jacobian(Matrix, symbol)
-        Matrix jacobian(ex, symbol)
+        #ex jacobian(ex, symbol)
 
         ex diff(ex, symbol)
         Matrix diff(Matrix, symbol)

@@ -1252,6 +1252,71 @@ cdef class _System:
 
 
 
+
+
+    cpdef _jacobian(self, args, kwargs):
+        if len(args) < 2:
+            raise TypeError('Invalid number of inputs (expected at least 2 positional arguments)')
+
+        args = list(args)
+        x, y = args[:2]
+        args = args[2:]
+
+        if not isinstance(x, Matrix):
+            raise TypeError('The first argument must be a matrix')
+
+        if not isinstance(y, (Matrix, SymbolNumeric)):
+            raise TypeError('The second argument after the matrix must be a matrix or a symbol')
+
+        if isinstance(y, SymbolNumeric):
+            if len(args) > 0:
+                raise TypeError('Invalid number of inputs (expected at most 2 positional arguments)')
+
+            if kwargs:
+                raise TypeError('You cant pass keyword arguments after passing a matrix and a symbol as positional arguments')
+
+
+            # Derivative of the matrix with respect a symbol
+            return _matrix_from_c_value(
+                self._c_handler.jacobian(
+                    c_deref(<c_Matrix*>(<Matrix>x)._get_c_handler()),
+                    c_deref(<c_symbol*>(<SymbolNumeric>y)._c_handler)
+                )
+            )
+
+        # Derivative of the matrix with resspect another matrix
+        if len(args) + len(kwargs) > 1:
+            raise TypeError('Invalid number of inputs (expected at most 3 positional or keyword arguments)')
+
+        if args or kwargs:
+            if kwargs:
+                key = next(iter(kwargs))
+                if key != 'symmetric':
+                    raise TypeError(f'Got an unexpected keyword argument "{key}"')
+                symmetric = next(iter(kwargs.values()))
+            else:
+                symmetric = args[0]
+
+            if not isinstance(symmetric, (Expr, int)):
+                raise TypeError('symmetric argument must be an expression, bool or int')
+
+            symmetric = Expr(symmetric)
+        else:
+            symmetric = Expr(0)
+
+        return _matrix_from_c_value(
+            self._c_handler.jacobian(
+                c_deref(<c_Matrix*>(<Matrix>x)._get_c_handler()),
+                c_deref(<c_Matrix*>(<Matrix>y)._get_c_handler()),
+                (<Expr>symmetric)._c_handler
+                )
+        )
+
+
+
+
+
+
     ######## Mixin ########
 
     cpdef _set_autogen_latex_names(self, enabled):

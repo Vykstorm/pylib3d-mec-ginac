@@ -1317,6 +1317,22 @@ class System(_System):
 
 
 
+    def jacobian(self, *args, **kwargs):
+        '''jacobian(x: ex | Matrix, y: Matrix | SymbolNumeric, symmetric: Expr) -> Matrix
+        Compute the jacobian matrix between two matrices, a an expression and a matrix or a
+        matrix and a symbol.
+
+            :Example:
+
+            >>> 
+
+
+        '''
+        return self._jacobian(args, kwargs)
+
+
+
+
     ######## Properties ########
 
 

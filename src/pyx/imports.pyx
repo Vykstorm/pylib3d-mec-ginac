@@ -53,7 +53,9 @@ from src.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
 from src.pxd.ginac.cnumeric cimport numeric as c_numeric
 from src.pxd.ginac.cexpr    cimport ex      as c_ex
 from src.pxd.ginac.cbasic   cimport basic   as c_basic
+from src.pxd.ginac.csymbol  cimport symbol  as c_symbol
 from src.pxd.ginac.cmatrix  cimport matrix  as c_ginac_matrix
+
 
 # Printing classes & functions
 from src.pxd.ginac.cprint cimport print_context  as c_ginac_printer
