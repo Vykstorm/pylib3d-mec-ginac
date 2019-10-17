@@ -107,3 +107,22 @@ API Reference
     :members:
         get_force, get_moment, get_solid, get_type,
         force, moment, solid, type
+
+
+
+
+Global functions
+==========================
+
+.. autofunction:: get_default_system
+
+.. autofunction:: set_default_system
+
+
+Mathematic functions
+~~~~~~~~~~~~~~~~~~~~
+
+
+.. autofunction:: dot
+
+.. autofunction:: cross

@@ -435,15 +435,16 @@ GeometricObject.register(Vector3D)
 def dot(v, w):
     '''dot(v: Vector3D, w: Vector3D) -> Expr
     Computes the dot product of two vectors.
+
     :rtype: Expr
     :raise TypeError: If the input arguments are not vectors
 
         :Example:
 
-        >> a, b = new_param('a'), new_param('b')
-        >> v = new_vector('v', a, b, 1)
-        >> w = new_vector('w', 1, b, a)
-        >> dot(v, w)
+        >>> a, b = new_param('a'), new_param('b')
+        >>> v = new_vector('v', a, b, 1)
+        >>> w = new_vector('w', 1, b, a)
+        >>> dot(v, w)
         2*a+b**2
 
     .. note:: Its equivalent to v.dot(w) or w.dot(v)
@@ -457,17 +458,18 @@ def dot(v, w):
 def cross(v, w):
     '''cross(v: Vector3D, w: Vector3D) -> Vector3D
     Computes the cross product between two vectors.
+
     :rtype: Vector3D
     :raise TypeError: If the input arguments are not vectors
 
         :Example:
 
-        >> a, b = new_param('a'), new_param('b')
-        >> v = new_vector('v', a, b, 1)
-        >> w = new_vector('w', 1, b, a)
-        >> cross(v, w)
+        >>> a, b = new_param('a'), new_param('b')
+        >>> v = new_vector('v', a, b, 1)
+        >>> w = new_vector('w', 1, b, a)
+        >>> cross(v, w)
         [ a*b-b  1.0-a**2  a*b-b ]
-        >> cross(w, v)
+        >>> cross(w, v)
         [ -a*b+b  -1.0+a**2  -a*b+b ]
 
 
