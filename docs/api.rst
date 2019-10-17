@@ -118,6 +118,11 @@ Global functions
 
 .. autofunction:: set_default_system
 
+.. autofunction:: set_atomization
+
+.. autofunction:: set_gravity
+
+
 
 Mathematic functions
 ~~~~~~~~~~~~~~~~~~~~
