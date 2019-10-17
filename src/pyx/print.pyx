@@ -171,6 +171,9 @@ cdef class ConsolePrinter(Printer):
     cpdef print_matrix(self, Matrix matrix):
         # This method is used to print matrices (including vectors and tensors)
 
+        if isinstance(matrix, Vector3D):
+            return self.print_vector(matrix)
+
         values = tuple(map(str, matrix.get_values()))
         n, m = matrix.get_shape()
         if m == 1:
@@ -194,6 +197,13 @@ cdef class ConsolePrinter(Printer):
             lines.append(tail)
 
         return '\n'.join(lines)
+
+
+
+    cpdef print_vector(self, Vector3D vector):
+        lines = map(str, vector)
+        return '[\n' + ',\n'.join(lines) + '\n] ' + f'base "{vector.base.name}"'
+
 
 
 
