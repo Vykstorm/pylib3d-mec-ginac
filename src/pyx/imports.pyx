@@ -45,6 +45,8 @@ from src.pxd.cpoint          cimport Point          as c_Point
 from src.pxd.cframe          cimport Frame          as c_Frame
 from src.pxd.csolid          cimport Solid          as c_Solid
 from src.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
+from src.pxd.cglobals        cimport atomization    as c_atomization
+from src.pxd.cglobals        cimport gravity        as c_gravity
 
 
 
