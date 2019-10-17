@@ -38,7 +38,7 @@ API Reference
         rotation_matrix, position_vector,
         angular_velocity, angular_velocity_tensor, velocity_vector,
         angular_acceleration, acceleration_vector,
-        twist, derivative,
+        twist, derivative, jacobian,
         symbols,
         time,
         coordinates, velocities, accelerations,
