@@ -118,9 +118,21 @@ Global functions
 
 .. autofunction:: set_default_system
 
-.. autofunction:: set_atomization
+.. autofunction:: set_atomization_state
 
-.. autofunction:: set_gravity
+.. autofunction:: enable_atomization
+
+.. autofunction:: disable_atomization
+
+.. autofunction:: get_atomization_state
+
+.. autofunction:: set_gravity_direction
+
+.. autofunction:: set_gravity_up
+
+.. autofunction:: set_gravity_down
+
+.. autofunction:: get_gravity_direction
 
 
 
