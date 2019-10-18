@@ -1316,6 +1316,57 @@ cdef class _System:
 
 
 
+    cpdef _diff(self, x, symbol):
+
+        if not isinstance(symbol, (str, SymbolNumeric)):
+            raise TypeError('symbol must be a SymbolNumeric or str object')
+
+        if isinstance(symbol, str):
+            symbol = self._get_symbol(symbol)
+
+        if not isinstance(x, (Expr, Matrix, Wrench3D)):
+            raise TypeError('First argument must be a expression, matrix or wrench object')
+
+
+        cdef c_symbol_numeric* c_symbol = (<SymbolNumeric>symbol)._c_handler
+
+        if isinstance(x, Expr):
+            # derivative between expression and symbol
+            return _expr_from_c(self._c_handler.diff(
+                    (<Expr>x)._c_handler,
+                    c_deref(c_symbol)
+                    ))
+
+        if isinstance(x, Vector3D):
+            # derivative between vector and symbol
+            return _vector_from_c_value(self._c_handler.diff(
+                c_deref(<c_Vector3D*>(<Vector3D>x)._get_c_handler()),
+                c_deref(c_symbol)
+            ))
+
+        if isinstance(x, Tensor3D):
+            # derivative between tensor and symbol
+            return _tensor_from_c_value(self._c_handler.diff(
+                c_deref(<c_Tensor3D*>(<Tensor3D>x)._get_c_handler()),
+                c_deref(c_symbol)
+            ))
+
+        if isinstance(x, Matrix):
+            # derivative between matrix and symbol
+            return _matrix_from_c_value(self._c_handler.diff(
+                c_deref((<Matrix>x)._get_c_handler()),
+                c_deref(c_symbol)
+            ))
+
+        # derivative between wrench and symbol
+        return _wrench_from_c_value(self._c_handler.diff(
+            c_deref((<Wrench3D>x)._c_handler),
+            c_deref(c_symbol)
+        ))
+
+
+
+
 
     ######## Mixin ########
 

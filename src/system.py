@@ -1347,6 +1347,50 @@ class System(_System):
 
 
 
+    def diff(self, x, symbol):
+        '''diff(x: Expr | Matrix | Wrench3D, symbol: SymbolNumeric) -> Expr | Matrix | Wrench3D
+        Computes the derivative of the given expression, matrix, vector, tensor or wrench
+        with respect a symbol.
+
+            :Example:
+
+            >>> a = new_param('a')
+            >>> diff(2 * a ** 2, a)
+            4*a
+            >>> b = new_param('b')
+            >>> diff(b / a, a)
+            -a**(-2)*b
+            >>> m = new_matrix('m', [a, b / a, b / a ** 2, b / a ** 3], shape=[2, 2])
+            >>> m
+            ╭                      ╮
+            │         a  a**(-1)*b │
+            │ a**(-2)*b  a**(-3)*b │
+            ╰                      ╯
+            >>> diff(m, a)
+            ╭                            ╮
+            │            1    -a**(-2)*b │
+            │ -2*a**(-3)*b  -3*a**(-4)*b │
+
+
+        :param x: Must be the expression, matrix or wrench to derivate
+        :type x: Expr, Matrix, Wrench3D
+
+        :param symbol: Must be the symbol about which the expression, matrix or wrench
+            is derivated
+        :type symbol: SymbolNumeric, str
+
+
+        :rtype: Expr, Matrix, Wrench3D
+
+
+        '''
+        return self._diff(x, symbol)
+
+
+
+
+
+
     ######## Properties ########
 
 

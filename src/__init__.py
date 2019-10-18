@@ -61,7 +61,8 @@ for name in dir(System):
     if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))) and\
     not any(map(lambda pattern: fullmatch(pattern, name),
         [r'\w+_point_branch', r'rotation_\w+', r'position_', r'angular_\w+',
-        r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian']
+        r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
+        'diff']
     )):
         continue
 

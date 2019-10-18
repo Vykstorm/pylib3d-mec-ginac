@@ -147,7 +147,6 @@ cdef extern from "System.h":
         Vector3D diff(Vector3D, symbol)
         Tensor3D diff(Tensor3D, symbol)
         Wrench3D diff(Wrench3D, symbol)
-        Wrench3D diff(Wrench3D, ex)
 
         ex numeric_evaluate(ex)
         Matrix evaluate_Matrix(Matrix)
