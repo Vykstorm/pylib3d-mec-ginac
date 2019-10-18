@@ -6,7 +6,11 @@ This file implements global function helpers
 
 
 
-def set_gravity(state):
+
+######## Change gravity direction ########
+
+
+def set_gravity_direction(state):
     '''set_gravity(state: int | str)
     Toggle gravity down or up.
 
@@ -15,6 +19,8 @@ def set_gravity(state):
         * If its False, 0 or "down", gravity is turned down.
 
     '''
+    global c_gravity
+
     if not isinstance(state, (int, str)):
         raise TypeError('Input argument must be str or int')
 
@@ -29,9 +35,40 @@ def set_gravity(state):
 
 
 
+def set_gravity_up():
+    '''
+    Toggle gravity up.
+    '''
+    set_gravity_direction(1)
 
 
-def set_atomization(state):
+def set_gravity_down():
+    '''
+    Toggle gravity down.
+    '''
+    set_gravity_direction(0)
+
+
+
+
+def get_gravity_direction():
+    '''get_gravity_direction() -> int
+    Get the gravity direction. Returns 1 if it is turned up, and 0 if its down.
+
+    :rtype: int
+
+    '''
+    return int(c_gravity)
+
+
+
+
+
+
+######## Change atomization ########
+
+
+def set_atomization_state(state):
     '''set_gravity(state: int | str)
     Toggle atomization on or off
 
@@ -40,6 +77,7 @@ def set_atomization(state):
         * If its False, 0 or "off", atomization is disabled
 
     '''
+    global c_atomization
 
     if not isinstance(state, (int, str)):
         raise TypeError('Input argument must be str or int')
@@ -52,3 +90,29 @@ def set_atomization(state):
         state = bool(state)
 
     c_atomization = state
+
+
+
+def enable_atomization():
+    '''
+    Toggle atomization on
+    '''
+    set_atomization_state(1)
+
+
+def disable_atomization():
+    '''
+    Toggle atomization off
+    '''
+    set_atomization_state(0)
+
+
+
+def get_atomization_state():
+    '''
+    Returns 1 if atomization is enabled. 0 othwerwise.
+
+    :rtype: int
+
+    '''
+    return int(c_atomization)
