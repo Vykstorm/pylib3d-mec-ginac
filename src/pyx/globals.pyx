@@ -69,7 +69,7 @@ def get_gravity_direction():
 
 
 def set_atomization_state(state):
-    '''set_gravity(state: int | str)
+    '''set_atomization_state(state: int | str)
     Toggle atomization on or off
 
     :param state:

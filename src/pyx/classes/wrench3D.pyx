@@ -84,7 +84,7 @@ cdef class Wrench3D(Object):
 
 
     cpdef get_type(self):
-        '''get_solid() -> str
+        '''get_type() -> str
         Get the type of this wrench
 
         :rtype: str
