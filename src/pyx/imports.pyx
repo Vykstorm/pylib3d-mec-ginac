@@ -47,6 +47,7 @@ from src.pxd.csolid          cimport Solid          as c_Solid
 from src.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
 from src.pxd.cglobals        cimport atomization    as c_atomization
 from src.pxd.cglobals        cimport gravity        as c_gravity
+from src.pxd.cglobals        cimport unatomize      as c_unatomize
 
 
 

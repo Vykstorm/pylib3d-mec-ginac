@@ -116,3 +116,34 @@ def get_atomization_state():
 
     '''
     return int(c_atomization)
+
+
+
+
+
+
+######## Unatomize ########
+
+
+def unatomize(x):
+    '''unatomize(x: Expr | Matrix | Wrench3D) -> Expr | Matrix | Wrench3D
+    Unatomize the given expression, matrix or wrench
+    '''
+
+    if not isinstance(x, (Expr, Matrix, Wrench3D)):
+        raise TypeError('Input argument must be an expression, matrix or wrench')
+
+    if isinstance(x, Expr):
+        # unatomize expression
+        return _expr_from_c(c_unatomize((<Expr>x)._c_handler))
+
+    if isinstance(x, Vector3D):
+        # unatomize vector
+        return _vector_from_c_value(c_unatomize(c_deref(<c_Vector3D*>(<Vector3D>x)._get_c_handler())))
+
+    if isinstance(x, Tensor3D):
+        # unatomize tensor
+        return _tensor_from_c_value(c_unatomize(c_deref(<c_Tensor3D*>(<Tensor3D>x)._get_c_handler())))
+
+    # unatomize matrix
+    return _matrix_from_c_value(c_unatomize(c_deref((<Matrix>x)._get_c_handler())))
