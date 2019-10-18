@@ -85,6 +85,7 @@ from operator import attrgetter
 from warnings import warn
 from abc import ABC
 from types import MethodType
+from re import match
 
 # Math
 from math import floor

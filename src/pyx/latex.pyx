@@ -77,9 +77,11 @@ cdef class LatexPrinter(Printer):
 
     cpdef print_matrix(self, Matrix matrix):
         # This method is used to print a matrix (including vectors and tensors)
-        return self._print_c_expr(c_ex(matrix._get_c_handler().get_matrix()))
-
-
+        #s = repr(self._print_c_expr(c_ex(matrix._get_c_handler().get_matrix())))
+        values = tuple(map(to_latex, matrix))
+        n, m = matrix.get_shape()
+        lines = [' & '.join([to_latex(matrix.get(i, j)) for j in range(0, m)]) for i in range(0, n)]
+        return r'\begin{bmatrix}' + '\n' + (r'\\' + '\n').join(lines) + '\n' + r'\end{bmatrix}'
 
 
 
