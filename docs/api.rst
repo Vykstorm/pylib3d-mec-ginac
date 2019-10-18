@@ -134,6 +134,8 @@ Global functions
 
 .. autofunction:: get_gravity_direction
 
+.. autofunction:: unatomize
+
 
 
 Mathematic functions
