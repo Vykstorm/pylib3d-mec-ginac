@@ -157,6 +157,97 @@ cdef class Matrix(Object):
 
 
 
+
+    @staticmethod
+    def block(n, m, *args):
+        '''block(n: int, m: int, ...) -> Matrix
+        Creates a new matrix by merging a list of matrices together.
+
+            :Example:
+
+            >>> a = new_matrix('a', [[1, 2], [3, 4]])
+            >>> b = new_matrix('b', [[5, 6], [7, 8]])
+            >>> a
+            ╭      ╮
+            │ 1  2 │
+            │ 3  4 │
+            ╰      ╯
+            >>> b
+            ╭      ╮
+            │ 5  6 │
+            │ 7  8 │
+            ╰      ╯
+            >>> Matrix.block(1, 2, a, b)
+            ╭            ╮
+            │ 1  2  5  6 │
+            │ 3  4  7  8 │
+            ╰            ╯
+            >>> Matrix.block(2, 1, a, b)
+            ╭      ╮
+            │ 1  2 │
+            │ 3  4 │
+            │ 5  6 │
+            │ 7  8 │
+            ╰      ╯
+            >>> Matrix.block(2, 2, a, b, a, b)
+            ╭            ╮
+            │ 1  2  5  6 │
+            │ 3  4  7  8 │
+            │ 1  2  5  6 │
+            │ 3  4  7  8 │
+            ╰            ╯
+
+
+        :param n: The number of blocks at the row dimension. Must be a value greater
+            than zero
+        :type n: int
+
+        :param m: The number of blocks at the column dimension. Must be a value greater
+            than zero.
+        :type m: int
+
+        :param args: The matrices to be merged. All of them must have the same number
+            of rows and columns. The number of matrices specified must be equal to
+            ``n*m``
+
+        :rtype: Matrix
+
+
+        '''
+        if not isinstance(n, int) or n <= 0:
+            raise TypeError('n must be a number greater than zero')
+
+        if not isinstance(m, int) or m <= 0:
+            raise TypeError('m must be a number greater than zero')
+
+        if not all(map(lambda arg: isinstance(arg, Matrix), args)):
+            raise TypeError('All input values passed as varadic arguments must be matrices')
+
+        if n*m != len(args):
+            raise ValueError('Inconsistent number of varadic arguments passed')
+
+        if len(frozenset(map(attrgetter('num_rows'), args))) != 1:
+            raise ValueError('All matrices must have the same number of rows')
+
+        if len(frozenset(map(attrgetter('num_cols'), args))) != 1:
+            raise ValueError('All matrices must have the same number of columns')
+
+        cdef c_vector[c_Matrix*] c_blocks
+        c_blocks.reserve(len(args))
+        for arg in args:
+            c_blocks.push_back((<Matrix>arg)._get_c_handler())
+
+        cdef c_Matrix* c_matrix = new c_Matrix(n, m, c_blocks)
+
+        m = Matrix()
+        (<Matrix>m)._c_handler = c_matrix
+        (<Matrix>m)._owns_c_handler = True
+        return m
+
+
+
+
+
     ######## Getters ########
 
 
@@ -644,7 +735,7 @@ cdef class Matrix(Object):
         Get the transposed matrix
 
             :Example:
-            
+
             >>> m = new_matrix('a', range(0, 9), shape=[3, 3])
             >>> m
             ╭         ╮
@@ -780,6 +871,10 @@ cdef class Matrix(Object):
 
         '''
         return self.get_values()
+
+
+
+
 
 
 

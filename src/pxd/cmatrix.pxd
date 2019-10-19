@@ -9,6 +9,7 @@ Matrix.h that are going to be used by this library
 
 # Imports from the standard C++ library
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 
 # Imports from .pxd file definitions
 from src.pxd.ginac.cmatrix cimport matrix
@@ -21,7 +22,9 @@ cdef extern from "Matrix.h":
         # Constructors
         Matrix() except +
         Matrix(long rows, long cols) except +
+        Matrix(long rows, long cols, vector[Matrix*]) except +
         Matrix(matrix mat) except +
+
 
         # Getters
         string get_name()
