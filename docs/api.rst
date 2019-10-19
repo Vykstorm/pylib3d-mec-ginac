@@ -63,6 +63,7 @@ API Reference
 
 .. autoclass:: Matrix
     :members:
+        block,
         get_shape, get_num_rows, get_num_cols, get_size, __len__,
         get_values, get, __getitem__,
         __iter__, __reversed__,
