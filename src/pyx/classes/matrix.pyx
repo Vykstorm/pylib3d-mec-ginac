@@ -206,7 +206,8 @@ cdef class Matrix(Object):
             than zero.
         :type m: int
 
-        :param args: The matrices to be merged.
+        :param args: The matrices to be merged:
+
             * The number of matrices specified must be equal to ``n*m``
             * All matrices in the same row block must have the same number of rows
             * All matrices in the same column block must have the same number of columns
