@@ -35,28 +35,37 @@ theta2, dtheta2, ddtheta2 = new_coord('theta2', -2*pi/6, 0)
 theta3, dtheta3, ddtheta3 = new_coord('theta3', -3*pi/6, 0)
 
 
-######## Geometric parameters ########
+######## Kinematical parameters ########
 
 l1, l2 = new_param('l1', 0.4), new_param('l2', 2.0)
 l3, l4 = new_param('l3', 1.2), new_param('l4', 1.6)
 
+
+######## Bases ########
 
 new_base('Barm1', 'xyz', [0, 1, 0], theta1)
 new_base('Barm2', 'xyz', 0, 1, 0, theta2)
 new_base('Barm3', 'xyz', rotation_tupla=[0, 1, 0], rotation_angle=theta3)
 
 
-new_vector('O_A', l1, 0, 0, 'Barm1')
-new_vector('A_B', l2, 0, 0, 'Barm2')
-new_vector('B_C', [l3, 0, 0], 'Barm3')
-new_vector('O_O2', values=[l4, 0, 0], base='xyz')
+######## Vectors ########
+
+new_vector('OA', l1, 0, 0, 'Barm1')
+new_vector('AB', l2, 0, 0, 'Barm2')
+new_vector('BC', [l3, 0, 0], 'Barm3')
+new_vector('OO2', values=[l4, 0, 0], base='xyz')
 
 
-new_point('OA', 'O', 'O_A')
-new_point('OB', 'OA', 'A_B')
-new_point('OC', 'OB', 'B_C')
-new_point('O2', 'O', 'O_O2')
+######## Points ########
 
+new_point('A',  'O', 'OA')
+new_point('B',  'A', 'AB')
+new_point('C',  'B', 'BC')
+new_point('O2', 'O', 'OO2')
+
+
+
+######## Dynamical parameters ########
 
 m1, m2, m3 = new_param('m1', 1), new_param('m2', 1), new_param('m3', 1)
 
@@ -79,19 +88,151 @@ I_Arm3 = new_tensor('Iarm3', base='Barm3')
 I_Arm1[1, 1], I_Arm2[1, 1], I_Arm3[1, 1] = I1yy, I2yy, I3yy
 
 
-new_frame('Fra_arm1', 'O',  'Barm1')
-new_frame('Fra_arm2', 'OA', 'Barm2')
-new_frame('Fra_arm3', 'OB', 'Barm3')
+######## Frames ########
+
+new_frame('FArm1',    'O',  'Barm1')
+new_frame('FArm2',    'A',  'Barm2')
+new_frame('FArm3',    'B',  'Barm3')
 new_frame('Fra_ABS2', 'O2', 'xyz')
 
 
 
 ######## Solids ########
 
-new_solid('arm1', 'O',  'Barm1', 'm1', 'OArm1_GArm1', 'Iarm1')
-new_solid('arm2', 'OA', 'Barm2', 'm2', 'OArm2_GArm2', 'Iarm2')
-new_solid('arm3', 'OB', 'Barm3', 'm3', 'OArm3_GArm3', 'Iarm3')
+new_solid('Arm1', 'O', 'Barm1', 'm1', 'OArm1_GArm1', 'Iarm1')
+new_solid('Arm2', 'A', 'Barm2', 'm2', 'OArm2_GArm2', 'Iarm2')
+new_solid('Arm3', 'B', 'Barm3', 'm3', 'OArm3_GArm3', 'Iarm3')
 
+
+
+######## Joint unknowns ########
+
+new_unknown('lambda1')
+new_unknown('lambda2')
+
+
+
+######## Inputs ########
+
+Fx2, Fz2 = new_input('Fx2'), new_input('Fz2')
+Fx3, Fz3 = new_input('Fx3'), new_input('Fz3')
+My2, My3 = new_input('My2'), new_input('My3')
+
+new_vector('Fext2', Fx2, 0,   Fz2, 'xyz')
+new_vector('Fext3', Fx3, 0,   Fz3, 'xyz')
+new_vector('Mext2', 0,   My2, 0,   'xyz')
+new_vector('Mext3', 0,   My3, 0,   'xyz')
+
+
+
+######## Force and momentum ########
+
+K   = new_param('k',     50)
+l2x = new_param('l2x',    1)
+l3x = new_param('l3x',  0.5)
+l3z = new_param('l3z',  0.1)
+
+new_vector('OArm2_L2',  l2x, 0, 0,   'Barm2')
+new_vector('OArm3_L3',  l3x, 0, l3z, 'Barm3')
+
+new_point('OL2', 'A', 'OArm2_L2')
+new_point('OL3', 'B', 'OArm3_L3')
+
+OL2_OL3 = position_vector('OL2', 'OL3')
+FK = K * OL2_OL3
+MK = new_vector('MK_GroundPend1', 0, 0, 0, 'xyz')
+
+
+######## Wrenches ########
+
+# Gravity
+Gravity_Arm1 = gravity_wrench('Arm1')
+Gravity_Arm2 = gravity_wrench('Arm2')
+Gravity_Arm3 = gravity_wrench('Arm3')
+
+# Inertia
+Inertia_Arm1 = inertia_wrench('Arm1')
+Inertia_Arm2 = inertia_wrench('Arm2')
+Inertia_Arm3 = inertia_wrench('Arm3')
+
+# Constitutive
+SpringA = new_wrench('SpringA', FK,   MK, 'OL2', 'Arm2', 'Constitutive')
+SpringR = new_wrench('SpringR', -FK, -MK, 'OL3', 'Arm3', 'Constitutive')
+
+# External
+FMext2 = new_wrench('FMext2', 'Fext2', 'Mext2', 'A', 'Arm2', 'External')
+FMext3 = new_wrench('FMext3', 'Fext3', 'Mext3', 'B', 'Arm3', 'External')
+
+# Wrenches sums
+Sum_Wrenches_Arm1 = Inertia_Arm1 + Gravity_Arm1
+Sum_Wrenches_Arm2 = Inertia_Arm2 + Gravity_Arm2 + SpringA - FMext2
+Sum_Wrenches_Arm3 = Inertia_Arm3 + Gravity_Arm3 - SpringA + FMext3
+
+print('* Arm wrenches sum unatomized:')
+print(unatomize(Sum_Wrenches_Arm1))
+print(unatomize(Sum_Wrenches_Arm2))
+print(unatomize(Sum_Wrenches_Arm3))
+print()
+
+# Twists
+Twist_Arm1, Twist_Arm2, Twist_Arm3 = twist('Arm1'), twist('Arm2'), twist('Arm3')
+
+print('* Arm twists unatomized:')
+print(unatomize(Twist_Arm1))
+print(unatomize(Twist_Arm2))
+print(unatomize(Twist_Arm3))
+print()
+
+
+######## Matrices of symbols ########
+
+q,   q_aux   = get_coords_matrix(),        get_aux_coords_matrix()
+dq,  dq_aux  = get_velocities_matrix(),    get_aux_velocities_matrix()
+ddq, ddq_aux = get_accelerations_matrix(), get_aux_accelerations_matrix()
+epsilon      = get_unknowns_matrix()
+param        = get_params_matrix()
+input        = get_inputs_matrix()
+
+
+######## Kinematic equations ########
+
+O2C = position_vector('O2', 'C')
+e_x = new_vector('e_x', 1, 0, 0, 'xyz')
+e_z = new_vector('e_z', 0, 0, 1, 'xyz')
+
+# Phi
+Phi = Matrix(shape=[2, 1])
+Phi[0] = O2C * e_x
+Phi[1] = O2C * e_z
+
+print('* Phi2 =   [')
+print(',\n'.join(map(str, unatomize(Phi))))
+print(']\n')
+
+dPhi = derivative(Phi)
+print('* dPhi2 =  [')
+print(',\n'.join(map(str, unatomize(dPhi))))
+print(']\n')
+
+ddPhi = derivative(dPhi)
+print('* ddPhi2 = [')
+print(',\n'.join(map(str, unatomize(ddPhi))))
+print(']\n')
+
+# Beta
+
+# Phi_q
+Phi_q = jacobian(Phi.transpose(), Matrix.block(2, 1, q, q_aux))
+
+print('* Phi_q2 = ')
+print(unatomize(Phi_q))
+
+dPhi_dq = jacobian(dPhi.transpose(), Matrix.block(2, 1, dq, dq_aux))
+print('* dPhi_dq2 = ')
+print(unatomize(dPhi_dq))
+
+
+# Gamma
 
 
 
@@ -132,4 +273,9 @@ print()
 print('#'*10 + ' Solids ' + '#'*10)
 print()
 print(get_vectors())
+print()
+
+print('#'*10 + ' Wrenches ' + '#'*10)
+print()
+print(get_wrenches())
 print()
