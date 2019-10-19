@@ -39,6 +39,7 @@ API Reference
         angular_velocity, angular_velocity_tensor, velocity_vector,
         angular_acceleration, acceleration_vector,
         twist, derivative, jacobian, diff,
+        gravity_wrench, inertia_wrench,
         symbols,
         time,
         coordinates, velocities, accelerations,
