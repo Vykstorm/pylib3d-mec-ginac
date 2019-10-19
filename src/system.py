@@ -1389,6 +1389,32 @@ class System(_System):
 
 
 
+    ######## Solid operations ########
+
+
+    def gravity_wrench(self, solid):
+        '''gravity_wrench(solid: Solid) -> Wrench3D
+        Get the gravity wrench of a solid
+
+        :rtype: Wrench3D
+
+        '''
+        return self._gravity_wrench(solid)
+
+
+
+    def inertia_wrench(self, solid):
+        '''inertia_wrench(solid: Solid) -> Wrench3D
+        Get the inertia wrench of a solid
+
+        :rtype: Wrench3D
+
+        '''
+        return self._inertia_wrench(solid)
+
+
+
+
 
 
     ######## Properties ########

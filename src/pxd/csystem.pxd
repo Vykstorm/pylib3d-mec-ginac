@@ -150,3 +150,8 @@ cdef extern from "System.h":
 
         ex numeric_evaluate(ex)
         Matrix evaluate_Matrix(Matrix)
+
+
+        # Solid methods
+        Wrench3D* Gravity_Wrench(Solid*)
+        Wrench3D* Inertia_Wrench(Solid*)

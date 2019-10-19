@@ -1367,6 +1367,29 @@ cdef class _System:
 
 
 
+    ######## Solid operations ########
+
+
+    def _gravity_wrench(self, solid):
+        if not isinstance(solid, (str, Solid)):
+            raise TypeError('Input argument must be a Solid or str object')
+        if isinstance(solid, str):
+            solid = self._get_solid(solid)
+
+        return _wrench_from_c(self._c_handler.Gravity_Wrench(<c_Solid*>(<Solid>solid)._c_handler))
+
+
+    def _inertia_wrench(self, solid):
+        if not isinstance(solid, (str, Solid)):
+            raise TypeError('Input argument must be a Solid or str object')
+        if isinstance(solid, str):
+            solid = self._get_solid(solid)
+        return _wrench_from_c(self._c_handler.Inertia_Wrench(<c_Solid*>(<Solid>solid)._c_handler))
+
+
+
+
+
 
     ######## Mixin ########
 
