@@ -145,5 +145,9 @@ def unatomize(x):
         # unatomize tensor
         return _tensor_from_c_value(c_unatomize(c_deref(<c_Tensor3D*>(<Tensor3D>x)._get_c_handler())))
 
+    if isinstance(x, Wrench3D):
+        # unatomize wrench
+        return _wrench_from_c_value(c_unatomize(c_deref((<Wrench3D>x)._c_handler)))
+
     # unatomize matrix
     return _matrix_from_c_value(c_unatomize(c_deref((<Matrix>x)._get_c_handler())))
