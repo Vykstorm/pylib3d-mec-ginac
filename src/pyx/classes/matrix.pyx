@@ -206,9 +206,10 @@ cdef class Matrix(Object):
             than zero.
         :type m: int
 
-        :param args: The matrices to be merged. All of them must have the same number
-            of rows and columns. The number of matrices specified must be equal to
-            ``n*m``
+        :param args: The matrices to be merged.
+            * The number of matrices specified must be equal to ``n*m``
+            * All matrices in the same row block must have the same number of rows
+            * All matrices in the same column block must have the same number of columns
 
         :rtype: Matrix
 
@@ -226,11 +227,19 @@ cdef class Matrix(Object):
         if n*m != len(args):
             raise ValueError('Inconsistent number of varadic arguments passed')
 
-        if len(frozenset(map(attrgetter('num_rows'), args))) != 1:
-            raise ValueError('All matrices must have the same number of rows')
+        # All matrices layed out on the same "row" must have the same number of rows
+        if m > 1:
+            for i in range(0, n):
+                if len(frozenset(map(attrgetter('num_rows'), args[i*m:(i+1)*m]))) != 1:
+                    raise TypeError('All matrices in a row must have the same number of rows')
 
-        if len(frozenset(map(attrgetter('num_cols'), args))) != 1:
-            raise ValueError('All matrices must have the same number of columns')
+        if n > 1:
+            for j in range(0, m):
+                if len(frozenset(map(attrgetter('num_cols'), [args[i*m+j] for i in range(0, n)]))) != 1:
+                    raise TypeError('All matrices in a column must have the same number of rows')
+
+
+
 
         cdef c_vector[c_Matrix*] c_blocks
         c_blocks.reserve(len(args))
