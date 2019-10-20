@@ -41,7 +41,7 @@ class System(_System):
 
 
     def set_value(self, name, value):
-        '''get_value(name: str, value: numeric) -> numeric
+        '''set_value(name: str, value: numeric) -> numeric
         Changes the value of a numeric symbol
 
         :param str name: Name of the symbol
