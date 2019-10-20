@@ -107,8 +107,8 @@ API Reference
 
 .. autoclass:: Wrench3D
     :members:
-        get_force, get_moment, get_solid, get_type,
-        force, moment, solid, type
+        get_force, get_moment, get_solid, get_type, get_point,
+        force, moment, solid, type, point
 
 
 
