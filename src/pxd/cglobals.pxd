@@ -31,3 +31,6 @@ cdef extern from "Globals.h":
     Vector3D unatomize(Vector3D)
     Tensor3D unatomize(Tensor3D)
     Wrench3D unatomize(Wrench3D)
+
+    # Substitution
+    Matrix subs(Matrix, Matrix, float)

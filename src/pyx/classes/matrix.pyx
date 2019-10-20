@@ -736,6 +736,29 @@ cdef class Matrix(Object):
 
 
 
+    ######## Recursive substitution ########
+
+
+    def subs(self, symbols, repl):
+        '''subs(symbols: Matrix, repl: numeric) -> Matrix
+        Performs a substitution of a vector of symbols with a constant value in all
+        of the elements of the this matrix.
+
+        :rtype: Matrix
+
+        '''
+        if not isinstance(symbols, Matrix):
+            raise TypeError('symbols must be a matrix object')
+        repl = _parse_numeric_value(repl)
+
+        return _matrix_from_c_value(c_subs(
+            c_deref(self._get_c_handler()),
+            c_deref((<Matrix>symbols)._get_c_handler()),
+            repl
+        ))
+
+
+
 
     ######## Misc operations ########
 

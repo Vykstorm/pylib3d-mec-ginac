@@ -35,6 +35,7 @@ from src.pxd.cpp cimport stringstream as c_sstream
 
 ######## C++ lib3d-mec-ginac imports ########
 
+# Classes
 from src.pxd.csymbol_numeric cimport symbol_numeric as c_symbol_numeric
 from src.pxd.csystem         cimport System         as c_System
 from src.pxd.cbase           cimport Base           as c_Base
@@ -45,9 +46,12 @@ from src.pxd.cpoint          cimport Point          as c_Point
 from src.pxd.cframe          cimport Frame          as c_Frame
 from src.pxd.csolid          cimport Solid          as c_Solid
 from src.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
+
+# Global functions
 from src.pxd.cglobals        cimport atomization    as c_atomization
 from src.pxd.cglobals        cimport gravity        as c_gravity
 from src.pxd.cglobals        cimport unatomize      as c_unatomize
+from src.pxd.cglobals        cimport subs           as c_subs
 
 
 

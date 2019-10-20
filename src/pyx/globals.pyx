@@ -151,3 +151,21 @@ def unatomize(x):
 
     # unatomize matrix
     return _matrix_from_c_value(c_unatomize(c_deref((<Matrix>x)._get_c_handler())))
+
+
+
+
+######## Recursive substitution ########
+
+
+def subs(matrix, symbols, repl):
+    '''subs(matrix: Matrix, symbols: Matrix, repl: numeric) -> Matrix
+    Performs a substitution of a vector of symbols with a constant value in all
+    of the elements of the given matrix.
+
+    :rtype: Matrix
+
+    '''
+    if not isinstance(matrix, Matrix):
+        raise TypeError('First argument must be a matrix object')
+    return matrix.subs(symbols, repl)
