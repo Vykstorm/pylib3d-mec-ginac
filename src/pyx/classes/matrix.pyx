@@ -800,7 +800,7 @@ cdef class Matrix(Object):
             If its a matrix, it must have a single row or column.
         :type symbols: Matrix, List[SymbolNumeric], SymbolNumeric
 
-        :param repl: The numeric value(s) which will be used to replace the symbols with
+        :param repl: The numeric value which will be used to replace the symbols with
 
         :type repl: numeric
 

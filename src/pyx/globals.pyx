@@ -159,13 +159,68 @@ def unatomize(x):
 
 
 def subs(matrix, symbols, repl):
-    '''subs(matrix: Matrix, symbols: Matrix, repl: numeric) -> Matrix
-    Performs a substitution of a vector of symbols with a constant value in all
+    '''subs(matrix: Matrix, symbols: Matrix | List[SymbolNumeric] | SymbolNumeric, repl: numeric) -> Matrix
+    Performs a substitution of a vector of symbols or a symbol with a numeric value in all
     of the elements of the given matrix.
+
+    * Replace a symbol with a numeric value:
 
         :Example:
 
-        
+        >>> a, b = new_param('a'), new_param('b')
+        >>> m = Matrix([[a ** 2, a ** b], [b ** a, b ** 2]])
+        >>> m
+        ╭            ╮
+        │ a**2  a**b │
+        │ b**a  b**2 │
+        ╰            ╯
+        >>> subs(m, a, 0)
+        ╭             ╮
+        │ 0  (0.0)**b │
+        │ 1      b**2 │
+        ╰             ╯
+        >>> subs(m, a, 1)
+        ╭         ╮
+        │ 1     1 │
+        │ b  b**2 │
+        ╰         ╯
+        >>> subs(m, b, 1)
+        ╭         ╮
+        │ a**2  a │
+        │    1  1 │
+        ╰         ╯
+
+    * Replace multiple symbols with a numeric value:
+
+        :Example:
+
+        >>> m = Matrix([[a ** 2, a - b], [b - a, b ** 2]])
+        >>> m
+        ╭            ╮
+        │ a**2   a-b │
+        │ -a+b  b**2 │
+        ╰            ╯
+        >>> subs(m, [a, b], 2)
+        ╭      ╮
+        │ 4  0 │
+        │ 0  4 │
+        ╰      ╯
+        >>> q = Matrix([a, b])
+        >>> subs(m, q, 1)
+        ╭      ╮
+        │ 1  0 │
+        │ 0  1 │
+        ╰      ╯
+
+
+    :param symbols: Must be a matrix or a list of symbols to be replaced. It can also
+        be a single symbol.
+        If its a matrix, it must have a single row or column.
+    :type symbols: Matrix, List[SymbolNumeric], SymbolNumeric
+
+    :param repl: The numeric value which will be used to replace the symbols with
+
+    :type repl: numeric
 
     :rtype: Matrix
 

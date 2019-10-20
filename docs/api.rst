@@ -68,7 +68,7 @@ API Reference
         get_values, get, __getitem__,
         __iter__, __reversed__,
         set,
-        transpose,
+        transpose, subs,
         shape, num_rows, num_cols, size, T, transposed, values
 
 
@@ -138,6 +138,7 @@ Global functions
 
 .. autofunction:: unatomize
 
+.. autofunction:: subs
 
 
 Mathematic functions
