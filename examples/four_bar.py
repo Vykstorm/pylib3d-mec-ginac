@@ -220,6 +220,12 @@ print(',\n'.join(map(str, unatomize(ddPhi))))
 print(']\n')
 
 # Beta
+beta = -dPhi
+beta = subs(beta, dq, 0)
+beta = subs(beta, dq_aux, 0)
+print('* beta2 = ')
+print(unatomize(beta))
+print()
 
 # Phi_q
 Phi_q = jacobian(Phi.transpose(), Matrix.block(2, 1, q, q_aux))
@@ -231,8 +237,78 @@ dPhi_dq = jacobian(dPhi.transpose(), Matrix.block(2, 1, dq, dq_aux))
 print('* dPhi_dq2 = ')
 print(unatomize(dPhi_dq))
 
-
 # Gamma
+gamma = -ddPhi
+gamma = subs(gamma, ddq, 0)
+gamma = subs(gamma, ddq_aux, 0)
+print('* gamma = ')
+print(unatomize(gamma))
+print()
+
+# Phi_init
+Phi_init = Matrix([theta1 + pi / 2])
+dPhi_init = Matrix([dtheta1 + pi / 2])
+
+
+
+######## Dynamic equations ########
+
+Dyn_eq_VP = Matrix(shape=[3, 1], values=[
+    Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta1) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta1) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta1),
+    Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta2) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta2) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta2),
+    Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta3) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta3) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta3)
+])
+
+print('* Dyn_eq_VP = [')
+print(',\n\n'.join(map(str,unatomize(Dyn_eq_VP))))
+print(']\n\n')
+
+
+
+######## Output vector ########
+
+
+Output = new_matrix('Output', shape=[1, 1])
+
+
+
+######## Energy equations ########
+
+
+Energy = new_matrix('Energy', shape=[1, 1])
+
+Dyn_eq_VP_open = Dyn_eq_VP
+Dyn_eq_VP_open = subs(Dyn_eq_VP_open, epsilon, 0)
+
+
+print('* Dyn_eq_VP_open2 = [')
+print(',\n\n'.join(map(str,unatomize(Dyn_eq_VP_open))))
+print(']\n\n')
+
+
+Dyn_eq_L = Dyn_eq_VP
+M_qq = jacobian(Dyn_eq_VP_open.transpose(), ddq, True)
+
+print('* M_qq2 = [')
+print(',\n\n'.join(map(str,unatomize(M_qq))))
+print(']\n\n')
+
+
+delta_q = -Dyn_eq_VP_open
+delta_q = subs(delta_q, ddq, 0)
+delta_q = subs(delta_q, ddq_aux, 0)
+
+print('* delta_qq2 = [')
+print(',\n\n'.join(map(str,unatomize(delta_q))))
+print(']\n\n')
+
+
+Phi_init = Matrix.block(2, 1, Phi, Phi_init)
+
+print('* Phi_init2 = [')
+print(',\n\n'.join(map(str,unatomize(Phi_init))))
+print(']\n\n')
+
 
 
 
