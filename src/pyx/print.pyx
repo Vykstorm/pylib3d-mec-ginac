@@ -226,6 +226,18 @@ cdef class ConsolePrinter(Printer):
 
 
 
+    cpdef print_wrench(self, Wrench3D wrench):
+        # This method is used to print wrenches
+        lines = [
+            f'wrench "{wrench.name}"',
+            f'force = {wrench.force}',
+            f'moment = {wrench.moment}',
+            f'point "{wrench.point.name}"'
+        ]
+        return '\n'.join(lines)
+
+
+
 
     cpdef print_table_view(self, TableView table_view):
         # This method is used to print table views

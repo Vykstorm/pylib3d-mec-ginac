@@ -93,6 +93,18 @@ cdef class Wrench3D(Object):
         return (<bytes>self._c_handler.get_Type()).decode()
 
 
+    cpdef get_point(self):
+        '''get_point() -> Point
+        Get the point of this wrench
+
+        :rtype: Point
+
+        '''
+        return Point(<Py_ssize_t>self._c_handler.get_Point())
+
+
+
+
 
     ######## Operations ########
 
@@ -226,6 +238,21 @@ cdef class Wrench3D(Object):
         '''
         return self.get_type()
 
+
+    @property
+    def point(self):
+        '''
+        Read only property that returns the point of this wrench.
+
+        :rtype: str
+
+        .. note::
+            This calls internally to ``get_point``
+
+            .. seealso:: :func:`get_point`
+
+        '''
+        return self.get_point()
 
 
 NamedObject.register(Wrench3D)
