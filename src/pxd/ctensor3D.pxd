@@ -28,7 +28,7 @@ from src.pxd.csystem cimport System
 cdef extern from "Tensor3D.h":
     cdef cppclass Tensor3D(Matrix):
         # Constructor
-        Tensor3D(Matrix values, Base* base, System* system)
+        Tensor3D(Matrix, Base*, System*)
 
         # Getters
         Base* get_Base()
@@ -36,12 +36,12 @@ cdef extern from "Tensor3D.h":
 
 
         # Setters
-        void set_Base(Base* base)
-        Tensor3D in_Base(Base* base)
+        void set_Base(Base*)
+        Tensor3D in_Base(Base*)
 
 
         # Operations
-        Tensor3D operator+(Tensor3D& other)
-        Tensor3D operator-(Tensor3D& other)
-        Tensor3D operator*(Tensor3D& other)
-        Vector3D operator*(Vector3D& other)
+        Tensor3D operator+(Tensor3D&)
+        Tensor3D operator-(Tensor3D&)
+        Tensor3D operator*(Tensor3D&)
+        Vector3D operator*(Vector3D&)

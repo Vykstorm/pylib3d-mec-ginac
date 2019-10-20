@@ -24,7 +24,7 @@ from src.pxd.ginac.cexpr cimport ex
 cdef extern from "Wrench3D.h":
     cdef cppclass Wrench3D:
         # Constructors
-        Wrench3D(string name, Vector3D force, Vector3D moment, Point* point, Solid* sol, string type) except +
+        Wrench3D(string, Vector3D, Vector3D, Point*, Solid*, string) except +
 
         # Getters
         string get_name()
@@ -36,11 +36,10 @@ cdef extern from "Wrench3D.h":
 
         # Operations
         Wrench3D unatomize()
-        Wrench3D at_Point(Point* point)
+        Wrench3D at_Point(Point*)
 
         # Arithmetic operations
-        Wrench3D operator+(Wrench3D& other)
-        Wrench3D operator-(Wrench3D& other)
+        Wrench3D operator+(Wrench3D&)
+        Wrench3D operator-(Wrench3D&)
         Wrench3D operator-()
-        ex operator*(Wrench3D& other)
-        
+        ex operator*(Wrench3D&)

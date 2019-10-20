@@ -21,31 +21,31 @@ cdef extern from "Matrix.h":
     cdef cppclass Matrix:
         # Constructors
         Matrix() except +
-        Matrix(long rows, long cols) except +
-        Matrix(long rows, long cols, vector[Matrix*]) except +
-        Matrix(matrix mat) except +
+        Matrix(long, long) except +
+        Matrix(long, long, vector[Matrix*]) except +
+        Matrix(matrix) except +
 
 
         # Getters
         string get_name()
-        void set_name(string name)
+        void set_name(string)
         long rows()
         long cols()
 
         matrix get_matrix()
-        void set_matrix(matrix mat)
+        void set_matrix(matrix)
         ex& get(int i, int j)
 
         # Setters
-        void set(int i, int j, ex& value)
+        void set(int, int, ex&)
 
         # Arithmetic operations
         Matrix operator+()
         Matrix operator-()
-        Matrix operator+(Matrix& other)
-        Matrix operator-(Matrix& other)
-        Matrix operator*(Matrix& other)
-        Matrix operator*(ex& other)
+        Matrix operator+(Matrix&)
+        Matrix operator-(Matrix&)
+        Matrix operator*(Matrix&)
+        Matrix operator*(ex&)
 
 
         # Misc operations

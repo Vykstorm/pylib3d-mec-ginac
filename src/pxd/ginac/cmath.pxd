@@ -14,4 +14,4 @@ from src.pxd.ginac.cexpr cimport ex
 ######## Math with symbolic expressions ########
 
 cdef extern from "ginac/power.h" namespace "GiNaC":
-    cdef ex pow(ex& base, ex& exp)
+    cdef ex pow(ex&, ex&)

@@ -21,12 +21,12 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
     cdef cppclass ex:
         # Constructors
         ex() except +
-        ex(const double value) except +
-        ex(const basic& value) except +
-        ex(long value) except +
+        ex(const double) except +
+        ex(const basic&) except +
+        ex(long) except +
 
         # Queries
-        bint is_equal(ex& other)
+        bint is_equal(ex&)
         bint is_zero()
 
         # Evaluation
@@ -35,14 +35,14 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
         # Arithmetic operations
         ex operator-()
         ex operator+()
-        ex operator+(ex& other)
-        ex operator-(ex& other)
-        ex operator*(ex& other)
-        ex operator/(ex& other)
+        ex operator+(ex&)
+        ex operator-(ex&)
+        ex operator*(ex&)
+        ex operator/(ex&)
         Vector3D operator*(Vector3D&)
         Tensor3D operator*(Tensor3D&)
         Wrench3D operator*(Wrench3D&)
 
 
         # Printing
-        void print(print_context&, unsigned level=0) const
+        void print(print_context&, unsigned=0) const

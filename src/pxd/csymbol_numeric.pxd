@@ -20,9 +20,9 @@ from src.pxd.ginac.csymbol cimport symbol
 
 cdef extern from "symbol_numeric.h":
     cdef cppclass symbol_numeric(symbol):
-        symbol_numeric(string name)
+        symbol_numeric(string)
 
         string get_name()
         string print_TeX_name()
         numeric get_value()
-        void set_value(numeric value)
+        void set_value(numeric)

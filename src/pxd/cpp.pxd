@@ -17,10 +17,10 @@ from src.pxd.ginac.cbasic cimport basic
 
 cdef extern from "<ostream>" namespace "std":
     cdef cppclass ostream:
-        ostream& operator<<(long value)
-        ostream& operator<<(double value)
-        ostream& operator<<(string value)
-        ostream& operator<<(const basic& ex)
+        ostream& operator<<(long)
+        ostream& operator<<(double)
+        ostream& operator<<(string)
+        ostream& operator<<(const basic&)
 
 
 ######## Class std::stringstream ########

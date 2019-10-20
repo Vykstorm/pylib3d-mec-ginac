@@ -23,19 +23,19 @@ from src.pxd.csystem cimport System
 
 cdef extern from "Vector3D.h":
     cdef cppclass Vector3D(Matrix):
-        Vector3D(string name, ex x, ex y, ex z, Base* base) except +
+        Vector3D(string, ex, ex, ex, Base*) except +
 
         Base* get_Base()
-        void set_Base(Base* base)
-        Vector3D in_Base(Base* base)
+        void set_Base(Base*)
+        Vector3D in_Base(Base*)
 
         string get_Name()
 
         ex get_module()
         Matrix skew()
 
-        void set_System(System * system)
-        System * get_System()
+        void set_System(System *)
+        System* get_System()
 
         # Arithmetic operations
         Vector3D operator-()

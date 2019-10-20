@@ -29,5 +29,5 @@ cdef extern from "Frame.h":
 
 
         # Setters
-        void set_Point(Point* point)
-        void set_Base(Base* base)
+        void set_Point(Point*)
+        void set_Base(Base*)

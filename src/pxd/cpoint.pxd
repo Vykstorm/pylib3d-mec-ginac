@@ -22,4 +22,4 @@ cdef extern from "Point.h":
         Point*    get_Previous_Point()
         Vector3D* get_Position_Vector()
         string    get_name()
-        void      set_name(string name)
+        void      set_name(string)
