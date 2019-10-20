@@ -163,6 +163,10 @@ def subs(matrix, symbols, repl):
     Performs a substitution of a vector of symbols with a constant value in all
     of the elements of the given matrix.
 
+        :Example:
+
+        
+
     :rtype: Matrix
 
     '''

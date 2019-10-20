@@ -740,15 +740,97 @@ cdef class Matrix(Object):
 
 
     def subs(self, symbols, repl):
-        '''subs(symbols: Matrix, repl: numeric) -> Matrix
-        Performs a substitution of a vector of symbols with a constant value in all
+        '''subs(symbols: Matrix | List[SymbolNumeric] | SymbolNumeric, repl: numeric) -> Matrix
+        Performs a substitution of a vector of symbols or a symbol with a numeric value in all
         of the elements of the this matrix.
+
+
+        * Replace a symbol with a numeric value:
+
+            :Example:
+
+            >>> a, b = new_param('a'), new_param('b')
+            >>> m = Matrix([[a ** 2, a ** b], [b ** a, b ** 2]])
+            >>> m
+            ╭            ╮
+            │ a**2  a**b │
+            │ b**a  b**2 │
+            ╰            ╯
+            >>> m.subs(a, 0)
+            ╭             ╮
+            │ 0  (0.0)**b │
+            │ 1      b**2 │
+            ╰             ╯
+            >>> m.subs(a, 1)
+            ╭         ╮
+            │ 1     1 │
+            │ b  b**2 │
+            ╰         ╯
+            >>> m.subs(b, 1)
+            ╭         ╮
+            │ a**2  a │
+            │    1  1 │
+            ╰         ╯
+
+        * Replace multiple symbols with a numeric value:
+
+            :Example:
+
+            >>> m = Matrix([[a ** 2, a - b], [b - a, b ** 2]])
+            >>> m
+            ╭            ╮
+            │ a**2   a-b │
+            │ -a+b  b**2 │
+            ╰            ╯
+            >>> m.subs([a, b], 2)
+            ╭      ╮
+            │ 4  0 │
+            │ 0  4 │
+            ╰      ╯
+            >>> q = Matrix([a, b])
+            >>> m.subs(q, 1)
+            ╭      ╮
+            │ 1  0 │
+            │ 0  1 │
+            ╰      ╯
+
+
+        :param symbols: Must be a matrix or a list of symbols to be replaced. It can also
+            be a single symbol.
+            If its a matrix, it must have a single row or column.
+        :type symbols: Matrix, List[SymbolNumeric], SymbolNumeric
+
+        :param repl: The numeric value(s) which will be used to replace the symbols with
+
+        :type repl: numeric
 
         :rtype: Matrix
 
         '''
-        if not isinstance(symbols, Matrix):
-            raise TypeError('symbols must be a matrix object')
+
+        try:
+            if not isinstance(symbols, (Matrix, SymbolNumeric, Iterable)):
+                raise TypeError
+
+            if isinstance(symbols, SymbolNumeric):
+                symbols = Matrix(values=[symbols])
+
+            elif isinstance(symbols, Matrix):
+                if symbols.get_num_rows() != 1 and symbols.get_num_cols() != 1:
+                    raise ValueError('symbols matrix must have one single row or column')
+                if symbols.get_num_rows() == 1:
+                    symbols = symbols.transpose()
+
+            else:
+                symbols = tuple(symbols)
+                if not symbols:
+                    raise ValueError('You must specify at least one symbol')
+                if not all(map(lambda symbol: isinstance(symbol, SymbolNumeric), symbols)):
+                    raise TypeError
+                symbols = Matrix(values=symbols).transpose()
+        except TypeError:
+            raise TypeError('symbols must be a Matrix, list of symbols or a symbol')
+
         repl = _parse_numeric_value(repl)
 
         return _matrix_from_c_value(c_subs(
