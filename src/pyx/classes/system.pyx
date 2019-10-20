@@ -837,7 +837,7 @@ cdef class _System:
         name = _parse_name(name, check_syntax=True)
 
         if self._has_object(name):
-            raise IndexError(f'Name "name.decode()" its already in use')
+            raise IndexError(f'Name "{name.decode()}" its already in use')
 
         if len(args) < 2 and 'previous' not in kwargs:
             args = list(args)
