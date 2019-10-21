@@ -95,12 +95,23 @@ cdef class Drawing3D(Object):
 
 
     @property
+    def point(self):
+        return self.get_point()
+
+
+    @property
     def scale(self):
         return self.get_scale()
 
     @scale.setter
     def scale(self, value):
         self.set_scale(value)
+
+
+    @property
+    def type(self):
+        return self.get_type()
+
 
 
     @property
