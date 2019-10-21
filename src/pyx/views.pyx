@@ -121,3 +121,11 @@ class WrenchesTableView(TableView):
             headers=['name', 'force', 'moment', 'solid', 'type'],
             data=[(w.name, w.force.name, w.moment.name, w.solid.name, w.type) for w in system._get_wrenches()]
         )
+
+
+class DrawingsTableView(TableView):
+    def __init__(self, system):
+        super().__init__(
+            headers=['name'],
+            data=[(d.name,) for d in system._get_drawings()]
+        )

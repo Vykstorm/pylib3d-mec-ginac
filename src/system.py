@@ -168,6 +168,8 @@ class System(_System):
     def get_wrench(self, name):
         return self._get_wrench(name)
 
+    def get_drawing(self, name):
+        return self._get_drawing(name)
 
 
     get_coord = get_coordinate
@@ -271,6 +273,8 @@ class System(_System):
     def has_wrench(self, name):
         return self._has_wrench(name)
 
+    def has_drawing(self, name):
+        return self._has_drawing(name)
 
 
     has_coord = has_coordinate
@@ -379,6 +383,9 @@ class System(_System):
 
     def get_wrenches(self):
         return WrenchesMapping(self)
+
+    def get_drawings(self):
+        return DrawingsMapping(self)
 
 
     get_coords = get_coordinates
@@ -1570,6 +1577,9 @@ class System(_System):
     def wrenches(self):
         return self.get_wrenches()
 
+    @property
+    def drawings(self):
+        return self.get_drawings()
 
 
     coords = coordinates

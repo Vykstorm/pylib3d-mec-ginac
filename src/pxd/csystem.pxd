@@ -79,23 +79,28 @@ cdef extern from "System.h":
         Matrix Inputs()
 
         # Geometric object getters
-        vector[Base*] get_Bases()
-        vector[Matrix*] get_Matrixs()
-        vector[Vector3D*] get_Vectors()
-        vector[Tensor3D*] get_Tensors()
-        vector[Point*] get_Points()
-        vector[Frame*] get_Frames()
-        vector[Solid*] get_Solids()
-        vector[Wrench3D*] get_Wrenches()
+        vector[Base*]       get_Bases()
+        vector[Matrix*]     get_Matrixs()
+        vector[Vector3D*]   get_Vectors()
+        vector[Tensor3D*]   get_Tensors()
+        vector[Point*]      get_Points()
+        vector[Frame*]      get_Frames()
+        vector[Solid*]      get_Solids()
+        vector[Wrench3D*]   get_Wrenches()
+        vector[Drawing3D*]  get_Drawings()
 
-        Base* get_Base(string)
-        Matrix* get_Matrix(string)
-        Vector3D* get_Vector3D(string)
-        Tensor3D* get_Tensor3D(string)
-        Point* get_Point(string)
-        Frame* get_Frame(string)
-        Solid* get_Solid(string)
-        Wrench3D* get_Wrench3D(string)
+
+
+        Base*      get_Base(string)
+        Matrix*    get_Matrix(string)
+        Vector3D*  get_Vector3D(string)
+        Tensor3D*  get_Tensor3D(string)
+        Point*     get_Point(string)
+        Frame*     get_Frame(string)
+        Solid*     get_Solid(string)
+        Wrench3D*  get_Wrench3D(string)
+        Drawing3D* get_Drawing3D(string)
+
 
         # Symbol constructors
         symbol_numeric* new_Coordinate(string, string, string, string, string, string, numeric, numeric, numeric)
@@ -105,24 +110,24 @@ cdef extern from "System.h":
         symbol_numeric* new_Input(string, string, numeric)
 
         # Geometric object constructors
-        Base* new_Base(string, string, ex, ex, ex, ex)
-        Matrix* new_Matrix(Matrix*)
-        void new_Vector3D(Vector3D*)
-        void new_Tensor3D(Tensor3D*)
-        Point* new_Point(string, Point*, Vector3D*)
-        Frame* new_Frame(string, Point*, Base*)
-        Solid* new_Solid(string, Point*, Base*, symbol_numeric*, Vector3D*, Tensor3D*)
-        Wrench3D* new_Wrench3D(string, Vector3D, Vector3D, Point*, Solid*, string)
+        Base*      new_Base(string, string, ex, ex, ex, ex)
+        Matrix*    new_Matrix(Matrix*)
+        void       new_Vector3D(Vector3D*)
+        void       new_Tensor3D(Tensor3D*)
+        Point*     new_Point(string, Point*, Vector3D*)
+        Frame*     new_Frame(string, Point*, Base*)
+        Solid*     new_Solid(string, Point*, Base*, symbol_numeric*, Vector3D*, Tensor3D*)
+        Wrench3D*  new_Wrench3D(string, Vector3D, Vector3D, Point*, Solid*, string)
         Drawing3D* new_Drawing3D(string, Vector3D*, Point*, numeric, numeric, numeric, numeric)
         Drawing3D* new_Drawing3D(string, Frame*, numeric)
 
 
         # Kinematic operations
 
-        Base* Reduced_Base(Base*, Base*)
-        Point* Reduced_Point(Point*, Point*)
-        Point* Pre_Point_Branch(Point*, Point*)
-        Matrix Rotation_Matrix(Base*, Base*)
+        Base*    Reduced_Base(Base*, Base*)
+        Point*   Reduced_Point(Point*, Point*)
+        Point*   Pre_Point_Branch(Point*, Point*)
+        Matrix   Rotation_Matrix(Base*, Base*)
         Vector3D Position_Vector(Point*, Point*)
         Vector3D Angular_Velocity(Base*, Base*)
         Tensor3D Angular_Velocity_Tensor(Base*, Base*)
@@ -134,9 +139,9 @@ cdef extern from "System.h":
 
         Wrench3D Twist(Solid*)
 
-        ex dt(ex)
+        ex       dt(ex)
         Vector3D dt(Vector3D)
-        Matrix Dt(Matrix)
+        Matrix   Dt(Matrix)
         Vector3D Dt(Vector3D, Base*)
         Vector3D Dt(Vector3D, Frame*)
 
@@ -145,13 +150,13 @@ cdef extern from "System.h":
         Matrix jacobian(Matrix, symbol)
         #ex jacobian(ex, symbol)
 
-        ex diff(ex, symbol)
-        Matrix diff(Matrix, symbol)
+        ex       diff(ex, symbol)
+        Matrix   diff(Matrix, symbol)
         Vector3D diff(Vector3D, symbol)
         Tensor3D diff(Tensor3D, symbol)
         Wrench3D diff(Wrench3D, symbol)
 
-        ex numeric_evaluate(ex)
+        ex     numeric_evaluate(ex)
         Matrix evaluate_Matrix(Matrix)
 
 

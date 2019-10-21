@@ -33,7 +33,7 @@ _derivable_symbol_types = frozenset(map(str.encode, (
 
 # All geometric object types
 _geom_types = frozenset(map(str.encode, (
-    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid', 'wrench'
+    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid', 'wrench', 'drawing'
 )))
 
 
@@ -115,6 +115,8 @@ cdef class _System:
             return <void*>self._c_handler.get_Solid(name)
         if kind == b'wrench':
             return <void*>self._c_handler.get_Wrench3D(name)
+        if kind == b'drawing':
+            return <void*>self._c_handler.get_Drawing3D(name)
         return NULL
 
 
@@ -267,6 +269,9 @@ cdef class _System:
         return self._c_handler.get_Wrenches()
 
 
+    cdef c_vector[c_Drawing3D*] _get_c_drawings(self):
+        return self._c_handler.get_Drawings()
+
 
 
     ######## Getters ########
@@ -392,6 +397,14 @@ cdef class _System:
         return _wrench_from_c(c_wrench)
 
 
+    cpdef _get_drawing(self, name):
+        name = _parse_name(name)
+        cdef c_Drawing3D* c_drawing = <c_Drawing3D*>self._get_c_object(name, b'drawing')
+        if c_drawing == NULL:
+            raise IndexError(f'Drawing {name.decode()} doesnt exist')
+        return Drawing3D(<Py_ssize_t>c_drawing)
+
+
 
 
     cpdef _has_base(self, name):
@@ -418,6 +431,8 @@ cdef class _System:
     cpdef _has_wrench(self, name):
         return self._has_c_object(_parse_name(name), b'wrench')
 
+    cpdef _has_drawing(self, name):
+        return self._has_c_object(_parse_name(name), b'drawing')
 
 
 
@@ -432,6 +447,8 @@ cdef class _System:
         if self._has_point(name) or self._has_frame(name):
             return True
         if self._has_solid(name) or self._has_wrench(name):
+            return True
+        if self._has_drawing(name):
             return True
         return False
 
@@ -488,6 +505,9 @@ cdef class _System:
         cdef c_vector[c_Wrench3D*] c_wrenches = self._c_handler.get_Wrenches()
         return [_wrench_from_c(c_wrench) for c_wrench in c_wrenches]
 
+    cpdef _get_drawings(self):
+        cdef c_vector[c_Drawing3D*] c_drawings = self._c_handler.get_Drawings()
+        return [Drawing3D(<Py_ssize_t>c_drawing) for c_drawing in c_drawings]
 
 
 
@@ -1650,3 +1670,16 @@ class WrenchesMapping(ObjectsMapping, WrenchesTableView):
             system._has_wrench
         )
         WrenchesTableView.__init__(self, system)
+
+
+
+######## Class DrawingsMapping ########
+
+class DrawingsMapping(ObjectsMapping, DrawingsTableView):
+    def __init__(self, system):
+        ObjectsMapping.__init__(self,
+            system._get_drawing,
+            system._get_drawings,
+            system._has_drawing
+        )
+        DrawingsTableView.__init__(self, system)
