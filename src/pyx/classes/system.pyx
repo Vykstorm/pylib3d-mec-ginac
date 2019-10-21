@@ -1011,30 +1011,30 @@ cdef class _System:
                 x = self._get_solid(x)
 
         elif not isinstance(x, (Vector3D, Frame)):
-            raise TypeError
+            raise TypeError('First argument must be a vector or frame')
 
 
         # Second positional argument must be a point if the first one is a vector.
         if isinstance(x, Vector3D):
             if not args:
-                raise TypeError
+                raise TypeError('Expected one more positional argument after vector')
 
             y = args.pop(0)
             if isinstance(y, str):
                 y = self._get_point(y)
             elif not isinstance(y, Point):
-                raise TypeError
+                raise TypeError('Second argument after vector must be a Point object')
 
 
         # Parse file, scale and color arguments
-        if len(args) > 3:
-            if len(args) != 6:
-                raise TypeError
+        if args and isinstance(args[0], str) and 'file' not in kwargs:
+            kwargs['file'] = args.pop(0)
+
+        if len(args) > 2:
+            if len(args) != 5:
+                raise TypeError('Invalid number of color components (4 expected)')
             args, color = args[:-4], args[-4:]
             args.append(color)
-
-        if isinstance(args[0], str) and 'file' not in kwargs:
-            kwargs['file'] = args.pop(0)
 
 
         scale, color, file = _apply_signature(
