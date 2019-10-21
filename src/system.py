@@ -1831,7 +1831,7 @@ for _symbol_type in map(bytes.decode, _symbol_types):
 # matrix, tensor, vector, point, frame
 for _geom_type in map(bytes.decode, _geom_types):
     _geom_class = _geom_type.title()
-    if _geom_type in ('vector', 'tensor'):
+    if _geom_type in ('vector', 'tensor', 'wrench', 'drawing'):
         _geom_class = _geom_class + '3D'
 
     if _geom_type == 'matrix':

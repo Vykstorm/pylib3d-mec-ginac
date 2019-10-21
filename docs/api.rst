@@ -110,6 +110,11 @@ API Reference
         get_force, get_moment, get_solid, get_type, get_point,
         force, moment, solid, type, point
 
+.. autoclass:: Drawing3D
+    :members:
+        get_file, get_type, get_color, get_point, get_scale, get_vector,
+        set_file, set_color, set_scale, set_vector,
+        file, point, scale, type, vector, color, r, g, b, a
 
 
 
