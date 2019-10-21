@@ -1042,8 +1042,8 @@ class System(_System):
 
 
 
-    def new_drawing(self, *args, **kwargs):
-        return self._new_drawing(args, kwargs)
+    def new_drawing(self, name, *args, **kwargs):
+        return self._new_drawing(name, args, kwargs)
 
 
 

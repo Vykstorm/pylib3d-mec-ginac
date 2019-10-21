@@ -14,16 +14,11 @@ from src.pxd.ginac.cexpr  cimport ex
 
 
 
-######## Class GiNaC::container  ########
-
-cdef extern from "ginac/container.h" namespace "GiNaC":
-    cdef cppclass container[C](basic):
-        size_t nops() const
-        ex     op(size_t i) const
-
-
-
 ######## Class GiNaC::lst ########
 
 cdef extern from "ginac/lst.h" namespace "GiNaC":
-    ctypedef container[list] lst
+    #ctypedef container[list] lst
+    cdef cppclass lst:
+        size_t nops() const
+        ex     op(size_t) const
+        lst&   append(const ex&)

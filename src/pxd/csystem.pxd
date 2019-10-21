@@ -113,7 +113,8 @@ cdef extern from "System.h":
         Frame* new_Frame(string, Point*, Base*)
         Solid* new_Solid(string, Point*, Base*, symbol_numeric*, Vector3D*, Tensor3D*)
         Wrench3D* new_Wrench3D(string, Vector3D, Vector3D, Point*, Solid*, string)
-        Drawing3D* new_Drawing3D(string,Vector3D*, Point*)
+        Drawing3D* new_Drawing3D(string, Vector3D*, Point*, numeric, numeric, numeric, numeric)
+        Drawing3D* new_Drawing3D(string, Frame*, numeric)
 
 
         # Kinematic operations

@@ -14,8 +14,9 @@ from src.pxd.ginac.cbasic cimport basic
 
 cdef extern from "ginac/ginac.h" namespace "GiNaC":
     cdef cppclass numeric(basic):
-        numeric(double)
-        numeric(long)
+        numeric() except +
+        numeric(double) except +
+        numeric(long) except +
 
         bint is_integer() const
         bint is_rational() const
