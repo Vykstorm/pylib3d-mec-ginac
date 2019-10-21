@@ -33,7 +33,7 @@ API Reference
         new_parameter, new_joint_unknown, new_input,
         new_coordinate, new_aux_coordinate, new_symbol,
         new_base, new_matrix, new_vector, new_tensor,
-        new_point, new_frame, new_solid, new_wrench,
+        new_point, new_frame, new_solid, new_wrench, new_drawing,
         reduced_base, reduced_point, pre_point_branch,
         rotation_matrix, position_vector,
         angular_velocity, angular_velocity_tensor, velocity_vector,
