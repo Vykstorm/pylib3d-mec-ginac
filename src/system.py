@@ -1043,6 +1043,54 @@ class System(_System):
 
 
     def new_drawing(self, name, *args, **kwargs):
+        '''new_drawing(name: str, x: frame | solid | vector+point, file: str, scale: numeric, color: Tuple[numeric, numeric, numeric, numeric]) -> Drawing3D
+        Creates a new drawing object indicating a frame, solid or vector and point and with
+        the given file, scale and color components.
+
+        * Create a drawing given a frame:
+
+            :Example:
+
+            >>> new_drawing('a', get_frame('abs'))
+            >>> new_drawing('a', 'abs')
+
+        * Create a drawing given a vector and a point:
+
+            :Example:
+
+            >>> v = new_vector('v', 1, 2, 3, base='xyz')
+            >>> O = get_point('O')
+            >>> new_drawing('a', v, O)
+            >>> new_drawing('a', 'v', 'O')
+
+
+        * Indicate the scale:
+
+            :Example:
+
+            >>> a = new_drawing('a', 'abs', 2)
+            >>> a.scale
+            >>> 2.0
+            >>> a = new_drawing('a', 'abs', scale=3)
+            >>> a.scale
+            >>> 3.0
+
+
+        * Indicate the rgba color components:
+
+            :Example:
+
+            >>> a = new_drawing('a', 'abs', scale=2, color=[0, 1, 0, 1])
+            >> a.color
+            [0, 1, 0, 1]
+            >>> a = new_drawing('a', 'abs', 2,  0, 0, 1, 0)
+            >>> a.color
+            [0, 0, 1, 0]
+
+        :rtype: Drawing3D
+
+
+        '''
         return self._new_drawing(name, args, kwargs)
 
 
