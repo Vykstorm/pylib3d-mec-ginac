@@ -15,20 +15,21 @@ from libcpp.string cimport string
 # Imports from other .pxd files
 
 # GiNaC classes
-from src.pxd.ginac.cnumeric cimport numeric
-from src.pxd.ginac.cexpr cimport ex
-from src.pxd.ginac.csymbol cimport symbol
+from src.pxd.ginac.cnumeric  cimport numeric
+from src.pxd.ginac.cexpr     cimport ex
+from src.pxd.ginac.csymbol   cimport symbol
 
 # lib3d-mec-ginac classes
 from src.pxd.csymbol_numeric cimport symbol_numeric
-from src.pxd.cbase cimport Base
-from src.pxd.cmatrix cimport Matrix
-from src.pxd.cvector3D cimport Vector3D
-from src.pxd.ctensor3D cimport Tensor3D
-from src.pxd.cpoint cimport Point
-from src.pxd.cframe cimport Frame
-from src.pxd.csolid cimport Solid
-from src.pxd.cwrench3D cimport Wrench3D
+from src.pxd.cbase           cimport Base
+from src.pxd.cmatrix         cimport Matrix
+from src.pxd.cvector3D       cimport Vector3D
+from src.pxd.ctensor3D       cimport Tensor3D
+from src.pxd.cpoint          cimport Point
+from src.pxd.cframe          cimport Frame
+from src.pxd.csolid          cimport Solid
+from src.pxd.cwrench3D       cimport Wrench3D
+from src.pxd.cdrawing3D      cimport Drawing3D
 
 
 
@@ -112,6 +113,7 @@ cdef extern from "System.h":
         Frame* new_Frame(string, Point*, Base*)
         Solid* new_Solid(string, Point*, Base*, symbol_numeric*, Vector3D*, Tensor3D*)
         Wrench3D* new_Wrench3D(string, Vector3D, Vector3D, Point*, Solid*, string)
+        Drawing3D* new_Drawing3D(string,Vector3D*, Point*)
 
 
         # Kinematic operations

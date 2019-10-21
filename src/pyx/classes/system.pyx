@@ -938,7 +938,10 @@ cdef class _System:
 
 
     cpdef _new_wrench(self, name, force, moment, point, solid, type):
-        name = _parse_name(name)
+        name = _parse_name(name, check_syntax=True)
+
+        if self._has_object(name):
+            raise IndexError(f'Name "{name.decode()}" its already in use')
 
         if not isinstance(force, (Vector3D, str)):
             raise TypeError('Force must be a Vector3D or str object')
@@ -978,6 +981,36 @@ cdef class _System:
             <c_Solid*>(<Solid>solid)._c_handler,
             type
         ))
+
+
+
+    cpdef _new_drawing(self, args, kwargs):
+        name, point, vector = args
+
+        name = _parse_name(name, check_syntax=True)
+
+        if self._has_object(name):
+            raise IndexError(f'Name "{name.decode()}" its already in use')
+
+        if not isinstance(point, (str, Point)):
+            raise TypeError('point must be a Point or str object')
+
+        if isinstance(point, str):
+            point = self._get_point(point)
+
+
+        if not isinstance(vector, (str, Vector3D)):
+            raise TypeError('vector must be a Vector3D or str object')
+
+        if isinstance(vector, str):
+            vector = self._get_vector(vector)
+
+
+        cdef c_Vector3D* c_vector = <c_Vector3D*>(<Vector3D>vector)._get_c_handler()
+        cdef c_Point* c_point = (<Point>point)._c_handler
+
+        return Drawing3D(<Py_ssize_t>self._c_handler.new_Drawing3D(<bytes>name, c_vector, c_point))
+
 
 
 

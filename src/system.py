@@ -1042,6 +1042,10 @@ class System(_System):
 
 
 
+    def new_drawing(self, *args, **kwargs):
+        return self._new_drawing(args, kwargs)
+
+
 
     new_coord = new_coordinate
     new_aux_coord = new_aux_coordinate,
