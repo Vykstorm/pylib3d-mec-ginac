@@ -108,7 +108,7 @@ EXTENSION_DEFINITION_FILES = list(map(partial(join, 'src/pyx'), chain(
     map(partial(join, 'classes'), [
         'object.pyx', 'system.pyx', 'symbol_numeric.pyx', 'expression.pyx',
         'base.pyx', 'matrix.pyx', 'vector3D.pyx', 'tensor3D.pyx',
-        'point.pyx', 'frame.pyx', 'solid.pyx', 'wrench3D.pyx'
+        'point.pyx', 'frame.pyx', 'solid.pyx', 'wrench3D.pyx', 'drawing3D.pyx'
     ])
 )))
 

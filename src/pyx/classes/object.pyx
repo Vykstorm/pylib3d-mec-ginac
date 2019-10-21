@@ -7,7 +7,7 @@ Cython doesn't support multiple inheritance if the derived class is defined with
 prefix "cdef".
 
 To circunvent this and to make the code more reusable and mantainable for
-the classes SymbolNumeric, Expr, Matrix, Vector3D, Tensor3D, Base, Point, Frame, Solid and Wrench, which share
+the classes SymbolNumeric, Expr, Matrix, Vector3D, Tensor3D, Base, Point, Frame, Solid, Wrench, Drawing3D which share
 some behaviour, they must be derived from the Object class.
 
 Base class will provide the next instance methods depending on the kind of object:
@@ -24,6 +24,7 @@ SymbolNumeric            yes        yes         no
         Frame            yes         no        yes
         Solid            yes         no        yes
      Wrench3D            yes         no         no
+    Drawing3D            yes         no        yes
 
 * Those classes with the method "get_name" avaliable, also will have the property "name"
 * Classes with "to_latex" will have also the method "print_latex" and property "latex"
@@ -63,6 +64,8 @@ class NamedObject(ABC):
             c_name = (<Frame>self)._c_handler.get_name()
         elif isinstance(self, Wrench3D):
             c_name = (<Wrench3D>self)._c_handler.get_name()
+        elif isinstance(self, Drawing3D):
+            c_name = (<Drawing3D>self)._c_handler.get_name()
         else:
             raise RuntimeError
 
@@ -147,6 +150,8 @@ class GeometricObject(ABC):
             c_base = (<c_Tensor3D*>(<Tensor3D>self)._get_c_handler()).get_Base()
         elif isinstance(self, Frame):
             c_base = (<Frame>self)._c_handler.get_Base()
+        elif isinstance(self, Drawing3D):
+            c_base = (<Drawing3D>self)._c_handler.get_Base()
         else:
             raise RuntimeError
 

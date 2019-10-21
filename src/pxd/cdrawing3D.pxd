@@ -32,8 +32,8 @@ cdef extern from "Drawing3D.h":
         string   get_file()
         lst      get_color()
         string   get_type()
-        Point*   get_point()
-        Base*    get_base()
+        Point*   get_Point()
+        Base*    get_Base()
         numeric  get_scale()
         Vector3D get_vector()
 
