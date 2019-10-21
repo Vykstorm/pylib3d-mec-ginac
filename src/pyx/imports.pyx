@@ -46,6 +46,7 @@ from src.pxd.cpoint          cimport Point          as c_Point
 from src.pxd.cframe          cimport Frame          as c_Frame
 from src.pxd.csolid          cimport Solid          as c_Solid
 from src.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
+from src.pxd.cdrawing3D      cimport Drawing3D      as c_Drawing3D
 
 # Global functions
 from src.pxd.cglobals        cimport atomization    as c_atomization
@@ -62,6 +63,7 @@ from src.pxd.ginac.cexpr    cimport ex      as c_ex
 from src.pxd.ginac.cbasic   cimport basic   as c_basic
 from src.pxd.ginac.csymbol  cimport symbol  as c_symbol
 from src.pxd.ginac.cmatrix  cimport matrix  as c_ginac_matrix
+from src.pxd.ginac.clst     cimport lst     as c_lst
 
 
 # Printing classes & functions
