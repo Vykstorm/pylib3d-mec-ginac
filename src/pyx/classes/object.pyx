@@ -235,6 +235,13 @@ cdef class Object:
 
 
     def __setattr__(self, key, value):
+        # This is a workaround for cython defined properties with setter
+        cls = self.__class__
+        if hasattr(cls, key) and hasattr(getattr(cls, key), '__set__'):
+            fset = getattr(getattr(cls, key), '__set__')
+            fset(self, value)
+            return
+
         # Attribute setter metamethod overloading.
         if key in self._inherited_properties:
             prop = self._inherited_properties[key]
