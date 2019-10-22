@@ -292,27 +292,6 @@ cdef class Drawing3D(Object):
         self.set_color(values)
 
 
-    @property
-    def r(self):
-        # TODO
-        pass
-
-    @property
-    def g(self):
-        # TODO
-        pass
-
-    @property
-    def b(self):
-        # TODO
-        pass
-
-    @property
-    def a(self):
-        # TODO
-        pass
-
-
 
 
 NamedObject.register(Drawing3D)
