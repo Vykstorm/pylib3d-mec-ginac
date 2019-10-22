@@ -1070,7 +1070,7 @@ cdef class _System:
         try:
             if not isinstance(color, Iterable):
                 raise TypeError
-            color = tuple(map(float, color))
+            color = tuple(map(_parse_numeric_value, color))
             if len(color) != 4:
                 raise TypeError
 
