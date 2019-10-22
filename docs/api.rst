@@ -114,7 +114,7 @@ API Reference
     :members:
         get_file, get_type, get_color, get_point, get_scale, get_vector,
         set_file, set_color, set_scale, set_vector,
-        file, point, scale, type, vector, color, r, g, b, a
+        file, point, scale, type, vector, color
 
 
 
