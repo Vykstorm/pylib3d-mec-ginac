@@ -24,6 +24,7 @@ API Reference
         get_symbols,
         get_coordinates, get_velocities, get_accelerations,
         get_aux_coordinates, get_aux_velocities, get_aux_accelerations,
+        get_parameters, get_joint_unknowns, get_inputs,
         get_bases, get_matrices, get_vectors, get_tensors,
         get_points, get_frames, get_solids, get_wrenches, get_drawings,
         get_symbols_matrix,
