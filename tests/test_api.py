@@ -62,6 +62,8 @@ def test_api_methods():
     in the API
     '''
     from lib3d_mec_ginac import System, SymbolNumeric, Base, Matrix
+    from lib3d_mec_ginac import Vector3D, Tensor3D, Wrench3D, Drawing3D
+    from lib3d_mec_ginac import Point, Frame, Solid
 
     methods = {
         # System methods
@@ -124,29 +126,45 @@ def test_api_methods():
             'block', 'get', 'get_num_cols', 'get_num_rows', 'get_shape',
             'get_size', 'get_values',
             'set', 'subs', 'transpose'
-        ]
+        ],
 
+        # Vector3D methods
+        Vector3D: [
+            'cross', 'dot', 'get_module', 'get_skew', 'in_base'
+        ],
+
+        # Tensor3D methods
+        Tensor3D: [
+            'in_base'
+        ],
+
+        # Wrench3D methods
+        Wrench3D : [
+            'get_force', 'get_moment', 'get_point', 'get_solid', 'get_type'
+        ],
+
+        # Drawing3D methods
+        Drawing3D: [
+            'get_color', 'get_file', 'get_point', 'get_scale', 'get_type', 'get_vector',
+            'set_color', 'set_file', 'set_scale', 'set_vector'
+        ],
+
+        # Point methods
+        Point: [
+            'get_position_vector', 'get_previous', 'has_previous'
+        ],
+
+        # Frame methods
+        Frame: [
+            'get_point', 'get_scale', 'set_point'
+        ],
+
+        # Solid methods
+        Solid: [
+            'get_CM', 'get_IT', 'get_mass'
+        ]
     }
 
     for cls, keys in methods.items():
         for key in keys:
             assert hasattr(cls, key) and callable(getattr(cls, key))
-
-
-
-
-
-'''
-    for prop in properties:
-        assert hasattr(System, prop) and isinstance(getattr(System, prop), property)
-
-    properties = [
-        'symbols', 'time',
-        'coordinates', 'velocities', 'accelerations',
-        'aux_coordinates', 'aux_velocities', 'aux_accelerations',
-        'parameters', 'joint_unknowns', 'inputs', 'bases',
-        'matrices', 'vectors', 'tensors', 'points', 'frames', 'solids',
-        'wrenches', 'drawings',
-        'autogen_latex_names'
-    ]
-'''
