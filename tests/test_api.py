@@ -297,3 +297,8 @@ def test_global_functions(global_functions):
         'unatomize', 'subs',
         'dot', 'cross'
     ]
+
+    names = frozenset(map(namegetter, global_functions))
+    for name in public_global_functions:
+        if name not in names:
+            raise AssertionError(f'Missing global function "{name}"')
