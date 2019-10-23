@@ -38,7 +38,7 @@ def properties(classes):
     This fixture returns a list with all the properties of any of the classes
     exposed by the library
     '''
-    values = chain.from_iterable([[getattr(cls, key) for key in dir(cls)] for cls in classes])
+    values = chain.from_iterable([[getattr(cls, key) for key in dir(cls) if not key.startswith('_')] for cls in classes])
     props = filter(lambda value: isinstance(value, property) or type(value).__name__ == 'getset_descriptor', values)
     return tuple(props)
 
