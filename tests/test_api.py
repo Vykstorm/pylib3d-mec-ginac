@@ -225,8 +225,8 @@ def test_methods(methods):
 
 def test_system_properties(properties):
     '''
-    This method checks that all properties defined by any of the classes on this library are
-    avaliable in the public API
+    This method checks that all properties defined by any of the API of the classes of this
+    library are avaliable
     '''
 
     public_properties = {
@@ -288,6 +288,10 @@ def test_system_properties(properties):
 
 
 def test_global_functions(global_functions):
+    '''
+    This test checks that all global functions in the public API are avaliable in the
+    library
+    '''
     public_global_functions = [
         'get_default_system', 'set_default_system',
         'set_atomization_state', 'enable_atomization', 'disable_atomization',
