@@ -38,7 +38,7 @@ def propqualnamegetter(prop):
 
 ######## Fixtures ########
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def classes():
     '''
     This fixture returns a list with all the avaliable classes of this library
@@ -48,7 +48,7 @@ def classes():
     return tuple(filter(isclass, map(partial(getattr, lib3d_mec_ginac), keys)))
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def methods(classes):
     '''
     This fixture returns a list with all the methods inside any of the classes
@@ -61,7 +61,7 @@ def methods(classes):
     return tuple(methods)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def properties(classes):
     '''
     This fixture returns a list with all the properties of any of the classes
@@ -72,7 +72,7 @@ def properties(classes):
     return tuple(props)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def global_functions():
     import lib3d_mec_ginac
     values = map(partial(getattr, lib3d_mec_ginac), filterfalse(lambda key: key.startswith('_'), dir(lib3d_mec_ginac)))
