@@ -8,7 +8,9 @@ the library are avaliable for the user (can be imported from the API)
 import pytest
 from inspect import isclass
 from functools import partial
-from operator import attrgetter
+from itertools import chain, filterfalse
+from operator import attrgetter, concat
+from re import match
 
 
 ######## Fixtures ########
@@ -24,27 +26,29 @@ def classes():
 
 
 @pytest.fixture(scope='module')
-def system_methods():
+def methods(classes):
     '''
-    This fixture returns a list with all the methods of the system class.
+    This fixture returns a list with all the methods inside any of the classes
+    exposed by the library
     '''
-    from lib3d_mec_ginac import System
-
-    methods = filter(callable, map(partial(getattr, System), dir(System)))
-    methods = filter(lambda method: method.__qualname__.startswith('System') and not method.__name__.startswith('_'),
-        methods)
+    #methods = filter(callable, map(partial(getattr, System), chain.from_iterable(map(dir, classes))))
+    values = chain.from_iterable([[getattr(cls, key) for key in dir(cls)] for cls in classes])
+    methods = filter(callable, values)
+    methods = filterfalse(lambda method: method.__name__.startswith('_'), methods)
+    methods = filter(lambda method: match(r'\w+\.', method.__qualname__), methods)
     return tuple(methods)
 
 
 @pytest.fixture(scope='module')
-def system_properties():
+def properties(classes):
     '''
-    This fixture returns a list with all the properties of the system class
+    This fixture returns a list with all the properties of any of the classes
+    exposed by the library
     '''
-    from lib3d_mec_ginac import System
-
-    props = filter(lambda value: isinstance(value, property), map(partial(getattr, System), dir(System)))
+    values = chain.from_iterable([[getattr(cls, key) for key in dir(cls)] for cls in classes])
+    props = filter(lambda value: isinstance(value, property), values)
     return tuple(props)
+
 
 
 
@@ -64,13 +68,12 @@ def test_classes(classes):
 
 
 
-def test_system_methods(system_methods):
+def test_system_methods(methods):
     '''
     This test checks that all the methods of the class System in the public API
     are avaliable
     '''
-
-    assert {
+    assert set(map(partial(concat, 'System.'), [
         'get_value', 'set_value',
         'get_symbol', 'get_time',
         'get_coordinate', 'get_velocity', 'get_acceleration',
@@ -108,12 +111,17 @@ def test_system_methods(system_methods):
         'derivative', 'jacobian', 'diff', 'gravity_wrench', 'inertia_wrench',
 
         'set_as_default'
-    }.issubset(set(map(attrgetter('__name__'), system_methods)))
+    ])).issubset(set(map(attrgetter('__qualname__'), methods)))
 
 
 
-def test_system_properties(system_properties):
-    assert {
+def test_system_properties(properties):
+    '''
+    This method checks that all properties defined by the class System in the public
+    API are avaliable.
+    '''
+
+    assert set(map(partial(concat, 'System.'), [
         'symbols',
         'time',
         'coordinates', 'velocities', 'accelerations',
@@ -122,4 +130,4 @@ def test_system_properties(system_properties):
         'bases', 'matrices', 'vectors', 'tensors', 'points',
         'frames', 'solids', 'wrenches', 'drawings', 'autogen_latex_names',
 
-    }.issubset( set(map(attrgetter('__name__'), map(attrgetter('fget'), system_properties))) )
+    ])).issubset( set(map(attrgetter('__qualname__'), map(attrgetter('fget'), properties))) )
