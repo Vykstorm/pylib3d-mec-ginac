@@ -142,6 +142,65 @@ def test_methods(methods):
             'set_tex_name', 'set_value',
             '__neg__', '__pos__', '__add__', '__sub__',
             '__mul__', '__truediv__', '__pow__'
+        ],
+
+        'Expr': [
+            'eval',
+            '__neg__', '__pos__', '__add__', '__sub__',
+            '__mul__', '__truediv__', '__pow__',
+            '__iadd__', '__isub__', '__imul__', '__itruediv__',
+            '__eq__'
+        ],
+
+        'Base': [
+            'get_previous_base', 'has_previous_base', 'get_rotation_angle',
+            'get_rotation_tupla'
+        ],
+
+        'Matrix': [
+            'get_shape', 'get_num_rows', 'get_num_cols', 'get_size', '__len__',
+            'get_values', 'get', '__getitem__', 'set', '__setitem__',
+            '__iter__', '__reversed__',
+            '__pos__', '__neg__', '__add__', '__sub__',
+            '__mul__', '__truediv__',
+            'subs', 'transpose', 'get_transposed'
+        ],
+
+        'Vector3D': [
+            'get_module', 'get_skew',
+            'in_base', 'dot', 'cross',
+            '__pos__', '__neg__', '__add__', '__sub__',
+            '__mul__', '__truediv__', '__xor__'
+        ],
+
+        'Tensor3D': [
+            'in_base',
+            '__pos__', '__neg__', '__add__', '__sub__',
+            '__mul__', '__truediv__'
+        ],
+
+        'Wrench3D': [
+            'get_force', 'get_moment', 'get_solid', 'get_type', 'get_point',
+            'unatomize', 'at_point',
+            '__pos__', '__neg__',
+            '__add__', '__sub__', '__mul__', '__truediv__'
+        ],
+
+        'Drawing3D': [
+            'get_file', 'get_type', 'get_color', 'get_point', 'get_scale', 'get_vector',
+            'set_file', 'set_color', 'set_scale', 'set_vector'
+        ],
+
+        'Point': [
+            'get_position_vector', 'get_position', 'get_previous', 'has_previous'
+        ],
+
+        'Frame': [
+            'get_point', 'get_scale', 'set_point'
+        ],
+
+        'Solid': [
+            'get_CM', 'get_IT', 'get_G', 'get_mass'
         ]
     }
 
@@ -175,6 +234,38 @@ def test_system_properties(properties):
 
         'SymbolNumeric': [
             'owner', 'tex_name', 'type', 'value'
+        ],
+
+        'Base': [
+            'previous_base', 'previous', 'rotation_tupla', 'rotation_angle'
+        ],
+
+        'Matrix': [
+            'shape', 'num_rows', 'num_cols', 'size', 'T', 'transposed', 'values'
+        ],
+
+        'Vector3D': [
+            'module', 'skew', 'x', 'y', 'z'
+        ],
+
+        'Wrench3D': [
+            'force', 'moment', 'solid', 'type', 'point'
+        ],
+
+        'Drawing3D': [
+            'file', 'point', 'scale', 'type', 'vector', 'color'
+        ],
+
+        'Point': [
+            'position_vector', 'position', 'previous'
+        ],
+
+        'Frame': [
+            'point', 'scale'
+        ],
+
+        'Solid': [
+            'CM', 'IT', 'G', 'mass'
         ]
     }
 
