@@ -54,4 +54,7 @@ def test_global_functions_docstrings(global_functions, api):
     '''
     This test case check that all global functions defined in the public API have non-empty docstrings
     '''
-    pass
+    for public_function in api['functions']:
+        func = next(filter(partial(eq, public_function), map(qualnamegetter, global_functions)))
+        if not func.__doc__:
+            raise AssertionError(f'Missing docstring on global function "{public_function}"')
