@@ -13,6 +13,29 @@ from operator import attrgetter, concat
 from re import match
 
 
+######## Helper functions ########
+
+
+namegetter = attrgetter('__name__')
+qualnamegetter = attrgetter('__qualname__')
+
+
+def propnamegetter(prop):
+    assert isinstance(prop, property) or type(prop).__name__ == 'getset_descriptor'
+    if isinstance(prop, property):
+        return prop.fget.__name__
+    return prop.__name__
+
+def propqualnamegetter(prop):
+    assert isinstance(prop, property) or type(prop).__name__ == 'getset_descriptor'
+    if isinstance(prop, property):
+        return prop.fget.__qualname__
+    return prop.__qualname__
+
+
+
+
+
 ######## Fixtures ########
 
 @pytest.fixture(scope='module')
@@ -31,10 +54,9 @@ def methods(classes):
     This fixture returns a list with all the methods inside any of the classes
     exposed by the library
     '''
-    #methods = filter(callable, map(partial(getattr, System), chain.from_iterable(map(dir, classes))))
     values = chain.from_iterable([[getattr(cls, key) for key in dir(cls)] for cls in classes])
     methods = filter(callable, values)
-    methods = filterfalse(lambda method: method.__name__.startswith('_'), methods)
+    #methods = filterfalse(lambda method: method.__name__.startswith('_'), methods)
     methods = filter(lambda method: match(r'\w+\.', method.__qualname__), methods)
     return tuple(methods)
 
@@ -46,7 +68,7 @@ def properties(classes):
     exposed by the library
     '''
     values = chain.from_iterable([[getattr(cls, key) for key in dir(cls)] for cls in classes])
-    props = filter(lambda value: isinstance(value, property), values)
+    props = filter(lambda value: isinstance(value, property) or type(value).__name__ == 'getset_descriptor', values)
     return tuple(props)
 
 
@@ -64,70 +86,101 @@ def test_classes(classes):
     assert {
         'SymbolNumeric', 'Expr', 'Base', 'Matrix', 'Vector3D', 'Tensor3D', 'Wrench3D',
         'Drawing3D', 'Point', 'Frame', 'Solid', 'Object', 'System'
-    }.issubset(set(map(attrgetter('__name__'), classes)))
+    }.issubset(set(map(namegetter, classes)))
 
 
 
-def test_system_methods(methods):
+def test_methods(methods):
     '''
-    This test checks that all the methods of the class System in the public API
+    This test checks that all the methods of the classes in the public API
     are avaliable
     '''
-    assert set(map(partial(concat, 'System.'), [
-        'get_value', 'set_value',
-        'get_symbol', 'get_time',
-        'get_coordinate', 'get_velocity', 'get_acceleration',
-        'get_aux_coordinate', 'get_aux_velocity', 'get_aux_acceleration',
-        'get_parameter', 'get_joint_unknown', 'get_input',
-        'get_base', 'get_matrix', 'get_vector', 'get_tensor', 'get_point',
-        'get_frame', 'get_solid', 'get_wrench', 'get_drawing',
+    public_methods = {
+        'System': [
+            'get_value', 'set_value',
+            'get_symbol', 'get_time',
+            'get_coordinate', 'get_velocity', 'get_acceleration',
+            'get_aux_coordinate', 'get_aux_velocity', 'get_aux_acceleration',
+            'get_parameter', 'get_joint_unknown', 'get_input',
+            'get_base', 'get_matrix', 'get_vector', 'get_tensor', 'get_point',
+            'get_frame', 'get_solid', 'get_wrench', 'get_drawing',
 
-        'has_symbol',
-        'has_coordinate', 'has_velocity', 'has_acceleration',
-        'has_aux_coordinate', 'has_aux_velocity', 'has_aux_acceleration',
-        'has_parameter', 'has_joint_unknown', 'has_input',
-        'has_base', 'has_matrix', 'has_vector', 'has_tensor', 'has_point',
-        'has_frame', 'has_solid', 'has_wrench', 'has_drawing',
+            'has_symbol',
+            'has_coordinate', 'has_velocity', 'has_acceleration',
+            'has_aux_coordinate', 'has_aux_velocity', 'has_aux_acceleration',
+            'has_parameter', 'has_joint_unknown', 'has_input',
+            'has_base', 'has_matrix', 'has_vector', 'has_tensor', 'has_point',
+            'has_frame', 'has_solid', 'has_wrench', 'has_drawing',
 
-        'get_symbols',
-        'get_coordinates', 'get_velocities', 'get_accelerations',
-        'get_aux_coordinates', 'get_aux_velocities', 'get_aux_accelerations',
-        'get_parameters', 'get_joint_unknowns', 'get_inputs',
-        'get_bases', 'get_matrices', 'get_vectors', 'get_tensors',
-        'get_points', 'get_frames', 'get_solids', 'get_wrenches', 'get_drawings',
+            'get_symbols',
+            'get_coordinates', 'get_velocities', 'get_accelerations',
+            'get_aux_coordinates', 'get_aux_velocities', 'get_aux_accelerations',
+            'get_parameters', 'get_joint_unknowns', 'get_inputs',
+            'get_bases', 'get_matrices', 'get_vectors', 'get_tensors',
+            'get_points', 'get_frames', 'get_solids', 'get_wrenches', 'get_drawings',
 
-        'get_symbols_matrix',
-        'get_coordinates_matrix', 'get_velocities_matrix', 'get_accelerations_matrix',
-        'get_aux_coordinates_matrix', 'get_aux_velocities_matrix', 'get_aux_accelerations_matrix',
+            'get_symbols_matrix',
+            'get_coordinates_matrix', 'get_velocities_matrix', 'get_accelerations_matrix',
+            'get_aux_coordinates_matrix', 'get_aux_velocities_matrix', 'get_aux_accelerations_matrix',
 
-        'new_coordinate', 'new_aux_coordinate',
-        'new_parameter', 'new_joint_unknown', 'new_input',
-        'new_base', 'new_matrix', 'new_vector', 'new_tensor',
-        'new_point', 'new_frame', 'new_solid', 'new_wrench', 'new_drawing',
+            'new_coordinate', 'new_aux_coordinate',
+            'new_parameter', 'new_joint_unknown', 'new_input',
+            'new_base', 'new_matrix', 'new_vector', 'new_tensor',
+            'new_point', 'new_frame', 'new_solid', 'new_wrench', 'new_drawing',
 
-        'reduced_base', 'reduced_point', 'pre_point_branch', 'rotation_matrix',
-        'position_vector', 'angular_velocity', 'angular_velocity_tensor',
-        'velocity_vector', 'angular_acceleration', 'acceleration_vector', 'twist',
-        'derivative', 'jacobian', 'diff', 'gravity_wrench', 'inertia_wrench',
+            'reduced_base', 'reduced_point', 'pre_point_branch', 'rotation_matrix',
+            'position_vector', 'angular_velocity', 'angular_velocity_tensor',
+            'velocity_vector', 'angular_acceleration', 'acceleration_vector', 'twist',
+            'derivative', 'jacobian', 'diff', 'gravity_wrench', 'inertia_wrench',
 
-        'set_as_default'
-    ])).issubset(set(map(attrgetter('__qualname__'), methods)))
+            'set_as_default'
+        ],
+
+        'SymbolNumeric': [
+            '__complex__', '__float__', '__int__',
+            'get_owner', 'get_tex_name', 'get_type', 'get_value',
+            'set_tex_name', 'set_value',
+            '__neg__', '__pos__', '__add__', '__sub__',
+            '__mul__', '__truediv__', '__pow__'
+        ]
+    }
+
+    qualnames = frozenset(map(qualnamegetter, methods))
+
+    for class_name, names in public_methods.items():
+        for name in names:
+            if class_name + '.' + name not in qualnames:
+                raise AssertionError(f'Missing method "{name}" in class "{class_name}"')
+
+
 
 
 
 def test_system_properties(properties):
     '''
-    This method checks that all properties defined by the class System in the public
-    API are avaliable.
+    This method checks that all properties defined by any of the classes on this library are
+    avaliable in the public API
     '''
 
-    assert set(map(partial(concat, 'System.'), [
-        'symbols',
-        'time',
-        'coordinates', 'velocities', 'accelerations',
-        'aux_coordinates', 'aux_velocities', 'aux_accelerations',
-        'parameters', 'joint_unknowns', 'inputs',
-        'bases', 'matrices', 'vectors', 'tensors', 'points',
-        'frames', 'solids', 'wrenches', 'drawings', 'autogen_latex_names',
+    public_properties = {
+        'System': [
+            'symbols',
+            'time',
+            'coordinates', 'velocities', 'accelerations',
+            'aux_coordinates', 'aux_velocities', 'aux_accelerations',
+            'parameters', 'joint_unknowns', 'inputs',
+            'bases', 'matrices', 'vectors', 'tensors', 'points',
+            'frames', 'solids', 'wrenches', 'drawings', 'autogen_latex_names'
+        ],
 
-    ])).issubset( set(map(attrgetter('__qualname__'), map(attrgetter('fget'), properties))) )
+        'SymbolNumeric': [
+            'owner', 'tex_name', 'type', 'value'
+        ]
+    }
+
+    qualnames = frozenset(map(propqualnamegetter, properties))
+
+    for class_name, names in public_properties.items():
+        for name in names:
+            if class_name + '.' + name not in qualnames:
+                raise AssertionError(f'Missing property "{name}" in class "{class_name}"')
