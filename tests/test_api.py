@@ -72,6 +72,14 @@ def properties(classes):
     return tuple(props)
 
 
+@pytest.fixture(scope='module')
+def global_functions():
+    import lib3d_mec_ginac
+    values = map(partial(getattr, lib3d_mec_ginac), filterfalse(lambda key: key.startswith('_'), dir(lib3d_mec_ginac)))
+    funcs = filter(lambda value: callable(value) and not isclass(value), values)
+    funcs = filter(lambda func: func.__module__.startswith('lib3d_mec_ginac'), funcs)
+    return tuple(funcs)
+
 
 
 ######## Tests ########
@@ -275,3 +283,17 @@ def test_system_properties(properties):
         for name in names:
             if class_name + '.' + name not in qualnames:
                 raise AssertionError(f'Missing property "{name}" in class "{class_name}"')
+
+
+
+
+def test_global_functions(global_functions):
+    public_global_functions = [
+        'get_default_system', 'set_default_system',
+        'set_atomization_state', 'enable_atomization', 'disable_atomization',
+        'get_atomization_state',
+        'set_gravity_direction', 'set_gravity_up', 'set_gravity_down',
+        'get_gravity_direction',
+        'unatomize', 'subs',
+        'dot', 'cross'
+    ]
