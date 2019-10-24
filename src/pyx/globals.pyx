@@ -228,3 +228,23 @@ def subs(matrix, symbols, repl):
     if not isinstance(matrix, Matrix):
         raise TypeError('First argument must be a matrix object')
     return matrix.subs(symbols, repl)
+
+
+
+
+######## Matrix list optimization ########
+
+cpdef matrix_list_optimize(matrix):
+    '''
+    '''
+    if not isinstance(matrix, Matrix):
+        raise TypeError('Input argument must be a Matrix object')
+
+    cdef c_lst atom_lst
+    cdef c_lst expr_lst
+
+    c_matrix_list_optimize(c_deref(<c_Matrix*>(<Matrix>matrix)._get_c_handler()), atom_lst, expr_lst)
+
+    atoms = [_expr_from_c(atom_lst.op(i)) for i in range(0, atom_lst.nops())]
+    exprs = [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]
+    return atoms, exprs

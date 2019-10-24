@@ -9,10 +9,11 @@ mec ginac globals.h that will be used by this library
 ######## Imports ########
 
 from src.pxd.ginac.cexpr cimport ex
-from src.pxd.cmatrix cimport Matrix
-from src.pxd.cvector3D cimport Vector3D
-from src.pxd.ctensor3D cimport Tensor3D
-from src.pxd.cwrench3D cimport Wrench3D
+from src.pxd.ginac.clst  cimport lst
+from src.pxd.cmatrix     cimport Matrix
+from src.pxd.cvector3D   cimport Vector3D
+from src.pxd.ctensor3D   cimport Tensor3D
+from src.pxd.cwrench3D   cimport Wrench3D
 
 
 
@@ -33,3 +34,6 @@ cdef extern from "Globals.h":
 
     # Substitution
     Matrix subs(Matrix, Matrix, float)
+
+    # Matrix list opimization
+    void matrix_list_optimize(Matrix&, lst&, lst&)

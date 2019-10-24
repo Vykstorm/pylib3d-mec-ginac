@@ -49,10 +49,11 @@ from src.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
 from src.pxd.cdrawing3D      cimport Drawing3D      as c_Drawing3D
 
 # Global functions
-from src.pxd.cglobals        cimport atomization    as c_atomization
-from src.pxd.cglobals        cimport gravity        as c_gravity
-from src.pxd.cglobals        cimport unatomize      as c_unatomize
-from src.pxd.cglobals        cimport subs           as c_subs
+from src.pxd.cglobals        cimport atomization          as c_atomization
+from src.pxd.cglobals        cimport gravity              as c_gravity
+from src.pxd.cglobals        cimport unatomize            as c_unatomize
+from src.pxd.cglobals        cimport subs                 as c_subs
+from src.pxd.cglobals        cimport matrix_list_optimize as c_matrix_list_optimize
 
 
 
