@@ -5,6 +5,8 @@ from lib3d_mec_ginac import *
 from math import pi, e
 
 
+#enable_atomization()
+
 
 # Set gravity value
 set_value('g', 9.80665)
@@ -44,8 +46,8 @@ l3, l4 = new_param('l3', 1.2), new_param('l4', 1.6)
 ######## Bases ########
 
 new_base('Barm1', 'xyz', [0, 1, 0], theta1)
-new_base('Barm2', 'xyz', 0, 1, 0, theta2)
-new_base('Barm3', 'xyz', rotation_tupla=[0, 1, 0], rotation_angle=theta3)
+new_base('Barm2', 'Barm1', 0, 1, 0, theta2)
+new_base('Barm3', 'Barm2', rotation_tupla=[0, 1, 0], rotation_angle=theta3)
 
 
 ######## Vectors ########
