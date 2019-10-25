@@ -146,6 +146,8 @@ Global functions
 
 .. autofunction:: subs
 
+.. autofunction:: matrix_list_optimize
+
 
 Mathematic functions
 ~~~~~~~~~~~~~~~~~~~~

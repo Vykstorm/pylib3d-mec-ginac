@@ -235,7 +235,12 @@ def subs(matrix, symbols, repl):
 ######## Matrix list optimization ########
 
 cpdef matrix_list_optimize(matrix):
-    '''
+    '''matrix_list_optimize(matrix: Matrix) -> Matrix, List[Expr], List[Expr]
+    Optimize the given matrix. Get the matrix optimized and the list of atoms
+    and expressions.
+
+    :type matrix: Matrix
+    
     '''
     if not isinstance(matrix, Matrix):
         raise TypeError('Input argument must be a Matrix object')
