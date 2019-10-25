@@ -244,7 +244,8 @@ cpdef matrix_list_optimize(matrix):
     cdef c_lst expr_lst
 
     c_matrix_list_optimize(c_deref(<c_Matrix*>(<Matrix>matrix)._get_c_handler()), atom_lst, expr_lst)
+    print(atom_lst.nops())
 
     atoms = [_expr_from_c(atom_lst.op(i)) for i in range(0, atom_lst.nops())]
     exprs = [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]
-    return atoms, exprs
+    return matrix, atoms, exprs
