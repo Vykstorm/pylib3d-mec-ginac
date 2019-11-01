@@ -9,6 +9,26 @@ from inspect import isclass
 
 ######## Fixtures ########
 
+
+@pytest.fixture(scope='session')
+def strings():
+    '''
+    This fixture returns a list of arbitrary strings
+    '''
+    return ('foo', 'bar', 'qux', '', 'abc')
+
+
+@pytest.fixture(scope='session')
+def non_strings():
+    '''
+    This fixture returns a list of objects which are not strings nor bytes.
+    '''
+    class Foo:
+        pass
+    return (False, 0, True, 1.5, 2, partial, Foo, Foo())
+
+
+
 @pytest.fixture(scope='session')
 def classes():
     '''
