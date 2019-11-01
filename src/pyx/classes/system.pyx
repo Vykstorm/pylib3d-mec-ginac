@@ -579,9 +579,8 @@ cdef class _System:
             name = _parse_name(name, check_syntax=True)
             value = _parse_numeric_value(value)
 
-            if tex_name or not self._autogen_latex_names:
-                tex_name = _parse_text(tex_name)
-            else:
+            tex_name = _parse_text(tex_name)
+            if not tex_name and self._autogen_latex_names:
                 # Auto generate latex name
                 tex_name = _gen_latex_name(name)
 
