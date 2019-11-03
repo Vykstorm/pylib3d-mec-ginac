@@ -33,8 +33,9 @@ def valid_object_names():
     '''
     This fixture returns a list of valid system object names.
     '''
-    return ('a', 'b', 'c', 'foo', 'bar', 'foobar', 'foo_bar', '_foo', 'foo2', 'bar_2', '__foo')
-
+    from lib3d_mec_ginac import System
+    return tuple(filterfalse(System().get_symbols().__contains__,
+        ('a', 'b', 'c', 'foo', 'bar', 'foobar', 'foo_bar', '_foo', 'foo2', 'bar_2', '__foo')))
 
 
 @pytest.fixture(scope='session')
