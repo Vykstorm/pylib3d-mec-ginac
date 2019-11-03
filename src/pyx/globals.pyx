@@ -62,6 +62,10 @@ def get_gravity_direction():
 
 
 
+# Default gravity direction is "down"
+set_gravity_down()
+
+
 
 
 
@@ -118,6 +122,8 @@ def get_atomization_state():
     return int(c_atomization)
 
 
+# Default atomizatio state is "enabled"
+enable_atomization()
 
 
 
@@ -235,7 +241,7 @@ def subs(matrix, symbols, repl):
 ######## Matrix list optimization ########
 
 cpdef matrix_list_optimize(matrix):
-    '''
+    '''matrix_list_optimize(matrix: Matrix) -> Matrix, List[Tuple[Expr, Expr]]
     '''
     if not isinstance(matrix, Matrix):
         raise TypeError('Input argument must be a Matrix object')
@@ -247,4 +253,4 @@ cpdef matrix_list_optimize(matrix):
 
     atoms = [_expr_from_c(atom_lst.op(i)) for i in range(0, atom_lst.nops())]
     exprs = [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]
-    return matrix, atoms, exprs
+    return matrix, list(zip(atoms, exprs))
