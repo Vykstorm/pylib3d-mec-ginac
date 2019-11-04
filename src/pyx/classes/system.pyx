@@ -579,9 +579,8 @@ cdef class _System:
             name = _parse_name(name, check_syntax=True)
             value = _parse_numeric_value(value)
 
-            if tex_name or not self._autogen_latex_names:
-                tex_name = _parse_text(tex_name)
-            else:
+            tex_name = _parse_text(tex_name)
+            if not tex_name and self._autogen_latex_names:
                 # Auto generate latex name
                 tex_name = _gen_latex_name(name)
 
@@ -630,15 +629,15 @@ cdef class _System:
 
             bounded_args = _apply_signature(
                 ['name', 'vel_name', 'acc_name', 'tex_name', 'vel_tex_name', 'acc_tex_name', 'value', 'vel_value', 'acc_value'],
-                {'vel_name': b'', 'acc_name': b'', 'tex_name': b'', 'vel_tex_name': b'', 'acc_tex_name': b'',
+                {'vel_name': None, 'acc_name': None, 'tex_name': b'', 'vel_tex_name': b'', 'acc_tex_name': b'',
                 'value': 0.0, 'vel_value': 0.0, 'acc_value': 0.0},
                 args, kwargs
             )
 
             # Validate & parse coordinate names
-            names = [_parse_text(arg) for arg in bounded_args[:3]]
+            names = list(bounded_args[:3])
             names[0] = _parse_name(names[0], check_syntax=True)
-            names[1:] = [_parse_name(name, check_syntax=True) if name else (b'd'*k + names[0]) for k, name in enumerate(names[1:], 1)]
+            names[1:] = [_parse_name(name, check_syntax=True) if name is not None else (b'd'*k + names[0]) for k, name in enumerate(names[1:],1)]
 
             # Validate & parse latex names
             tex_names = [_parse_text(arg) for arg in bounded_args[3:6]]
