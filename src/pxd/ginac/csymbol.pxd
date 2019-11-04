@@ -19,3 +19,4 @@ cdef extern from "ginac/symbol.h" namespace "GiNaC":
     cdef cppclass symbol:
         void set_name(string&)
         void set_TeX_name(string&)
+        string get_name()

@@ -241,7 +241,7 @@ def subs(matrix, symbols, repl):
 ######## Matrix list optimization ########
 
 cpdef matrix_list_optimize(matrix):
-    '''matrix_list_optimize(matrix: Matrix) -> Matrix, List[Tuple[Expr, Expr]]
+    '''matrix_list_optimize(matrix: Matrix) -> Matrix, Dict[str, Expr]
     Optimize the given matrix. Get the matrix optimized and the list of atoms
     and expressions.
 
@@ -255,7 +255,6 @@ cpdef matrix_list_optimize(matrix):
     cdef c_lst expr_lst
 
     c_matrix_list_optimize(c_deref(<c_Matrix*>(<Matrix>matrix)._get_c_handler()), atom_lst, expr_lst)
-
-    atoms = [_expr_from_c(atom_lst.op(i)) for i in range(0, atom_lst.nops())]
-    exprs = [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]
-    return matrix, list(zip(atoms, exprs))
+    atoms = dict(zip([(<bytes>(c_ex_to[c_symbol](atom_lst.op(i))).get_name()).decode() for i in range(0, atom_lst.nops())],
+                    [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]))
+    return matrix, atoms

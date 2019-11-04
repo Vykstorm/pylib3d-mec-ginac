@@ -22,7 +22,7 @@ cdef extern from "symbol_numeric.h":
     cdef cppclass symbol_numeric(symbol):
         symbol_numeric(string)
 
-        string get_name()
+        #string get_name()
         string print_TeX_name()
         numeric get_value()
         void set_value(numeric)
