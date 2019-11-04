@@ -57,6 +57,7 @@ from src.pxd.cglobals        cimport matrix_list_optimize as c_matrix_list_optim
 
 
 
+
 ######## C++ GiNaC imports ########
 
 from src.pxd.ginac.cnumeric cimport numeric as c_numeric
@@ -66,6 +67,9 @@ from src.pxd.ginac.csymbol  cimport symbol  as c_symbol
 from src.pxd.ginac.cmatrix  cimport matrix  as c_ginac_matrix
 from src.pxd.ginac.clst     cimport lst     as c_lst
 
+# Utility functions
+from src.pxd.ginac.cexpr cimport is_a as c_is_a
+from src.pxd.ginac.cexpr cimport ex_to as c_ex_to
 
 # Printing classes & functions
 from src.pxd.ginac.cprint cimport print_context  as c_ginac_printer

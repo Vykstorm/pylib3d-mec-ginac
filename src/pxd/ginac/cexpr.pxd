@@ -46,3 +46,7 @@ cdef extern from "ginac/ex.h" namespace "GiNaC":
 
         # Printing
         void print(print_context&, unsigned=0) const
+
+
+    bint is_a[T](const ex&)
+    T& ex_to[T](const ex&)
