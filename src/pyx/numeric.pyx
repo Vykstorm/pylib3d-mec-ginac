@@ -11,10 +11,9 @@ class NumericFunction:
 
     ######## Constructor ########
 
-    def __init__(self, name, atoms, outputs):
+    def __init__(self, atoms, outputs):
         # Validate input arguments
-        assert isinstance(name, str)
-        #assert isinstance(name, str) and name.isidentifier()
+
         assert isinstance(atoms, dict)
         assert all(map(lambda key: isinstance(key, str) and key.isidentifier(), atoms.keys()))
         assert all(map(lambda value: isinstance(value, str) and value, atoms.values()))
@@ -35,7 +34,6 @@ class NumericFunction:
 
 
         # Initialize internal fields
-        self._name = name
         self._atoms = atoms
         self._outputs = outputs
         self._code = None
@@ -57,15 +55,6 @@ class NumericFunction:
 
 
     ######## Getters ########
-
-    def get_name(self):
-        '''get_name() -> str
-        Get the name of this numeric function
-
-        :rtype: str
-
-        '''
-        return self._name
 
     def get_atoms(self):
         '''get_atoms() -> Dict[str, str]
@@ -119,7 +108,6 @@ class NumericFunction:
         if not isinstance(filename, str):
             raise TypeError('filename must be a string')
         data = {
-            'name': self.name,
             'atoms': self.atoms,
             'outputs': self.outputs
         }
@@ -162,15 +150,6 @@ class NumericFunction:
 
     ######## Properties ########
 
-    @property
-    def name(self):
-        '''
-        Only read property that returns the name of this numeric function
-
-        :rtype: str
-
-        '''
-        return self.get_name()
 
     @property
     def atoms(self):
@@ -191,9 +170,3 @@ class NumericFunction:
 
 
     ######## Printing ########
-
-    def __str__(self):
-        return f"Numeric function {self.get_name()}"
-
-    def __repr__(self):
-        return self.__str__()

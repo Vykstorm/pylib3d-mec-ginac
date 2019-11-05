@@ -290,7 +290,7 @@ cpdef matrix_list_optimize(matrix):
     outputs = [[_print_expr(matrix.get(i, j)) for j in range(0, m)] for i in range(0, n)]
 
     # Create the numeric function
-    numeric_func = NumericFunction(matrix.get_name(), atoms, outputs)
+    numeric_func = NumericFunction(atoms, outputs)
 
     # Return the matrix and the numeric function
     return matrix, numeric_func
