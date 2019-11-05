@@ -48,6 +48,7 @@ API Reference
         parameters, inputs, joint_unknowns,
         bases, matrices, vectors, tensors,
         points, frames, solids, wrenches, drawings,
+        evaluate,
         autogen_latex_names,
         set_as_default
 
@@ -147,6 +148,7 @@ Global functions
 .. autofunction:: subs
 
 .. autofunction:: matrix_list_optimize
+
 
 
 Mathematic functions
