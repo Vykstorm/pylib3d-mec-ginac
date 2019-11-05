@@ -98,6 +98,7 @@ from warnings import warn
 from abc import ABC
 from types import MethodType
 from re import match
+from inspect import Signature, Parameter
 
 # Math
 from math import floor

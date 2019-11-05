@@ -4,10 +4,6 @@ Description:
 This module defines internal helper routines to validate & parse input arguments of the public API functions.
 '''
 
-from collections.abc import Iterable
-from inspect import Signature, Parameter
-from re import match
-
 
 
 def _parse_text(text):
@@ -43,7 +39,7 @@ def _parse_name(name, check_syntax=False):
     except TypeError:
         raise TypeError('Name must be a str or bytes object')
 
-    if check_syntax and not match(b'^[a-zA-Z_]\w*$', name):
+    if check_syntax and not name.decode().isidentifier():
         raise ValueError(f'"{name.decode()}" is not a valid name')
 
     return name

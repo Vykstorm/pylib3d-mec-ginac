@@ -14,32 +14,16 @@ class NumericFunction:
 
     ######## Constructor ########
 
-    def __init__(self, name, atoms, outputs, use_numpy=True):
+    def __init__(self, name, atoms, outputs):
         # Validate input arguments
-        if not isinstance(name, str) or not str:
-            raise TypeError('name must be a non empty string')
-        if not isinstance(atoms, dict):
-            raise TypeError('atoms must be a dictionary')
-        if not isinstance(outputs, (list, tuple)) or not outputs:
-            raise TypeError('outputs must be a non empty list')
-        outputs = tuple(outputs)
+        
 
-        if not all(map(lambda key: isinstance(key, str) and key, atoms.keys())):
-            raise TypeError('atom names must be non empty strings')
-        if not all(map(lambda value: isinstance(value, str) and value, atoms.values())):
-            raise TypeError('atom expressions must be non empty strings')
 
-        if not all(map(lambda output: isinstance(output, str) and output, outputs)):
-            raise TypeError('outputs must be a list of non empty strings')
-
-        if not isinstance(use_numpy, bool):
-            raise TypeError('use_numpy must be bool')
 
         # Initialize internal fields
         self._name = name
         self._atoms = atoms
         self._outputs = outputs
-        self._use_numpy = use_numpy
         self._code = None
 
 
@@ -85,27 +69,6 @@ class NumericFunction:
         '''
         return self._outputs
 
-    def is_numpy_used(self):
-        '''is_numpy_used() -> bool
-        If this method returns True, the output of this numeric function will be
-        a numpy array. Otherwise, it will be a generic python list
-
-        '''
-        return self._use_numpy
-
-    def use_numpy(self):
-        '''use_numpy()
-        If this method is called, the output of this numeric function will be
-        a numpy array.
-        '''
-        self._use_numpy = True
-
-    def dont_use_numpy(self):
-        '''dont_use_numpy()
-        If this method is called, the output of this numeric function will be
-        a generic python list
-        '''
-        self._use_numpy = False
 
 
     ######## Export/Import  ########
@@ -176,10 +139,6 @@ class NumericFunction:
 
         exec(self._code, global_vars, local_vars)
         result = local_vars['__output__']
-
-        if self._use_numpy:
-            import numpy as np
-            return np.array(result)
         return result
 
 
