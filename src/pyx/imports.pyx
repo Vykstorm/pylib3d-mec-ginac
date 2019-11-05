@@ -99,9 +99,11 @@ from abc import ABC
 from types import MethodType
 from re import match
 from inspect import Signature, Parameter
+import json
 
 # Math
 from math import floor
+from math import cos, sin, tan
 
 
 # Third party libraries

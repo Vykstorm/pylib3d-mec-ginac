@@ -4,9 +4,6 @@ Description:
 This module defines the class NumericFunction
 '''
 
-import json
-from math import cos, sin, tan
-
 
 ######## Class NumericFunction ########
 
@@ -16,7 +13,23 @@ class NumericFunction:
 
     def __init__(self, name, atoms, outputs):
         # Validate input arguments
-        
+        assert isinstance(name, str) and name.isidentifier()
+        assert isinstance(atoms, dict)
+        assert all(map(lambda key: isinstance(key, str) and key.isidentifier(), atoms.keys()))
+        assert all(map(lambda value: isinstance(value, str) and value, atoms.values()))
+
+        assert isinstance(outputs, (list, tuple))
+        output = tuple(outputs)
+        assert output
+        assert all(map(lambda output: isinstance(output, str), outputs)) or all(map(lambda output: isinstance(output, (list, tuple)), outputs))
+        if not isinstance(output[0], str):
+            outputs = tuple(map(tuple, outputs))
+            assert len(frozenset(map(len, outputs))) == 1
+            assert outputs[0]
+            for output in outputs:
+                assert all(map(lambda item: isinstance(item, str), output)) and all(output)
+        else:
+            assert all(outputs)
 
 
 
@@ -31,7 +44,11 @@ class NumericFunction:
     def _compile(self):
         # This private method is used to compile the internal numeric function
         lines = [f'{name} = {value}' for name, value in self.atoms.items()]
-        lines.append(f'__output__ = [{", ".join(self.outputs)}]')
+
+        if isinstance(self.outputs[0], tuple):
+            lines.append(f'__output__ = [' + ', '.join(['[' + ', '.join(row) + ']' for row in self.outputs]) + ']')
+        else:
+            lines.append(f'__output__ = [{", ".join(self.outputs)}]')
         source = '\n'.join(lines)
         self._code = compile(source, '<string>', 'exec', optimize=2)
 
@@ -130,7 +147,6 @@ class NumericFunction:
         # Compile numeric function body if needed
         if self._code is None:
             self._compile()
-
 
         # Evaluate the function
         global_vars = {'cos': cos, 'sin': sin, 'tan': tan}
