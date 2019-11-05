@@ -170,20 +170,10 @@ Sum_Wrenches_Arm1 = Inertia_Arm1 + Gravity_Arm1
 Sum_Wrenches_Arm2 = Inertia_Arm2 + Gravity_Arm2 + SpringA - FMext2
 Sum_Wrenches_Arm3 = Inertia_Arm3 + Gravity_Arm3 - SpringA + FMext3
 
-print('* Arm wrenches sum unatomized:')
-print(unatomize(Sum_Wrenches_Arm1))
-print(unatomize(Sum_Wrenches_Arm2))
-print(unatomize(Sum_Wrenches_Arm3))
-print()
 
 # Twists
 Twist_Arm1, Twist_Arm2, Twist_Arm3 = twist('Arm1'), twist('Arm2'), twist('Arm3')
 
-print('* Arm twists unatomized:')
-print(unatomize(Twist_Arm1))
-print(unatomize(Twist_Arm2))
-print(unatomize(Twist_Arm3))
-print()
 
 
 ######## Matrices of symbols ########
@@ -207,45 +197,24 @@ Phi = Matrix(shape=[2, 1])
 Phi[0] = O2C * e_x
 Phi[1] = O2C * e_z
 
-print('* Phi2 =   [')
-print(',\n'.join(map(str, unatomize(Phi))))
-print(']\n')
-
 dPhi = derivative(Phi)
-print('* dPhi2 =  [')
-print(',\n'.join(map(str, unatomize(dPhi))))
-print(']\n')
-
 ddPhi = derivative(dPhi)
-print('* ddPhi2 = [')
-print(',\n'.join(map(str, unatomize(ddPhi))))
-print(']\n')
 
 # Beta
 beta = -dPhi
 beta = subs(beta, dq, 0)
 beta = subs(beta, dq_aux, 0)
-print('* beta2 = ')
-print(unatomize(beta))
-print()
 
 # Phi_q
 Phi_q = jacobian(Phi.transpose(), Matrix.block(2, 1, q, q_aux))
-
-print('* Phi_q2 = ')
-print(unatomize(Phi_q))
-
 dPhi_dq = jacobian(dPhi.transpose(), Matrix.block(2, 1, dq, dq_aux))
-print('* dPhi_dq2 = ')
-print(unatomize(dPhi_dq))
+
 
 # Gamma
 gamma = -ddPhi
 gamma = subs(gamma, ddq, 0)
 gamma = subs(gamma, ddq_aux, 0)
-print('* gamma = ')
-print(unatomize(gamma))
-print()
+
 
 # Phi_init
 Phi_init = Matrix([theta1 + pi / 2])
@@ -260,11 +229,6 @@ Dyn_eq_VP = Matrix(shape=[3, 1], values=[
     Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta2) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta2) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta2),
     Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta3) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta3) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta3)
 ])
-
-print('* Dyn_eq_VP = [')
-print(',\n\n'.join(map(str,unatomize(Dyn_eq_VP))))
-print(']\n\n')
-
 
 
 ######## Output vector ########
@@ -283,77 +247,23 @@ Dyn_eq_VP_open = Dyn_eq_VP
 Dyn_eq_VP_open = subs(Dyn_eq_VP_open, epsilon, 0)
 
 
-print('* Dyn_eq_VP_open2 = [')
-print(',\n\n'.join(map(str,unatomize(Dyn_eq_VP_open))))
-print(']\n\n')
-
-
 Dyn_eq_L = Dyn_eq_VP
 M_qq = jacobian(Dyn_eq_VP_open.transpose(), ddq, True)
-
-print('* M_qq2 = [')
-print(',\n\n'.join(map(str,unatomize(M_qq))))
-print(']\n\n')
-
 
 delta_q = -Dyn_eq_VP_open
 delta_q = subs(delta_q, ddq, 0)
 delta_q = subs(delta_q, ddq_aux, 0)
 
-print('* delta_qq2 = [')
-print(',\n\n'.join(map(str,unatomize(delta_q))))
-print(']\n\n')
-
-
 Phi_init = Matrix.block(2, 1, Phi, Phi_init)
-
-print('* Phi_init2 = [')
-print(',\n\n'.join(map(str,unatomize(Phi_init))))
-print(']\n\n')
+dPhi_init = Matrix.block(2, 1, dPhi, dPhi_init)
 
 
+Phi_init_q = jacobian(Phi_init.transpose(), Matrix.block(2, 1, q, q_aux))
+dPhi_init_dq = jacobian(dPhi_init.transpose(), Matrix.block(2, 1, dq, dq_aux))
 
+beta_init = -dPhi_init
+beta_init = subs(beta_init, dq, 0)
+beta_init = subs(beta_init, ddq_aux, 0)
 
-
-######## System introspection ########
-
-print('#'*10 + ' Symbols ' + '#'*10)
-print()
-print(get_symbols())
-print()
-
-print('#'*10 + ' Bases ' + '#'*10)
-print()
-print(get_bases())
-print()
-
-print('#'*10 + ' Vectors ' + '#'*10)
-print()
-print(get_vectors())
-print()
-
-print('#'*10 + ' Tensors ' + '#'*10)
-print()
-print(get_vectors())
-print()
-
-
-print('#'*10 + ' Points ' + '#'*10)
-print()
-print(get_points())
-print()
-
-print('#'*10 + ' Frames ' + '#'*10)
-print()
-print(get_frames())
-print()
-
-print('#'*10 + ' Solids ' + '#'*10)
-print()
-print(get_vectors())
-print()
-
-print('#'*10 + ' Wrenches ' + '#'*10)
-print()
-print(get_wrenches())
-print()
+Extra_Dyn_Eq_eq = Matrix([dtheta1, ddtheta1]).transpose()
+Dyn_Eq_eq_VP = Matrix.block(5, 1, Dyn_eq_L, ddPhi, dPhi, Phi, Extra_Dyn_Eq_eq)
