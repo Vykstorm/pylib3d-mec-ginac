@@ -1474,6 +1474,16 @@ class System(_System):
 
 
 
+    ######## Numeric evaluation ########
+
+
+    def evaluate(self, func):
+        '''
+        '''
+        return self._evaluate(func)
+
+
+
 
 
     ######## Properties ########

@@ -240,21 +240,43 @@ def subs(matrix, symbols, repl):
 
 ######## Matrix list optimization ########
 
+cpdef _print_expr(Expr atom_expr):
+    cdef c_sstream out
+    cdef c_ginac_printer* c_printer = new c_ginac_python_printer(out)
+    atom_expr._c_handler.print(c_deref(c_printer))
+    del c_printer
+    return (<bytes>out.str()).decode()
+
+
 cpdef matrix_list_optimize(matrix):
-    '''matrix_list_optimize(matrix: Matrix) -> Matrix, Dict[str, Expr]
-    Optimize the given matrix. Get the matrix optimized and the list of atoms
-    and expressions.
+    '''matrix_list_optimize(matrix: Matrix) -> Tuple[Matrix, NumericFunction]
+    Optimize the given matrix. Get the matrix optimized and a compiled numeric
+    function to evaluate their items numerically
 
     :type matrix: Matrix
+    :rtype: Tuple[Matrix, NumericFunction]
 
     '''
+
     if not isinstance(matrix, Matrix):
         raise TypeError('Input argument must be a Matrix object')
 
     cdef c_lst atom_lst
     cdef c_lst expr_lst
 
+    # Optimize matrix list
     c_matrix_list_optimize(c_deref(<c_Matrix*>(<Matrix>matrix)._get_c_handler()), atom_lst, expr_lst)
+
+    # Get the list of atoms with their expressions
     atoms = dict(zip([(<bytes>(c_ex_to[c_symbol](atom_lst.op(i))).get_name()).decode() for i in range(0, atom_lst.nops())],
-                    [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]))
-    return matrix, atoms
+                    [_print_expr(_expr_from_c(expr_lst.op(i))) for i in range(0, expr_lst.nops())]))
+
+    # Get the matrix elements arranged as a list of lists (one list per row)
+    n, m = matrix.shape
+    outputs = [[_print_expr(matrix.get(i, j)) for j in range(0, m)] for i in range(0, n)]
+
+    # Create the numeric function
+    numeric_func = NumericFunction(matrix.get_name(), atoms, outputs)
+
+    # Return the matrix and the numeric function
+    return matrix, numeric_func

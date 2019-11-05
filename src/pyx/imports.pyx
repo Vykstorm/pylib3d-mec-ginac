@@ -92,7 +92,7 @@ from collections.abc import Iterable, Mapping, Sized
 
 # Utilities
 from functools import partial, partialmethod, wraps
-from itertools import chain, starmap, repeat
+from itertools import chain, starmap, repeat, product
 from operator import attrgetter
 from warnings import warn
 from abc import ABC

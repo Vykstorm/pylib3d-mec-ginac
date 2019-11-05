@@ -29,3 +29,4 @@ cdef extern from "<sstream>" namespace "std":
     cdef cppclass stringstream(ostream):
         stringstream() except +
         string str()
+        void str(string& s)

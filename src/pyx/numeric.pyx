@@ -13,7 +13,8 @@ class NumericFunction:
 
     def __init__(self, name, atoms, outputs):
         # Validate input arguments
-        assert isinstance(name, str) and name.isidentifier()
+        assert isinstance(name, str)
+        #assert isinstance(name, str) and name.isidentifier()
         assert isinstance(atoms, dict)
         assert all(map(lambda key: isinstance(key, str) and key.isidentifier(), atoms.keys()))
         assert all(map(lambda value: isinstance(value, str) and value, atoms.values()))
