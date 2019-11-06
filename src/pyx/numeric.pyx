@@ -11,32 +11,39 @@ class NumericFunction:
 
     ######## Constructor ########
 
-    def __init__(self, atoms, outputs):
-        # Validate input arguments
+    def __init__(self, atoms, outputs, globals=None):
+        ## Validate input arguments
 
+        # Validate atoms argument
         assert isinstance(atoms, dict)
         assert all(map(lambda key: isinstance(key, str) and key.isidentifier(), atoms.keys()))
         assert all(map(lambda value: isinstance(value, str) and value, atoms.values()))
 
+        # Validate outputs argument
         assert isinstance(outputs, (list, tuple))
         output = tuple(outputs)
         assert output
-        assert all(map(lambda output: isinstance(output, str), outputs)) or all(map(lambda output: isinstance(output, (list, tuple)), outputs))
-        if not isinstance(output[0], str):
-            outputs = tuple(map(tuple, outputs))
-            assert len(frozenset(map(len, outputs))) == 1
-            assert outputs[0]
-            for output in outputs:
-                assert all(map(lambda item: isinstance(item, str), output)) and all(output)
-        else:
-            assert all(outputs)
+        assert all(map(lambda output: isinstance(output, (list, tuple)), outputs))
+        outputs = tuple(map(tuple, outputs))
+        assert len(frozenset(map(len, outputs))) == 1
+        assert outputs[0]
+        for output in outputs:
+            assert all(map(lambda item: isinstance(item, str), output)) and all(output)
 
+        # Validate globals argument
+        assert globals is None or isinstance(globals, dict)
+        if globals is not None:
+            assert all(map(lambda key: isinstance(key, str) and key.isidentifier(), globals.keys()))
+        else:
+            globals = {'sin': sin, 'cos': cos, 'tan': tan}
 
 
         # Initialize internal fields
         self._atoms = atoms
         self._outputs = outputs
         self._code = None
+        self._globals = globals
+
 
 
 
@@ -75,6 +82,26 @@ class NumericFunction:
 
         '''
         return self._outputs
+
+
+    def get_inputs(self):
+        '''get_inputs() -> List[str]
+        Get a list of variable inputs needed by this numeric function in order to be evaluated
+        '''
+        atom_names, atoms_exprs = self.atoms.keys(), self.atoms.values()
+        words = frozenset(chain.from_iterable(map(lambda s: map(lambda result: result.group(0), finditer(r'\w+', s)),
+            chain(atoms_exprs, chain.from_iterable(self.outputs)))))
+        return list(words - frozenset(atom_names) - frozenset(self._globals.keys()))
+
+
+
+    def get_globals(self):
+        '''get_globals() -> Dict[str, Any]
+        Get the global variables and functions used by this numeric function
+        '''
+        return self._globals
+
+
 
 
 
@@ -138,12 +165,13 @@ class NumericFunction:
             self._compile()
 
         # Evaluate the function
-        global_vars = {'cos': cos, 'sin': sin, 'tan': tan}
-        global_vars.update(inputs)
-        local_vars = {}
+        globals = {}
+        globals.update(self._globals)
+        globals.update(inputs)
+        locals = {}
 
-        exec(self._code, global_vars, local_vars)
-        result = local_vars['__output__']
+        exec(self._code, globals, locals)
+        result = locals['__output__']
         return result
 
 
@@ -167,6 +195,26 @@ class NumericFunction:
         Only read property that returns the outputs of this numeric function
         '''
         return self.get_outputs()
+
+
+    @property
+    def inputs(self):
+        '''
+        Only read property that returns the inputs of this numeric function
+        '''
+        return self.get_inputs()
+
+
+    @property
+    def globals(self):
+        '''
+        Only read property that returns the global variables ir functions used by
+        this numeric function
+        '''
+        return self.get_globals()
+
+
+
 
 
     ######## Printing ########

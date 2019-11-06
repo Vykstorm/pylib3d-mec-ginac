@@ -97,7 +97,7 @@ from operator import attrgetter
 from warnings import warn
 from abc import ABC
 from types import MethodType
-from re import match
+from re import match, finditer
 from inspect import Signature, Parameter
 import json
 
