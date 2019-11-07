@@ -1,7 +1,7 @@
 '''
 Author: Víctor Ruiz Gómez
 Description:
-This file implements global function helpers
+This file implements the global functions of this library
 '''
 
 
@@ -303,3 +303,61 @@ cpdef get_numeric_func(matrix):
 
     '''
     return get_numeric_function(matrix)
+
+
+
+
+######## Math functions ########
+
+
+cpdef sin(x):
+    '''sin(x: Expr | SymbolNumeric | numeric) -> Expr | float
+    Compute the sine of the given numeric or symbolic angle expressed in radians.
+    If the input argument is numeric, the sine is evaluated numerically. Otherwise,
+    a symbolic expression equal to the sine of the given input is returned.
+
+    :param x: Expr | SymbolNumeric | numeric
+    :rtype: Expr | float
+
+    '''
+    if isinstance(x, (Expr, SymbolNumeric)):
+        if isinstance(x, SymbolNumeric):
+            x = Expr(x)
+        return _expr_from_c(c_sym_sin((<Expr>x)._c_handler))
+    return math.sin(_parse_numeric_value(x))
+
+
+
+cpdef cos(x):
+    '''cos(x: Expr | SymbolNumeric | numeric) -> Expr | float
+    Compute the cosine of the given numeric or symbolic angle expressed in radians.
+    If the input argument is numeric, the sine is evaluated numerically. Otherwise,
+    a symbolic expression equal to the cosine of the given input is returned.
+
+    :param x: Expr | SymbolNumeric | numeric
+    :rtype: Expr | float
+
+    '''
+    if isinstance(x, (Expr, SymbolNumeric)):
+        if isinstance(x, SymbolNumeric):
+            x = Expr(x)
+        return _expr_from_c(c_sym_cos((<Expr>x)._c_handler))
+    return math.cos(_parse_numeric_value(x))
+
+
+
+cpdef tan(x):
+    '''tan(x: Expr | SymbolNumeric | numeric) -> Expr | float
+    Compute the tangent of the given numeric or symbolic angle expressed in radians.
+    If the input argument is numeric, the sine is evaluated numerically. Otherwise,
+    a symbolic expression equal to the tangent of the given input is returned.
+
+    :param x: Expr | SymbolNumeric | numeric
+    :rtype: Expr | float
+
+    '''
+    if isinstance(x, (Expr, SymbolNumeric)):
+        if isinstance(x, SymbolNumeric):
+            x = Expr(x)
+        return _expr_from_c(c_sym_tan((<Expr>x)._c_handler))
+    return math.tan(_parse_numeric_value(x))

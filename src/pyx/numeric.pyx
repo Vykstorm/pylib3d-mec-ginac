@@ -42,7 +42,7 @@ class NumericFunction:
         if globals is not None:
             assert all(map(lambda key: isinstance(key, str) and key.isidentifier(), globals.keys()))
         else:
-            globals = {'sin': sin, 'cos': cos, 'tan': tan}
+            globals = {'sin': math.sin, 'cos': math.cos, 'tan': math.tan}
 
 
         # Initialize internal fields

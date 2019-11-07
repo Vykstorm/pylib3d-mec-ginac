@@ -986,8 +986,86 @@ cdef class Matrix(Object):
 
 
 
-
-
-
 NamedObject.register(Matrix)
 LatexRenderable.register(Matrix)
+
+
+
+######## Matrix3 class ########
+
+
+class Matrix3(Matrix):
+    '''
+    Instances of this class represents symbolic matrices with fixed size (3x3)
+    '''
+    def __init__(self, values=None):
+        super().__init__(shape=(3, 3), values=values)
+
+    @classmethod
+    def eye(cls):
+        '''eye() -> Matrix3
+        Get a 3x3 identity matrix
+        '''
+        return cls(np.eye(3))
+
+
+    @classmethod
+    def xrot(cls, phi):
+        '''rot_x(phi: Expr) -> Matrix3
+        Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
+        with respect the x axis
+
+        :type phi: Expr
+        :rtype: Matrix3
+
+        '''
+        return cls.rot([1, 0, 0], phi)
+
+
+    @classmethod
+    def yrot(cls, phi):
+        '''rot_y(phi: Expr) -> Matrix3
+        Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
+        with respect the y axis
+
+        :type phi: Expr
+        :rtype: Matrix3
+
+        '''
+        return cls.rot([0, 1, 0], phi)
+
+
+    @classmethod
+    def zrot(cls, phi):
+        '''rot_z(phi: Expr) -> Matrix3
+        Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
+        with respect the z axis
+
+        :type phi: Expr
+        :rtype: Matrix3
+
+        '''
+        return cls.rot([0, 0, 1], phi)
+
+
+    @classmethod
+    def rot(cls, axis, phi):
+        '''rot(axis: Matrix, phi: Expr) -> Matrix3
+        Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
+        with respect the given axis
+
+        :type axis: Matrix
+        :type phi: Expr
+        :rtype: Matrix3
+
+        '''
+        if not isinstance(axis, Matrix):
+            axis = Matrix(shape=(1, 3), values=axis)
+        elif axis.size != 3:
+            raise TypeError('Axis must be a column or row matrix with three values')
+
+        if not isinstance(phi, Expr):
+            phi = Expr(phi)
+
+        axis_skew = axis.get_skew()
+        return cls.eye() + sin(phi) * axis_skew + (1 - cos(phi)) * (axis_skew * axis_skew)

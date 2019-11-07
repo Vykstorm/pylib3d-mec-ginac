@@ -15,3 +15,12 @@ from src.pxd.ginac.cexpr cimport ex
 
 cdef extern from "ginac/power.h" namespace "GiNaC":
     cdef ex pow(ex&, ex&)
+
+
+
+######## Trigonometric functions ########
+
+cdef extern from "ginac/ginac.h" namespace "GiNaC":
+    cdef ex sin(ex& x)
+    cdef ex cos(ex& x)
+    cdef ex tan(ex& x)

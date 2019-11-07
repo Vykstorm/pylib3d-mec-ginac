@@ -141,7 +141,7 @@ cdef class Expr(Object):
         '''
         if modulo is not None:
             return NotImplemented
-        return _expr_from_c(c_pow(Expr(base)._c_handler, Expr(exp)._c_handler))
+        return _expr_from_c(c_sym_pow(Expr(base)._c_handler, Expr(exp)._c_handler))
 
 
 

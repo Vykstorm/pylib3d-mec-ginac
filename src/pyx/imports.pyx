@@ -78,8 +78,8 @@ from src.pxd.ginac.cprint cimport print_latex    as c_ginac_latex_printer
 from src.pxd.ginac.cprint cimport set_print_func as c_ginac_set_print_func
 
 # Symbolic math functions
-from src.pxd.ginac.cmath cimport pow as c_pow
-
+from src.pxd.ginac.cmath cimport pow as c_sym_pow
+from src.pxd.ginac.cmath cimport sin as c_sym_sin, cos as c_sym_cos, tan as c_sym_tan
 
 
 
@@ -104,7 +104,6 @@ import json
 # Math
 import math
 from math import floor
-from math import cos, sin, tan
 
 
 # Third party libraries
