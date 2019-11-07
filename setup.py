@@ -137,6 +137,7 @@ if __name__ == '__main__':
         from Cython.Build import cythonize
         import asciitree
         import tabulate
+        import numpy
     except ImportError as e:
         # Generate error message if missing dependencies
         print(f'Failed to import "{e.name}" module')

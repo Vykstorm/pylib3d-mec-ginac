@@ -109,3 +109,4 @@ from math import cos, sin, tan
 # Third party libraries
 from asciitree import LeftAligned
 from tabulate import tabulate
+import numpy as np

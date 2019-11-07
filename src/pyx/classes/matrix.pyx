@@ -58,22 +58,16 @@ cdef class Matrix(Object):
 
         if shape is None and values is not None and not isinstance(values, (range, list, tuple, set, frozenset)):
             # Check if values is a numpy array
-            try:
-                import numpy as np
-                if isinstance(values, np.ndarray):
-                    dtype = values.dtype
-                    if dtype not in (np.float64, np.int64):
-                        dtype = np.float64
-                    m = np.array(values, dtype=dtype, copy=False, order='C')
-                    # Check numpy array dimensions
-                    if m.ndim not in (1, 2):
-                        raise ValueError('Input numpy array must have one or two dimensions')
-                    shape = m.shape if m.ndim == 2 else (1, m.shape[0])
-                    values = m.tolist()
-
-            except ImportError:
-                pass
-
+            if isinstance(values, np.ndarray):
+                dtype = values.dtype
+                if dtype not in (np.float64, np.int64):
+                    dtype = np.float64
+                m = np.array(values, dtype=dtype, copy=False, order='C')
+                # Check numpy array dimensions
+                if m.ndim not in (1, 2):
+                    raise ValueError('Input numpy array must have one or two dimensions')
+                shape = m.shape if m.ndim == 2 else (1, m.shape[0])
+                values = m.tolist()
 
 
         # Validate & parse shape argument
