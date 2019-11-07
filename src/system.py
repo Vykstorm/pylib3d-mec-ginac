@@ -9,7 +9,7 @@ This module defines the class System
 
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
 from lib3d_mec_ginac_ext import *
-
+import math
 
 
 
@@ -21,6 +21,20 @@ class System(_System):
     Its the main class of the library. It represents a mechanical system defined with different variables:
     coordinates, parameters, inputs, tensors, ...
     '''
+
+
+    ######## Constructor ########
+
+
+    def __init__(self):
+        super().__init__()
+
+        # Define mathematical constants
+        self.new_parameter('pi', r'\pi', math.pi)
+        self.new_parameter('e', 'e', math.e)
+        self.new_parameter('tau', r'\tau', math.tau)
+
+
 
 
     ######## Get/Set symbol value ########

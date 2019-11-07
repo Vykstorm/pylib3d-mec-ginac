@@ -102,6 +102,7 @@ from inspect import Signature, Parameter
 import json
 
 # Math
+import math
 from math import floor
 from math import cos, sin, tan
 
