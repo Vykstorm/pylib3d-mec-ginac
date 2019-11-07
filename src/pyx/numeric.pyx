@@ -8,6 +8,13 @@ This module defines the class NumericFunction
 ######## Class NumericFunction ########
 
 class NumericFunction:
+    '''
+    Instances of this class represents numerical functions and
+    are returned by the method ``get_numeric_function``
+
+    .. seealso:: :func:`get_numeric_function`
+
+    '''
 
     ######## Constructor ########
 

@@ -112,6 +112,14 @@ API Reference
         get_force, get_moment, get_solid, get_type, get_point,
         force, moment, solid, type, point
 
+
+.. autoclass:: NumericFunction
+    :members:
+        get_atoms, get_outputs, get_globals,
+        load_from_file, save_to_file,
+        __call__
+
+
 .. autoclass:: Drawing3D
     :members:
         get_file, get_type, get_color, get_point, get_scale, get_vector,
@@ -147,7 +155,9 @@ Global functions
 
 .. autofunction:: subs
 
-.. autofunction:: matrix_list_optimize
+.. autofunction:: get_numeric_function
+
+.. autofunction:: get_numeric_func
 
 
 
