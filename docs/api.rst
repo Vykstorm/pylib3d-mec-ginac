@@ -90,8 +90,9 @@ API Reference
 
 .. autoclass:: Base
     :members:
-        get_previous_base, has_previous_base, get_rotation_angle, get_rotation_tupla,
-        previous_base, rotation_angle, rotation_tupla
+        get_previous_base, has_previous_base,
+        get_rotation_angle, get_rotation_tupla, get_rotation,
+        previous_base, rotation_angle, rotation_tupla, rotation
 
 .. autoclass:: Point
     :members:

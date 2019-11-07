@@ -76,6 +76,7 @@ cdef class Base(Object):
         return _expr_from_c(self._c_handler.get_Rotation_Angle())
 
 
+
     cpdef get_rotation_tupla(self):
         '''get_rotation_tupla() -> Matrix
         Get the rotation tupla of this base
@@ -84,6 +85,18 @@ cdef class Base(Object):
 
         '''
         return _matrix_from_c_value(self._c_handler.get_Rotation_Tupla())
+
+
+
+    cpdef get_rotation(self):
+        '''get_rotation() -> Matrix
+        Get the rotation transformation matrix of this base
+
+        :rtype: Matrix
+
+        '''
+        return Matrix.rot(self.get_rotation_tupla(), self.get_rotation_angle())
+
 
 
 
@@ -149,6 +162,22 @@ cdef class Base(Object):
         '''
         return self.get_rotation_tupla()
 
+
+
+    @property
+    def rotation(self):
+        '''
+        Read only property that returns the rotation transformation matrix of
+        this base
+
+        :rtype: Matrix
+
+        .. note::
+            This calls internally to ``get_rotation``
+
+            .. seealso:: :func:`get_rotation`
+        '''
+        return self.get_rotation()
 
 
 
