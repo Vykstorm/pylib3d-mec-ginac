@@ -71,7 +71,8 @@ API Reference
         __iter__, __reversed__,
         set,
         transpose, subs,
-        shape, num_rows, num_cols, size, T, transposed, values
+        shape, num_rows, num_cols, size, T, transposed, values,
+        eye, xrot, yrot, zrot
 
 
 
