@@ -84,16 +84,6 @@ class NumericFunction:
         return self._outputs
 
 
-    def get_inputs(self):
-        '''get_inputs() -> List[str]
-        Get a list of variable inputs needed by this numeric function in order to be evaluated
-        '''
-        atom_names, atoms_exprs = self.atoms.keys(), self.atoms.values()
-        words = frozenset(chain.from_iterable(map(lambda s: map(lambda result: result.group(0), finditer(r'\w+', s)),
-            chain(atoms_exprs, chain.from_iterable(self.outputs)))))
-        return list(words - frozenset(atom_names) - frozenset(self._globals.keys()))
-
-
 
     def get_globals(self):
         '''get_globals() -> Dict[str, Any]
@@ -171,7 +161,7 @@ class NumericFunction:
         locals = {}
 
         exec(self._code, globals, locals)
-        result = locals['__output__']
+        result = np.array(locals['__output__'], dtype=np.float64)
         return result
 
 
@@ -195,15 +185,6 @@ class NumericFunction:
         Only read property that returns the outputs of this numeric function
         '''
         return self.get_outputs()
-
-
-    @property
-    def inputs(self):
-        '''
-        Only read property that returns the inputs of this numeric function
-        '''
-        return self.get_inputs()
-
 
     @property
     def globals(self):
