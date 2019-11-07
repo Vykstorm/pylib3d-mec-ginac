@@ -168,3 +168,9 @@ Mathematic functions
 .. autofunction:: dot
 
 .. autofunction:: cross
+
+.. autofunction:: sin
+
+.. autofunction:: cos
+
+.. autofunction:: tan
