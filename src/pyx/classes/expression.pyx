@@ -17,6 +17,15 @@ cdef Expr _expr_from_c(c_ex x):
     return expr
 
 
+cpdef str _print_expr_py(Expr atom_expr):
+    # This routine prints a GiNac::ex as readable python code (its used to convert
+    # atom expressions to valid python statements)
+    cdef c_sstream out
+    cdef c_ginac_printer* c_printer = new c_ginac_python_printer(out)
+    atom_expr._c_handler.print(c_deref(c_printer))
+    del c_printer
+    return (<bytes>out.str()).decode()
+
 
 
 
