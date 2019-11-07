@@ -316,6 +316,16 @@ cpdef sin(x):
     If the input argument is numeric, the sine is evaluated numerically. Otherwise,
     a symbolic expression equal to the sine of the given input is returned.
 
+        :Example:
+
+        >>> from math import radians
+        >>> sin(radians(45))
+        0.7071067811865475
+        >>> a, b = new_param('a'), new_param('b')
+        >>> sin(a ** 2) / sin(b ** 2)
+        sin(a**2)*sin(b**2)**(-1)
+
+
     :param x: Expr | SymbolNumeric | numeric
     :rtype: Expr | float
 
@@ -334,6 +344,16 @@ cpdef cos(x):
     If the input argument is numeric, the sine is evaluated numerically. Otherwise,
     a symbolic expression equal to the cosine of the given input is returned.
 
+        :Example:
+
+        >>> from math import radians
+        >>> cos(radians(45))
+        0.7071067811865475
+        >>> a, b = new_param('a'), new_param('b')
+        >>> cos(a ** 2) / cos(b ** 2)
+        cos(a**2)*cos(b**2)**(-1)
+
+
     :param x: Expr | SymbolNumeric | numeric
     :rtype: Expr | float
 
@@ -351,6 +371,17 @@ cpdef tan(x):
     Compute the tangent of the given numeric or symbolic angle expressed in radians.
     If the input argument is numeric, the sine is evaluated numerically. Otherwise,
     a symbolic expression equal to the tangent of the given input is returned.
+
+
+        :Example:
+
+        >>> from math import radians
+        >>> tan(radians(75))
+        3.7320508075688776
+        >>> a, b = new_param('a'), new_param('b')
+        >>> tan(a ** 2) / tan(b ** 2)
+        tan(a**2)*tan(b**2)**(-1)
+
 
     :param x: Expr | SymbolNumeric | numeric
     :rtype: Expr | float
