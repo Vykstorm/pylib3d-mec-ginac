@@ -1020,7 +1020,7 @@ cdef class Matrix(Object):
 
     @classmethod
     def xrot(cls, phi):
-        '''rot_x(phi: Expr) -> Matrix
+        '''xrot(phi: Expr) -> Matrix
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the x axis
 
@@ -1043,7 +1043,7 @@ cdef class Matrix(Object):
 
     @classmethod
     def yrot(cls, phi):
-        '''rot_y(phi: Expr) -> Matrix
+        '''yrot(phi: Expr) -> Matrix
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the y axis
 
@@ -1067,7 +1067,7 @@ cdef class Matrix(Object):
 
     @classmethod
     def zrot(cls, phi):
-        '''rot_z(phi: Expr) -> Matrix
+        '''zrot(phi: Expr) -> Matrix
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the z axis
 
