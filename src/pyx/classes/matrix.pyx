@@ -989,8 +989,25 @@ cdef class Matrix(Object):
 
     @classmethod
     def eye(cls, n):
-        '''eye() -> Matrix3
+        '''eye(n: int) -> Matrix
         Create a symbolic identity matrix of size nxn
+
+            :Example:
+
+            >>> Matrix.eye(3)
+            ╭         ╮
+            │ 1  0  0 │
+            │ 0  1  0 │
+            │ 0  0  1 │
+            ╰         ╯
+            >>> Matrix.eye(2)
+            ╭      ╮
+            │ 1  0 │
+            │ 0  1 │
+            ╰      ╯
+
+        :rtype: Matrix
+
         '''
         if not isinstance(n, int) or n <= 0:
             raise TypeError('n must be a number greater than zero')
@@ -1007,6 +1024,16 @@ cdef class Matrix(Object):
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the x axis
 
+            :Example:
+
+            >>> a = new_param('a')
+            >>> Matrix.xrot(a)
+            ╭                    ╮
+            │ 1       0        0 │
+            │ 0  cos(a)  -sin(a) │
+            │ 0  sin(a)   cos(a) │
+            ╰                    ╯
+
         :type phi: Expr
         :rtype: Matrix
 
@@ -1019,6 +1046,16 @@ cdef class Matrix(Object):
         '''rot_y(phi: Expr) -> Matrix
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the y axis
+
+            :Example:
+
+            >>> a = new_param('a')
+            >>> Matrix.yrot(a)
+            ╭                    ╮
+            │  cos(a)  0  sin(a) │
+            │       0  1       0 │
+            │ -sin(a)  0  cos(a) │
+            ╰                    ╯
 
         :type phi: Expr
         :rtype: Matrix
@@ -1034,6 +1071,16 @@ cdef class Matrix(Object):
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the z axis
 
+            :Example:
+
+            >>> a = new_param('a')
+            >>> Matrix.zrot(a)
+            ╭                    ╮
+            │ cos(a)  -sin(a)  0 │
+            │ sin(a)   cos(a)  0 │
+            │      0        0  1 │
+            ╰                    ╯
+
         :type phi: Expr
         :rtype: Matrix
 
@@ -1047,6 +1094,17 @@ cdef class Matrix(Object):
         '''rot(axis: Matrix, phi: Expr) -> Matrix
         Get a 3x3 matrix transformation which represents a rotation of ``phi`` radians
         with respect the given axis
+
+            :Example:
+
+            >>> x, y, z = new_param('x'), new_param('y'), new_param('z')
+            >>> a = new_param('a')
+            >>> Matrix.rot(axis=[x, y, z], phi=a)
+            ╭                                                                                 ╮
+            │ 1+(z**2+y**2)*(-1+cos(a))  -z*sin(a)-x*y*(-1+cos(a))   y*sin(a)-x*(-1+cos(a))*z │
+            │  z*sin(a)-x*y*(-1+cos(a))  1+(z**2+x**2)*(-1+cos(a))  -y*(-1+cos(a))*z-x*sin(a) │
+            │ -y*sin(a)-x*(-1+cos(a))*z  -y*(-1+cos(a))*z+x*sin(a)  1+(x**2+y**2)*(-1+cos(a)) │
+            ╰                                                                                 ╯
 
         :type axis: Matrix
         :type phi: Expr
