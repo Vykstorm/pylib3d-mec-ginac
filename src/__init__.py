@@ -1,6 +1,6 @@
 '''
 Author: Víctor Ruiz Gómez
-
+Description:
 Public API of the pylib3d_mec_ginac library.
 '''
 
@@ -8,7 +8,7 @@ Public API of the pylib3d_mec_ginac library.
 # The next variable will contain all public API methods & classes
 __all__ = []
 
-# Import underline extension
+# Import underline Cython extension
 import lib3d_mec_ginac_ext as _ext
 
 # Other imports
@@ -29,7 +29,7 @@ for name in dir(_ext):
     globals()[name] = obj
 
 # Add extra classes & methods
-from .system import System
+from .core.system import System
 __all__.append('System')
 
 
