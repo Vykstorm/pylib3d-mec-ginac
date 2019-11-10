@@ -45,7 +45,7 @@ from src.core.pxd.cpoint          cimport Point          as c_Point
 from src.core.pxd.cframe          cimport Frame          as c_Frame
 from src.core.pxd.csolid          cimport Solid          as c_Solid
 from src.core.pxd.cwrench3D       cimport Wrench3D       as c_Wrench3D
-from src.core.pxd.cdrawing3D      cimport Drawing3D      as c_Drawing3D
+
 
 # Global functions
 from src.core.pxd.cglobals        cimport atomization          as c_atomization
@@ -680,14 +680,6 @@ class WrenchesTableView(TableView):
         super().__init__(
             headers=['name', 'force', 'moment', 'solid', 'type'],
             data=[(w.name, w.force.name, w.moment.name, w.solid.name, w.type) for w in system._get_wrenches()]
-        )
-
-
-class DrawingsTableView(TableView):
-    def __init__(self, system):
-        super().__init__(
-            headers=['name'],
-            data=[(d.name,) for d in system._get_drawings()]
         )
 
 
@@ -1412,8 +1404,6 @@ class NamedObject(ABC):
             c_name = (<Frame>self)._c_handler.get_name()
         elif isinstance(self, Wrench3D):
             c_name = (<Wrench3D>self)._c_handler.get_name()
-        elif isinstance(self, Drawing3D):
-            c_name = (<Drawing3D>self)._c_handler.get_name()
         else:
             raise RuntimeError
 
@@ -1498,8 +1488,6 @@ class GeometricObject(ABC):
             c_base = (<c_Tensor3D*>(<Tensor3D>self)._get_c_handler()).get_Base()
         elif isinstance(self, Frame):
             c_base = (<Frame>self)._c_handler.get_Base()
-        elif isinstance(self, Drawing3D):
-            c_base = (<Drawing3D>self)._c_handler.get_Base()
         else:
             raise RuntimeError
 
@@ -1722,7 +1710,7 @@ _derivable_symbol_types = frozenset(map(str.encode, (
 
 # All geometric object types
 _geom_types = frozenset(map(str.encode, (
-    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid', 'wrench', 'drawing'
+    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid', 'wrench'
 )))
 
 
@@ -1804,8 +1792,6 @@ cdef class _System:
             return <void*>self._c_handler.get_Solid(name)
         if kind == b'wrench':
             return <void*>self._c_handler.get_Wrench3D(name)
-        if kind == b'drawing':
-            return <void*>self._c_handler.get_Drawing3D(name)
         return NULL
 
 
@@ -1958,8 +1944,7 @@ cdef class _System:
         return self._c_handler.get_Wrenches()
 
 
-    cdef c_vector[c_Drawing3D*] _get_c_drawings(self):
-        return self._c_handler.get_Drawings()
+
 
 
 
@@ -2086,12 +2071,6 @@ cdef class _System:
         return _wrench_from_c(c_wrench)
 
 
-    cpdef _get_drawing(self, name):
-        name = _parse_name(name)
-        cdef c_Drawing3D* c_drawing = <c_Drawing3D*>self._get_c_object(name, b'drawing')
-        if c_drawing == NULL:
-            raise IndexError(f'Drawing {name.decode()} doesnt exist')
-        return Drawing3D(<Py_ssize_t>c_drawing)
 
 
 
@@ -2120,9 +2099,6 @@ cdef class _System:
     cpdef _has_wrench(self, name):
         return self._has_c_object(_parse_name(name), b'wrench')
 
-    cpdef _has_drawing(self, name):
-        return self._has_c_object(_parse_name(name), b'drawing')
-
 
 
     cpdef _has_object(self, name):
@@ -2136,8 +2112,6 @@ cdef class _System:
         if self._has_point(name) or self._has_frame(name):
             return True
         if self._has_solid(name) or self._has_wrench(name):
-            return True
-        if self._has_drawing(name):
             return True
         return False
 
@@ -2194,9 +2168,8 @@ cdef class _System:
         cdef c_vector[c_Wrench3D*] c_wrenches = self._c_handler.get_Wrenches()
         return [_wrench_from_c(c_wrench) for c_wrench in c_wrenches]
 
-    cpdef _get_drawings(self):
-        cdef c_vector[c_Drawing3D*] c_drawings = self._c_handler.get_Drawings()
-        return [Drawing3D(<Py_ssize_t>c_drawing) for c_drawing in c_drawings]
+
+
 
 
 
@@ -2692,116 +2665,7 @@ cdef class _System:
 
 
 
-    cpdef _new_drawing(self, name, args, kwargs):
 
-        # Parse and validate the name
-        name = _parse_name(name, check_syntax=True)
-
-        if self._has_object(name):
-            raise IndexError(f'Name "{name.decode()}" its already in use')
-
-        if not args:
-            raise TypeError('Expected at least one positional parameter')
-
-        args = list(args)
-
-        # First positional argument must be a frame or vector
-        x = args.pop(0)
-
-        if isinstance(x, str):
-            if not self._has_vector(x) and not self._has_frame(x) and not self._has_solid(x):
-                raise TypeError
-            if self._has_vector(x):
-                x = self._get_vector(x)
-            elif self._has_frame(x):
-                x = self._get_frame(x)
-            else:
-                x = self._get_solid(x)
-
-        elif not isinstance(x, (Vector3D, Frame)):
-            raise TypeError('First argument must be a vector or frame')
-
-
-        # Second positional argument must be a point if the first one is a vector.
-        if isinstance(x, Vector3D):
-            if not args:
-                raise TypeError('Expected one more positional argument after vector')
-
-            y = args.pop(0)
-            if isinstance(y, str):
-                y = self._get_point(y)
-            elif not isinstance(y, Point):
-                raise TypeError('Second argument after vector must be a Point object')
-
-
-        # Parse file, scale and color arguments
-        if args and isinstance(args[0], str) and 'file' not in kwargs:
-            kwargs['file'] = args.pop(0)
-
-        if len(args) > 2:
-            if len(args) != 5:
-                raise TypeError('Invalid number of color components (4 expected)')
-            args, color = args[:-4], args[-4:]
-            args.append(color)
-
-
-        scale, color, file = _apply_signature(
-            ['scale', 'color', 'file'],
-            {'file': '', 'scale':1, 'color': (1, 0, 0, 1)},
-            args, kwargs
-        )
-        if not isinstance(file, str):
-            raise TypeError('file must be a string')
-
-        scale = _parse_numeric_value(scale)
-
-        try:
-            if not isinstance(color, Iterable):
-                raise TypeError
-            color = tuple(map(_parse_numeric_value, color))
-            if len(color) != 4:
-                raise TypeError
-
-        except TypeError | ValueError:
-            raise TypeError('color must be a list of four numeric values')
-
-
-        cdef c_Drawing3D* c_drawing
-        cdef c_numeric r = c_numeric(<double>color[0])
-        cdef c_numeric g = c_numeric(<double>color[1])
-        cdef c_numeric b = c_numeric(<double>color[2])
-        cdef c_numeric a = c_numeric(<double>color[3])
-        cdef c_lst c_color
-        cdef c_numeric c_scale = c_numeric(<double>scale)
-
-        c_color.append(c_ex(r))
-        c_color.append(c_ex(g))
-        c_color.append(c_ex(b))
-        c_color.append(c_ex(a))
-
-        # Create drawing with vector+point, frame or solid.
-        # Then set the color & scale
-        if isinstance(x, Frame):
-            c_drawing = self._c_handler.new_Drawing3D(
-                name,
-                (<Frame>x)._c_handler,
-                c_scale
-            )
-            c_drawing.set_color(c_color)
-
-        else:
-            c_drawing = self._c_handler.new_Drawing3D(name,
-                <c_Vector3D*>(<Vector3D>x)._get_c_handler(),
-                (<Point>y)._c_handler,
-                r, g, b, a
-            )
-            c_drawing.set_scale(c_scale)
-
-        # Also set the file
-        c_drawing.set_file(<bytes>file.encode())
-
-        # Returned the created drawing object
-        return Drawing3D(<Py_ssize_t>c_drawing)
 
 
 
@@ -3371,19 +3235,6 @@ class WrenchesMapping(ObjectsMapping, WrenchesTableView):
             system._has_wrench
         )
         WrenchesTableView.__init__(self, system)
-
-
-
-######## Class DrawingsMapping ########
-
-class DrawingsMapping(ObjectsMapping, DrawingsTableView):
-    def __init__(self, system):
-        ObjectsMapping.__init__(self,
-            system._get_drawing,
-            system._get_drawings,
-            system._has_drawing
-        )
-        DrawingsTableView.__init__(self, system)
 
 
 
@@ -6720,304 +6571,6 @@ cdef class Wrench3D(Object):
 
 
 NamedObject.register(Wrench3D)
-
-
-
-######## src/core/pyx/classes/drawing3D.pyx ########
-
-
-
-######## Class Drawing3D ########
-
-cdef class Drawing3D(Object):
-    '''
-    Objects of this class represents drawable elements. They are defined with a
-    point, base, vector, scale and color.
-    '''
-
-    ######## Attributes ########
-
-    cdef c_Drawing3D* _c_handler
-
-
-    ######## Constructor ########
-
-
-    def __cinit__(self, Py_ssize_t handler):
-        self._c_handler = <c_Drawing3D*>handler
-
-
-
-    ######## Getters ########
-
-
-    cpdef get_file(self):
-        '''get_file() -> str
-        Get the file of this drawing object
-
-        :rtype: str
-
-        '''
-        return (<bytes>self._c_handler.get_file()).decode()
-
-
-    cpdef get_type(self):
-        '''get_type() -> str
-        Get the type of this drawing
-
-        :rtype: str
-
-        '''
-        return (<bytes>self._c_handler.get_type()).decode()
-
-
-    cpdef get_color(self):
-        '''get_color() -> List[Expr]
-        Get the color components of this drawing
-
-        :rtype: List[Expr]
-
-        '''
-        cdef c_lst color = self._c_handler.get_color()
-        return [_expr_from_c(color.op(i)) for i in range(0, color.nops())]
-
-
-    cpdef get_point(self):
-        '''get_point() -> Point
-        Get the point of this drawing
-
-        :rtype: Point
-
-        '''
-        return Point(<Py_ssize_t>self._c_handler.get_Point())
-
-
-    cpdef get_scale(self):
-        '''get_scale() -> numeric
-        Get the scale of this drawing
-
-        :rtype: numeric
-
-        '''
-        return self._c_handler.get_scale().to_double()
-
-
-    cpdef get_vector(self):
-        '''get_vector() -> Vector3D
-        Get the vector of this drawing
-
-        :rtype: Vector3D
-
-        '''
-        return _vector_from_c_value(self._c_handler.get_vector())
-
-
-
-
-    ######## Setters ########
-
-
-    cpdef set_file(self, file):
-        '''set_file(file: str)
-        Set the file for this drawing
-
-        :type file: str
-
-        '''
-        if not isinstance(file, str):
-            raise TypeError('Input argument must be a string')
-        self._c_handler.set_file(<bytes>file.encode())
-
-
-    def set_color(self, *args):
-        '''set_color(...)
-        Set the color of the drawing object.
-
-        You can pass the color components as positional arguments or in a single
-        list:
-
-            :Example:
-
-            >>> a = new_drawing('a', get_frame('abs'))
-            >>> a.set_color(1, 1, 0, 1)
-            >>> a.get_color()
-            [1, 1, 0, 1]
-            >>> a.set_color([1, 0, 1, 0.5])
-            [1, 0, 1, 0.5]
-
-        '''
-        if len(args) not in (1, 4):
-            raise TypeError('Unexpected number of input arguments')
-
-        try:
-            if len(args) != 1:
-                values = args
-            else:
-                values = args[0]
-                if not isinstance(values, Iterable):
-                    raise TypeError
-            values = tuple(map(_parse_numeric_value, values))
-            if len(values) != 4:
-                raise TypeError
-        except TypeError:
-            raise TypeError('You must pass a list of four values or four positional arguments')
-
-        cdef c_lst c_color
-        for value in values:
-            c_color.append(c_ex(c_numeric(<double>value)))
-
-        self._c_handler.set_color(c_color)
-
-
-
-
-    cpdef set_scale(self, scale):
-        '''set_scale(scale: numeric)
-        Set the scale of this drawing
-
-        :type scale: numeric
-
-        '''
-        scale = _parse_numeric_value(scale)
-        self._c_handler.set_scale(c_numeric(<double>scale))
-
-
-    cpdef set_vector(self, vector):
-        '''set_vector(vector: Vector3D)
-        Set the vector of this drawing
-
-        :type vector: Vector3D
-
-        '''
-        if not isinstance(vector, Vector3D):
-            raise TypeError('Input argument must be a vector')
-        self._c_handler.set_vector(c_deref(<c_Vector3D*>(<Vector3D>vector)._get_c_handler()))
-
-
-
-    ######## Properties ########
-
-
-    @property
-    def file(self):
-        '''
-        Property that can be used to fetch/modify the file of this drawing object.
-
-        :rtype: str
-
-        .. note:: This property used internally the methods ``get_file`` and
-            ``set_file``
-
-            .. seealso:: :func:`get_file`
-
-            .. seealso:: :func:`set_file`
-
-        '''
-        return self.get_file()
-
-    @file.setter
-    def file(self, file):
-        self.set_file(file)
-
-
-    @property
-    def point(self):
-        '''
-        Read only property that fetch the point of this drawing object.
-
-        :rtype: Point
-
-        .. note:: This calls internally to ``get_point``
-
-            .. seealso:: :func:`get_point`
-
-        '''
-        return self.get_point()
-
-
-    @property
-    def scale(self):
-        '''
-        Property that can be used to fetch/modify the scale of this drawing object.
-
-        :rtype: str
-
-        .. note:: This property used internally the methods ``get_scale`` and
-            ``set_scale``
-
-            .. seealso:: :func:`get_scale`
-
-            .. seealso:: :func:`set_scale`
-
-        '''
-        return self.get_scale()
-
-    @scale.setter
-    def scale(self, value):
-        self.set_scale(value)
-
-
-    @property
-    def type(self):
-        '''
-        Read only property that fetch the type of this drawing object.
-
-        :rtype: Point
-
-        .. note:: This calls internally to ``get_type``
-
-            .. seealso:: :func:`get_type`
-
-        '''
-        return self.get_type()
-
-
-
-    @property
-    def vector(self):
-        '''
-        Read only property that fetch the vector of this drawing object.
-
-        :rtype: Point
-
-        .. note:: This calls internally to ``get_vector``
-
-            .. seealso:: :func:`get_vector`
-
-        '''
-        return self.get_vector()
-
-    @vector.setter
-    def vector(self, v):
-        self.set_vector(v)
-
-
-    @property
-    def color(self):
-        '''
-        Property that can be used to fetch/modify the color of this drawing object.
-
-        :rtype: str
-
-        .. note:: This property used internally the methods ``get_color`` and
-            ``set_color``
-
-            .. seealso:: :func:`get_color`
-
-            .. seealso:: :func:`set_color`
-
-        '''
-        return self.get_color()
-
-    @color.setter
-    def color(self, values):
-        self.set_color(values)
-
-
-
-
-NamedObject.register(Drawing3D)
-GeometricObject.register(Drawing3D)
 
 
 

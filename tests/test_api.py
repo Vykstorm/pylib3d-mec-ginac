@@ -17,7 +17,7 @@ from utils import *
 def test_classes(classes, api):
     '''
     This test checks that the next classes are avaliable:
-    SymbolNumeric, Expr, Base, Matrix, Vector3D, Tensor3D, Wrench3D, Drawing3D,
+    SymbolNumeric, Expr, Base, Matrix, Vector3D, Tensor3D, Wrench3D,
     Point, Frame, Solid, Object, System
     '''
 

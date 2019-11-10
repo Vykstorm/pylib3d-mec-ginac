@@ -105,7 +105,7 @@ LIBRARIES = [
 ######## EXTENSION SETUP ########
 
 # Name of the Cython extension
-EXTENSION_NAME = 'lib_3d_mec_ginac_ext'
+EXTENSION_NAME = 'lib3d_mec_ginac_ext'
 
 # Path to the directory containing additional C++ files to be compiled in the extension
 CPP_DIR = join(ROOT_PACKAGE_DIR, 'core', 'cpp')
@@ -125,7 +125,7 @@ PYX_FILES = list(map(partial(join, PYX_DIR), chain(
     map(partial(join, 'classes'), [
         'object.pyx', 'system.pyx', 'symbol.pyx', 'expression.pyx',
         'base.pyx', 'matrix.pyx', 'vector3D.pyx', 'tensor3D.pyx',
-        'point.pyx', 'frame.pyx', 'solid.pyx', 'wrench3D.pyx', 'drawing3D.pyx'
+        'point.pyx', 'frame.pyx', 'solid.pyx', 'wrench3D.pyx'
     ])
 )))
 

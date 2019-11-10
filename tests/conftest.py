@@ -256,16 +256,6 @@ def api():
                 ]
             },
 
-            'Drawing3D': {
-                'methods': [
-                    'get_file', 'get_type', 'get_color', 'get_point', 'get_scale', 'get_vector',
-                    'set_file', 'set_color', 'set_scale', 'set_vector'
-                ],
-                'properties': [
-                    'file', 'point', 'scale', 'type', 'vector', 'color'
-                ]
-            },
-
             'Point': {
                 'methods': [
                     'get_position_vector', 'get_position', 'get_previous', 'has_previous'

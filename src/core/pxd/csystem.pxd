@@ -29,7 +29,6 @@ from src.core.pxd.cpoint          cimport Point
 from src.core.pxd.cframe          cimport Frame
 from src.core.pxd.csolid          cimport Solid
 from src.core.pxd.cwrench3D       cimport Wrench3D
-from src.core.pxd.cdrawing3D      cimport Drawing3D
 
 
 
@@ -87,7 +86,6 @@ cdef extern from "System.h":
         vector[Frame*]      get_Frames()
         vector[Solid*]      get_Solids()
         vector[Wrench3D*]   get_Wrenches()
-        vector[Drawing3D*]  get_Drawings()
 
 
 
@@ -99,7 +97,6 @@ cdef extern from "System.h":
         Frame*     get_Frame(string)
         Solid*     get_Solid(string)
         Wrench3D*  get_Wrench3D(string)
-        Drawing3D* get_Drawing3D(string)
 
 
         # Symbol constructors
@@ -118,8 +115,6 @@ cdef extern from "System.h":
         Frame*     new_Frame(string, Point*, Base*)
         Solid*     new_Solid(string, Point*, Base*, symbol_numeric*, Vector3D*, Tensor3D*)
         Wrench3D*  new_Wrench3D(string, Vector3D, Vector3D, Point*, Solid*, string)
-        Drawing3D* new_Drawing3D(string, Vector3D*, Point*, numeric, numeric, numeric, numeric)
-        Drawing3D* new_Drawing3D(string, Frame*, numeric)
 
 
         # Kinematic operations

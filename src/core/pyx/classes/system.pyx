@@ -33,7 +33,7 @@ _derivable_symbol_types = frozenset(map(str.encode, (
 
 # All geometric object types
 _geom_types = frozenset(map(str.encode, (
-    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid', 'wrench', 'drawing'
+    'matrix', 'vector', 'tensor', 'base', 'point', 'frame', 'solid', 'wrench'
 )))
 
 
@@ -115,8 +115,6 @@ cdef class _System:
             return <void*>self._c_handler.get_Solid(name)
         if kind == b'wrench':
             return <void*>self._c_handler.get_Wrench3D(name)
-        if kind == b'drawing':
-            return <void*>self._c_handler.get_Drawing3D(name)
         return NULL
 
 
@@ -269,8 +267,7 @@ cdef class _System:
         return self._c_handler.get_Wrenches()
 
 
-    cdef c_vector[c_Drawing3D*] _get_c_drawings(self):
-        return self._c_handler.get_Drawings()
+
 
 
 
@@ -397,12 +394,6 @@ cdef class _System:
         return _wrench_from_c(c_wrench)
 
 
-    cpdef _get_drawing(self, name):
-        name = _parse_name(name)
-        cdef c_Drawing3D* c_drawing = <c_Drawing3D*>self._get_c_object(name, b'drawing')
-        if c_drawing == NULL:
-            raise IndexError(f'Drawing {name.decode()} doesnt exist')
-        return Drawing3D(<Py_ssize_t>c_drawing)
 
 
 
@@ -431,9 +422,6 @@ cdef class _System:
     cpdef _has_wrench(self, name):
         return self._has_c_object(_parse_name(name), b'wrench')
 
-    cpdef _has_drawing(self, name):
-        return self._has_c_object(_parse_name(name), b'drawing')
-
 
 
     cpdef _has_object(self, name):
@@ -447,8 +435,6 @@ cdef class _System:
         if self._has_point(name) or self._has_frame(name):
             return True
         if self._has_solid(name) or self._has_wrench(name):
-            return True
-        if self._has_drawing(name):
             return True
         return False
 
@@ -505,9 +491,8 @@ cdef class _System:
         cdef c_vector[c_Wrench3D*] c_wrenches = self._c_handler.get_Wrenches()
         return [_wrench_from_c(c_wrench) for c_wrench in c_wrenches]
 
-    cpdef _get_drawings(self):
-        cdef c_vector[c_Drawing3D*] c_drawings = self._c_handler.get_Drawings()
-        return [Drawing3D(<Py_ssize_t>c_drawing) for c_drawing in c_drawings]
+
+
 
 
 
@@ -1003,116 +988,7 @@ cdef class _System:
 
 
 
-    cpdef _new_drawing(self, name, args, kwargs):
 
-        # Parse and validate the name
-        name = _parse_name(name, check_syntax=True)
-
-        if self._has_object(name):
-            raise IndexError(f'Name "{name.decode()}" its already in use')
-
-        if not args:
-            raise TypeError('Expected at least one positional parameter')
-
-        args = list(args)
-
-        # First positional argument must be a frame or vector
-        x = args.pop(0)
-
-        if isinstance(x, str):
-            if not self._has_vector(x) and not self._has_frame(x) and not self._has_solid(x):
-                raise TypeError
-            if self._has_vector(x):
-                x = self._get_vector(x)
-            elif self._has_frame(x):
-                x = self._get_frame(x)
-            else:
-                x = self._get_solid(x)
-
-        elif not isinstance(x, (Vector3D, Frame)):
-            raise TypeError('First argument must be a vector or frame')
-
-
-        # Second positional argument must be a point if the first one is a vector.
-        if isinstance(x, Vector3D):
-            if not args:
-                raise TypeError('Expected one more positional argument after vector')
-
-            y = args.pop(0)
-            if isinstance(y, str):
-                y = self._get_point(y)
-            elif not isinstance(y, Point):
-                raise TypeError('Second argument after vector must be a Point object')
-
-
-        # Parse file, scale and color arguments
-        if args and isinstance(args[0], str) and 'file' not in kwargs:
-            kwargs['file'] = args.pop(0)
-
-        if len(args) > 2:
-            if len(args) != 5:
-                raise TypeError('Invalid number of color components (4 expected)')
-            args, color = args[:-4], args[-4:]
-            args.append(color)
-
-
-        scale, color, file = _apply_signature(
-            ['scale', 'color', 'file'],
-            {'file': '', 'scale':1, 'color': (1, 0, 0, 1)},
-            args, kwargs
-        )
-        if not isinstance(file, str):
-            raise TypeError('file must be a string')
-
-        scale = _parse_numeric_value(scale)
-
-        try:
-            if not isinstance(color, Iterable):
-                raise TypeError
-            color = tuple(map(_parse_numeric_value, color))
-            if len(color) != 4:
-                raise TypeError
-
-        except TypeError | ValueError:
-            raise TypeError('color must be a list of four numeric values')
-
-
-        cdef c_Drawing3D* c_drawing
-        cdef c_numeric r = c_numeric(<double>color[0])
-        cdef c_numeric g = c_numeric(<double>color[1])
-        cdef c_numeric b = c_numeric(<double>color[2])
-        cdef c_numeric a = c_numeric(<double>color[3])
-        cdef c_lst c_color
-        cdef c_numeric c_scale = c_numeric(<double>scale)
-
-        c_color.append(c_ex(r))
-        c_color.append(c_ex(g))
-        c_color.append(c_ex(b))
-        c_color.append(c_ex(a))
-
-        # Create drawing with vector+point, frame or solid.
-        # Then set the color & scale
-        if isinstance(x, Frame):
-            c_drawing = self._c_handler.new_Drawing3D(
-                name,
-                (<Frame>x)._c_handler,
-                c_scale
-            )
-            c_drawing.set_color(c_color)
-
-        else:
-            c_drawing = self._c_handler.new_Drawing3D(name,
-                <c_Vector3D*>(<Vector3D>x)._get_c_handler(),
-                (<Point>y)._c_handler,
-                r, g, b, a
-            )
-            c_drawing.set_scale(c_scale)
-
-        # Also set the file
-        c_drawing.set_file(<bytes>file.encode())
-
-        # Returned the created drawing object
-        return Drawing3D(<Py_ssize_t>c_drawing)
 
 
 
@@ -1682,16 +1558,3 @@ class WrenchesMapping(ObjectsMapping, WrenchesTableView):
             system._has_wrench
         )
         WrenchesTableView.__init__(self, system)
-
-
-
-######## Class DrawingsMapping ########
-
-class DrawingsMapping(ObjectsMapping, DrawingsTableView):
-    def __init__(self, system):
-        ObjectsMapping.__init__(self,
-            system._get_drawing,
-            system._get_drawings,
-            system._has_drawing
-        )
-        DrawingsTableView.__init__(self, system)

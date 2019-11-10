@@ -182,8 +182,6 @@ class System(_System):
     def get_wrench(self, name):
         return self._get_wrench(name)
 
-    def get_drawing(self, name):
-        return self._get_drawing(name)
 
 
     get_coord = get_coordinate
@@ -286,9 +284,6 @@ class System(_System):
 
     def has_wrench(self, name):
         return self._has_wrench(name)
-
-    def has_drawing(self, name):
-        return self._has_drawing(name)
 
 
     has_coord = has_coordinate
@@ -398,8 +393,6 @@ class System(_System):
     def get_wrenches(self):
         return WrenchesMapping(self)
 
-    def get_drawings(self):
-        return DrawingsMapping(self)
 
 
     get_coords = get_coordinates
@@ -1063,59 +1056,6 @@ class System(_System):
 
 
 
-    def new_drawing(self, name, *args, **kwargs):
-        '''new_drawing(name: str, x: frame | solid | vector+point, file: str, scale: numeric, color: Tuple[numeric, numeric, numeric, numeric]) -> Drawing3D
-        Creates a new drawing object indicating a frame, solid or vector and point and with
-        the given file, scale and color components.
-
-        * Create a drawing given a frame:
-
-            :Example:
-
-            >>> new_drawing('a', get_frame('abs'))
-            >>> new_drawing('a', 'abs')
-
-        * Create a drawing given a vector and a point:
-
-            :Example:
-
-            >>> v = new_vector('v', 1, 2, 3, base='xyz')
-            >>> O = get_point('O')
-            >>> new_drawing('a', v, O)
-            >>> new_drawing('a', 'v', 'O')
-
-
-        * Indicate the scale:
-
-            :Example:
-
-            >>> a = new_drawing('a', 'abs', 2)
-            >>> a.scale
-            >>> 2.0
-            >>> a = new_drawing('a', 'abs', scale=3)
-            >>> a.scale
-            >>> 3.0
-
-
-        * Indicate the rgba color components:
-
-            :Example:
-
-            >>> a = new_drawing('a', 'abs', scale=2, color=[0, 1, 0, 1])
-            >> a.color
-            [0, 1, 0, 1]
-            >>> a = new_drawing('a', 'abs', 2,  0, 0, 1, 0)
-            >>> a.color
-            [0, 0, 1, 0]
-
-        :rtype: Drawing3D
-
-
-        '''
-        return self._new_drawing(name, args, kwargs)
-
-
-
     new_coord = new_coordinate
     new_aux_coord = new_aux_coordinate,
     new_param = new_parameter
@@ -1621,10 +1561,6 @@ class System(_System):
     def wrenches(self):
         return self.get_wrenches()
 
-    @property
-    def drawings(self):
-        return self.get_drawings()
-
 
     coords = coordinates
     aux_coords = aux_coordinates
@@ -1875,7 +1811,7 @@ for _symbol_type in map(bytes.decode, _symbol_types):
 # matrix, tensor, vector, point, frame
 for _geom_type in map(bytes.decode, _geom_types):
     _geom_class = _geom_type.title()
-    if _geom_type in ('vector', 'tensor', 'wrench', 'drawing'):
+    if _geom_type in ('vector', 'tensor', 'wrench'):
         _geom_class = _geom_class + '3D'
 
     if _geom_type == 'matrix':
