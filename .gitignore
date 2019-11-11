@@ -129,7 +129,7 @@ dmypy.json
 *.so
 
 # Compiled Cython extensions
-src/pyx/main.cpp
+src/core/pyx/main.cpp
 
 # Sphinx doc build directory
 docs/_build
