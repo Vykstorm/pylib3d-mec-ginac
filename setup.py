@@ -57,11 +57,12 @@ KEYWORDS = [
 
 ######## PYTHON PACKAGE SETUP ########
 
+
 # Name of the root package of this library
 ROOT_PACKAGE = 'lib3d_mec_ginac'
 
 # Directory of the root package of this library
-ROOT_PACKAGE_DIR = 'src'
+ROOT_PACKAGE_DIR = join(root_dir, 'src')
 
 # List of all packages (including subpackages but not the extension) to be installed within this library
 PACKAGES = [ROOT_PACKAGE, f'{ROOT_PACKAGE}.core', f'{ROOT_PACKAGE}.drawing']

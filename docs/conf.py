@@ -2,26 +2,28 @@
 Author: Víctor Ruiz Gómez
 Description: Configuration file for the Sphinx documentation builder.
 
-The extension of this library must be built locally before generating the docs with:
-python setup.py build_ext --inplace
+The library must be installed using ``python setup.py install`` before building
+the docs.
+Use the Makefile located in the same directory where this script is located to generate the docs.
 '''
 
 
 # Add the project root directory to sys path
-from os.path import abspath, join
-import sys
-sys.path.insert(0, abspath('..'))
 
-import src
-sys.modules['lib3d_mec_ginac'] = src
+from os.path import abspath, join, dirname
+import sys
+
+sys.path.insert(0, abspath(join(dirname(__file__), '../..')))
+sys.path.insert(0, abspath(join(dirname(__file__), '..')))
+
 
 
 ######## PROJECT INFORMATION ########
 
 # Load information from setup script
-from setup import AUTHOR, PACKAGE, VERSION
+from setup import AUTHOR, ROOT_PACKAGE, VERSION
 
-project = PACKAGE
+project = ROOT_PACKAGE
 copyright = f'2019, {AUTHOR}'
 author = AUTHOR
 release, version = VERSION, VERSION
