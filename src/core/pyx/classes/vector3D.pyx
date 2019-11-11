@@ -303,6 +303,9 @@ cdef class Vector3D(Matrix):
         if not isinstance(left_op, Vector3D) and not isinstance(right_op, Vector3D):
             raise TypeError(f'Unsupported operand type for *: {type(left_op).__name__} and {type(right_op).__name__}')
 
+        if type(left_op) == Matrix or type(right_op) == Matrix:
+            return Matrix.__mul__(left_op, right_op)
+
         if isinstance(left_op, Vector3D):
             right_op = Expr(right_op)
         else:
