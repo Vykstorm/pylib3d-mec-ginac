@@ -48,7 +48,7 @@ def __dir__():
 # This variable will store the "default" system object.
 _default_system = System()
 
-# Expose get_* and new_*, set_* methods of the default system object (add them to __all__ and globals())
+# Expose get_*, new_*, set_* and draw_* methods of the default system object (add them to __all__ and globals())
 def _create_system_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
@@ -58,7 +58,7 @@ def _create_system_global_func(method):
 for name in dir(System):
     if name == 'set_as_default':
         continue
-    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))) and\
+    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_', 'draw_'))) and\
     not any(map(lambda pattern: fullmatch(pattern, name),
         [r'\w+_point_branch', r'rotation_\w+', r'position_\w+', r'angular_\w+',
         r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
