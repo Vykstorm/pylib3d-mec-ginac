@@ -68,19 +68,13 @@ class Drawing3D:
     ######## Updating ########
 
 
-    def update(self):
-        '''
-        This method updates this drawing object
-        '''
-        self.update_transformation()
+    def _update(self):
+        self._update_transformation()
 
 
 
 
-    def update_transformation(self):
-        '''
-        This method updates the transformation matrix of this drawing object.
-        '''
+    def _update_transformation(self):
         # Compute translation matrix
         translation = np.eye(4).astype(np.float64)
         translation[0:3, 3] = self._system.evaluate(self._position_func).flatten()

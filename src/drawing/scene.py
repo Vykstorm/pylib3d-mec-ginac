@@ -12,7 +12,7 @@ from vtk import vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor, vtkName
 from .drawing import Drawing3D
 from .point import PointDrawing
 from lib3d_mec_ginac_ext import Point
-from threading import Thread
+from threading import Thread, RLock
 from math import ceil
 from time import time
 from os.path import basename
@@ -30,6 +30,11 @@ class Scene:
     An instance of this class represents a 3D renderable scene.
     '''
 
+
+
+    ######## class Viewer ########
+
+
     class Viewer(Thread):
         def __init__(self, scene):
             super().__init__()
@@ -46,8 +51,12 @@ class Scene:
 
             # Start rendering the scene and show the window
             window.Render()
-            scene.update()
+            scene._update()
             interactor.Start()
+
+
+
+
 
 
 
@@ -75,18 +84,28 @@ class Scene:
         # Set render window to the interactor
         interactor.SetRenderWindow(window)
 
-        # Initialize internal fields
-        self._renderer, self._window, self._interactor = renderer, window, interactor
-        self._drawings = []
-        self._system = system
-        self._elapsed_time = 0.0
-        self._last_time, self._last_update_time = None, None
-        self._update_freq = 30
-        self._update_timer = None
-        self._viewer = None
-        self._simulation_state = 'inactive'
-        self._time_multiplier = 1.0
+        ## Initialize internal fields
 
+        # vtk objects (renderer, window & interactor)
+        self._renderer, self._window, self._interactor = renderer, window, interactor
+        # vtk timer to update the scene
+        self._update_timer = None
+
+        self._drawings = [] # list of drawing objects
+        self._system = system # system attached to this scene
+        self._elapsed_time = 0.0 # elapsed time since the simulation begun
+        # timestamp of the last call to _update and last time when drawing objects were updated
+        self._last_time, self._last_update_time = None, None
+        # update frequency of drawing objects
+        self._update_freq = 30
+
+        self._viewer = None # viewer instance
+        self._simulation_state = 'inactive' # current simulation state
+        self._time_multiplier = 1.0 # time multiplier factor
+
+        # threading lock to modify scene properties and drawing objects attached to it,
+        # safely from multiple threads
+        self._lock = RLock()
 
 
 
@@ -101,7 +120,8 @@ class Scene:
         :rtype: float
 
         '''
-        return self._update_freq
+        with self._lock:
+            return self._update_freq
 
 
     get_update_freq = get_update_frequency
@@ -114,8 +134,8 @@ class Scene:
         rtype: float
 
         '''
-        return self._time_multiplier
-
+        with self._lock:
+            return self._time_multiplier
 
 
 
@@ -148,9 +168,10 @@ class Scene:
         if freq <= 0:
             raise ValueError('update frequency must be a number greater than zero')
 
-        self._update_freq = float(freq)
-        if self._viewer is not None:
-            self._create_update_timer()
+        with self._lock:
+            self._update_freq = float(freq)
+            if self._viewer is not None:
+                self._create_update_timer()
 
 
     set_update_freq = set_update_frequency
@@ -169,7 +190,8 @@ class Scene:
         multiplier = float(multiplier)
         if multiplier <= 0:
             raise ValueError('time multiplier must be a number greater than zero')
-        self._time_multiplier = multiplier
+        with self._lock:
+            self._time_multiplier = multiplier
 
 
 
@@ -181,8 +203,9 @@ class Scene:
 
     def _add_drawing(self, drawing):
         assert isinstance(drawing, Drawing3D)
-        self._drawings.append(drawing)
-        self._renderer.AddActor(drawing._vtk_handler)
+        with self._lock:
+            self._drawings.append(drawing)
+            self._renderer.AddActor(drawing._vtk_handler)
 
 
 
@@ -215,10 +238,11 @@ class Scene:
     ######## Updating ########
 
 
-    def update(self):
+    def _update(self):
         '''
         Update this scene.
         '''
+        self._lock.acquire()
         if self._simulation_state == 'running':
             current_time = time()
 
@@ -234,10 +258,13 @@ class Scene:
             if self._last_update_time is None or (current_time - self._last_update_time) >= update_delay:
                 self._last_update_time = current_time
                 # Update simulation state
-                self.update_simulation()
+                self._update_simulation()
 
                 # Update drawings
-                self.update_drawings()
+                self._update_drawings()
+
+        self._lock.release()
+
 
         # Redraw scene
         self._interactor.Render()
@@ -245,16 +272,16 @@ class Scene:
 
 
 
-    def update_drawings(self):
+    def _update_drawings(self):
         '''
         Update all drawings
         '''
         for drawing in self._drawings:
-            drawing.update()
+            drawing._update()
 
 
 
-    def update_simulation(self):
+    def _update_simulation(self):
         '''
         Update scene simulation
         '''
@@ -279,28 +306,32 @@ class Scene:
         '''
         interactor, system = self._interactor, self._system
 
-        # Create scene viewer
-        viewer = Scene.Viewer(self)
-        self._viewer = viewer
+        with self._lock:
+            if self._simulation_state != 'inactive':
+                raise RuntimeError('Simulation already started')
 
-        # Enable user interface interactor
-        interactor.Initialize()
+            # Create scene viewer
+            viewer = Scene.Viewer(self)
+            self._viewer = viewer
 
-        # Create a timer to update scene objects periodically
-        self._create_update_timer()
+            # Enable user interface interactor
+            interactor.Initialize()
 
-        # Register a callback to update the scene on each time interval
-        interactor.AddObserver('TimerEvent', lambda *args: self.update())
+            # Create a timer to update scene objects periodically
+            self._create_update_timer()
 
-        # Initialize simulation
-        self._simulation_state = 'running'
-        self._start_time = time()
-        self._elapsed_time = 0.0
-        self._system.get_time().set_value(0)
+            # Register a callback to update the scene on each time interval
+            interactor.AddObserver('TimerEvent', lambda *args: self._update())
 
-        # Run the viewer
-        viewer.start()
-        #viewer.join()
+            # Initialize simulation
+            self._simulation_state = 'running'
+            self._start_time = time()
+            self._elapsed_time = 0.0
+            self._system.get_time().set_value(0)
+
+            # Run the viewer
+            viewer.start()
+
 
 
 
@@ -311,9 +342,13 @@ class Scene:
         .. seealso:: :func:`start_simulation`
 
         '''
-        self._simulation_state = 'inactive'
-        self._interactor.TerminateApp()
-        self._viewer = None
+        with self._lock:
+            if self._simulation_state == 'inactive':
+                raise RuntimeError('Simulation was not started yet')
+
+            self._simulation_state = 'inactive'
+            self._interactor.TerminateApp()
+            self._viewer = None
 
 
 
@@ -325,7 +360,11 @@ class Scene:
         .. seealso:: :func:`resume_simulation`
 
         '''
-        self._simulation_state = 'paused'
+        with self._lock:
+            if self._simulation_state != 'running':
+                raise RuntimeError('Simulation is not running')
+
+            self._simulation_state = 'paused'
 
 
 
@@ -336,8 +375,12 @@ class Scene:
         .. seealso:: :func:`pause_simulation`
 
         '''
-        self._simulation_state = 'running'
-        self._last_time = self._last_update_time = None
+        with self._lock:
+            if self._simulation_state != 'paused':
+                raise RuntimeError('Simulation is not paused')
+
+            self._simulation_state = 'running'
+            self._last_time = self._last_update_time = None
 
 
 
