@@ -347,7 +347,11 @@ class Scene:
                 raise RuntimeError('Simulation was not started yet')
 
             self._simulation_state = 'inactive'
-            self._interactor.TerminateApp()
+
+            self._window.Finalize()
+            self._interactor.ExitCallback()
+            #self._interactor.TerminateApp()
+            self._viewer.join()
             self._viewer = None
 
 
