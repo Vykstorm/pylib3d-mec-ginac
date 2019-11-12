@@ -18,7 +18,7 @@ class PointDrawing(Drawing3D):
 
     ######## Constructor ########
 
-    def __init__(self, position=None, rotation=None, scale=None, radius=0.1, center=(0, 0, 0), resolution=15):
+    def __init__(self, scene, position=None, rotation=None, scale=None, radius=0.1, center=(0, 0, 0), resolution=15):
         # Validate input arguments
 
 
@@ -36,4 +36,4 @@ class PointDrawing(Drawing3D):
         actor.SetMapper(mapper)
 
         # Initialize super instance
-        super().__init__(actor, position, rotation, scale)
+        super().__init__(scene, actor, position, rotation, scale)

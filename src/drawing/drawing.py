@@ -8,8 +8,9 @@ This script implements the class Drawing3D
 ######## Imports ########
 
 from lib3d_mec_ginac_ext import Matrix
-from vtk import vtkProp
+from vtk import vtkProp, vtkMatrix4x4
 import numpy as np
+from itertools import product
 
 
 
@@ -31,7 +32,7 @@ class Drawing3D:
     ######## Constructor ########
 
 
-    def __init__(self, vtk_handler, position=None, rotation=None, scale=None):
+    def __init__(self, scene, vtk_handler, position=None, rotation=None, scale=None):
         # Validate input arguments
         if not isinstance(vtk_handler, vtkProp):
             raise TypeError('vtk_handler must be a vtkProp instance')
@@ -47,24 +48,59 @@ class Drawing3D:
         if rotation is not None and not isinstance(rotation, Matrix):
             raise TypeError('rotation must be a 3x3 Matrix')
 
-
+        # Initialize internal fields
         self._vtk_handler = vtk_handler
         self._position = position
         self._rotation = rotation
         self._position_func = position.get_numeric_function()
         self._rotation_func = rotation.get_numeric_function()
         self._scale = (1, 1, 1)
+        self._system = scene._system
+
+
+        # Initialize vtk actor user matrix
+        self._vtk_handler.SetUserMatrix(vtkMatrix4x4())
+
+
 
 
 
     ######## Updating ########
 
 
-    def _update(self):
+    def update(self):
         '''
-        This method updates the transformation matrix of the underline vtk actor.
+        This method updates this drawing object
         '''
-        pass
+        self.update_transformation()
+
+
+
+
+    def update_transformation(self):
+        '''
+        This method updates the transformation matrix of this drawing object.
+        '''
+        # Compute translation matrix
+        translation = np.eye(4).astype(np.float64)
+        translation[0:3, 3] = self._system.evaluate(self._position_func).flatten()
+
+        # Compute rotation matrix
+        rotation = np.eye(4).astype(np.float64)
+        rotation[0:3, 0:3] = self._system.evaluate(self._rotation_func)
+
+        # Compute scale matrix
+        scale = np.diag(self._scale + (1,)).astype(np.float64)
+
+        # Concatenate transformations (scale -> rotate -> translate)
+        transformation = translation @ rotation @ scale
+
+        # Update vtk user matrix
+        matrix = self._vtk_handler.GetUserMatrix()
+        for index, value in zip(product(range(0, 4), range(0, 4)), transformation.flatten()):
+            i, j = index
+            matrix.SetElement(i, j, value.item())
+
 
 
 
@@ -93,31 +129,12 @@ class Drawing3D:
         return self._rotation
 
 
-    def get_transformation(self, system):
-        '''get_transformation(system: System) -> ndarray
-        Compute the transformation matrix for this drawing numerically.
-
-        :type system: System
-
-        :return: A numpy array of size 4x4
-        :rtype: ndarray
-
-        '''
-        translation = np.eye(4).astype(np.float64)
-        translation[0:3, 3] = system.evaluate(self._position_func).flatten()
-
-        rotation = np.eye(4).astype(np.float64)
-        rotation[0:3, 0:3] = system.evaluate(self._rotation_func)
-
-        scale = np.diag(self._scale + (1,)).astype(np.float64)
-
-        return scale @ rotation @ translation
-
 
 
 
 
     ######## Properties ########
+
 
     @property
     def position(self):

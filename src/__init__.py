@@ -48,7 +48,7 @@ def __dir__():
 # This variable will store the "default" system object.
 _default_system = System()
 
-# Expose get_*, new_*, set_* and draw_* methods of the default system object (add them to __all__ and globals())
+# Expose get_*, new_*, set_* methods of the default system object (add them to __all__ and globals())
 def _create_system_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
@@ -68,6 +68,26 @@ for name in dir(System):
 
     __all__.append(name)
     globals()[name] = _create_system_global_func(getattr(System, name))
+
+# Expose draw_* methods of the default system object (add them to __all__ and globals())
+from .drawing.scene import Scene as DrawingScene
+
+def _create_scene_global_func(method):
+    @wraps(method)
+    def func(*args, **kwargs):
+        return method(_default_system._scene, *args, **kwargs)
+    return func
+
+for name in dir(DrawingScene):
+    if not name.startswith('draw_') and\
+        name not in (
+            'start_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation',
+            'set_update_frequency', 'set_time_multiplier'
+            ):
+        continue
+    __all__.append(name)
+    globals()[name] = _create_scene_global_func(getattr(DrawingScene, name))
+
 
 
 

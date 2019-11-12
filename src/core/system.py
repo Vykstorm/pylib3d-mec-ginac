@@ -9,7 +9,7 @@ This module defines the class System
 
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
 from lib3d_mec_ginac_ext import *
-from ..drawing.scene import DrawingScene
+from ..drawing.scene import Scene as DrawingScene
 import math
 
 
@@ -30,13 +30,14 @@ class System(_System):
     def __init__(self):
         super().__init__()
 
+
         # Define mathematical constants
         self.new_parameter('pi', r'\pi', math.pi)
         self.new_parameter('e', 'e', math.e)
         self.new_parameter('tau', r'\tau', math.tau)
 
         # Create scene visualizer (to show drawings)
-        self._scene = DrawingScene()
+        self._scene = DrawingScene(self)
 
 
 
@@ -1459,28 +1460,6 @@ class System(_System):
 
         '''
         return self._evaluate(func)
-
-
-
-
-
-    ######## Drawing routines ########
-
-
-    def draw_point(self, point, **kwargs):
-        if not isinstance(point, (Point, str)):
-            raise TypeError('Input argument must be a Point or str instance')
-        if isinstance(point, str):
-            point = self.get_point(point)
-
-        # Get symbolic position & rotation matrices for the drawing
-        OC = self.position_vector('O', point)
-        base = OC.get_base()
-        position = self.rotation_matrix('xyz', base) * OC
-        rotation = self.rotation_matrix('xyz', base).transpose()
-
-        return self._scene.draw_point(position, rotation, **kwargs)
-
 
 
 
