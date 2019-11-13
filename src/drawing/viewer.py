@@ -8,16 +8,23 @@ This script implements the class Scene
 ######## Imports ########
 
 
-from vtk import vtkRenderer, vtkRenderWindow, vtkRenderWindowInteractor, vtkNamedColors
 from .drawing import Drawing3D
 from .point import PointDrawing
 from lib3d_mec_ginac_ext import Point
-from threading import Thread, RLock
+
+# vtk imports
+from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors
+from vtk import vtkGenericRenderWindowInteractor
+
+# utilities
 from math import ceil
-from time import time
+from time import time, sleep
 from os.path import basename
 import sys
 from re import match
+
+# multithreading
+from threading import RLock, Thread, Event
 
 
 
@@ -30,38 +37,43 @@ class Viewer:
     An instance of this class represents a 3D renderable scene.
     '''
 
+    class Updater(Thread):
+        '''
+        Helper class responsible of updating the viewer periodically running
+        on a secondary thread
+        '''
+        def __init__(self, viewer):
+            super().__init__()
+            self._viewer = viewer
+            self._close = Event()
+            self.daemon = True
+
+
+        def run(self):
+            update_delay = 1 / min(30, self._viewer.get_simulation_update_frequency())
+            while True:
+                if self._close.is_set():
+                    break
+
+                # Update viewer each update_interval time interval
+                self._viewer._update()
+                sleep(.5 * update_delay)
+
+
+
 
 
     ######## Constructor ########
 
 
     def __init__(self, system):
-        # Create the vtk renderer, window & interactor objects
+
+        # Create the vtk renderer
         renderer = vtkRenderer()
-        window = vtkRenderWindow()
-        interactor = vtkRenderWindowInteractor()
 
-        # Set window title
-        result = match('(.*)\.py$', sys.argv[0])
-        title = result.group(1) if result else sys.argv[0]
-        window.SetWindowName(title)
-
-        # Added renderer to the window
-        window.AddRenderer(renderer)
-
-        # Set default window size
-        window.SetSize(640, 480)
-
-        # Set render window to the interactor
-        interactor.SetRenderWindow(window)
 
         ## Initialize internal fields
-
-        # vtk objects (renderer, window & interactor)
-        self._renderer, self._window, self._interactor = renderer, window, interactor
-        # vtk timer to update the scene
-        self._update_timer = None
-
+        self._renderer = renderer
         self._drawings = [] # list of drawing objects
         self._system = system # system attached to this scene
         self._elapsed_time = 0.0 # elapsed time since the simulation begun
@@ -69,11 +81,13 @@ class Viewer:
         self._last_time, self._last_update_time = None, None
         # update frequency of drawing objects
         self._update_freq = 30
+        # Viewer.Updater instance to update the viewer periodically on a secondary thread
+        self._updater = None
 
         self._simulation_state = 'inactive' # current simulation state
         self._time_multiplier = 1.0 # time multiplier factor
 
-        # threading lock to modify scene properties and drawing objects attached to it,
+        # threading lock to modify scene properties and drawing objects attached to it
         # safely from multiple threads
         self._lock = RLock()
 
@@ -114,13 +128,6 @@ class Viewer:
     ######## Setters ########
 
 
-    def _create_update_timer(self):
-        if self._update_timer is not None:
-            self._interactor.DestroyTimer(self._update_timer)
-        self._update_timer = self._interactor.CreateRepeatingTimer(min(30, ceil(1000 / self._update_freq)))
-
-
-
     def set_simulation_update_frequency(self, freq):
         '''set_simulation_update_frequency(freq: numeric)
         Set the desired scene update frequency in updates per second (Default is 30)
@@ -138,9 +145,8 @@ class Viewer:
             raise ValueError('update frequency must be a number greater than zero')
 
         with self._lock:
-            self._update_freq = float(freq)
-            if self._simulation_state != 'inactive':
-                self._create_update_timer()
+            self._update_freq = freq
+
 
 
     set_simulation_update_freq = set_simulation_update_frequency
@@ -232,11 +238,10 @@ class Viewer:
                 # Update drawings
                 self._update_drawings()
 
-        self._lock.release()
-
-
         # Redraw scene
         self._interactor.Render()
+
+        self._lock.release()
 
 
 
@@ -273,29 +278,53 @@ class Viewer:
         Start the simulation (also open the window where drawing objects should be
         rendered)
         '''
-        interactor, system = self._interactor, self._system
-
+        system, renderer = self._system, self._renderer
         with self._lock:
+
+            # Create the interactor and the window
+            window = vtkRenderWindow()
+            interactor = vtkGenericRenderWindowInteractor()
+            self._window, self._interactor = window, interactor
+
+            # Set window title
+            result = match('(.*)\.py$', sys.argv[0])
+            title = result.group(1) if result else sys.argv[0]
+            window.SetWindowName(title)
+
+            # Added renderer to the window
+            window.AddRenderer(renderer)
+
+            # Set default window size
+            window.SetSize(640, 480)
+
+            # Set render window to the interactor
+            interactor.SetRenderWindow(window)
+
+
+
             if self._simulation_state != 'inactive':
                 raise RuntimeError('Simulation already started')
 
             # Enable user interface interactor
             interactor.Initialize()
 
-            # Create a timer to update scene objects periodically
-            self._create_update_timer()
-
-            # Register a callback to update the scene on each time interval
-            interactor.AddObserver('TimerEvent', lambda *args: self._update())
-
-            # Initialize simulation
+            # Initialize simulation state and variables
             self._simulation_state = 'running'
             self._start_time = time()
+            self._last_update_time = None
             self._elapsed_time = 0.0
             self._system.get_time().set_value(0)
 
-            # TODO
+
+            # Start interactor
             interactor.Start()
+
+            # Update view periodically
+            self._update()
+            self._updater = Viewer.Updater(self)
+            self._updater.start()
+
+
 
 
 
@@ -310,11 +339,16 @@ class Viewer:
             if self._simulation_state == 'inactive':
                 raise RuntimeError('Simulation was not started yet')
 
-            self._simulation_state = 'inactive'
+            updater = self._updater
+            updater._close.set()
+            updater.join()
+            self._updater = None
 
             self._window.Finalize()
-            self._interactor.ExitCallback()
+            self._interactor.TerminateApp()
+            del self._interactor, self._window
 
+            self._simulation_state = 'inactive'
 
 
 
