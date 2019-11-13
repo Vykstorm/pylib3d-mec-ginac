@@ -70,22 +70,22 @@ for name in dir(System):
     globals()[name] = _create_system_global_func(getattr(System, name))
 
 # Expose draw_* methods of the default system object (add them to __all__ and globals())
-from .drawing.scene import Scene as DrawingScene
+from .drawing.viewer import Viewer
 
-def _create_scene_global_func(method):
+def _create_viewer_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
-        return method(_default_system._scene, *args, **kwargs)
+        return method(_default_system._viewer, *args, **kwargs)
     return func
 
-for name in dir(DrawingScene):
+for name in dir(Viewer):
     if not any(map(name.startswith, ['draw_', 'get_', 'set_'])) and\
         name not in (
             'start_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation',
             ):
         continue
     __all__.append(name)
-    globals()[name] = _create_scene_global_func(getattr(DrawingScene, name))
+    globals()[name] = _create_viewer_global_func(getattr(Viewer, name))
 
 
 

@@ -25,39 +25,10 @@ from re import match
 ######## class Scene ########
 
 
-class Scene:
+class Viewer:
     '''
     An instance of this class represents a 3D renderable scene.
     '''
-
-
-
-    ######## class Viewer ########
-
-
-    class Viewer(Thread):
-        def __init__(self, scene):
-            super().__init__()
-            # Set thread as daemon
-            self.daemon = True
-
-            # Initialize internal fields
-            self._scene = scene
-
-
-        def run(self):
-            scene = self._scene
-            interactor, window = scene._interactor, scene._window
-
-            # Start rendering the scene and show the window
-            window.Render()
-            scene._update()
-            interactor.Start()
-
-
-
-
-
 
 
 
@@ -99,7 +70,6 @@ class Scene:
         # update frequency of drawing objects
         self._update_freq = 30
 
-        self._viewer = None # viewer instance
         self._simulation_state = 'inactive' # current simulation state
         self._time_multiplier = 1.0 # time multiplier factor
 
@@ -145,7 +115,6 @@ class Scene:
 
 
     def _create_update_timer(self):
-        assert self._viewer is not None
         if self._update_timer is not None:
             self._interactor.DestroyTimer(self._update_timer)
         self._update_timer = self._interactor.CreateRepeatingTimer(min(30, ceil(1000 / self._update_freq)))
@@ -170,7 +139,7 @@ class Scene:
 
         with self._lock:
             self._update_freq = float(freq)
-            if self._viewer is not None:
+            if self._simulation_state != 'inactive':
                 self._create_update_timer()
 
 
@@ -310,10 +279,6 @@ class Scene:
             if self._simulation_state != 'inactive':
                 raise RuntimeError('Simulation already started')
 
-            # Create scene viewer
-            viewer = Scene.Viewer(self)
-            self._viewer = viewer
-
             # Enable user interface interactor
             interactor.Initialize()
 
@@ -329,9 +294,8 @@ class Scene:
             self._elapsed_time = 0.0
             self._system.get_time().set_value(0)
 
-            # Run the viewer
-            viewer.start()
-
+            # TODO
+            interactor.Start()
 
 
 
@@ -350,9 +314,7 @@ class Scene:
 
             self._window.Finalize()
             self._interactor.ExitCallback()
-            #self._interactor.TerminateApp()
-            self._viewer.join()
-            self._viewer = None
+
 
 
 

@@ -32,7 +32,7 @@ class Drawing3D:
     ######## Constructor ########
 
 
-    def __init__(self, scene, vtk_handler, position=None, rotation=None, scale=None):
+    def __init__(self, viewer, vtk_handler, position=None, rotation=None, scale=None):
         # Validate input arguments
         if not isinstance(vtk_handler, vtkProp):
             raise TypeError('vtk_handler must be a vtkProp instance')
@@ -55,7 +55,7 @@ class Drawing3D:
         self._position_func = position.get_numeric_function()
         self._rotation_func = rotation.get_numeric_function()
         self._scale = (1, 1, 1)
-        self._system = scene._system
+        self._system = viewer._system
 
 
         # Initialize vtk actor user matrix
