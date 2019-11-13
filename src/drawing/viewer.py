@@ -7,13 +7,13 @@ This script implements the class Scene
 
 ######## Imports ########
 
-
 from .drawing import Drawing3D
 from .point import PointDrawing
-from lib3d_mec_ginac_ext import Point
+from .frame import FrameDrawing
+from lib3d_mec_ginac_ext import Point, Frame
 
 # vtk imports
-from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors
+from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors, vtkCommand
 from vtk import vtkGenericRenderWindowInteractor
 
 # utilities
@@ -185,7 +185,7 @@ class Viewer:
 
 
 
-    def draw_point(self, point, *args, **kwargs):
+    def draw_point(self, point, **kwargs):
         '''draw_point(...)
         Draw the given point
 
@@ -205,6 +205,29 @@ class Viewer:
         drawing = PointDrawing(self, position, rotation, **kwargs)
         self._add_drawing(drawing)
         return drawing
+
+
+
+    def draw_frame(self, frame, **kwargs):
+        '''draw_frame(...)
+        Draw the given frame
+        '''
+        # Validate & parse frame argument
+        if not isinstance(frame, (Frame, str)):
+            raise TypeError('Input argument must be a Frame or str instance')
+        if isinstance(frame, str):
+            frame = self._system.get_frame(frame)
+
+        # Get symbolic position & rotation matrices for the drawing
+        OC = self._system.position_vector('O', frame.get_point())
+        base = OC.get_base()
+        position = self._system.rotation_matrix('xyz', base) * OC
+        rotation = self._system.rotation_matrix('xyz', base).transpose()
+
+        drawing = FrameDrawing(self, position, rotation, **kwargs)
+        self._add_drawing(drawing)
+        return drawing
+
 
 
 
@@ -280,6 +303,9 @@ class Viewer:
         '''
         system, renderer = self._system, self._renderer
         with self._lock:
+            if self._simulation_state != 'inactive':
+                raise RuntimeError('Simulation already started')
+
 
             # Create the interactor and the window
             window = vtkRenderWindow()
@@ -300,13 +326,13 @@ class Viewer:
             # Set render window to the interactor
             interactor.SetRenderWindow(window)
 
-
-
-            if self._simulation_state != 'inactive':
-                raise RuntimeError('Simulation already started')
-
             # Enable user interface interactor
             interactor.Initialize()
+
+            # Add a callback which is executed when the user press the 'x' button
+            # on the window
+            ## TODO
+
 
             # Initialize simulation state and variables
             self._simulation_state = 'running'
