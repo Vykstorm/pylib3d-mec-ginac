@@ -113,8 +113,8 @@ class Scene:
     ######## Getters ########
 
 
-    def get_update_frequency(self):
-        '''get_update_frequency() -> float
+    def get_simulation_update_frequency(self):
+        '''get_simulation_update_frequency() -> float
         Get the desired update frequency in updates per second
 
         :rtype: float
@@ -124,11 +124,11 @@ class Scene:
             return self._update_freq
 
 
-    get_update_freq = get_update_frequency
+    get_simulation_update_freq = get_simulation_update_frequency
 
 
-    def get_time_multiplier(self):
-        '''get_time_multiplier() -> float
+    def get_simulaton_time_multiplier(self):
+        '''get_simulaton_time_multiplier() -> float
         Get the current time multiplier
 
         rtype: float
@@ -152,8 +152,8 @@ class Scene:
 
 
 
-    def set_update_frequency(self, freq):
-        '''set_update_frequency(freq: numeric)
+    def set_simulation_update_frequency(self, freq):
+        '''set_simulation_update_frequency(freq: numeric)
         Set the desired scene update frequency in updates per second (Default is 30)
 
         :type freq: numeric
@@ -174,12 +174,12 @@ class Scene:
                 self._create_update_timer()
 
 
-    set_update_freq = set_update_frequency
+    set_simulation_update_freq = set_simulation_update_frequency
 
 
 
-    def set_time_multiplier(self, multiplier):
-        '''set_time_multiplier(multiplier: numeric)
+    def set_simulation_time_multiplier(self, multiplier):
+        '''set_simulation_time_multiplier(multiplier: numeric)
         Set the time multiplier for the simulation
 
         :type multiplier: numeric
@@ -395,39 +395,39 @@ class Scene:
 
 
     @property
-    def update_frequency(self):
+    def simulation_update_frequency(self):
         '''
         Property that can be used to get/set the desired scene update frequency
 
         .. seealso::
-            :func:`set_update_frequency`
-            :func:`get_update_frequency`
+            :func:`set_simulation_update_frequency`
+            :func:`get_simulation_update_frequency`
 
         '''
-        return self.get_update_frequency()
+        return self.get_simulation_update_frequency()
 
 
-    @update_frequency.setter
-    def update_frequency(self, freq):
-        self.set_update_frequency(freq)
+    @simulation_update_frequency.setter
+    def simulation_update_frequency(self, freq):
+        self.set_simulation_update_frequency(freq)
 
 
-    update_freq = update_frequency
+    simulation_update_freq = simulation_update_frequency
 
 
     @property
-    def time_multiplier(self):
+    def simulation_time_multiplier(self):
         '''
         Property that can be used to get/set the time multiplier
 
         .. seealso::
-            :func:`set_time_multiplier`
-            :func:`get_time_multiplier`
+            :func:`set_simulation_time_multiplier`
+            :func:`get_simulation_time_multiplier`
 
         '''
-        return self.get_time_multiplier()
+        return self.get_simulation_time_multiplier()
 
 
-    @time_multiplier.setter
-    def time_multiplier(self, multiplier):
-        self.set_time_multiplier(multiplier)
+    @simulation_time_multiplier.setter
+    def simulation_time_multiplier(self, multiplier):
+        self.set_simulation_time_multiplier(multiplier)

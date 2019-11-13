@@ -79,10 +79,9 @@ def _create_scene_global_func(method):
     return func
 
 for name in dir(DrawingScene):
-    if not name.startswith('draw_') and\
+    if not any(map(name.startswith, ['draw_', 'get_', 'set_'])) and\
         name not in (
             'start_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation',
-            'set_update_frequency', 'set_time_multiplier'
             ):
         continue
     __all__.append(name)
