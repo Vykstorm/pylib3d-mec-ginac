@@ -124,6 +124,21 @@ API Reference
         __call__
 
 
+.. autoclass:: Viewer
+    :members:
+        get_simulation_update_frequency, get_simulation_update_freq,
+        get_simulaton_time_multiplier,
+        is_simulation_running, is_simulation_paused, is_simulation_stopped,
+        are_drawings_shown,
+        get_simulation_elapsed_time,
+        set_simulation_update_frequency, set_simulation_time_multiplier,
+        draw_point, draw_frame, draw_solid, draw_vector,
+        show_drawings, hide_drawings,
+        start_simulation, stop_simulation, pause_simulation, resume_simulation,
+        simulation_update_frequency, simulation_time_multiplier
+
+
+
 
 
 Global functions
