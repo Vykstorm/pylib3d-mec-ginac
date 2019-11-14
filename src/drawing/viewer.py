@@ -256,6 +256,10 @@ class Viewer:
         with self._lock:
             self._drawings.append(drawing)
             self._renderer.AddActor(drawing._vtk_handler)
+            # Update drawings and redraw scene
+            self._update_drawings()
+            self._redraw()
+
 
 
     def _fv_draw(self, point, cls, **kwargs):
@@ -343,10 +347,7 @@ class Viewer:
                     # Update drawings
                     self._update_drawings()
 
-            if self._interactor is not None:
-                # Redraw scene
-                self._interactor.Render()
-
+            self._redraw()
 
 
 
@@ -369,6 +370,16 @@ class Viewer:
             # Update time symbol numeric value
             self._system.get_time().set_value(self._elapsed_time)
 
+
+
+    def _redraw(self):
+        '''
+        Redraw the scene
+        '''
+        with self._lock:
+            if self._interactor is not None:
+                # Redraw scene
+                self._interactor.Render()
 
 
 
@@ -416,8 +427,9 @@ class Viewer:
             # Start interactor
             interactor.Start()
 
-            # Update drawings
+            # Update drawings and redraw
             self._update_drawings()
+            self._redraw()
 
 
 
