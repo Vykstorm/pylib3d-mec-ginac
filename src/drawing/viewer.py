@@ -71,6 +71,8 @@ class Viewer:
         # Create the vtk renderer
         renderer = vtkRenderer()
 
+        renderer.GetActiveCamera().SetPosition(3, 3, 3)
+
 
         ## Initialize internal fields
         self._renderer = renderer

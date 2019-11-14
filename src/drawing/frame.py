@@ -7,9 +7,9 @@ This file defines the class FrameDrawing
 
 ######## Imports ########
 
+from .geometry import _create_sphere_geometry, _create_arrow_geometry, _create_assembly_geometry
 from .drawing import Drawing3D
 from vtk import vtkAssembly, vtkSphereSource, vtkPolyDataMapper, vtkActor
-
 
 
 ######## class FrameDrawing ########
@@ -26,22 +26,16 @@ class FrameDrawing(Drawing3D):
 
 
         # Create geometry
-        origin_geom = vtkSphereSource()
-        origin_geom.SetRadius(origin_radius)
-        origin_geom.SetThetaResolution(origin_resolution)
-        origin_geom.SetPhiResolution(origin_resolution)
+        origin = _create_sphere_geometry(origin_radius, origin_resolution)
+        x_axis, x_axis_shaft, x_axis_tip = _create_arrow_geometry()
+        y_axis, y_axis_shaft, y_axis_tip = _create_arrow_geometry()
+        z_axis, z_axis_shaft, z_axis_tip = _create_arrow_geometry()
 
-        # Create underline vtk actor
+        y_axis.SetOrientation(0, 0, 90)
+        z_axis.SetOrientation(0, -90, 0)
 
-        mapper = vtkPolyDataMapper()
-        mapper.SetInputConnection(origin_geom.GetOutputPort())
-        origin = vtkActor()
-        origin.SetMapper(mapper)
+        actor = _create_assembly_geometry(x_axis, y_axis, z_axis)
 
-
-
-        actor = vtkAssembly()
-        actor.AddPart(origin)
 
         # Initialize super instance
         super().__init__(scene, actor, position, rotation, scale)
