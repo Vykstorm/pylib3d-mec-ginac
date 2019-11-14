@@ -30,6 +30,8 @@ from threading import RLock, Thread, Event
 
 
 
+
+
 ######## class Scene ########
 
 
@@ -40,8 +42,7 @@ class Viewer:
 
     class Updater(Thread):
         '''
-        Helper class responsible of updating the viewer periodically running
-        on a secondary thread
+        Helper class to implement timers internally.
         '''
         def __init__(self, viewer):
             super().__init__()
@@ -50,15 +51,27 @@ class Viewer:
             self.daemon = True
 
 
+        def get_update_frequency(self):
+            viewer = self._viewer
+            if viewer.is_simulation_running():
+                return viewer.get_simulation_update_frequency()
+            return 30
+
+        def update(self):
+            self._viewer._update()
+
+        def close(self):
+            self._close.set()
+            self.join()
+
         def run(self):
-            update_delay = 1 / min(30, self._viewer.get_simulation_update_frequency())
+            update_delay = 1 / self.get_update_frequency()
             while True:
-                if self._close.is_set():
+                self.update()
+                if self._close.wait(update_delay):
                     break
 
-                # Update viewer each update_interval time interval
-                self._viewer._update()
-                sleep(.5 * update_delay)
+
 
 
 
@@ -77,7 +90,7 @@ class Viewer:
 
 
         ## Initialize internal fields
-        self._renderer = renderer
+        self._renderer, self._interactor, self._window = renderer, None, None
         self._drawings = [] # list of drawing objects
         self._system = system # system attached to this scene
         self._elapsed_time = 0.0 # elapsed time since the simulation begun
@@ -85,8 +98,6 @@ class Viewer:
         self._last_time, self._last_update_time = None, None
         # update frequency of drawing objects
         self._update_freq = 30
-        # Viewer.Updater instance to update the viewer periodically on a secondary thread
-        self._updater = None
 
         self._simulation_state = 'inactive' # current simulation state
         self._time_multiplier = 1.0 # time multiplier factor
@@ -95,6 +106,8 @@ class Viewer:
         # safely from multiple threads
         self._lock = RLock()
 
+        # Viewer.Updater instance to update the viewer periodically on a secondary thread
+        self._updater = None
 
 
 
@@ -119,11 +132,69 @@ class Viewer:
         '''get_simulaton_time_multiplier() -> float
         Get the current time multiplier
 
-        rtype: float
+        :rtype: float
 
         '''
         with self._lock:
             return self._time_multiplier
+
+
+
+    def is_simulation_running(self):
+        '''is_simulation_running() -> bool
+        Returns True if the simulation is running, False otherwise
+
+        :rtype: bool
+
+        '''
+        with self._lock:
+            return self._simulation_state == 'running'
+
+
+    def is_simulation_paused(self):
+        '''is_simulation_paused() -> bool
+        Returns True if the simulation is paused, False otherwise
+
+        :rtype: bool
+
+        '''
+        with self._lock:
+            return self._simulation_state == 'paused'
+
+
+    def is_simulation_stopped(self):
+        '''is_simulation_stopped() -> bool
+        Returns True if the simulation is inactive (stopped), False otherwise
+
+        :rtype: bool
+
+        '''
+        with self._lock:
+            return self._simulation_state == 'inactive'
+
+
+    def are_drawings_shown(self):
+        '''are_drawings_shown() -> bool
+        Returns True if the drawings are being rendered
+
+        :rtype: bool
+
+        '''
+        with self._lock:
+            return self._interactor is not None
+
+
+    def get_simulation_elapsed_time(self):
+        '''get_simulation_elapsed_time() -> float
+        Returns the total number of seconds that the simulation was running.
+
+        :rtype: float
+
+        '''
+        with self._lock:
+            if self._simulation_state == 'inactive':
+                raise RuntimeError('Simulation has not started yet')
+            return self._elapsed_time
 
 
 
@@ -251,31 +322,31 @@ class Viewer:
         '''
         Update this scene.
         '''
-        self._lock.acquire()
-        if self._simulation_state == 'running':
-            current_time = time()
+        with self._lock:
+            if self._simulation_state == 'running':
+                current_time = time()
 
-            # Compute elapsed time since the simulation begun
-            if self._last_time is None:
+                # Compute elapsed time since the simulation begun
+                if self._last_time is None:
+                    self._last_time = current_time
+
+                self._elapsed_time += (current_time - self._last_time) * self._time_multiplier
                 self._last_time = current_time
 
-            self._elapsed_time += (current_time - self._last_time) * self._time_multiplier
-            self._last_time = current_time
+                # Make sure to update the scene with the desired update frequency
+                update_delay = 1 / self._update_freq
+                if self._last_update_time is None or (current_time - self._last_update_time) >= update_delay:
+                    self._last_update_time = current_time
+                    # Update simulation state
+                    self._update_simulation()
 
-            # Make sure to update the scene with the desired update frequency
-            update_delay = 1 / self._update_freq
-            if self._last_update_time is None or (current_time - self._last_update_time) >= update_delay:
-                self._last_update_time = current_time
-                # Update simulation state
-                self._update_simulation()
+                    # Update drawings
+                    self._update_drawings()
 
-                # Update drawings
-                self._update_drawings()
+            if self._interactor is not None:
+                # Redraw scene
+                self._interactor.Render()
 
-        # Redraw scene
-        self._interactor.Render()
-
-        self._lock.release()
 
 
 
@@ -284,8 +355,9 @@ class Viewer:
         '''
         Update all drawings
         '''
-        for drawing in self._drawings:
-            drawing._update()
+        with self._lock:
+            for drawing in self._drawings:
+                drawing._update()
 
 
 
@@ -293,29 +365,26 @@ class Viewer:
         '''
         Update scene simulation
         '''
-        # Update time symbol numeric value
-        self._system.get_time().set_value(self._elapsed_time)
+        with self._lock:
+            # Update time symbol numeric value
+            self._system.get_time().set_value(self._elapsed_time)
 
 
 
 
 
 
+    ######## Show/hide scene  ########
 
 
-
-    ######## Simulation controls  ########
-
-
-    def start_simulation(self):
+    def show_drawings(self):
         '''show_drawings()
-        Start the simulation (also open the window where drawing objects should be
-        rendered)
+        Show the drawing objects
         '''
         system, renderer = self._system, self._renderer
         with self._lock:
-            if self._simulation_state != 'inactive':
-                raise RuntimeError('Simulation already started')
+            if self._interactor is not None:
+                raise RuntimeError('Drawings are being shown already')
 
 
             # Create the interactor and the window
@@ -344,6 +413,45 @@ class Viewer:
             # on the window
             ## TODO
 
+            # Start interactor
+            interactor.Start()
+
+            # Update drawings
+            self._update_drawings()
+
+
+
+
+
+
+    def hide_drawings(self):
+        '''hide_drawings()
+        Remove the window showing the drawing objects
+        '''
+        with self._lock:
+            if self._interactor is None:
+                raise RuntimeError('Drawings are not being shown yet')
+
+            self._window.Finalize()
+            self._interactor.TerminateApp()
+            self._interactor, self._window = None, None
+
+
+
+
+
+
+    ######## Simulation controls  ########
+
+
+    def start_simulation(self):
+        '''show_drawings()
+        Start the simulation (also open the window where drawing objects should be
+        rendered)
+        '''
+        with self._lock:
+            if self._simulation_state != 'inactive':
+                raise RuntimeError('Simulation already started')
 
             # Initialize simulation state and variables
             self._simulation_state = 'running'
@@ -352,15 +460,9 @@ class Viewer:
             self._elapsed_time = 0.0
             self._system.get_time().set_value(0)
 
-
-            # Start interactor
-            interactor.Start()
-
-            # Update view periodically
-            self._update()
+            # update viewer periodically
             self._updater = Viewer.Updater(self)
             self._updater.start()
-
 
 
 
@@ -374,18 +476,12 @@ class Viewer:
         '''
         with self._lock:
             if self._simulation_state == 'inactive':
-                raise RuntimeError('Simulation was not started yet')
-
-            updater = self._updater
-            updater._close.set()
-            updater.join()
-            self._updater = None
-
-            self._window.Finalize()
-            self._interactor.TerminateApp()
-            del self._interactor, self._window
+                raise RuntimeError('Simulation has not started yet')
 
             self._simulation_state = 'inactive'
+            self._updater.close()
+            self._updater = None
+
 
 
 
@@ -399,9 +495,10 @@ class Viewer:
         '''
         with self._lock:
             if self._simulation_state != 'running':
-                raise RuntimeError('Simulation is not running')
+                raise RuntimeError('Simulation is not running yet')
 
             self._simulation_state = 'paused'
+
 
 
 
@@ -414,7 +511,9 @@ class Viewer:
         '''
         with self._lock:
             if self._simulation_state != 'paused':
-                raise RuntimeError('Simulation is not paused')
+                if self._simulation_state == 'inactive':
+                    raise RuntimeError('Simulation has not started yet')
+                raise RuntimeError('Simulation is running already')
 
             self._simulation_state = 'running'
             self._last_time = self._last_update_time = None

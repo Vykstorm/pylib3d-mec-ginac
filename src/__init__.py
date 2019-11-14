@@ -79,9 +79,10 @@ def _create_viewer_global_func(method):
     return func
 
 for name in dir(Viewer):
-    if not any(map(name.startswith, ['draw_', 'get_', 'set_'])) and\
+    if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
         name not in (
             'start_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation',
+            'show_drawings', 'hide_drawings'
             ):
         continue
     __all__.append(name)
