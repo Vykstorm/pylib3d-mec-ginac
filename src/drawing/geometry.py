@@ -8,6 +8,7 @@ This file defines the helper functions to build 3d geometry (with VTK)
 from vtk import vtkPolyDataMapper, vtkActor, vtkAssembly
 from vtk import vtkSphereSource, vtkConeSource, vtkCylinderSource, vtkLineSource
 from vtk import vtkPolyData, vtkPoints, vtkCellArray, vtkLine, vtkCubeSource
+from vtk import vtkSTLReader
 
 
 def _create_vtk_actor(source):
@@ -109,3 +110,11 @@ def _create_arrow_geometry(size=1, shaft_radius=0.03, tip_radius=0.1, tip_size=0
     tip.SetPosition(shaft_size+tip_size/2, 0, 0)
 
     return _create_assembly_geometry(shaft, tip), shaft, tip
+
+
+
+
+def _create_geometry_from_stl(filename):
+    reader = vtkSTLReader()
+    reader.SetFileName(filename)
+    return _create_vtk_actor(reader)

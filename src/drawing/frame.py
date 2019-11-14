@@ -31,10 +31,14 @@ class FrameDrawing(Drawing3D):
         y_axis, y_axis_shaft, y_axis_tip = _create_arrow_geometry()
         z_axis, z_axis_shaft, z_axis_tip = _create_arrow_geometry()
 
+        x_axis_tip.GetProperty().SetColor(1, 0, 0)
+        y_axis_tip.GetProperty().SetColor(0, 1, 0)
+        z_axis_tip.GetProperty().SetColor(0, 0, 1)
+
         y_axis.SetOrientation(0, 0, 90)
         z_axis.SetOrientation(0, -90, 0)
 
-        actor = _create_assembly_geometry(x_axis, y_axis, z_axis)
+        actor = _create_assembly_geometry(origin, x_axis, y_axis, z_axis)
 
 
         # Initialize super instance

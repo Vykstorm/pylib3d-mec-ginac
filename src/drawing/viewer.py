@@ -10,7 +10,8 @@ This script implements the class Scene
 from .drawing import Drawing3D
 from .point import PointDrawing
 from .frame import FrameDrawing
-from lib3d_mec_ginac_ext import Point, Frame
+from .solid import SolidDrawing
+from lib3d_mec_ginac_ext import Point, Frame, Solid
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors, vtkCommand
@@ -71,7 +72,8 @@ class Viewer:
         # Create the vtk renderer
         renderer = vtkRenderer()
 
-        renderer.GetActiveCamera().SetPosition(3, 3, 3)
+        renderer.GetActiveCamera().SetPosition(5, 5, 5)
+        renderer.SetBackground(1, 1, 1)
 
 
         ## Initialize internal fields
@@ -185,6 +187,15 @@ class Viewer:
             self._renderer.AddActor(drawing._vtk_handler)
 
 
+    def _fv_draw(self, point, cls, **kwargs):
+        # Get symbolic position & rotation matrices for the drawing
+        OC = self._system.position_vector('O', point)
+        base = OC.get_base()
+        position = self._system.rotation_matrix('xyz', base) * OC
+        rotation = self._system.rotation_matrix('xyz', base).transpose()
+        drawing = cls(self, position, rotation, **kwargs)
+        self._add_drawing(drawing)
+        return drawing
 
 
     def draw_point(self, point, **kwargs):
@@ -198,15 +209,7 @@ class Viewer:
         if isinstance(point, str):
             point = self._system.get_point(point)
 
-        # Get symbolic position & rotation matrices for the drawing
-        OC = self._system.position_vector('O', point)
-        base = OC.get_base()
-        position = self._system.rotation_matrix('xyz', base) * OC
-        rotation = self._system.rotation_matrix('xyz', base).transpose()
-
-        drawing = PointDrawing(self, position, rotation, **kwargs)
-        self._add_drawing(drawing)
-        return drawing
+        return self._fv_draw(point, PointDrawing, **kwargs)
 
 
 
@@ -220,15 +223,21 @@ class Viewer:
         if isinstance(frame, str):
             frame = self._system.get_frame(frame)
 
-        # Get symbolic position & rotation matrices for the drawing
-        OC = self._system.position_vector('O', frame.get_point())
-        base = OC.get_base()
-        position = self._system.rotation_matrix('xyz', base) * OC
-        rotation = self._system.rotation_matrix('xyz', base).transpose()
+        return self._fv_draw(frame.get_point(), FrameDrawing, **kwargs)
 
-        drawing = FrameDrawing(self, position, rotation, **kwargs)
-        self._add_drawing(drawing)
-        return drawing
+
+
+    def draw_solid(self, solid, **kwargs):
+        '''draw_solid(...)
+        Draw the given solid
+        '''
+        # Validate & parse solid argument
+        if not isinstance(solid, (Solid, str)):
+            raise TypeError('Input argument must be a Solid or str instance')
+        if isinstance(solid, str):
+            solid = self._system.get_solid(solid)
+
+        return self._fv_draw(solid.get_point(), SolidDrawing, **kwargs)
 
 
 
