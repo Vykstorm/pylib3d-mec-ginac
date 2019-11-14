@@ -88,6 +88,8 @@ for name in dir(Viewer):
     __all__.append(name)
     globals()[name] = _create_viewer_global_func(getattr(Viewer, name))
 
+__all__.append('Viewer')
+
 
 
 

@@ -11,7 +11,8 @@ from .drawing import Drawing3D
 from .point import PointDrawing
 from .frame import FrameDrawing
 from .solid import SolidDrawing
-from lib3d_mec_ginac_ext import Point, Frame, Solid
+from .vector import VectorDrawing
+from lib3d_mec_ginac_ext import Point, Frame, Solid, Vector3D
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors, vtkCommand
@@ -262,9 +263,11 @@ class Viewer:
 
 
 
-    def _fv_draw(self, point, cls, **kwargs):
+    def _fv_draw(self, x, cls, **kwargs):
+        assert isinstance(x, (Vector3D, Point))
+
         # Get symbolic position & rotation matrices for the drawing
-        OC = self._system.position_vector('O', point)
+        OC = self._system.position_vector('O', x) if isinstance(x, Point) else x
         base = OC.get_base()
         position = self._system.rotation_matrix('xyz', base) * OC
         rotation = self._system.rotation_matrix('xyz', base).transpose()
@@ -314,6 +317,19 @@ class Viewer:
 
         return self._fv_draw(solid.get_point(), SolidDrawing, **kwargs)
 
+
+
+    def draw_vector(self, vector, **kwargs):
+        '''draw_vector(...)
+        Draw the given vector
+        '''
+        # Validate & parse vector argument
+        if not isinstance(vector, (Vector3D, str)):
+            raise TypeError('Input argument must be a Vector3D or str instance')
+        if isinstance(vector, str):
+            vector = self._system.get_vector(vector)
+
+        return self._fv_draw(vector, VectorDrawing, **kwargs)
 
 
 
