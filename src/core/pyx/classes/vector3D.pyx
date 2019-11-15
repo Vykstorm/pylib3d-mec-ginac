@@ -247,12 +247,24 @@ cdef class Vector3D(Matrix):
         Get this vector normalized
 
             :Example:
-
+            >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >>> v = new_vector('v', a, b, c)
+            >>> v.normalize()
+            [
+            (b**2+c**2+a**2)**(-1/2)*a,
+            (b**2+c**2+a**2)**(-1/2)*b,
+            c*(b**2+c**2+a**2)**(-1/2)
+            ]
 
         :rtype: Vector3D
 
+        :raises ZeroDivisionError: If the module of this vector is zero length
+
         '''
-        return self / self.get_module()
+        module = self.get_module()
+        if module == 0:
+            raise ZeroDivisionError('You cant normalize a vector with module zero')
+        return self / module
 
 
 
