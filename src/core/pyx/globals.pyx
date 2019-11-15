@@ -324,3 +324,31 @@ cpdef tan(x):
             x = Expr(x)
         return _expr_from_c(c_sym_tan((<Expr>x)._c_handler))
     return math.tan(_parse_numeric_value(x))
+
+
+
+
+cpdef sqrt(x):
+    '''sqrt(x: Expr | SymbolNumeric | numeric) -> Expr | float
+    Compute the square root of the given numeric or symbolic value
+    If the input argument is numeric, the square root is evaluated numerically and
+    the return value is numeric (float). Otherwise, the operation is symbolic and the
+    result is an expression
+
+        :Example:
+
+        >>> x = new_param('x')
+        >>> sqrt(x)
+        x**(1/2)
+
+
+
+    :param x: Expr | SymbolNumeric | numeric
+    :rtype: Expr | float
+
+    '''
+    if isinstance(x, (Expr, SymbolNumeric)):
+        if isinstance(x, SymbolNumeric):
+            x = Expr(x)
+        return x ** (Expr(1)/Expr(2))
+    return math.sqrt(_parse_numeric_value(x))
