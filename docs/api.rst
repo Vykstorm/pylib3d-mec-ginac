@@ -80,8 +80,8 @@ API Reference
 
 .. autoclass:: Vector3D
     :members:
-        get_module, get_skew, in_base, dot, cross,
-        module, skew, x, y, z
+        get_module, get_skew, in_base, dot, cross, normalize,
+        module, skew, x, y, z, normalized
 
 
 .. autoclass:: Tensor3D
