@@ -184,3 +184,5 @@ Mathematic functions
 .. autofunction:: cos
 
 .. autofunction:: tan
+
+.. autofunction:: sqrt
