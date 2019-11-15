@@ -247,6 +247,7 @@ cdef class Vector3D(Matrix):
         Get this vector normalized
 
             :Example:
+            
             >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
             >>> v = new_vector('v', a, b, c)
             >>> v.normalize()
