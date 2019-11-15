@@ -166,6 +166,7 @@ cdef class Vector3D(Matrix):
 
 
 
+
     ######## Setters ########
 
 
@@ -238,6 +239,23 @@ cdef class Vector3D(Matrix):
             c_deref(<c_Vector3D*>(<Vector3D>self)._get_c_handler()) ^\
             c_deref(<c_Vector3D*>(<Vector3D>other)._get_c_handler())
         )
+
+
+
+    def normalize(self):
+        '''normalize() -> Vector3D
+        Get this vector normalized
+
+            :Example:
+
+
+        :rtype: Vector3D
+
+        '''
+        return self / self.get_module()
+
+
+
 
 
 
@@ -325,8 +343,8 @@ cdef class Vector3D(Matrix):
         :rtype: Vector3D
         '''
         if not isinstance(other, Expr):
-            expr = Expr(other)
-        inverted_expr = 1 / expr
+            other = Expr(other)
+        inverted_expr = 1 / other
 
         return _vector_from_c_value(
             (<Expr>inverted_expr)._c_handler *\
@@ -359,10 +377,29 @@ cdef class Vector3D(Matrix):
 
         .. note:: This calls ``get_module`` internally.
 
-            .. seealso:: get_module
+            .. seealso::
+                :func:`get_module`
 
         '''
         return self.get_module()
+
+
+    @property
+    def normalized(self):
+        '''
+        Only read property that returns this vector normalized.
+
+        :rtype: Vector3D
+
+        .. note:: This calls to ``normalize`` insternally.
+
+            .. seealso:: :func:`normalize`
+
+        '''
+        return self.normalize()
+
+
+
 
     @property
     def skew(self):

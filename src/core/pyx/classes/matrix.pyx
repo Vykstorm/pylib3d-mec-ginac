@@ -320,7 +320,7 @@ cdef class Matrix(Object):
         except AttributeError:
             pass
 
-        if key not in ('get_module', 'get_skew', 'module', 'skew') or type(self) != Matrix:
+        if key not in ('get_module', 'get_skew', 'normalize', 'module', 'skew', 'normalized', 'cross') or type(self) != Matrix:
             raise AttributeError(f'"Matrix" object has no attribute "{key}"')
         if self.get_size() != 3:
             raise AttributeError(f'Only 1x3 or 3x1 matrices have access to "{key}" method or property')
@@ -335,7 +335,7 @@ cdef class Matrix(Object):
     def __dir__(self):
         if self.get_size() != 3 or type(self) != Matrix:
             return super().__dir__()
-        return super().__dir__() + ['get_module', 'get_skew', 'module', 'skew']
+        return super().__dir__() + ['get_module', 'get_skew', 'normalize', 'module', 'skew', 'normalized', 'cross']
 
 
 
@@ -1210,6 +1210,24 @@ cdef class Matrix(Object):
         axis_skew = axis.get_skew()
         return cls.eye(3) + sin(phi) * axis_skew + (1 - cos(phi)) * (axis_skew * axis_skew)
 
+
+    @classmethod
+    def dir_to_rot(cls, direction):
+        '''
+        '''
+        if not isinstance(direction, Vector3D):
+            raise TypeError('Input argument must be a Vector3D instance')
+
+
+        up = Matrix(shape=[3, 1], values=[0, 1, 0])
+        xaxis = up.cross(direction).normalize()
+        yaxis = direction.cross(xaxis).normalize()
+
+        return Matrix([
+            [xaxis.x, yaxis.x, direction.x],
+            [xaxis.y, yaxis.y, direction.y],
+            [xaxis.z, yaxis.z, direction.z]
+        ])
 
 
 

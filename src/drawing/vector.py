@@ -23,7 +23,11 @@ class VectorDrawing(Drawing3D):
     def __init__(self, scene, *args, **kwargs):
         # Validate input arguments
 
-        arrow, shaft, tip = _create_arrow_geometry()
+        arrow, shaft, tip = _create_arrow_geometry(size=1)
         tip.GetProperty().SetColor(1, 1, 0)
 
         super().__init__(scene, arrow, *args, **kwargs)
+
+
+    #def _update_transformation(self):
+    #    pass

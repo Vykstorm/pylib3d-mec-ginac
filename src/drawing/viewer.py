@@ -12,7 +12,7 @@ from .point import PointDrawing
 from .frame import FrameDrawing
 from .solid import SolidDrawing
 from .vector import VectorDrawing
-from lib3d_mec_ginac_ext import Point, Frame, Solid, Vector3D
+from lib3d_mec_ginac_ext import Point, Frame, Solid, Vector3D, Matrix
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors, vtkCommand
@@ -24,6 +24,7 @@ from time import time, sleep
 from os.path import basename
 import sys
 from re import match
+from functools import partial
 
 # multithreading
 from threading import RLock, Thread, Event
@@ -267,13 +268,15 @@ class Viewer:
         assert isinstance(x, (Vector3D, Point))
 
         # Get symbolic position & rotation matrices for the drawing
-        OC = self._system.position_vector('O', x) if isinstance(x, Point) else x
+        OC = self._system.position_vector('O', x)
         base = OC.get_base()
         position = self._system.rotation_matrix('xyz', base) * OC
         rotation = self._system.rotation_matrix('xyz', base).transpose()
+
         drawing = cls(self, position, rotation, **kwargs)
         self._add_drawing(drawing)
         return drawing
+
 
 
     def draw_point(self, point, **kwargs):
@@ -319,18 +322,34 @@ class Viewer:
 
 
 
-    def draw_vector(self, vector, **kwargs):
+    def draw_vector(self, a, b, **kwargs):
         '''draw_vector(...)
         Draw the given vector
         '''
-        # Validate & parse vector argument
-        if not isinstance(vector, (Vector3D, str)):
-            raise TypeError('Input argument must be a Vector3D or str instance')
-        if isinstance(vector, str):
-            vector = self._system.get_vector(vector)
+        # Validate & parse arguments
+        try:
+            if not isinstance(a, (Point, str)):
+                raise TypeError
+            if not isinstance(b, (Point, str)):
+                raise TypeError
+        except TypeError:
+            raise TypeError('Input arguments a and b must be Point or str instances')
 
-        return self._fv_draw(vector, VectorDrawing, **kwargs)
+        if isinstance(a, str):
+            a = self._system.get_point(a)
+        if isinstance(b, str):
+            b = self._system.get_point(b)
 
+        OC = self._system.position_vector('O', a)
+        base = OC.get_base()
+        position = self._system.rotation_matrix('xyz', base) * OC
+        rotation = Matrix.zrot(self._system.get_time())
+
+
+
+        drawing = VectorDrawing(self, position, rotation, **kwargs)
+        self._add_drawing(drawing)
+        return drawing
 
 
 
