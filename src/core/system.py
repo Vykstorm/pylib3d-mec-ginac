@@ -30,7 +30,6 @@ class System(_System):
     def __init__(self):
         super().__init__()
 
-
         # Define mathematical constants
         self.new_parameter('pi', r'\pi', math.pi)
         self.new_parameter('e', 'e', math.e)
@@ -1498,7 +1497,6 @@ class System(_System):
         '''
         return self.get_time()
 
-
     @property
     def coordinates(self):
         return self.get_coordinates()
@@ -1573,6 +1571,51 @@ class System(_System):
     params = parameters
     unknowns = joint_unknowns
 
+
+
+    @property
+    def O(self):
+        '''
+        Only read property that returns the origin point.
+
+        :rtype: Point
+
+        .. note::
+            Its equivalent to ``get_point('O')``
+            .. seealso:: :func:`get_point`
+
+        '''
+        return self.get_point('O')
+
+
+    @property
+    def xyz(self):
+        '''
+        Only read property that returns the xyz base.
+
+        :rtype: Base
+
+        .. note::
+            Its equivalent to ``get_base('xyz')``
+            .. seealso:: :func:`get_base`
+
+        '''
+        return self.get_base('xyz')
+
+
+    @property
+    def abs(self):
+        '''
+        Only read property that returns the abs base.
+
+        :rtype: Frame
+
+        .. note::
+            Its equivalent to ``get_frame('abs')``
+            .. seealso:: :func:`get_frame`
+
+        '''
+        return self.get_frame('abs')
 
 
     @property
