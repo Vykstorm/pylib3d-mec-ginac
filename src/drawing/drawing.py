@@ -50,6 +50,34 @@ class Drawing3D:
 
 
 
+    ######## Change visibility ########
+
+
+    def show(self):
+        '''show()
+        Make this drawing object visible
+        '''
+        viewer = self._viewer
+        with viewer._lock:
+            self._vtk_handler.VisibilityOn()
+            self._update()
+            viewer._redraw()
+
+
+
+    def hide(self):
+        '''hide()
+        Hide this drawing object
+        '''
+        viewer = self._viewer
+        with viewer._lock:
+            self._vtk_handler.VisibilityOff()
+            viewer._redraw()
+
+
+
+
+
 
     ######## Transformations ########
 
