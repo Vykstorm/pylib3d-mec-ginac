@@ -140,6 +140,10 @@ API Reference
         simulation_update_frequency, simulation_time_multiplier
 
 
+.. autoclass:: Drawing3D
+    :members:
+        show, hide
+
 
 
 
