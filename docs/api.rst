@@ -48,6 +48,7 @@ API Reference
         parameters, inputs, joint_unknowns,
         bases, matrices, vectors, tensors,
         points, frames, solids, wrenches,
+        O, abs, xyz,
         evaluate,
         autogen_latex_names,
         set_as_default
@@ -91,8 +92,8 @@ API Reference
 .. autoclass:: Base
     :members:
         get_previous_base, has_previous_base,
-        get_rotation_angle, get_rotation_tupla, get_rotation,
-        previous_base, rotation_angle, rotation_tupla, rotation
+        get_rotation_angle, get_rotation_tupla,
+        previous_base, rotation_angle, rotation_tupla
 
 .. autoclass:: Point
     :members:
@@ -132,8 +133,8 @@ API Reference
         are_drawings_shown,
         get_simulation_elapsed_time,
         set_simulation_update_frequency, set_simulation_time_multiplier,
-        draw_point, draw_frame, draw_solid, draw_vector,
-        show_drawings, hide_drawings,
+        draw_point, draw_frame, draw_solid, draw_vector, draw_position_vector,
+        show_drawings, hide_drawings, purge_drawings,
         start_simulation, stop_simulation, pause_simulation, resume_simulation,
         simulation_update_frequency, simulation_time_multiplier
 
