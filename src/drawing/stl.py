@@ -22,9 +22,9 @@ class STLDrawing(Drawing3D):
     ######## Constructor ########
 
 
-    def __init__(self, scene, position=None, rotation=None, scale=None, filename=''):
+    def __init__(self, scene, filename):
         # Validate input arguments
 
         actor = _create_geometry_from_stl(filename)
 
-        super().__init__(scene, actor, position, rotation)
+        super().__init__(scene, actor)

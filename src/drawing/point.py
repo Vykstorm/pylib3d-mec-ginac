@@ -19,11 +19,12 @@ class PointDrawing(Drawing3D):
 
     ######## Constructor ########
 
-    def __init__(self, scene, position=None, rotation=None, scale=None, radius=0.1, resolution=15):
+    def __init__(self, viewer,
+        radius=0.1, resolution=15):
         # Validate input arguments
 
         sphere = _create_sphere_geometry(radius, resolution)
         sphere.GetProperty().SetColor(0, 1, 1)
 
         # Initialize super instance
-        super().__init__(scene, sphere, position, rotation, scale)
+        super().__init__(viewer, sphere)

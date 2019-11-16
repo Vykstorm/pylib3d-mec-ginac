@@ -12,7 +12,7 @@ from .point import PointDrawing
 from .frame import FrameDrawing
 from .solid import SolidDrawing
 from .vector import VectorDrawing
-from lib3d_mec_ginac_ext import Point, Frame, Solid, Vector3D, Matrix
+from lib3d_mec_ginac_ext import Point, Frame, Solid, Vector3D, Matrix, Base
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkNamedColors, vtkCommand
@@ -258,28 +258,16 @@ class Viewer:
         with self._lock:
             self._drawings.append(drawing)
             self._renderer.AddActor(drawing._vtk_handler)
+            for child in drawing._children:
+                self._renderer.AddActor(child._vtk_handler)
+
             # Update drawings and redraw scene
             self._update_drawings()
             self._redraw()
 
 
 
-    def _fv_draw(self, x, cls, **kwargs):
-        assert isinstance(x, (Vector3D, Point))
-
-        # Get symbolic position & rotation matrices for the drawing
-        OC = self._system.position_vector('O', x)
-        base = OC.get_base()
-        position = self._system.rotation_matrix('xyz', base) * OC
-        rotation = self._system.rotation_matrix('xyz', base).transpose()
-
-        drawing = cls(self, position, rotation, **kwargs)
-        self._add_drawing(drawing)
-        return drawing
-
-
-
-    def draw_point(self, point, **kwargs):
+    def draw_point(self, point, *args, **kwargs):
         '''draw_point(...)
         Draw the given point
 
@@ -290,11 +278,24 @@ class Viewer:
         if isinstance(point, str):
             point = self._system.get_point(point)
 
-        return self._fv_draw(point, PointDrawing, **kwargs)
+        drawing = PointDrawing(self, *args, **kwargs)
+
+        OC = self._system.position_vector('O', point)
+        base = OC.get_base()
+        rotation = self._system.rotation_matrix('xyz', base)
+
+        drawing.translate(rotation * OC)
+        drawing.rotate(rotation.transpose())
+
+        self._add_drawing(drawing)
+        return drawing
 
 
 
-    def draw_frame(self, frame, **kwargs):
+
+
+
+    def draw_frame(self, frame, *args, **kwargs):
         '''draw_frame(...)
         Draw the given frame
         '''
@@ -304,11 +305,21 @@ class Viewer:
         if isinstance(frame, str):
             frame = self._system.get_frame(frame)
 
-        return self._fv_draw(frame.get_point(), FrameDrawing, **kwargs)
+        drawing = FrameDrawing(self, *args, **kwargs)
+        OC = self._system.position_vector('O', frame.get_point())
+        base = OC.get_base()
+        rotation = self._system.rotation_matrix('xyz', base)
+
+        drawing.translate(rotation * OC)
+        drawing.rotate(rotation.transpose())
+
+        self._add_drawing(drawing)
+        return drawing
 
 
 
-    def draw_solid(self, solid, **kwargs):
+
+    def draw_solid(self, solid, *args, **kwargs):
         '''draw_solid(...)
         Draw the given solid
         '''
@@ -318,13 +329,24 @@ class Viewer:
         if isinstance(solid, str):
             solid = self._system.get_solid(solid)
 
-        return self._fv_draw(solid.get_point(), SolidDrawing, **kwargs)
+        drawing = SolidDrawing(self, *args, **kwargs)
+        OC = self._system.position_vector('O', frame.get_point())
+        base = OC.get_base()
+        rotation = self._system.rotation_matrix('xyz', base)
+
+        drawing.translate(rotation * OC)
+        drawing.rotate(rotation.transpose())
+
+        self._add_drawing(drawing)
+        return drawing
 
 
 
-    def draw_vector(self, a, b, **kwargs):
+
+
+    def draw_vector(self, a, b, *args, **kwargs):
         '''draw_vector(...)
-        Draw the given vector
+        Draw a vector between the given points
         '''
         # Validate & parse arguments
         try:
@@ -340,16 +362,25 @@ class Viewer:
         if isinstance(b, str):
             b = self._system.get_point(b)
 
+        # Compute position vector between a and b
+        v = self._system.position_vector(a, b)
+
+        # Create the vector drawing object
+        drawing = VectorDrawing(self, v.get_module(), *args, **kwargs)
+
+        # Apply affine transformations
         OC = self._system.position_vector('O', a)
         base = OC.get_base()
-        position = self._system.rotation_matrix('xyz', base) * OC
-        rotation = Matrix.zrot(self._system.get_time())
+        rotation = self._system.rotation_matrix('xyz', base)
 
+        drawing.rotate(rotation.transpose())
+        drawing.translate(rotation * OC)
+        drawing.rotate_to_dir(v)
 
-
-        drawing = VectorDrawing(self, position, rotation, **kwargs)
+        # Add the drawing object to the view
         self._add_drawing(drawing)
         return drawing
+
 
 
 

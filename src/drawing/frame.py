@@ -18,7 +18,7 @@ class FrameDrawing(Drawing3D):
 
     ######## Constructor ########
 
-    def __init__(self, scene, position=None, rotation=None, scale=None,
+    def __init__(self, viewer,
         axis_size=1, axis_shaft_radius=0.03, axis_tip_radius=0.1, axis_tip_size=0.25,
         axis_shaft_resolution=10, axis_tip_resolution=25, origin_radius=0.06, origin_resolution=15):
 
@@ -38,8 +38,8 @@ class FrameDrawing(Drawing3D):
         y_axis.SetOrientation(0, 0, 90)
         z_axis.SetOrientation(0, -90, 0)
 
-        actor = _create_assembly_geometry(origin, x_axis, y_axis, z_axis)
+        frame = _create_assembly_geometry(origin, x_axis, y_axis, z_axis)
 
 
         # Initialize super instance
-        super().__init__(scene, actor, position, rotation, scale)
+        super().__init__(viewer, frame)

@@ -109,7 +109,7 @@ def _create_arrow_geometry(size=1, shaft_radius=0.03, tip_radius=0.1, tip_size=0
     tip = _create_cone_geometry(radius=tip_radius, height=tip_size, resolution=tip_resolution, direction=(1, 0, 0))
     tip.SetPosition(shaft_size+tip_size/2, 0, 0)
 
-    return _create_assembly_geometry(shaft, tip), shaft, tip
+    return shaft, tip
 
 
 
