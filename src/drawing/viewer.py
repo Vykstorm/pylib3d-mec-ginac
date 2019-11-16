@@ -342,45 +342,48 @@ class Viewer:
 
 
 
-
-
-    def draw_vector(self, a, b, *args, **kwargs):
-        '''draw_vector(...)
-        Draw a vector between the given points
-        '''
+    def _draw_vector(self, point, vector, *args, **kwargs):
         # Validate & parse arguments
-        try:
-            if not isinstance(a, (Point, str)):
-                raise TypeError
-            if not isinstance(b, (Point, str)):
-                raise TypeError
-        except TypeError:
-            raise TypeError('Input arguments a and b must be Point or str instances')
+        if not isinstance(vector, (Vector3D, str)):
+            raise TypeError
+        if isinstance(vector, str):
+            vector = self._system.get_vector(vector)
 
-        if isinstance(a, str):
-            a = self._system.get_point(a)
-        if isinstance(b, str):
-            b = self._system.get_point(b)
 
-        # Compute position vector between a and b
-        v = self._system.position_vector(a, b).in_base(self._system.get_base('xyz'))
+        # Put the vector into the xyz base
+        vector = vector.in_base(self._system.get_base('xyz'))
 
         # Create the vector drawing object
-        drawing = VectorDrawing(self, v.get_module(), *args, **kwargs)
+        drawing = VectorDrawing(self, vector.get_module(), *args, **kwargs)
 
         # Apply affine transformations
-        OC = self._system.position_vector('O', a)
+        OC = self._system.position_vector('O', point)
         base = OC.get_base()
         rotation = self._system.rotation_matrix('xyz', base)
 
         drawing.rotate(rotation.transpose())
         drawing.translate(rotation * OC)
-        drawing.rotate_to_dir(v)
+        drawing.rotate_to_dir(vector)
 
         # Add the drawing object to the view
         self._add_drawing(drawing)
         return drawing
 
+
+    def draw_vector(self, vector, *args, **kwargs):
+        return self._draw_vector('O', vector)
+
+
+    def draw_position_vector(self, a, b, *args, **kwargs):
+        return self._draw_vector(a, self._system.position_vector(a, b), *args, **kwargs)
+
+
+    def draw_velocity_vector(self, frame, point):
+        if not isinstance(frame, (Frame, str)):
+            raise TypeError
+        if isinstance(frame, str):
+            frame = self._system.get_frame(frame)
+        return self._draw_vector(point, self._system.velocity_vector(frame, point))
 
 
 
