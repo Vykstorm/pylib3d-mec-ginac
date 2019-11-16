@@ -340,9 +340,12 @@ cdef class _System:
     cpdef _get_matrix(self, name):
         name = _parse_name(name)
         cdef c_Matrix* c_matrix = <c_Matrix*>self._get_c_object(name, b'matrix')
-        if c_matrix == NULL:
-            raise IndexError(f'Matrix "{name.decode()}" doesnt exist')
-        return _matrix_from_c(c_matrix)
+        if c_matrix != NULL:
+            return _matrix_from_c(c_matrix)
+        c_matrix = <c_Matrix*>self._get_c_object(name, b'vector')
+        if c_matrix != NULL:
+            return _vector_from_c(<c_Vector3D*>c_matrix)
+        raise IndexError(f'Matrix "{name.decode()}" doesnt exist')
 
 
     cpdef _get_vector(self, name):
@@ -373,9 +376,12 @@ cdef class _System:
     cpdef _get_frame(self, name):
         name = _parse_name(name)
         cdef c_Frame* c_frame = <c_Frame*>self._get_c_object(name, b'frame')
-        if c_frame == NULL:
-            raise IndexError(f'Frame "{name.decode()}" doesnt exist')
-        return Frame(<Py_ssize_t>c_frame)
+        if c_frame != NULL:
+            return Frame(<Py_ssize_t>c_frame)
+        c_frame = <c_Solid*>self._get_c_object(name, b'solid')
+        if c_frame != NULL:
+            return Solid(<Py_ssize_t>c_frame)
+        raise IndexError(f'Frame "{name.decode()}" doesnt exist')
 
 
     cpdef _get_solid(self, name):
@@ -402,7 +408,8 @@ cdef class _System:
         return self._has_c_object(_parse_name(name), b'base')
 
     cpdef _has_matrix(self, name):
-        return self._has_c_object(_parse_name(name), b'matrix')
+        name = _parse_name(name)
+        return self._has_c_object(name, b'matrix') or self._has_c_object(name, b'vector')
 
     cpdef _has_vector(self, name):
         return self._has_c_object(_parse_name(name), b'vector')
@@ -414,7 +421,8 @@ cdef class _System:
         return self._has_c_object(_parse_name(name), b'point')
 
     cpdef _has_frame(self, name):
-        return self._has_c_object(_parse_name(name), b'frame')
+        name = _parse_name(name)
+        return self._has_c_object(name, b'frame') or self._has_c_object(name, b'solid')
 
     cpdef _has_solid(self, name):
         return self._has_c_object(_parse_name(name), b'solid')
@@ -465,7 +473,7 @@ cdef class _System:
 
     cpdef _get_matrices(self):
         cdef c_vector[c_Matrix*] c_matrices = self._c_handler.get_Matrixs()
-        return [_matrix_from_c(c_matrix) for c_matrix in c_matrices]
+        return [_matrix_from_c(c_matrix) for c_matrix in c_matrices] + self._get_vectors()
 
     cpdef _get_vectors(self):
         cdef c_vector[c_Vector3D*] c_vectors = self._c_handler.get_Vectors()
@@ -481,7 +489,7 @@ cdef class _System:
 
     cpdef _get_frames(self):
         cdef c_vector[c_Frame*] c_frames = self._c_handler.get_Frames()
-        return [Frame(<Py_ssize_t>c_frame) for c_frame in c_frames]
+        return [Frame(<Py_ssize_t>c_frame) for c_frame in c_frames] + self._get_solids()
 
     cpdef _get_solids(self):
         cdef c_vector[c_Solid*] c_solids = self._c_handler.get_Solids()
