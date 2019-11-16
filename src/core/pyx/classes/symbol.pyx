@@ -111,7 +111,11 @@ cdef class SymbolNumeric(Object):
 
         try:
             # Update drawings and redraw viewer scene.
-            viewer = self.get_owner()._viewer
+            viewer = self.get_owner().get_viewer()
+            with viewer._lock:
+                if viewer.are_drawings_shown():
+                    viewer._update_drawings()
+                    viewer._redraw()
         except:
             pass
 
