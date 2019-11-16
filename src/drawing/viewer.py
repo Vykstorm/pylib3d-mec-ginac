@@ -520,6 +520,18 @@ class Viewer:
 
 
 
+    def purge_drawings(self):
+        '''purge_drawings()
+        Remove all the drawings previously created
+        '''
+        with self._lock:
+            self._drawings.clear()
+            self._renderer.RemoveAllViewProps()
+            self._redraw()
+
+
+
+
 
 
     ######## Simulation controls  ########
