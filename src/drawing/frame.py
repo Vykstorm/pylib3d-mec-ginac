@@ -34,7 +34,6 @@ class FrameDrawing(Drawing3D):
             axis_size = tuple(repeat(axis_size, 3))
 
 
-
         # Create geometry
         origin = _create_sphere_geometry(origin_radius, origin_resolution)
         x_axis_shaft, x_axis_tip = _create_arrow_geometry(size=axis_size[0])
@@ -45,17 +44,19 @@ class FrameDrawing(Drawing3D):
         y_axis = _create_assembly_geometry(y_axis_shaft, y_axis_tip)
         z_axis = _create_assembly_geometry(z_axis_shaft, z_axis_tip)
 
+        # Setup geometry properties
         x_axis_tip.GetProperty().SetColor(1, 0, 0)
         y_axis_tip.GetProperty().SetColor(0, 1, 0)
         z_axis_tip.GetProperty().SetColor(0, 0, 1)
 
+        # Adjust geometry local transformations
         y_axis.SetOrientation(0, 0, 90)
         z_axis.SetOrientation(0, -90, 0)
 
+        # Ensamble geometry
         frame = _create_assembly_geometry(
             origin, x_axis, y_axis, z_axis
         )
-
 
         # Initialize super instance
         super().__init__(viewer, frame)
