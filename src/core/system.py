@@ -1399,7 +1399,7 @@ class System(_System):
             ╭                            ╮
             │            1    -a**(-2)*b │
             │ -2*a**(-3)*b  -3*a**(-4)*b │
-
+            ╰                            ╯
 
         :param x: Must be the expression, matrix or wrench to derivate
         :type x: Expr, Matrix, Wrench3D
