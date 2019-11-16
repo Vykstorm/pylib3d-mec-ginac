@@ -363,7 +363,7 @@ class Viewer:
             b = self._system.get_point(b)
 
         # Compute position vector between a and b
-        v = self._system.position_vector(a, b)
+        v = self._system.position_vector(a, b).in_base(self._system.get_base('xyz'))
 
         # Create the vector drawing object
         drawing = VectorDrawing(self, v.get_module(), *args, **kwargs)
