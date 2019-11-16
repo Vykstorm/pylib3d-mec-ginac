@@ -31,6 +31,7 @@ API Reference
         get_coordinates_matrix, get_velocities_matrix, get_accelerations_matrix,
         get_aux_coordinates_matrix, get_aux_velocities_matrix, get_aux_accelerations_matrix,
         get_parameters_matrix, get_joint_unknowns_matrix, get_inputs_matrix,
+        get_viewer,
         new_parameter, new_joint_unknown, new_input,
         new_coordinate, new_aux_coordinate, new_symbol,
         new_base, new_matrix, new_vector, new_tensor,
@@ -48,7 +49,7 @@ API Reference
         parameters, inputs, joint_unknowns,
         bases, matrices, vectors, tensors,
         points, frames, solids, wrenches,
-        O, abs, xyz,
+        O, abs, xyz, viewer,
         evaluate,
         autogen_latex_names,
         set_as_default
