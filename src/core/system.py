@@ -463,6 +463,18 @@ class System(_System):
 
 
 
+    def get_viewer(self):
+        '''get_viewer() -> Viewer
+        Get the viewer object associated to this system
+
+        :rtype: Viewer
+
+        '''
+        return self._viewer
+
+
+
+
 
     ######## Constructors ########
 
@@ -1603,6 +1615,7 @@ class System(_System):
         return self.get_base('xyz')
 
 
+
     @property
     def abs(self):
         '''
@@ -1616,6 +1629,20 @@ class System(_System):
 
         '''
         return self.get_frame('abs')
+
+
+    @property
+    def viewer(self):
+        '''
+        Only read property that returns the viewer object associated to this system
+
+        :rtype: Viewer
+
+        .. seealso:: :func:`get_viewer`
+
+        '''
+        return self.get_viewer()
+
 
 
     @property

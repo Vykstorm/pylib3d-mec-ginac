@@ -109,6 +109,12 @@ cdef class SymbolNumeric(Object):
         '''
         self._c_handler.set_value(c_numeric(<double>_parse_numeric_value(value)))
 
+        try:
+            # Update drawings and redraw viewer scene.
+            viewer = self.get_owner()._viewer
+        except:
+            pass
+
 
 
     cpdef set_tex_name(self, tex_name):
