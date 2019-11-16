@@ -26,5 +26,6 @@ class STLDrawing(Drawing3D):
         # Validate input arguments
 
         actor = _create_geometry_from_stl(filename)
+        actor.GetProperty().SetColor(1, 0, 0)
 
         super().__init__(scene, actor)

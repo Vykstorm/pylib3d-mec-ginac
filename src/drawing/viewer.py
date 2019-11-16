@@ -329,14 +329,18 @@ class Viewer:
         if isinstance(solid, str):
             solid = self._system.get_solid(solid)
 
+        # Create solid drawing
         drawing = SolidDrawing(self, *args, **kwargs)
-        OC = self._system.position_vector('O', frame.get_point())
+
+        # Apply transformations to the drawing object
+        OC = self._system.position_vector('O', solid.get_point())
         base = OC.get_base()
         rotation = self._system.rotation_matrix('xyz', base)
 
-        drawing.translate(rotation * OC)
         drawing.rotate(rotation.transpose())
+        drawing.translate(rotation * OC)
 
+        # Add the drawing object to the scene and return it
         self._add_drawing(drawing)
         return drawing
 
