@@ -1,6 +1,6 @@
 
 
-from timer import Timer
+from .timer import Timer
 from time import time
 
 
@@ -22,15 +22,7 @@ class Simulation:
         self._time_multiplier = 1.0
         self._update_freq = 30
         self._timer = None
-        self._init()
-
-
-    def _init(self):
-        assert self._state == 'stopped'
-        # This is called to "reset" simulation variables
-        self._elapsed_time = 0.0
-        self._last_update_time = None
-        self.update()
+        self._elapsed_time, self._last_update_time = 0.0, None
 
 
     def start(self):
@@ -59,7 +51,9 @@ class Simulation:
         self._state = 'stopped'
         self._timer.kill()
         self._timer = None
-        self._init()
+        self._elapsed_time = 0.0
+        self._last_update_time = None
+        self.update()
 
 
     def is_running(self):

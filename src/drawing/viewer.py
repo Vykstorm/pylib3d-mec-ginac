@@ -71,7 +71,7 @@ class VtkViewer:
         '''
         with self._lock:
             interactor, window = self._interactor, self._window
-            if interactor is not None:
+            if interactor is None:
                 raise RuntimeError('Viewer is not open yet')
 
             # Destroy vtk window & interactor
