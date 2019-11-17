@@ -113,7 +113,7 @@ cdef class SymbolNumeric(Object):
             # Update drawings and redraw viewer scene.
             viewer = self.get_owner().get_viewer()
             with viewer._lock:
-                if viewer.are_drawings_shown():
+                if viewer.are_drawings_shown() and ((self.get_type() != 'time') or not viewer.is_simulation_running()):
                     viewer._update_drawings()
                     viewer._redraw()
         except:
