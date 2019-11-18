@@ -31,8 +31,8 @@ class Drawing3D:
 
 
         # Initialize internal fields
-        self._transformation = Transform.identity()
-        self._transformation_evaluated = np.eye(4).astype(np.float64)
+        self._transform = Transform.identity()
+        self._transform_evaluated = np.eye(4).astype(np.float64)
         self._lock = RLock()
         self._children, self._parent = [], None
         self._viewer, self._system = viewer, system
@@ -126,27 +126,27 @@ class Drawing3D:
 
 
 
-    def get_transformation(self):
-        '''get_transformation() -> Transform
+    def get_transform(self):
+        '''get_transform() -> Transform
         Get the transformation of the drawing object
         '''
         with self._lock:
-            return self._transformation
+            return self._transform
 
 
 
-    def set_transformation(self, transformation):
-        '''set_transformation(transformation: Transform)
+    def set_transform(self, transform):
+        '''set_transform(transform: Transform)
         Set the transformation of this drawing object
 
-        :type transformation: Transform
+        :type transform: Transform
 
         '''
-        if not isinstance(transformation, Transform):
+        if not isinstance(transform, Transform):
             raise TypeError('Input argument must be a Transform object')
         with self._lock:
             # Change drawing transformation
-            self._transformation = transformation
+            self._transform = transform
             # Update drawing
             self.update()
 
@@ -154,11 +154,11 @@ class Drawing3D:
         self._viewer.redraw()
 
 
-    def clear_transformation(self):
-        '''clear_transformation()
+    def clear_transform(self):
+        '''clear_transform()
         Clear the transformation of this drawing object
         '''
-        self.set_transformation(Transform.identity())
+        self.set_transform(Transform.identity())
 
 
     def rotate(self, *args, **kwargs):
@@ -167,7 +167,7 @@ class Drawing3D:
         '''
         with self._lock:
             # Change drawing transformation
-            self._transformation = self._transformation.concatenate(Transform.rotate(*args, **kwargs))
+            self._transform = self._transform.concatenate(Transform.rotate(*args, **kwargs))
             # Update drawing
             self.update()
         # Redraw
@@ -181,7 +181,7 @@ class Drawing3D:
         '''
         with self._lock:
             # Change drawing transformation
-            self._transformation = self._transformation.concatenate(Transform.scale(*args, **kwargs))
+            self._transform = self._transform.concatenate(Transform.scale(*args, **kwargs))
             # Update drawing
             self.update()
         # Redraw
@@ -194,7 +194,7 @@ class Drawing3D:
         '''
         with self._lock:
             # Change drawing transformation
-            self._transformation = self._transformation.concatenate(Transform.translation(*args, **kwargs))
+            self._transform = self._transform.concatenate(Transform.translation(*args, **kwargs))
             # Update drawing
             self.update()
         # Redraw
@@ -207,7 +207,7 @@ class Drawing3D:
         '''
         with self._lock:
             # Change drawing transformation
-            self._transformation = self._transformation.concatenate(Transform.rotation_from_dir(*args, **kwargs))
+            self._transform = self._transform.concatenate(Transform.rotation_from_dir(*args, **kwargs))
             # Update drawing
             self.update()
         # Redraw
@@ -220,8 +220,8 @@ class Drawing3D:
         '''update()
         Updates this drawing object
         '''
-        # Update this drawing affine transformation matrix
-        self.update_transformation()
+        # Update this drawing transformation matrix
+        self.update_transform()
         # Update child drawings
         self.update_children()
 
@@ -237,20 +237,20 @@ class Drawing3D:
 
 
 
-    def update_transformation(self):
-        '''update_transformation()
-        Compute affine transformation for this drawing object and update vtk
+    def update_transform(self):
+        '''update_transform()
+        Compute numerical transformation matrix for this drawing object and update vtk
         actor user matrix
         '''
         with self._lock:
             # Compute affine transformation numerically for this drawing
-            matrix = self._transformation.evaluate(self._system)
+            matrix = self._transform.evaluate(self._system)
 
             # Concatenate transformation of the parent drawing if any
             if self._parent is not None:
                 matrix = self._parent._transformation_evaluated @ matrix
 
-            self._transformation_evaluated = matrix
+            self._transform_evaluated = matrix
             self._actor.GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
 
 
@@ -278,3 +278,20 @@ class Drawing3D:
 
         # Redraw scene
         self._viewer.redraw()
+
+
+
+
+    @property
+    def transform(self):
+        '''
+        Property that can be used to get/set the transformation of this drawing object
+
+        :rtype: Transform
+
+        '''
+        return self.get_transform()
+
+    @transform.setter
+    def transform(self, x):
+        self.set_transform(x)
