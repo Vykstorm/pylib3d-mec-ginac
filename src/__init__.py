@@ -34,10 +34,10 @@ __all__.append('System')
 
 from .drawing.scene import Scene
 from .drawing.timer import Timer, OneShotTimer
-from .drawing.transform import Transform
+from .drawing.transform import Transform, ComposedTransform
 from .drawing.viewer import VtkViewer as Viewer
 from .drawing.drawing import Drawing3D
-__all__.extend(['Scene', 'Timer', 'OneShotTimer', 'Transform', 'Viewer', 'Drawing3D'])
+__all__.extend(['Scene', 'Timer', 'OneShotTimer', 'Transform', 'ComposedTransform', 'Viewer', 'Drawing3D'])
 
 
 
