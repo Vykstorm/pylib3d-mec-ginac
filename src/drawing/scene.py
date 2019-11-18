@@ -198,7 +198,7 @@ class Scene:
                 viewer.add_actor(child.get_actor())
 
             # Update drawing
-            drawing.update()
+            drawing._update()
 
             # Redraw
             viewer.redraw()
@@ -214,7 +214,7 @@ class Scene:
 
 
 
-    def update(self):
+    def _update(self):
         '''
         Updates the scene
         '''
@@ -224,7 +224,7 @@ class Scene:
 
             # Update drawings
             for drawing in drawings:
-                drawing.update()
+                drawing._update()
 
             # Redraw scene
             viewer.redraw()

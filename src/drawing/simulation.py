@@ -31,7 +31,7 @@ class Simulation:
             if self._state != 'stopped':
                 raise RuntimeError('Simulation already started')
             self._state = 'running'
-            self._timer = Timer(self.update, interval=1 / self._update_freq)
+            self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
 
 
@@ -58,7 +58,7 @@ class Simulation:
             self._timer = None
             self._elapsed_time = 0.0
             self._last_update_time = None
-            self.update()
+            self._update()
 
 
     def is_running(self):
@@ -115,7 +115,7 @@ class Simulation:
                 self._timer.set_time_interval(1 / self._update_freq)
 
 
-    def update(self):
+    def _update(self):
         with self._lock:
             if self._state == 'running':
                 # Update elapsed time
@@ -137,4 +137,4 @@ class Simulation:
             # TODO
 
         # Update scene (update drawings & redraw)
-        self._scene.update()
+        self._scene._update()

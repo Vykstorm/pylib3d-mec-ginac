@@ -94,7 +94,7 @@ class Drawing3D:
             self._viewer.remove_actor(self._actor)
             self._set_actor(actor)
             # Update this drawing
-            self.update()
+            self._update()
 
         # Redraw
         self._viewer.redraw()
@@ -119,7 +119,7 @@ class Drawing3D:
         self._add_child(child)
 
         # Update child drawing
-        child.update()
+        child._update()
 
         # Redraw
         self._viewer.redraw()
@@ -148,7 +148,7 @@ class Drawing3D:
             # Change drawing transformation
             self._transform = transform
             # Update drawing
-            self.update()
+            self._update()
 
         # Redraw
         self._viewer.redraw()
@@ -169,7 +169,7 @@ class Drawing3D:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.rotate(*args, **kwargs))
             # Update drawing
-            self.update()
+            self._update()
         # Redraw
         self._viewer.redraw()
 
@@ -183,7 +183,7 @@ class Drawing3D:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.scale(*args, **kwargs))
             # Update drawing
-            self.update()
+            self._update()
         # Redraw
         self._viewer.redraw()
 
@@ -196,7 +196,7 @@ class Drawing3D:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.translation(*args, **kwargs))
             # Update drawing
-            self.update()
+            self._update()
         # Redraw
         self._viewer.redraw()
 
@@ -209,39 +209,31 @@ class Drawing3D:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.rotation_from_dir(*args, **kwargs))
             # Update drawing
-            self.update()
+            self._update()
         # Redraw
         self._viewer.redraw()
 
 
 
 
-    def update(self):
-        '''update()
-        Updates this drawing object
-        '''
-        # Update this drawing transformation matrix
-        self.update_transform()
-        # Update child drawings
-        self.update_children()
+    def _update(self):
+        with self._lock:
+            # Update this drawing transformation matrix
+            self._update_transform()
+            # Update child drawings
+            self._update_children()
 
 
 
-    def update_children(self):
-        '''update_children()
-        Update all child drawing objects
-        '''
+    def _update_children(self):
         with self._lock:
             for child in self._children:
-                child.update()
+                child._update()
 
 
 
-    def update_transform(self):
-        '''update_transform()
-        Compute numerical transformation matrix for this drawing object and update vtk
-        actor user matrix
-        '''
+    def _update_transform(self):
+        # Update transformation
         with self._lock:
             # Compute affine transformation numerically for this drawing
             matrix = self._transform.evaluate(self._system)
