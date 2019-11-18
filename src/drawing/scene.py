@@ -151,7 +151,7 @@ class Scene:
         viewer = self._viewer
         # Open viewer & redraw
         viewer.open()
-        viewer.redraw()
+        viewer._redraw()
 
 
 
@@ -176,7 +176,7 @@ class Scene:
             # Remove all vtk actors in the viewer
             viewer.remove_all_actors()
             # Redraw
-            viewer.redraw()
+            viewer._redraw()
 
 
 
@@ -201,7 +201,7 @@ class Scene:
             drawing._update()
 
             # Redraw
-            viewer.redraw()
+            viewer._redraw()
 
 
 
@@ -227,4 +227,4 @@ class Scene:
                 drawing._update()
 
             # Redraw scene
-            viewer.redraw()
+            viewer._redraw()

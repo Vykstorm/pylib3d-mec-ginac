@@ -97,7 +97,7 @@ class Drawing3D:
             self._update()
 
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
 
@@ -122,7 +122,7 @@ class Drawing3D:
         child._update()
 
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
 
@@ -151,7 +151,7 @@ class Drawing3D:
             self._update()
 
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
     def clear_transform(self):
@@ -171,7 +171,7 @@ class Drawing3D:
             # Update drawing
             self._update()
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
     def scale(self, *args, **kwargs):
@@ -185,7 +185,7 @@ class Drawing3D:
             # Update drawing
             self._update()
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
     def translate(self, *args, **kwargs):
@@ -198,7 +198,7 @@ class Drawing3D:
             # Update drawing
             self._update()
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
     def rotate_to_dir(self, *args, **kwargs):
@@ -211,7 +211,7 @@ class Drawing3D:
             # Update drawing
             self._update()
         # Redraw
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
 
@@ -256,7 +256,7 @@ class Drawing3D:
             self._actor.VisibilityOn()
 
         # Redraw scene
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
 
@@ -269,7 +269,7 @@ class Drawing3D:
             self._actor.VisibilityOff()
 
         # Redraw scene
-        self._viewer.redraw()
+        self._viewer._redraw()
 
 
 
