@@ -69,6 +69,7 @@ for name in dir(System):
     __all__.append(name)
     globals()[name] = _create_system_global_func(getattr(System, name))
 
+'''
 # Expose draw_* methods of the default system object (add them to __all__ and globals())
 from .drawing.viewer import Viewer, Drawing3D
 
@@ -89,7 +90,7 @@ for name in dir(Viewer):
     globals()[name] = _create_viewer_global_func(getattr(Viewer, name))
 
 __all__.extend(['Viewer', 'Drawing3D'])
-
+'''
 
 
 

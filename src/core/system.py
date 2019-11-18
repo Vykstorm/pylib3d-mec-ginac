@@ -9,7 +9,7 @@ This module defines the class System
 
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
 from lib3d_mec_ginac_ext import *
-from ..drawing.viewer import Viewer
+#from ..drawing.viewer import Viewer
 import math
 
 
@@ -35,8 +35,8 @@ class System(_System):
         self.new_parameter('e', 'e', math.e)
         self.new_parameter('tau', r'\tau', math.tau)
 
-        # Create visualizer (to show drawings)
-        self._viewer = Viewer(self)
+        # Create scene visualizer (to show drawings)
+        #self._viewer = Viewer(self)
 
 
 
