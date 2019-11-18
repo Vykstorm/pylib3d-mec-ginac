@@ -32,6 +32,14 @@ for name in dir(_ext):
 from .core.system import System
 __all__.append('System')
 
+from .drawing.scene import Scene
+from .drawing.timer import Timer, OneShotTimer
+from .drawing.transform import Transform
+from .drawing.viewer import VtkViewer as Viewer
+from .drawing.drawing import Drawing3D
+__all__.extend(['Scene', 'Timer', 'OneShotTimer', 'Transform', 'Viewer', 'Drawing3D'])
+
+
 
 
 # This only has effect with python>=3.7 (PEP 562)
@@ -58,7 +66,7 @@ def _create_system_global_func(method):
 for name in dir(System):
     if name == 'set_as_default':
         continue
-    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_', 'draw_'))) and\
+    if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))) and\
     not any(map(lambda pattern: fullmatch(pattern, name),
         [r'\w+_point_branch', r'rotation_\w+', r'position_\w+', r'angular_\w+',
         r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
@@ -69,17 +77,16 @@ for name in dir(System):
     __all__.append(name)
     globals()[name] = _create_system_global_func(getattr(System, name))
 
-'''
-# Expose draw_* methods of the default system object (add them to __all__ and globals())
-from .drawing.viewer import Viewer, Drawing3D
 
-def _create_viewer_global_func(method):
+# Expose methods of the 3d scene manager associated to the default system object (add them to __all__ and globals())
+
+def _create_scene_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
-        return method(_default_system._viewer, *args, **kwargs)
+        return method(_default_system.get_scene(), *args, **kwargs)
     return func
 
-for name in dir(Viewer):
+for name in dir(Scene):
     if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
         name not in (
             'start_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation',
@@ -87,10 +94,9 @@ for name in dir(Viewer):
             ):
         continue
     __all__.append(name)
-    globals()[name] = _create_viewer_global_func(getattr(Viewer, name))
+    globals()[name] = _create_scene_global_func(getattr(Scene, name))
 
-__all__.extend(['Viewer', 'Drawing3D'])
-'''
+
 
 
 

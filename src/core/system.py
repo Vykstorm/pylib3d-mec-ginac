@@ -9,7 +9,7 @@ This module defines the class System
 
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
 from lib3d_mec_ginac_ext import *
-#from ..drawing.viewer import Viewer
+from ..drawing.scene import Scene
 import math
 
 
@@ -36,7 +36,7 @@ class System(_System):
         self.new_parameter('tau', r'\tau', math.tau)
 
         # Create scene visualizer (to show drawings)
-        #self._viewer = Viewer(self)
+        self._scene = Scene(self)
 
 
 
@@ -463,14 +463,21 @@ class System(_System):
 
 
 
-    def get_viewer(self):
-        '''get_viewer() -> Viewer
-        Get the viewer object associated to this system
+    def get_scene(self):
+        '''get_scene() -> Scene
+        Get the 3D scene manager object associated to this system
 
         :rtype: Viewer
 
         '''
-        return self._viewer
+        return self._scene
+
+
+    def get_viewer(self):
+        '''get_viewer() -> Viewer
+        Get the 3D viewer associated to this system
+        '''
+        return self.get_scene().get_viewer()
 
 
 
@@ -1670,6 +1677,33 @@ class System(_System):
     @autogen_latex_names.setter
     def autogen_latex_names(self, enabled):
         self._set_autogen_latex_names(enabled)
+
+
+
+    @property
+    def scene(self):
+        '''
+        Read only property that returns the 3d scene manager associated to this system
+
+        :rtype: Scene
+
+        .. seealso:: :func:`get_scene`
+
+        '''
+        return self.get_scene()
+
+
+    @property
+    def viewer(self):
+        '''
+        Read only property that returns the 3d viewer associated to this system
+
+        :rtype: Viewer
+
+        .. seealso:: :func:`get_viewer`
+
+        '''
+        return self.get_viewer()
 
 
 
