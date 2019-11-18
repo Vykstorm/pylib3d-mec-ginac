@@ -172,7 +172,7 @@ API Reference
 
 
 
-.. autoclass:: Viewer
+.. autoclass:: lib3d_mec_ginac.drawing.viewer.VtkViewer
     :members:
         open, close,
         is_open, is_closed,
