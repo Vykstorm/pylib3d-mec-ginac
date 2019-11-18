@@ -31,7 +31,7 @@ API Reference
         get_coordinates_matrix, get_velocities_matrix, get_accelerations_matrix,
         get_aux_coordinates_matrix, get_aux_velocities_matrix, get_aux_accelerations_matrix,
         get_parameters_matrix, get_joint_unknowns_matrix, get_inputs_matrix,
-        get_viewer,
+        get_scene, get_viewer,
         new_parameter, new_joint_unknown, new_input,
         new_coordinate, new_aux_coordinate, new_symbol,
         new_base, new_matrix, new_vector, new_tensor,
@@ -52,7 +52,8 @@ API Reference
         O, abs, xyz, viewer,
         evaluate,
         autogen_latex_names,
-        set_as_default
+        set_as_default,
+        scene, viewer
 
 
 
@@ -126,23 +127,58 @@ API Reference
         __call__
 
 
-.. autoclass:: Viewer
+.. autoclass:: Scene
     :members:
-        get_simulation_update_frequency, get_simulation_update_freq,
-        get_simulaton_time_multiplier,
+        get_viewer,
         is_simulation_running, is_simulation_paused, is_simulation_stopped,
-        are_drawings_shown,
-        get_simulation_elapsed_time,
-        set_simulation_update_frequency, set_simulation_time_multiplier,
-        draw_point, draw_frame, draw_solid, draw_vector, draw_position_vector,
-        show_drawings, hide_drawings, purge_drawings,
-        start_simulation, stop_simulation, pause_simulation, resume_simulation,
-        simulation_update_frequency, simulation_time_multiplier
+        start_simulation, stop_simulation, resume_simulation, pause_simulation,
+        are_drawings_shown, show_drawings, hide_drawings,
+        purge_drawings, add_drawing, update
+
 
 
 .. autoclass:: Drawing3D
     :members:
-        show, hide
+        get_actor, get_children, get_parent, add_child,
+        get_transform, set_transform, clear_transform,
+        rotate, scale, translate, rotate_to_dir,
+        update, update_children, update_transform,
+        show, hide,
+        transform
+
+
+.. autoclass:: Timer
+    :members:
+        get_callback, get_time_interval, is_one_shot,
+        is_active, is_alive, is_death, is_running, is_paused,
+        start, resume, pause, kill,
+        set_time_interval
+
+
+
+.. autoclass:: OneShotTimer
+    :members:
+
+
+
+.. autoclass:: Transform
+    :members:
+        evaluate, concatenate,
+        identity, translation, rotation, scale, rotation_from_dir,
+        __and__
+
+.. autoclass:: ComposedTransform
+    :members:
+
+
+
+.. autoclass:: Viewer
+    :members:
+        open, close,
+        is_open, is_closed,
+        redraw,
+        set_title,
+        add_actor, remove_actor, remove_all_actors
 
 
 
