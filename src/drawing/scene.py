@@ -46,6 +46,51 @@ class Scene:
 
 
 
+    def get_simulation_update_frequency(self):
+        '''get_simulation_update_frequency() -> float
+        Returns the current simulation update frequency (in number of updates per second)
+
+        :rtype: float
+
+        '''
+        return self._simulation.get_update_frequency()
+
+
+
+    def set_simulation_update_frequency(self, frequency):
+        '''set_simulation_update_frequency(frequency: numeric)
+        Change the simulation update frequency.
+
+        :param frequency: The new simulation update frequency (in number of updates per second)
+
+        '''
+        self._simulation.set_update_frequency(frequency)
+
+
+
+    def get_simulation_time_multiplier(self):
+        '''get_simulation_time_multiplier() -> float
+        Returns the current simulation time multiplier
+
+        :rtype: float
+
+        '''
+        return self._simulation.get_time_multiplier()
+
+
+
+    def set_simulation_time_multiplier(self, multiplier):
+        '''set_simulation_time_multiplier(multiplier: numeric)
+        Change the simulation time multiplier
+
+        :param multiplier: The new simulation time multiplier
+
+        '''
+        self._simulation.set_time_multiplier(multiplier)
+
+
+
+
     def start_simulation(self):
         '''start_simulation()
         Starts the simulation
