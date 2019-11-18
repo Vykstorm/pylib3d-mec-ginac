@@ -3,15 +3,16 @@
 from .viewer import VtkViewer
 from .simulation import Simulation
 from threading import RLock
+from operator import methodcaller
+from itertools import chain
 
 
 class Scene:
     def __init__(self, system):
-        self._viewer = VtkViewer()
+        self._viewer, self._system = VtkViewer(), system
         self._simulation = Simulation(self, system)
         self._drawings = []
-
-
+        self._lock = RLock()
 
 
     def get_viewer(self):
@@ -167,16 +168,15 @@ class Scene:
         '''purge_drawings()
         Remove all the drawing objects created previously
         '''
-        viewer, drawings = self._viewer, self._drawings
-
-        # Remove all vtk actors in the viewer
-        viewer.remove_all_actors()
-
-        # Clear drawings
-        drawings.clear()
-
-        # Redraw
-        viewer.redraw()
+        viewer = self._viewer
+        with self._lock:
+            drawings = self._drawings
+            # Clear drawings
+            drawings.clear()
+            # Remove all vtk actors in the viewer
+            viewer.remove_all_actors()
+            # Redraw
+            viewer.redraw()
 
 
 
@@ -184,23 +184,24 @@ class Scene:
         '''add_drawing(drawing: Drawing3D)
         Add a new drawing object to the scene
         '''
-        viewer, drawings = self._viewer, self._drawings
+        viewer = self._viewer
 
-        # Add the drawing to the list of drawings
-        drawings.append(drawing)
+        with self._lock:
+            drawings = self._drawings
 
-        # Update drawing
-        drawing.update()
+            # Add the drawing to the list of drawings
+            drawings.append(drawing)
 
-        # Add the drawing actor to the viewer
-        viewer.add_actor(drawing.get_actor())
+            # Add drawing actor to the viewer
+            viewer.add_actor(drawing.get_actor())
+            for child in drawing.get_children():
+                viewer.add_actor(child.get_actor())
 
-        # Add also actors of child drawings to the viewer
-        for child in drawing.get_children():
-            viewer.add_actor(child.get_actor())
+            # Update drawing
+            drawing.update()
 
-        # Redraw
-        viewer.redraw()
+            # Redraw
+            viewer.redraw()
 
 
 
@@ -217,11 +218,13 @@ class Scene:
         '''
         Updates the scene
         '''
-        viewer, drawings = self._viewer, self._drawings
+        viewer = self._viewer
+        with self._lock:
+            drawings = self._drawings
 
-        # Update drawings
-        for drawing in drawings:
-            drawing.update()
+            # Update drawings
+            for drawing in drawings:
+                drawing.update()
 
-        # Redraw scene
-        viewer.redraw()
+            # Redraw scene
+            viewer.redraw()
