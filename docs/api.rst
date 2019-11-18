@@ -131,6 +131,8 @@ API Reference
     :members:
         get_viewer,
         is_simulation_running, is_simulation_paused, is_simulation_stopped,
+        get_simulation_update_frequency, get_simulation_time_multiplier,
+        set_simulation_update_frequency, set_simulation_time_multiplier,
         start_simulation, stop_simulation, resume_simulation, pause_simulation,
         are_drawings_shown, show_drawings, hide_drawings,
         purge_drawings, add_drawing, update
