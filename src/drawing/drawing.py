@@ -10,6 +10,7 @@ from vtk import vtkProp, vtkMatrix4x4, vtkActor
 import numpy as np
 from threading import RLock
 from vtk import vtkSphereSource, vtkPolyDataMapper, vtkActor
+from .transform import Transform
 
 
 
@@ -30,7 +31,8 @@ class Drawing3D:
 
 
         # Initialize internal fields
-        self._transformation = np.eye(4).astype(np.float64)
+        self._transformation = Transform.identity()
+        self._transformation_evaluated = np.eye(4).astype(np.float64)
         self._lock = RLock()
         self._children, self._parent = [], None
         self._viewer, self._system = viewer, system
@@ -124,6 +126,95 @@ class Drawing3D:
 
 
 
+    def get_transformation(self):
+        '''get_transformation() -> Transform
+        Get the transformation of the drawing object
+        '''
+        with self._lock:
+            return self._transformation
+
+
+
+    def set_transformation(self, transformation):
+        '''set_transformation(transformation: Transform)
+        Set the transformation of this drawing object
+
+        :type transformation: Transform
+
+        '''
+        if not isinstance(transformation, Transform):
+            raise TypeError('Input argument must be a Transform object')
+        with self._lock:
+            # Change drawing transformation
+            self._transformation = transformation
+            # Update drawing
+            self.update()
+
+        # Redraw
+        self._viewer.redraw()
+
+
+    def clear_transformation(self):
+        '''clear_transformation()
+        Clear the transformation of this drawing object
+        '''
+        self.set_transformation(Transform.identity())
+
+
+    def rotate(self, *args, **kwargs):
+        '''rotate(...)
+        Add a new rotation transformation to this drawing object
+        '''
+        with self._lock:
+            # Change drawing transformation
+            self._transformation = self._transformation.concatenate(Transform.rotate(*args, **kwargs))
+            # Update drawing
+            self.update()
+        # Redraw
+        self._viewer.redraw()
+
+
+    def scale(self, *args, **kwargs):
+        '''scale(...)
+        Add a new scale transformation to this drawing object
+
+        '''
+        with self._lock:
+            # Change drawing transformation
+            self._transformation = self._transformation.concatenate(Transform.scale(*args, **kwargs))
+            # Update drawing
+            self.update()
+        # Redraw
+        self._viewer.redraw()
+
+
+    def translate(self, *args, **kwargs):
+        '''translate(...)
+        Add a new translation transformation to this drawing object
+        '''
+        with self._lock:
+            # Change drawing transformation
+            self._transformation = self._transformation.concatenate(Transform.translation(*args, **kwargs))
+            # Update drawing
+            self.update()
+        # Redraw
+        self._viewer.redraw()
+
+
+    def rotate_to_dir(self, *args, **kwargs):
+        '''rotate_to_dir(...)
+        Add a new rotation transformation (to vector direction) to this drawing object
+        '''
+        with self._lock:
+            # Change drawing transformation
+            self._transformation = self._transformation.concatenate(Transform.rotation_from_dir(*args, **kwargs))
+            # Update drawing
+            self.update()
+        # Redraw
+        self._viewer.redraw()
+
+
+
 
     def update(self):
         '''update()
@@ -151,15 +242,15 @@ class Drawing3D:
         Compute affine transformation for this drawing object and update vtk
         actor user matrix
         '''
-        # Compute affine transformation numerically for this drawing
-        matrix = np.eye(4).astype(np.float64)
-
         with self._lock:
+            # Compute affine transformation numerically for this drawing
+            matrix = self._transformation.evaluate(self._system)
+
             # Concatenate transformation of the parent drawing if any
             if self._parent is not None:
-                matrix = self._parent._transformation @ matrix
+                matrix = self._parent._transformation_evaluated @ matrix
 
-            self._transformation = matrix
+            self._transformation_evaluated = matrix
             self._actor.GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
 
 
