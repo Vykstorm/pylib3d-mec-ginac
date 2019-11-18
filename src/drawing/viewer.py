@@ -1,7 +1,7 @@
 
 
 from threading import RLock
-from vtk import vtkRenderer, vtkRenderWindow, vtkCommand
+from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
 from vtk import vtkGenericRenderWindowInteractor
 
 
@@ -131,8 +131,28 @@ class VtkViewer:
         :param actor: Must be a vtk.vtkProp instance (normally vtk.vtkActor objects)
 
         '''
+        if not isinstance(actor, vtkProp):
+            raise TypeError('actor must be a vtkProp object')
+
         with self._lock:
             self._renderer.AddActor(actor)
+
+
+
+    def remove_actor(self, actor):
+        '''remove_actor(actor)
+        Remove the given 3d object from the view
+
+        :param actor: Must be a vtk.vtkProp instance (normally vtk.vtkActor objects)
+
+        '''
+        if not isinstance(actor, vtkProp):
+            raise TypeError('actor must be a vtkProp object')
+
+        with self._lock:
+            self._render.RemoveActor(actor)
+
+
 
 
     def remove_all_actors(self):

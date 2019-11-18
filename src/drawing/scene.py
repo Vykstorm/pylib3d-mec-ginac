@@ -179,5 +179,4 @@ class Scene:
             drawing.update()
 
         # Redraw scene
-        if viewer.is_open():
-            viewer.redraw()
+        viewer.redraw()
