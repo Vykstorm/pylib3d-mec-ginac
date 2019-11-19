@@ -1,12 +1,13 @@
 
 
+from .object import Object
 from .timer import Timer
 from time import time
 from threading import RLock
 
 
 
-class Simulation:
+class Simulation(Object):
     '''
     This class is responsible of storing & update the simulation state (change the
     time symbol value periodically and integrate).
@@ -15,6 +16,7 @@ class Simulation:
     '''
 
     def __init__(self, scene, system):
+        super().__init__()
 
         # Initialize internal fields
         self._scene, self._system = scene, system
@@ -23,11 +25,11 @@ class Simulation:
         self._update_freq = 30
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
-        self._lock = RLock()
+
 
 
     def start(self):
-        with self._lock:
+        with self.lock:
             if self._state != 'stopped':
                 raise RuntimeError('Simulation already started')
             self._state = 'running'
@@ -36,21 +38,21 @@ class Simulation:
 
 
     def resume(self):
-        with self._lock:
+        with self.lock:
             if self._state != 'paused':
                 raise RuntimeError('Simulation is not paused')
             self._state = 'running'
 
 
     def pause(self):
-        with self._lock:
+        with self.lock:
             if self._state != 'running':
                 raise RuntimeError('Simulation is not running')
             self._state = 'paused'
 
 
     def stop(self):
-        with self._lock:
+        with self.lock:
             if self._state == 'stopped':
                 raise RuntimeError('Simulation has not started yet')
             self._state = 'stopped'
@@ -62,27 +64,27 @@ class Simulation:
 
 
     def is_running(self):
-        with self._lock:
+        with self.lock:
             return self._state == 'running'
 
 
     def is_paused(self):
-        with self._lock:
+        with self.lock:
             return self._state == 'paused'
 
 
     def is_stopped(self):
-        with self._lock:
+        with self.lock:
             return self._state == 'stopped'
 
 
     def get_elapsed_time(self):
-        with self._lock:
+        with self.lock:
             return self._elapsed_time
 
 
     def get_time_multiplier(self):
-        with self._lock:
+        with self.lock:
             return self._time_multiplier
 
 
@@ -93,12 +95,12 @@ class Simulation:
                 raise TypeError
         except TypeError:
             raise TypeError('Input argument must be a number greater than zero')
-        with self._lock:
+        with self.lock:
             self._time_multiplier = multiplier
 
 
     def get_update_frequency(self):
-        with self._lock:
+        with self.lock:
             return self._update_freq
 
 
@@ -109,14 +111,14 @@ class Simulation:
                 raise TypeError
         except TypeError:
             raise TypeError('Input argument must be a number greater than zero')
-        with self._lock:
+        with self.lock:
             self._update_freq = frequency
             if self._state != 'stopped':
                 self._timer.set_time_interval(1 / self._update_freq)
 
 
     def _update(self):
-        with self._lock:
+        with self.lock:
             if self._state == 'running':
                 # Update elapsed time
                 current_time = time()

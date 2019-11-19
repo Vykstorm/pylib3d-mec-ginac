@@ -10,16 +10,19 @@ from vtk import vtkProp, vtkMatrix4x4, vtkActor
 import numpy as np
 from threading import RLock
 from vtk import vtkSphereSource, vtkPolyDataMapper, vtkActor
+
 from .transform import Transform
+from .object import Object
 
 
-
-class Drawing3D:
+class Drawing3D(Object):
     '''
     An instance of this class represents any 3D renderable entity.
     '''
 
     def __init__(self, viewer, system, actor=None):
+        super().__init__()
+
         # Validate & parse input arguments
         if actor is None:
             source = vtkSphereSource()
@@ -33,8 +36,6 @@ class Drawing3D:
         # Initialize internal fields
         self._transform = Transform.identity()
         self._transform_evaluated = np.eye(4).astype(np.float64)
-        self._lock = RLock()
-        self._children, self._parent = [], None
         self._viewer, self._system = viewer, system
         self._actor = None
         self._set_actor(actor)
@@ -48,30 +49,8 @@ class Drawing3D:
         :rtype: vtkProp
 
         '''
-        with self._lock:
+        with self.lock:
             return self._actor
-
-
-    def get_children(self):
-        '''get_children() -> List[Drawing3D]
-        Get all child drawing objects
-
-        :rtype: List[Drawing3D]
-
-        '''
-        with self._lock:
-            return tuple(self._children)
-
-
-    def get_parent(self):
-        '''get_parent() -> Drawing3D | None
-        Get the parent of this drawing object if it has. None otherwise
-
-        :rtype: Drawing3D | None
-
-        '''
-        with self._lock:
-            return self._parent
 
 
 
@@ -81,7 +60,7 @@ class Drawing3D:
         # Set default properties for the actor
         actor.VisibilityOn()
 
-        with self._lock:
+        with self.lock:
             self._actor = actor
 
 
@@ -90,7 +69,7 @@ class Drawing3D:
         '''set_actor(actor: vtkProp)
         Change the vtk actor attached to this drawing object
         '''
-        with self._lock:
+        with self.lock:
             self._viewer.remove_actor(self._actor)
             self._set_actor(actor)
             # Update this drawing
@@ -101,22 +80,12 @@ class Drawing3D:
 
 
 
-    def _add_child(self, child):
-        # Add child to the list of children of this drawing
-        with self._lock:
-            self._children.append(child)
-
-        # Change child parent
-        with child._lock:
-            child._parent = self
-
-
 
     def add_child(self, child):
         '''add_child(child: Drawing3D)
         Add a new child drawing object
         '''
-        self._add_child(child)
+        super().add_child(child)
 
         # Update child drawing
         child._update()
@@ -130,7 +99,7 @@ class Drawing3D:
         '''get_transform() -> Transform
         Get the transformation of the drawing object
         '''
-        with self._lock:
+        with self.lock:
             return self._transform
 
 
@@ -144,7 +113,7 @@ class Drawing3D:
         '''
         if not isinstance(transform, Transform):
             raise TypeError('Input argument must be a Transform object')
-        with self._lock:
+        with self.lock:
             # Change drawing transformation
             self._transform = transform
             # Update drawing
@@ -165,7 +134,7 @@ class Drawing3D:
         '''rotate(...)
         Add a new rotation transformation to this drawing object
         '''
-        with self._lock:
+        with self.lock:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.rotate(*args, **kwargs))
             # Update drawing
@@ -179,7 +148,7 @@ class Drawing3D:
         Add a new scale transformation to this drawing object
 
         '''
-        with self._lock:
+        with self.lock:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.scale(*args, **kwargs))
             # Update drawing
@@ -192,7 +161,7 @@ class Drawing3D:
         '''translate(...)
         Add a new translation transformation to this drawing object
         '''
-        with self._lock:
+        with self.lock:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.translation(*args, **kwargs))
             # Update drawing
@@ -205,7 +174,7 @@ class Drawing3D:
         '''rotate_to_dir(...)
         Add a new rotation transformation (to vector direction) to this drawing object
         '''
-        with self._lock:
+        with self.lock:
             # Change drawing transformation
             self._transform = self._transform.concatenate(Transform.rotation_from_dir(*args, **kwargs))
             # Update drawing
@@ -217,30 +186,30 @@ class Drawing3D:
 
 
     def _update(self):
-        with self._lock:
+        with self.lock:
             # Update this drawing transformation matrix
             self._update_transform()
             # Update child drawings
-            self._update_children()
+            self._update_subdrawings()
 
 
 
-    def _update_children(self):
-        with self._lock:
-            for child in self._children:
+    def _update_subdrawings(self):
+        with self.lock:
+            for child in self.get_children(kind=Drawing3D):
                 child._update()
 
 
 
     def _update_transform(self):
         # Update transformation
-        with self._lock:
+        with self.lock:
             # Compute affine transformation numerically for this drawing
             matrix = self._transform.evaluate(self._system)
 
             # Concatenate transformation of the parent drawing if any
-            if self._parent is not None:
-                matrix = self._parent._transformation_evaluated @ matrix
+            if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
+                matrix = self.get_parent()._transformation_evaluated @ matrix
 
             self._transform_evaluated = matrix
             self._actor.GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
@@ -252,7 +221,7 @@ class Drawing3D:
         Toogle visibility on for this drawing object
         '''
         # Toggle visibility on
-        with self._lock:
+        with self.lock:
             self._actor.VisibilityOn()
 
         # Redraw scene
@@ -265,12 +234,11 @@ class Drawing3D:
         Toggle visibility off for this drawing object
         '''
         # Toggle visibility off
-        with self._lock:
+        with self.lock:
             self._actor.VisibilityOff()
 
         # Redraw scene
         self._viewer._redraw()
-
 
 
 
@@ -283,6 +251,7 @@ class Drawing3D:
 
         '''
         return self.get_transform()
+
 
     @transform.setter
     def transform(self, x):

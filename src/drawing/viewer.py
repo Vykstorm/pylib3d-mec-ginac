@@ -3,16 +3,19 @@
 from threading import RLock
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
 from vtk import vtkGenericRenderWindowInteractor
+from .object import Object
 
 
 
-class VtkViewer:
+class VtkViewer(Object):
     '''
     This is a helper class to create a window and display 3d objects using vtk
     library
     '''
 
     def __init__(self):
+        super().__init__()
+
         # Create vtk renderer
         renderer = vtkRenderer()
 
@@ -24,7 +27,6 @@ class VtkViewer:
 
 
         # Initialize internal fields
-        self._lock = RLock()
         self._interactor, self._window = None, None
         self._title = ''
         self._renderer = renderer
@@ -37,7 +39,7 @@ class VtkViewer:
         Open the window where the 3d objects will be displayed
         '''
         renderer = self._renderer
-        with self._lock:
+        with self.lock:
             if self._interactor is not None:
                 raise RuntimeError('Viewer is being shown already')
 
@@ -69,7 +71,7 @@ class VtkViewer:
         '''close()
         Closes the window where 3d objects are rendered
         '''
-        with self._lock:
+        with self.lock:
             interactor, window = self._interactor, self._window
             if interactor is None:
                 raise RuntimeError('Viewer is not open yet')
@@ -86,7 +88,7 @@ class VtkViewer:
         Returns True after calling to open(). Otherwise, or after calling close(),
         this method returns False
         '''
-        with self._lock:
+        with self.lock:
             return self._interactor is not None
 
 
@@ -100,12 +102,6 @@ class VtkViewer:
         return not self.is_open()
 
 
-    def _redraw(self):
-        # Redraw the 3d objects and update the view
-        with self._lock:
-            if self._interactor is not None:
-                self._interactor.Render()
-
 
     def set_title(self, title):
         '''set_title(title: str)
@@ -114,49 +110,42 @@ class VtkViewer:
         if not isinstance(title, str):
             raise TypeError('title must be a str object')
 
-        with self._lock:
+        with self.lock:
             self._title = title
             if self._interactor is not None:
                 # Refresh vtk window title
                 self._window.SetWindowName(title)
                 self._interactor.Render()
+            self.fire_event('title_changed', title)
 
 
-    def add_actor(self, actor):
-        '''add_actor(actor)
-        Add a new 3d object to the view.
 
-        :param actor: Must be a vtk.vtkProp instance (normally vtk.vtkActor objects)
+    def _redraw(self):
+        # Redraw the 3d objects and update the view
+        with self.lock:
+            if self._interactor is not None:
+                self._interactor.Render()
 
-        '''
-        if not isinstance(actor, vtkProp):
-            raise TypeError('actor must be a vtkProp object')
 
-        with self._lock:
+
+    def _add_actor(self, actor):
+        assert isinstance(actor, vtkProp)
+
+        with self.lock:
             self._renderer.AddActor(actor)
 
 
 
-    def remove_actor(self, actor):
-        '''remove_actor(actor)
-        Remove the given 3d object from the view
+    def _remove_actor(self, actor):
+        assert isinstance(actor, vtkProp)
 
-        :param actor: Must be a vtk.vtkProp instance (normally vtk.vtkActor objects)
-
-        '''
-        if not isinstance(actor, vtkProp):
-            raise TypeError('actor must be a vtkProp object')
-
-        with self._lock:
+        with self.lock:
             self._render.RemoveActor(actor)
 
 
 
 
-    def remove_all_actors(self):
-        '''remove_all_actors()
-        Remove all the 3d objects previosuly created.
-        '''
-        with self._lock:
+    def _remove_all_actors(self):
+        with self.lock:
             # Remove all actors from the renderer
             self._renderer.RemoveAllViewProps()
