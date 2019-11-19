@@ -46,6 +46,7 @@ class Object:
             self._children.append(child)
             with child._lock:
                 child._parent = self
+            child.fire_event('object_entered')
 
 
     def remove_child(self, child):
@@ -55,7 +56,9 @@ class Object:
                 return
             self._children.remove(child)
             with child._lock:
+                child.fire_event('object_exit')
                 child._parent = None
+
 
 
     def add_event_handler(self, callback, event_type=None, args=[], kwargs={}):
@@ -75,6 +78,7 @@ class Object:
             self._event_handlers.append(event_handler)
 
 
+
     def remove_event_handler(self, callback, event_type=None):
         assert callable(callback)
         assert event_type is None or isinstance(event_type, str)
@@ -86,13 +90,14 @@ class Object:
             ))
 
 
+
     def _fire_event(self, source, event_type, *args, **kwargs):
         with self._lock:
             for handler in self._event_handlers:
                 if handler.event_type is not None and handler.event_type != event_type:
                     continue
                 callback = handler.callback
-                callback(source, *args, **kwargs)
+                callback(event_type, source, *args, **kwargs)
 
             # Propagate the event from bottom to top
             if self._parent is not None:

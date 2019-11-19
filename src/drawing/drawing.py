@@ -9,10 +9,9 @@ from lib3d_mec_ginac_ext import Matrix
 from vtk import vtkProp, vtkMatrix4x4, vtkActor
 import numpy as np
 from threading import RLock
-from vtk import vtkSphereSource, vtkPolyDataMapper, vtkActor
-
 from .transform import Transform
 from .object import Object
+from .geometry import Geometry
 
 
 class Drawing3D(Object):
@@ -20,78 +19,45 @@ class Drawing3D(Object):
     An instance of this class represents any 3D renderable entity.
     '''
 
-    def __init__(self, viewer, system, actor=None):
+    def __init__(self, geometry):
         super().__init__()
-
-        # Validate & parse input arguments
-        if actor is None:
-            source = vtkSphereSource()
-            mapper = vtkPolyDataMapper()
-            mapper.SetInputConnection(source.GetOutputPort())
-            actor = vtkActor()
-            actor.SetMapper(mapper)
-
-
 
         # Initialize internal fields
         self._transform = Transform.identity()
         self._transform_evaluated = np.eye(4).astype(np.float64)
-        self._viewer, self._system = viewer, system
-        self._actor = None
-        self._set_actor(actor)
+        self._system = None
+        self._geometry = geometry
+
+        self.add_event_handler(self._on_object_entered, 'object_entered')
+        self.add_child(self._geometry)
 
 
 
-    def get_actor(self):
-        '''get_actor() -> vtkProp
-        Get the vtk actor associated to this drawing object
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
+        if self == source or isinstance(source, Geometry):
+            self._update()
 
+
+
+    def get_geometry(self):
+        '''get_geometry() -> Geometry
+        Get the geomtry associated to this drawing object
         :rtype: vtkProp
 
         '''
         with self.lock:
-            return self._actor
+            return self._geometry
 
 
 
-    def _set_actor(self, actor):
-        # Initialize vtk actor user matrix
-        actor.SetUserMatrix(vtkMatrix4x4())
-        # Set default properties for the actor
-        actor.VisibilityOn()
-
-        with self.lock:
-            self._actor = actor
-
-
-
-    def set_actor(self, actor):
-        '''set_actor(actor: vtkProp)
-        Change the vtk actor attached to this drawing object
+    def set_geometry(self, geometry):
+        '''set_geometry(geometry: Geometry)
+        Change the geometry associated to this drawing object
         '''
         with self.lock:
-            self._viewer.remove_actor(self._actor)
-            self._set_actor(actor)
-            # Update this drawing
-            self._update()
-
-        # Redraw
-        self._viewer._redraw()
-
-
-
-
-    def add_child(self, child):
-        '''add_child(child: Drawing3D)
-        Add a new child drawing object
-        '''
-        super().add_child(child)
-
-        # Update child drawing
-        child._update()
-
-        # Redraw
-        self._viewer._redraw()
+            self.remove_child(self._geometry)
+            self._geometry = geometry
+            self.add_child(geometry)
 
 
 
@@ -118,9 +84,9 @@ class Drawing3D(Object):
             self._transform = transform
             # Update drawing
             self._update()
+            # Fire 'transform_changed' event
+            self.fire_event('transform_changed')
 
-        # Redraw
-        self._viewer._redraw()
 
 
     def clear_transform(self):
@@ -130,17 +96,15 @@ class Drawing3D(Object):
         self.set_transform(Transform.identity())
 
 
+
     def rotate(self, *args, **kwargs):
         '''rotate(...)
         Add a new rotation transformation to this drawing object
         '''
         with self.lock:
             # Change drawing transformation
-            self._transform = self._transform.concatenate(Transform.rotate(*args, **kwargs))
-            # Update drawing
-            self._update()
-        # Redraw
-        self._viewer._redraw()
+            self.set_transform(self._transform.concatenate(Transform.rotate(*args, **kwargs)))
+
 
 
     def scale(self, *args, **kwargs):
@@ -150,11 +114,8 @@ class Drawing3D(Object):
         '''
         with self.lock:
             # Change drawing transformation
-            self._transform = self._transform.concatenate(Transform.scale(*args, **kwargs))
-            # Update drawing
-            self._update()
-        # Redraw
-        self._viewer._redraw()
+            self.set_transform(self._transform.concatenate(Transform.scale(*args, **kwargs)))
+
 
 
     def translate(self, *args, **kwargs):
@@ -163,11 +124,8 @@ class Drawing3D(Object):
         '''
         with self.lock:
             # Change drawing transformation
-            self._transform = self._transform.concatenate(Transform.translation(*args, **kwargs))
-            # Update drawing
-            self._update()
-        # Redraw
-        self._viewer._redraw()
+            self.set_transform(self._transform.concatenate(Transform.translation(*args, **kwargs)))
+
 
 
     def rotate_to_dir(self, *args, **kwargs):
@@ -176,12 +134,7 @@ class Drawing3D(Object):
         '''
         with self.lock:
             # Change drawing transformation
-            self._transform = self._transform.concatenate(Transform.rotation_from_dir(*args, **kwargs))
-            # Update drawing
-            self._update()
-        # Redraw
-        self._viewer._redraw()
-
+            self.set_transform(self._transform.concatenate(Transform.rotation_from_dir(*args, **kwargs)))
 
 
 
@@ -204,7 +157,10 @@ class Drawing3D(Object):
     def _update_transform(self):
         # Update transformation
         with self.lock:
-            # Compute affine transformation numerically for this drawing
+            if self._system is None:
+                return
+
+            # Compute transformation numerically for this drawing
             matrix = self._transform.evaluate(self._system)
 
             # Concatenate transformation of the parent drawing if any
@@ -212,7 +168,7 @@ class Drawing3D(Object):
                 matrix = self.get_parent()._transformation_evaluated @ matrix
 
             self._transform_evaluated = matrix
-            self._actor.GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
+            self._geometry.get_actor().GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
 
 
 
@@ -220,12 +176,12 @@ class Drawing3D(Object):
         '''show()
         Toogle visibility on for this drawing object
         '''
-        # Toggle visibility on
         with self.lock:
-            self._actor.VisibilityOn()
+            # Toggle visibility on
+            self._geometry.get_actor().VisibilityOn()
+            # Fire 'visibility_changed' event
+            self.fire_event('visibility_changed')
 
-        # Redraw scene
-        self._viewer._redraw()
 
 
 
@@ -233,12 +189,11 @@ class Drawing3D(Object):
         '''hide()
         Toggle visibility off for this drawing object
         '''
-        # Toggle visibility off
         with self.lock:
-            self._actor.VisibilityOff()
-
-        # Redraw scene
-        self._viewer._redraw()
+            # Toggle visibility off
+            self._geometry.get_actor().VisibilityOff()
+            # Fire 'visibility_changed' event
+            self.fire_event('visibility_changed')
 
 
 

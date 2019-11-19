@@ -4,6 +4,7 @@ from .object import Object
 from .viewer import VtkViewer
 from .simulation import Simulation
 from .drawing import Drawing3D
+from .geometry import Geometry
 from threading import RLock
 from operator import methodcaller
 from itertools import chain
@@ -14,6 +15,11 @@ class Scene(Object):
         super().__init__()
         self._viewer, self._system = VtkViewer(), system
         self._simulation = Simulation(self, system)
+
+        self.add_event_handler(self._event_handler)
+        self.add_child(self._viewer)
+        self.add_child(self._simulation)
+
 
 
     def get_viewer(self):
@@ -194,22 +200,7 @@ class Scene(Object):
         '''
         if not isinstance(drawing, Drawing3D):
             raise TypeError('Input argument must be a Drawing3D instance')
-
-        viewer = self._viewer
-
-        with self.lock:
-            self.add_child(drawing)
-
-            # Add drawing actor to the viewer
-            viewer._add_actor(drawing.get_actor())
-            for child in drawing.get_children(kind=Drawing3D):
-                viewer._add_actor(child.get_actor())
-
-            # Update drawing
-            drawing._update()
-
-            # Redraw
-            viewer._redraw()
+        self.add_child(drawing)
 
 
 
@@ -219,6 +210,32 @@ class Scene(Object):
         # Add point to drawing to the scene
         # TODO
         pass
+
+
+    def _event_handler(self, event_type, source, *args, **kwargs):
+        if event_type == 'simulation_step':
+            self._update()
+            return
+
+        if isinstance(source, Drawing3D) and event_type == 'object_entered':
+            with source.lock:
+                source._system = self._system
+
+        if isinstance(source, (Drawing3D, Geometry)):
+            if event_type in ('object_entered', 'object_exit'):
+                if isinstance(source, Drawing3D):
+                    geometry = source.get_geometry()
+                else:
+                    geometry = source
+                actor = geometry.get_actor()
+
+                if event_type == 'object_entered':
+                    self._viewer._add_actor(actor)
+                else:
+                    self._viewer._remove_actor(actor)
+
+            # Any change made by the user in a drawing 3D object will cause a redraw of the whole scene
+            self._viewer._redraw()
 
 
 

@@ -36,6 +36,9 @@ class Simulation(Object):
             self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
 
+            self.fire_event('simulation_started')
+
+
 
     def resume(self):
         with self.lock:
@@ -43,12 +46,18 @@ class Simulation(Object):
                 raise RuntimeError('Simulation is not paused')
             self._state = 'running'
 
+            self.fire_event('simulation_resumed')
+
+
 
     def pause(self):
         with self.lock:
             if self._state != 'running':
                 raise RuntimeError('Simulation is not running')
             self._state = 'paused'
+
+            self.fire_event('simulation_paused')
+
 
 
     def stop(self):
@@ -61,6 +70,9 @@ class Simulation(Object):
             self._elapsed_time = 0.0
             self._last_update_time = None
             self._update()
+
+            self.fire_event('simulation_stopped')
+
 
 
     def is_running(self):
@@ -98,6 +110,9 @@ class Simulation(Object):
         with self.lock:
             self._time_multiplier = multiplier
 
+            self.fire_event('time_multiplier_changed')
+
+
 
     def get_update_frequency(self):
         with self.lock:
@@ -115,6 +130,9 @@ class Simulation(Object):
             self._update_freq = frequency
             if self._state != 'stopped':
                 self._timer.set_time_interval(1 / self._update_freq)
+
+            self.fire_event('update_frequency_changed')
+
 
 
     def _update(self):
@@ -138,5 +156,5 @@ class Simulation(Object):
             # Intergrate
             # TODO
 
-        # Update scene (update drawings & redraw)
-        self._scene._update()
+            if self._state == 'running':
+                self.fire_event('simulation_step')

@@ -64,6 +64,8 @@ class VtkViewer(Object):
             interactor.Initialize()
             interactor.Start()
 
+            self.fire_event('viewer_open')
+
 
 
 
@@ -80,6 +82,8 @@ class VtkViewer(Object):
             window.Finalize()
             interactor.TerminateApp()
             self._interactor, self._window = None, None
+
+            self.fire_event('viewer_close')
 
 
 
@@ -140,7 +144,7 @@ class VtkViewer(Object):
         assert isinstance(actor, vtkProp)
 
         with self.lock:
-            self._render.RemoveActor(actor)
+            self._renderer.RemoveActor(actor)
 
 
 
