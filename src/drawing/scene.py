@@ -4,6 +4,7 @@ from .object import Object
 from .viewer import VtkViewer
 from .simulation import Simulation
 from .geometry import Geometry
+from .color import Color
 from threading import RLock
 from operator import methodcaller
 from itertools import chain
@@ -225,6 +226,7 @@ class Scene(Object):
             elif event_type == 'object_exit':
                 self._viewer._remove_actor(source.get_actor())
 
+        if isinstance(source, (Drawing3D, Color)):
             self._viewer._redraw()
 
 

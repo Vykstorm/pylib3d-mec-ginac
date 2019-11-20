@@ -13,6 +13,7 @@ from .transform import Transform
 from .object import Object
 from .geometry import Geometry
 from .scene import Scene
+from .color import Color
 
 
 class Drawing3D(Object):
@@ -25,21 +26,26 @@ class Drawing3D(Object):
 
         actor = vtkActor()
 
-        # Initialize vtk actor user matrix
-        actor.SetUserMatrix(vtkMatrix4x4())
-        # Set default properties for the actor
-        actor.VisibilityOn()
-
 
         # Initialize internal fields
         self._transform = Transform.identity()
         self._transform_evaluated = np.eye(4).astype(np.float64)
         self._geometry = geometry
         self._actor = actor
+        self._color = Color()
+
+        # Initialize vtk actor user matrix
+        actor.SetUserMatrix(vtkMatrix4x4())
+        # Set default properties for the actor
+        actor.VisibilityOn()
+        actor.GetProperty().SetColor(*self._color.rgb)
+        actor.GetProperty().SetOpacity(self._color.a)
 
 
         self.add_event_handler(self._on_object_entered, 'object_entered')
+        self._color.add_event_handler(self._on_color_changed, 'color_changed')
         self.add_child(self._geometry)
+        self.add_child(self._color)
 
 
 
@@ -47,8 +53,14 @@ class Drawing3D(Object):
         if self == source:
             self._update()
         elif isinstance(source, Geometry):
-            with self.lock:
-                self._actor.SetMapper(source.get_mapper())
+            self._actor.SetMapper(source.get_mapper())
+
+
+    def _on_color_changed(self, *args, **kwargs):
+        actor = self._actor
+        actor.GetProperty().SetColor(*self._color.rgb)
+        actor.GetProperty().SetOpacity(self._color.a)
+
 
 
 
@@ -160,6 +172,9 @@ class Drawing3D(Object):
 
 
 
+
+
+
     def _update(self):
         with self.lock:
             # Update this drawing transformation matrix
@@ -221,12 +236,33 @@ class Drawing3D(Object):
 
 
 
+
+    def get_color(self):
+        '''get_color() -> Color
+        Get the color of this drawing object
+        :rtype: Color
+
+        '''
+        return self._color
+
+
+    def set_color(self, *args):
+        '''set_color(...)
+        Change the color of this drawing object
+        '''
+        self._color.set(*args)
+
+
+
+
     @property
     def transform(self):
         '''
         Property that can be used to get/set the transformation of this drawing object
 
         :rtype: Transform
+
+        .. seealso:: :func:`get_transform` :func:`set_transform`
 
         '''
         return self.get_transform()
@@ -235,3 +271,19 @@ class Drawing3D(Object):
     @transform.setter
     def transform(self, x):
         self.set_transform(x)
+
+
+    @property
+    def color(self):
+        '''
+        Property that can be used to get/set the color of this drawing object
+
+        :rtype: Color
+
+        .. seealso:: :func:`get_color` :func:`set_color`
+        '''
+        return self.get_color()
+
+    @color.setter
+    def color(self, args):
+        self.set_color(*args)
