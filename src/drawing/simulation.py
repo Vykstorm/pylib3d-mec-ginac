@@ -3,7 +3,7 @@
 from .object import Object
 from .timer import Timer
 from time import time
-from threading import RLock
+
 
 
 
@@ -29,7 +29,7 @@ class Simulation(Object):
 
 
     def start(self):
-        with self.lock:
+        with self:
             if self._state != 'stopped':
                 raise RuntimeError('Simulation already started')
             self._state = 'running'
@@ -41,7 +41,7 @@ class Simulation(Object):
 
 
     def resume(self):
-        with self.lock:
+        with self:
             if self._state != 'paused':
                 raise RuntimeError('Simulation is not paused')
             self._state = 'running'
@@ -51,7 +51,7 @@ class Simulation(Object):
 
 
     def pause(self):
-        with self.lock:
+        with self:
             if self._state != 'running':
                 raise RuntimeError('Simulation is not running')
             self._state = 'paused'
@@ -61,7 +61,7 @@ class Simulation(Object):
 
 
     def stop(self):
-        with self.lock:
+        with self:
             if self._state == 'stopped':
                 raise RuntimeError('Simulation has not started yet')
             self._state = 'stopped'
@@ -76,27 +76,27 @@ class Simulation(Object):
 
 
     def is_running(self):
-        with self.lock:
+        with self:
             return self._state == 'running'
 
 
     def is_paused(self):
-        with self.lock:
+        with self:
             return self._state == 'paused'
 
 
     def is_stopped(self):
-        with self.lock:
+        with self:
             return self._state == 'stopped'
 
 
     def get_elapsed_time(self):
-        with self.lock:
+        with self:
             return self._elapsed_time
 
 
     def get_time_multiplier(self):
-        with self.lock:
+        with self:
             return self._time_multiplier
 
 
@@ -107,7 +107,7 @@ class Simulation(Object):
                 raise TypeError
         except TypeError:
             raise TypeError('Input argument must be a number greater than zero')
-        with self.lock:
+        with self:
             self._time_multiplier = multiplier
 
             self.fire_event('time_multiplier_changed')
@@ -115,7 +115,7 @@ class Simulation(Object):
 
 
     def get_update_frequency(self):
-        with self.lock:
+        with self:
             return self._update_freq
 
 
@@ -126,7 +126,7 @@ class Simulation(Object):
                 raise TypeError
         except TypeError:
             raise TypeError('Input argument must be a number greater than zero')
-        with self.lock:
+        with self:
             self._update_freq = frequency
             if self._state != 'stopped':
                 self._timer.set_time_interval(1 / self._update_freq)
@@ -136,7 +136,7 @@ class Simulation(Object):
 
 
     def _update(self):
-        with self.lock:
+        with self:
             if self._state == 'running':
                 # Update elapsed time
                 current_time = time()

@@ -22,13 +22,13 @@ class Color(Object):
 
 
     def __iter__(self):
-        with self.lock:
+        with self:
             values = tuple(self._values)
             return iter(values)
 
 
     def __getitem__(self, index):
-        with self.lock:
+        with self:
             return self._values.__getitem__(index)
 
 
@@ -50,7 +50,7 @@ class Color(Object):
         except TypeError:
             raise TypeError('Color components must be numbers in the range [0, 1]')
 
-        with self.lock:
+        with self:
             x = copy(self._values)
             x.__setitem__(index, value)
             if len(x) != 4:
@@ -70,7 +70,7 @@ class Color(Object):
 
     @property
     def rgba(self):
-        with self.lock:
+        with self:
             return tuple(self._values)
 
     @rgba.setter

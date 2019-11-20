@@ -4,7 +4,6 @@ Description: This file defines the class Geometry and all its subclasses
 '''
 
 from .object import Object
-from threading import RLock
 from vtk import vtkSphereSource, vtkPolyDataMapper, vtkActor, vtkMapper, vtkAlgorithm
 
 

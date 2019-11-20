@@ -1,6 +1,5 @@
 
 
-from threading import RLock
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
 from vtk import vtkGenericRenderWindowInteractor
 from .object import Object
@@ -52,7 +51,7 @@ class VtkViewer(Object):
         Open the window where the 3d objects will be displayed
         '''
         renderer = self._renderer
-        with self.lock:
+        with self:
             if self._interactor is not None:
                 raise RuntimeError('Viewer is being shown already')
 
@@ -86,7 +85,7 @@ class VtkViewer(Object):
         '''close()
         Closes the window where 3d objects are rendered
         '''
-        with self.lock:
+        with self:
             interactor, window = self._interactor, self._window
             if interactor is None:
                 raise RuntimeError('Viewer is not open yet')
@@ -105,7 +104,7 @@ class VtkViewer(Object):
         Returns True after calling to open(). Otherwise, or after calling close(),
         this method returns False
         '''
-        with self.lock:
+        with self:
             return self._interactor is not None
 
 
@@ -127,7 +126,7 @@ class VtkViewer(Object):
         if not isinstance(title, str):
             raise TypeError('title must be a str object')
 
-        with self.lock:
+        with self:
             self._title = title
             if self._interactor is not None:
                 # Refresh vtk window title
@@ -160,7 +159,7 @@ class VtkViewer(Object):
 
     def _redraw(self):
         # Redraw the 3d objects and update the view
-        with self.lock:
+        with self:
             if self._interactor is None:
                 return
             self._interactor.Render()
@@ -170,7 +169,7 @@ class VtkViewer(Object):
     def _add_actor(self, actor):
         assert isinstance(actor, vtkProp)
 
-        with self.lock:
+        with self:
             self._renderer.AddActor(actor)
 
 
@@ -178,13 +177,13 @@ class VtkViewer(Object):
     def _remove_actor(self, actor):
         assert isinstance(actor, vtkProp)
 
-        with self.lock:
+        with self:
             self._renderer.RemoveActor(actor)
 
 
 
 
     def _remove_all_actors(self):
-        with self.lock:
+        with self:
             # Remove all actors from the renderer
             self._renderer.RemoveAllViewProps()

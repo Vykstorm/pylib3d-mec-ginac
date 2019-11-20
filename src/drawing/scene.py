@@ -5,7 +5,6 @@ from .viewer import VtkViewer
 from .simulation import Simulation
 from .geometry import Geometry
 from .color import Color
-from threading import RLock
 from operator import methodcaller
 from itertools import chain
 
@@ -165,7 +164,7 @@ class Scene(Object):
         viewer = self._viewer
         # Open viewer & redraw
         viewer.open()
-        self._redraw()
+        self._viewer._redraw()
 
 
 
@@ -183,14 +182,14 @@ class Scene(Object):
         Remove all the drawing objects created previously
         '''
         viewer = self._viewer
-        with self.lock:
+        with self:
             drawings = self.get_drawings()
             # Clear drawings
             drawings.clear()
             # Remove all vtk actors in the viewer
             viewer._remove_all_actors()
             # Redraw
-            self._redraw()
+            viewer._redraw()
 
 
 
@@ -232,22 +231,23 @@ class Scene(Object):
 
 
     def _event_handler(self, event_type, source, *args, **kwargs):
+        # This method is called when an event of any kind occurs
         if event_type == 'simulation_step':
             self._update()
             return
 
+        viewer = self._viewer
+
         if isinstance(source, Drawing3D):
             if event_type == 'object_entered':
-                with source.lock:
-                    source._system = self._system
-                self._viewer._add_actor(source.get_actor())
+                viewer._add_actor(source.get_actor())
 
             elif event_type == 'object_exit':
-                self._viewer._remove_actor(source.get_actor())
+                viewer._remove_actor(source.get_actor())
 
         # Redraw the scene if a drawing object property, geometry or color changed
         if isinstance(source, (Drawing3D, Color)):
-            self._redraw()
+            viewer._redraw()
 
 
 
@@ -255,7 +255,7 @@ class Scene(Object):
         '''
         Updates the scene
         '''
-        with self.lock:
+        with self:
             drawings = self.get_drawings()
 
             # Update drawings
@@ -263,28 +263,10 @@ class Scene(Object):
                 drawing._update()
 
             # Redraw scene
-            self._redraw()
+            self._viewer._redraw()
 
 
 
-    def _redraw(self):
-        '''
-        Redraws the scene
-        '''
-        viewer = self._viewer
-        # Lock this scene and all the drawings, geometry and color objects
-        self.lock.acquire()
-        objs = tuple(filter(lambda obj: isinstance(obj, (Drawing3D, Geometry, Color)), self.get_predecessors()))
-        for obj in objs:
-            obj.lock.acquire()
-
-        # Redraw the scene
-        viewer._redraw()
-
-        # Unlock everything
-        for obj in objs:
-            obj.lock.release()
-        self.lock.release()
 
 
 
