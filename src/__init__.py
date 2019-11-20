@@ -37,13 +37,13 @@ from .drawing.timer import Timer, OneShotTimer
 from .drawing.transform import Transform, ComposedTransform
 from .drawing.viewer import VtkViewer as Viewer
 from .drawing.drawing import Drawing3D
-from .drawing.geometry import Geometry, Sphere
+from .drawing.geometry import Geometry, Sphere, Cube
 from .drawing.color import Color
 
 __all__.extend([
     'Scene', 'Timer', 'OneShotTimer', 'Transform',
     'ComposedTransform', 'Viewer', 'Drawing3D', 'Color',
-    'Geometry', 'Sphere'])
+    'Geometry', 'Sphere', 'Cube'])
 
 
 
