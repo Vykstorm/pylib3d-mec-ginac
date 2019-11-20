@@ -11,7 +11,7 @@ import numpy as np
 from threading import RLock
 from .transform import Transform
 from .object import Object
-from .geometry import Geometry
+from .geometry import Geometry, Sphere
 from .scene import Scene
 from .color import Color
 
@@ -21,11 +21,15 @@ class Drawing3D(Object):
     An instance of this class represents any 3D renderable entity.
     '''
 
-    def __init__(self, geometry):
+    def __init__(self, geometry=None):
+        if geometry is not None and not isinstance(geometry, Geometry):
+            raise TypeError('geometry must be an instance of the class Geometry')
+        if geometry is None:
+            geometry = Sphere()
+
         super().__init__()
 
         actor = vtkActor()
-
 
         # Initialize internal fields
         self._transform = Transform.identity()
@@ -194,7 +198,7 @@ class Drawing3D(Object):
     def _update_transform(self):
         # Update transformation
         with self.lock:
-            scene = self.find_ancestor(Scene)
+            scene = self.get_ancestor(Scene)
             if scene is None:
                 # This drawing object is not attached to any scene yet
                 return

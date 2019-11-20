@@ -165,7 +165,7 @@ class Scene(Object):
         viewer = self._viewer
         # Open viewer & redraw
         viewer.open()
-        viewer._redraw()
+        self._redraw()
 
 
 
@@ -190,7 +190,7 @@ class Scene(Object):
             # Remove all vtk actors in the viewer
             viewer._remove_all_actors()
             # Redraw
-            viewer._redraw()
+            self._redraw()
 
 
 
@@ -247,7 +247,7 @@ class Scene(Object):
 
         # Redraw the scene if a drawing object property, geometry or color changed
         if isinstance(source, (Drawing3D, Color)):
-            self._viewer._redraw()
+            self._redraw()
 
 
 
@@ -255,7 +255,6 @@ class Scene(Object):
         '''
         Updates the scene
         '''
-        viewer = self._viewer
         with self.lock:
             drawings = self.get_drawings()
 
@@ -264,7 +263,28 @@ class Scene(Object):
                 drawing._update()
 
             # Redraw scene
-            viewer._redraw()
+            self._redraw()
+
+
+
+    def _redraw(self):
+        '''
+        Redraws the scene
+        '''
+        viewer = self._viewer
+        # Lock this scene and all the drawings, geometry and color objects
+        self.lock.acquire()
+        objs = tuple(filter(lambda obj: isinstance(obj, (Drawing3D, Geometry, Color)), self.get_predecessors()))
+        for obj in objs:
+            obj.lock.acquire()
+
+        # Redraw the scene
+        viewer._redraw()
+
+        # Unlock everything
+        for obj in objs:
+            obj.lock.release()
+        self.lock.release()
 
 
 

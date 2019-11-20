@@ -31,32 +31,17 @@ class Object:
             return self._parent is not None
 
 
-    def _get_ancestors(self):
-        with self._lock:
-            parent = self._parent
-            if parent is None:
-                return
-            yield parent
-            yield from parent._get_ancestors()
-
-
-    def get_ancestors(self):
-        return tuple(self._get_ancestors())
-
-
-    def find_ancestor(self, kind):
-        assert isclass(kind)
+    def get_ancestor(self, kind):
+        #assert isclass(kind)
         with self._lock:
             parent = self._parent
             if parent is None:
                 return None
-            return parent if isinstance(parent, kind) else parent.find_ancestor(kind)
-
+            return parent if isinstance(parent, kind) else parent.get_ancestor(kind)
 
 
     def get_children(self, kind=None):
-        assert kind is None or isclass(kind)
-
+        #assert kind is None or isclass(kind)
         with self._lock:
             if kind is None:
                 return tuple(self._children)

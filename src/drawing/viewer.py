@@ -161,8 +161,9 @@ class VtkViewer(Object):
     def _redraw(self):
         # Redraw the 3d objects and update the view
         with self.lock:
-            if self._interactor is not None:
-                self._interactor.Render()
+            if self._interactor is None:
+                return
+            self._interactor.Render()
 
 
 
