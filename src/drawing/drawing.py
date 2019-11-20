@@ -12,6 +12,7 @@ from threading import RLock
 from .transform import Transform
 from .object import Object
 from .geometry import Geometry
+from .scene import Scene
 
 
 class Drawing3D(Object):
@@ -22,11 +23,20 @@ class Drawing3D(Object):
     def __init__(self, geometry):
         super().__init__()
 
+        actor = vtkActor()
+
+        # Initialize vtk actor user matrix
+        actor.SetUserMatrix(vtkMatrix4x4())
+        # Set default properties for the actor
+        actor.VisibilityOn()
+
+
         # Initialize internal fields
         self._transform = Transform.identity()
         self._transform_evaluated = np.eye(4).astype(np.float64)
-        self._system = None
         self._geometry = geometry
+        self._actor = actor
+
 
         self.add_event_handler(self._on_object_entered, 'object_entered')
         self.add_child(self._geometry)
@@ -34,8 +44,11 @@ class Drawing3D(Object):
 
 
     def _on_object_entered(self, event_type, source, *args, **kwargs):
-        if self == source or isinstance(source, Geometry):
+        if self == source:
             self._update()
+        elif isinstance(source, Geometry):
+            with self.lock:
+                self._actor.SetMapper(source.get_mapper())
 
 
 
@@ -58,6 +71,15 @@ class Drawing3D(Object):
             self.remove_child(self._geometry)
             self._geometry = geometry
             self.add_child(geometry)
+
+
+    def get_actor(self):
+        '''get_actor() -> vtkActor
+        Get the VTK actor associated to this drawing object
+        :rtype: vtkActor
+
+        '''
+        return self._actor
 
 
 
@@ -157,18 +179,20 @@ class Drawing3D(Object):
     def _update_transform(self):
         # Update transformation
         with self.lock:
-            if self._system is None:
+            scene = self.find_ancestor(Scene)
+            if scene is None:
+                # This drawing object is not attached to any scene yet
                 return
 
             # Compute transformation numerically for this drawing
-            matrix = self._transform.evaluate(self._system)
+            matrix = self._transform.evaluate(scene._system)
 
             # Concatenate transformation of the parent drawing if any
             if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
                 matrix = self.get_parent()._transformation_evaluated @ matrix
 
             self._transform_evaluated = matrix
-            self._geometry.get_actor().GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
+            self._actor.GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
 
 
 
@@ -178,7 +202,7 @@ class Drawing3D(Object):
         '''
         with self.lock:
             # Toggle visibility on
-            self._geometry.get_actor().VisibilityOn()
+            self._actor.VisibilityOn()
             # Fire 'visibility_changed' event
             self.fire_event('visibility_changed')
 
@@ -191,7 +215,7 @@ class Drawing3D(Object):
         '''
         with self.lock:
             # Toggle visibility off
-            self._geometry.get_actor().VisibilityOff()
+            self._actor.VisibilityOff()
             # Fire 'visibility_changed' event
             self.fire_event('visibility_changed')
 

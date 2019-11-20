@@ -5,8 +5,7 @@ Description: This file defines the class Geometry and all its subclasses
 
 from .object import Object
 from threading import RLock
-from vtk import vtkSphereSource, vtkPolyDataMapper, vtkActor
-from vtk import vtkActor, vtkMatrix4x4
+from vtk import vtkSphereSource, vtkPolyDataMapper, vtkActor, vtkMapper
 
 
 
@@ -22,18 +21,8 @@ class Geometry(Object):
         source.SetRadius(float(r))
         mapper = vtkPolyDataMapper()
         mapper.SetInputConnection(source.GetOutputPort())
-        actor = vtkActor()
-        actor.SetMapper(mapper)
-
-        # Initialize vtk actor user matrix
-        actor.SetUserMatrix(vtkMatrix4x4())
-        # Set default properties for the actor
-        actor.VisibilityOn()
-
-        # Initialize internal fields
-        self._actor = actor
+        self._mapper = mapper
 
 
-
-    def get_actor(self):
-        return self._actor
+    def get_mapper(self):
+        return self._mapper

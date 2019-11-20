@@ -7,7 +7,7 @@ from threading import RLock
 from types import SimpleNamespace
 from collections.abc import Iterable, Mapping
 from operator import attrgetter
-from itertools import filterfalse
+from itertools import filterfalse, chain
 from inspect import isclass
 
 
@@ -29,6 +29,29 @@ class Object:
     def has_parent(self):
         with self._lock:
             return self._parent is not None
+
+
+    def _get_ancestors(self):
+        with self._lock:
+            parent = self._parent
+            if parent is None:
+                return
+            yield parent
+            yield from parent._get_ancestors()
+
+
+    def get_ancestors(self):
+        return tuple(self._get_ancestors())
+
+
+    def find_ancestor(self, kind):
+        assert isclass(kind)
+        with self._lock:
+            parent = self._parent
+            if parent is None:
+                return None
+            return parent if isinstance(parent, kind) else parent.find_ancestor(kind)
+
 
 
     def get_children(self, kind=None):

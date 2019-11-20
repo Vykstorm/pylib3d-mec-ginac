@@ -3,7 +3,6 @@
 from .object import Object
 from .viewer import VtkViewer
 from .simulation import Simulation
-from .drawing import Drawing3D
 from .geometry import Geometry
 from threading import RLock
 from operator import methodcaller
@@ -217,24 +216,15 @@ class Scene(Object):
             self._update()
             return
 
-        if isinstance(source, Drawing3D) and event_type == 'object_entered':
-            with source.lock:
-                source._system = self._system
+        if isinstance(source, Drawing3D):
+            if event_type == 'object_entered':
+                with source.lock:
+                    source._system = self._system
+                self._viewer._add_actor(source.get_actor())
 
-        if isinstance(source, (Drawing3D, Geometry)):
-            if event_type in ('object_entered', 'object_exit'):
-                if isinstance(source, Drawing3D):
-                    geometry = source.get_geometry()
-                else:
-                    geometry = source
-                actor = geometry.get_actor()
+            elif event_type == 'object_exit':
+                self._viewer._remove_actor(source.get_actor())
 
-                if event_type == 'object_entered':
-                    self._viewer._add_actor(actor)
-                else:
-                    self._viewer._remove_actor(actor)
-
-            # Any change made by the user in a drawing 3D object will cause a redraw of the whole scene
             self._viewer._redraw()
 
 
@@ -253,3 +243,7 @@ class Scene(Object):
 
             # Redraw scene
             viewer._redraw()
+
+
+# This import is moved here to avoid circular dependencies
+from .drawing import Drawing3D
