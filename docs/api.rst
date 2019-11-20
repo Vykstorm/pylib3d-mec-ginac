@@ -135,18 +135,29 @@ API Reference
         set_simulation_update_frequency, set_simulation_time_multiplier,
         start_simulation, stop_simulation, resume_simulation, pause_simulation,
         are_drawings_shown, show_drawings, hide_drawings,
-        purge_drawings, add_drawing, update
+        purge_drawings, add_drawing,
+        get_background_color, set_background_color
+
+
+
+.. autoclass:: lib3d_mec_ginac.drawing.viewer.VtkViewer
+    :members:
+        open, close,
+        is_open, is_closed,
+        set_title
+
 
 
 
 .. autoclass:: Drawing3D
     :members:
-        get_actor, get_children, get_parent, add_child,
+        get_geometry, set_geometry, get_actor,
         get_transform, set_transform, clear_transform,
         rotate, scale, translate, rotate_to_dir,
-        update, update_children, update_transform,
         show, hide,
-        transform
+        get_color, set_color,
+        transform, color
+
 
 
 .. autoclass:: Timer
@@ -162,6 +173,8 @@ API Reference
     :members:
 
 
+.. autoclass:: Color
+
 
 .. autoclass:: Transform
     :members:
@@ -173,14 +186,6 @@ API Reference
     :members:
 
 
-
-.. autoclass:: lib3d_mec_ginac.drawing.viewer.VtkViewer
-    :members:
-        open, close,
-        is_open, is_closed,
-        redraw,
-        set_title,
-        add_actor, remove_actor, remove_all_actors
 
 
 
