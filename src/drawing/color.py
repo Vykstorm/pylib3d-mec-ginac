@@ -56,7 +56,7 @@ class Color(Object):
             if len(x) != 4:
                 raise ValueError('Invalid number of color components specified')
             self._values = x
-            self.fire_event('color_changed')
+            self.fire_event('changed')
 
 
     def set(self, *args):

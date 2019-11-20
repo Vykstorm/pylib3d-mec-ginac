@@ -101,7 +101,7 @@ class Scene(Object):
         '''get_drawings() -> List[Drawing3D]
         Get all the drawings previously created in the scene
         '''
-        return self.get_children(kind=Drawing3D)
+        return self._viewer.get_children(kind=Drawing3D)
 
 
 
@@ -181,11 +181,13 @@ class Scene(Object):
         '''purge_drawings()
         Remove all the drawing objects created previously
         '''
+        raise NotImplementedError()
         viewer = self._viewer
         with self:
             drawings = self.get_drawings()
             # Clear drawings
-            drawings.clear()
+            # TODO
+            #drawings.clear()
             # Remove all vtk actors in the viewer
             viewer._remove_all_actors()
             # Redraw
@@ -218,7 +220,7 @@ class Scene(Object):
         '''
         if not isinstance(drawing, Drawing3D):
             raise TypeError('Input argument must be a Drawing3D instance')
-        self.add_child(drawing)
+        self._viewer.add_child(drawing)
 
 
 
@@ -240,13 +242,13 @@ class Scene(Object):
 
         if isinstance(source, Drawing3D):
             if event_type == 'object_entered':
-                viewer._add_actor(source.get_actor())
+                viewer._add_actor(source.get_handler())
 
             elif event_type == 'object_exit':
-                viewer._remove_actor(source.get_actor())
+                viewer._remove_actor(source.get_handler())
 
         # Redraw the scene if a drawing object property, geometry or color changed
-        if isinstance(source, (Drawing3D, Color)):
+        if isinstance(source, (Drawing3D, Color, Geometry)):
             viewer._redraw()
 
 
