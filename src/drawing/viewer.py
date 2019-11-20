@@ -4,6 +4,7 @@ from threading import RLock
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
 from vtk import vtkGenericRenderWindowInteractor
 from .object import Object
+from .color import Color
 
 
 
@@ -22,15 +23,27 @@ class VtkViewer(Object):
         # Set default camera position
         renderer.GetActiveCamera().SetPosition(5, 5, 5)
 
-        # Set default background color
-        renderer.SetBackground(1, 1, 1)
-
-
         # Initialize internal fields
         self._interactor, self._window = None, None
         self._title = ''
         self._renderer = renderer
+        self._color = Color()
 
+        # Initialize background color
+        renderer.SetBackground(*self._color.rgb)
+        renderer.SetBackgroundAlpha(self._color.a)
+
+        self.add_child(self._color)
+        self._color.add_event_handler(self._on_background_color_changed, 'color_changed')
+
+
+
+    def _on_background_color_changed(self, *args, **kwargs):
+        renderer = self._renderer
+        renderer.SetBackground(*self._color.rgb)
+        renderer.SetBackgroundAlpha(self._color.a)
+        self._redraw()
+        return True
 
 
 
@@ -121,6 +134,27 @@ class VtkViewer(Object):
                 self._window.SetWindowName(title)
                 self._interactor.Render()
             self.fire_event('title_changed', title)
+
+
+
+
+    def get_background_color(self):
+        '''get_background_color() -> Color
+        Get the background color of the viewer
+
+        :rtype: Color
+
+        '''
+        return self._color
+
+
+    def set_background_color(self, *args):
+        '''set_background_color(...)
+        Set the background color of the viewer
+        '''
+        self._color.set(*args)
+
+
 
 
 

@@ -194,6 +194,25 @@ class Scene(Object):
 
 
 
+    def get_background_color(self):
+        '''get_background_color() -> Color
+        Get the background color of the viewer
+
+        :rtype: Color
+
+        '''
+        return self._viewer.get_background_color()
+
+
+
+    def set_background_color(self, *args):
+        '''set_background_color(...)
+        Change the background color of the viewer
+        '''
+        self._viewer.set_background_color(*args)
+
+
+
     def add_drawing(self, drawing):
         '''add_drawing(drawing: Drawing3D)
         Add a new drawing object to the scene
@@ -226,6 +245,7 @@ class Scene(Object):
             elif event_type == 'object_exit':
                 self._viewer._remove_actor(source.get_actor())
 
+        # Redraw the scene if a drawing object property, geometry or color changed
         if isinstance(source, (Drawing3D, Color)):
             self._viewer._redraw()
 
@@ -245,6 +265,8 @@ class Scene(Object):
 
             # Redraw scene
             viewer._redraw()
+
+
 
 
 # This import is moved here to avoid circular dependencies

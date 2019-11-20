@@ -120,7 +120,9 @@ class Object:
                 if handler.event_type is not None and handler.event_type != event_type:
                     continue
                 callback = handler.callback
-                callback(event_type, source, *args, **kwargs)
+                if callback(event_type, source, *args, **kwargs):
+                    # Event handler cancelled the event
+                    return
 
             # Propagate the event from bottom to top
             if self._parent is not None:
