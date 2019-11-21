@@ -294,18 +294,24 @@ class Scene(Object):
 
 
 
-    def draw_vector(self, vector, *args, **kwargs):
+    def draw_vector(self, point, vector, *args, **kwargs):
         # Validate & parse point argument
         if not isinstance(vector, (Vector3D, str)):
-            raise TypeError('Input argument must be a Vector3D or str instance')
+            raise TypeError('vector argument must be a Vector3D or str instance')
+        if not isinstance(point, (Point, str)):
+            raise TypeError('point argument must be a Point or str instance')
+
         if isinstance(vector, str):
             vector = self._system.get_vector(vector)
+        if isinstance(point, str):
+            point = self._system.get_point(point)
 
         # Create a vector drawing
         drawing = VectorDrawing(*args, **kwargs)
 
         # Setup drawing transformation
         self._apply_vector_transform(drawing, vector)
+        self._apply_point_transform(drawing, point)
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
@@ -314,6 +320,12 @@ class Scene(Object):
 
 
 
+    def draw_position_vector(self, a, b, *args, **kwargs):
+        return self.draw_vector(a, self._system.position_vector(a, b), *args, **kwargs)
+
+
+    def draw_velocity_vector(self, frame, point):
+        return self.draw_vector(point, self._system.velocity_vector(frame, point))
 
 
 
