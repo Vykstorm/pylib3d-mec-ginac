@@ -8,7 +8,7 @@ from .color import Color
 from .transform import Transform
 from operator import methodcaller
 from itertools import chain
-from lib3d_mec_ginac_ext import Vector3D, Point
+from lib3d_mec_ginac_ext import Vector3D, Point, Frame
 
 
 
@@ -256,6 +256,30 @@ class Scene(Object):
 
 
 
+    def draw_frame(self, frame, *args, **kwargs):
+        # Validate & parse point argument
+        if not isinstance(frame, (Frame, str)):
+            raise TypeError('Input argument must be a Point or str instance')
+        if isinstance(frame, str):
+            frame = self._system.get_frame(frame)
+
+        # Create a frame drawing
+        drawing = FrameDrawing(*args, **kwargs)
+
+        # Setup drawing transformation
+        drawing.add_transform(self._get_point_transform(frame.get_point()))
+
+        # Add the drawing to the scene
+        self.add_drawing(drawing)
+
+        return drawing
+
+
+
+    def draw_vector(self, vector, *args, **kwargs):
+        pass
+
+
 
 
 
@@ -305,4 +329,4 @@ class Scene(Object):
 
 
 # This import is moved here to avoid circular dependencies
-from .drawing import Drawing3D, PointDrawing, VectorDrawing
+from .drawing import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
