@@ -9,6 +9,8 @@ from lib3d_mec_ginac_ext import Matrix
 from vtk import vtkProp, vtkMatrix4x4, vtkActor
 import numpy as np
 from math import radians
+from itertools import chain
+from operator import methodcaller
 from .transform import Transform
 from .object import VtkObjectWrapper
 from .geometry import Geometry, Sphere, Cylinder, Cone
@@ -260,11 +262,12 @@ class Drawing3D(VtkObjectWrapper):
 
     def show(self):
         '''show()
-        Toogle visibility on for this drawing object
+        Toogle visibility on for this drawing object (and all child drawings)
         '''
         with self:
-            # Toggle visibility on
-            self.get_handler().VisibilityOn()
+            actors = map(methodcaller('get_handler'), chain([self], self.get_predecessors(Drawing3D)))
+            for actor in actors:
+                actor.VisibilityOn()
             # Fire 'visibility_changed' event
             self.fire_event('visibility_changed')
 
@@ -272,11 +275,12 @@ class Drawing3D(VtkObjectWrapper):
 
     def hide(self):
         '''hide()
-        Toggle visibility off for this drawing object
+        Toggle visibility off for this drawing object (and all child drawings)
         '''
         with self:
-            # Toggle visibility off
-            self.get_handler().VisibilityOff()
+            actors = map(methodcaller('get_handler'), chain([self], self.get_predecessors(Drawing3D)))
+            for actor in actors:
+                actor.VisibilityOff()
             # Fire 'visibility_changed' event
             self.fire_event('visibility_changed')
 
