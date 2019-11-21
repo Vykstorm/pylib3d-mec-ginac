@@ -44,7 +44,7 @@ def _parse_vector3(x, argname=None):
             if len(x) != 3:
                 raise TypeError
     except TypeError:
-        if argame is None:
+        if argname is None:
             raise TypeError('Input argument must be a list with three number values')
         raise TypeError(f'Invalid number of components specified for {argname}')
 

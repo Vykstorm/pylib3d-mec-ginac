@@ -20,7 +20,7 @@ class VtkViewer(Object):
         renderer = vtkRenderer()
 
         # Set default camera position
-        renderer.GetActiveCamera().SetPosition(5, 5, 5)
+        renderer.GetActiveCamera().SetPosition(3, 2, 3)
 
         # Initialize internal fields
         self._interactor, self._window = None, None

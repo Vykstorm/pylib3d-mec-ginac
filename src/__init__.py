@@ -36,14 +36,14 @@ from .drawing.scene import Scene
 from .drawing.timer import Timer, OneShotTimer
 from .drawing.transform import Transform, ComposedTransform
 from .drawing.viewer import VtkViewer as Viewer
-from .drawing.drawing import Drawing3D
+from .drawing.drawing import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .drawing.geometry import Geometry, Sphere, Cube, Cone, Cylinder, Line, LineStrip
 from .drawing.geometry import read_stl, write_stl
 from .drawing.color import Color
 
 __all__.extend([
-    'Scene', 'Timer', 'OneShotTimer', 'Transform',
-    'ComposedTransform', 'Viewer', 'Drawing3D', 'Color',
+    'Scene', 'Timer', 'OneShotTimer', 'Transform', 'ComposedTransform', 'Viewer', 'Color',
+    'Drawing3D', 'PointDrawing', 'FrameDrawing', 'VectorDrawing',
     'Geometry', 'Sphere', 'Cube', 'Cone', 'Cylinder', 'Line', 'LineStrip',
     'read_stl', 'write_stl'])
 

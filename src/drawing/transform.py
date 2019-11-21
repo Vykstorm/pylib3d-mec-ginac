@@ -3,7 +3,7 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the class Transform
 '''
 
-from lib3d_mec_ginac_ext import Matrix, SymbolNumeric, Expr
+from lib3d_mec_ginac_ext import Matrix, SymbolNumeric, Expr, cos, sin
 import numpy as np
 from collections.abc import Iterable
 from itertools import repeat, chain
@@ -196,6 +196,64 @@ class Transform:
             m[0:3, 0:3] = matrix
 
         return cls(m)
+
+
+
+
+    @classmethod
+    def rotation_over_axis(cls, phi, axis):
+        if not isinstance(phi, (SymbolNumeric, Expr)):
+            try:
+                phi = float(phi)
+            except TypeError:
+                raise TypeError('phi must be symbol, expression or number')
+        else:
+            phi = Expr(phi)
+
+        try:
+            axis = tuple(axis)
+            if len(axis) != 3:
+                raise TypeError
+        except TypeError:
+            raise TypeError('axis must be a list of three values')
+
+        if not any(map(lambda value: isinstance(value, (SymbolNumeric, Expr)), axis)):
+            try:
+                axis = tuple(map(float, axis))
+            except TypeError:
+                raise TypeError('axis must be a list of three values (symbols, expresssions or numbers)')
+        else:
+            axis = tuple(map(Expr, axis))
+
+
+        if isinstance(phi, Expr) or any(map(lambda value: isinstance(value, Expr), axis)):
+            axis, phi = Matrix(shape=(1, 3), values=axis), Expr(phi)
+            axis_skew = axis.get_skew()
+            return cls.rotation(Matrix.eye(3) + sin(phi) * axis_skew + (1 - cos(phi)) * (axis_skew * axis_skew))
+
+        a, b, c = axis
+        sp, cp = sin(phi), cos(phi)
+        return cls.rotation(np.array([
+            [1+(-1+cp)*(b**2+c**2),  -sp*c-(-1+cp)*a*b,      -(-1+cp)*a*c+sp*b],
+            [sp*c-(-1+cp)*a*b,       1+(-1+cp)*(c**2+a**2),  -sp*a-(-1+cp)*b*c],
+            [-(-1+cp)*a*c-sp*b,      sp*a-(-1+cp)*b*c,       1+(-1+cp)*(b**2+a**2)]
+        ] ,dtype=np.float64))
+
+
+
+    @classmethod
+    def xrotation(cls, phi):
+        return cls.rotation_over_axis(phi, (1, 0, 0))
+
+    @classmethod
+    def yrotation(cls, phi):
+        return cls.rotation_over_axis(phi, (0, 1, 0))
+
+    @classmethod
+    def zrotation(cls, phi):
+        return cls.rotation_over_axis(phi, (0, 0, 1))
+
+
 
 
 

@@ -60,8 +60,10 @@ class Color(Object):
 
 
     def set(self, *args):
-        if len(args) not in (0, 3, 4):
+        if len(args) not in (0, 1, 3, 4):
             raise TypeError('Invalid number of arguments specified')
+        if len(args) == 1:
+            args = args[0]
         if len(args) == 3:
             self.rgba = chain(args, [1])
         elif len(args) == 4:

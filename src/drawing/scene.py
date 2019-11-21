@@ -241,11 +241,14 @@ class Scene(Object):
         viewer = self._viewer
 
         if isinstance(source, Drawing3D):
+            actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
             if event_type == 'object_entered':
-                viewer._add_actor(source.get_handler())
+                for actor in actors:
+                    viewer._add_actor(actor)
 
             elif event_type == 'object_exit':
-                viewer._remove_actor(source.get_handler())
+                for actor in actors:
+                    viewer._remove_actor(actor)
 
         # Redraw the scene if a drawing object property, geometry or color changed
         if isinstance(source, (Drawing3D, Color, Geometry)):

@@ -8,11 +8,14 @@ This script implements the class Drawing3D
 from lib3d_mec_ginac_ext import Matrix
 from vtk import vtkProp, vtkMatrix4x4, vtkActor
 import numpy as np
+from math import radians
 from .transform import Transform
 from .object import VtkObjectWrapper
-from .geometry import Geometry, Sphere
+from .geometry import Geometry, Sphere, Cylinder, Cone
 from .scene import Scene
 from .color import Color
+
+
 
 
 class Drawing3D(VtkObjectWrapper):
@@ -23,8 +26,6 @@ class Drawing3D(VtkObjectWrapper):
     def __init__(self, geometry=None):
         if geometry is not None and not isinstance(geometry, Geometry):
             raise TypeError('geometry must be an instance of the class Geometry')
-        if geometry is None:
-            geometry = Sphere()
 
         actor = vtkActor()
         super().__init__(actor)
@@ -47,7 +48,8 @@ class Drawing3D(VtkObjectWrapper):
         # Add event handlers & child objects
         self.add_event_handler(self._on_object_entered, 'object_entered')
         self._color.add_event_handler(self._on_color_changed, 'changed')
-        self.add_child(self._geometry)
+        if geometry is not None:
+            self.add_child(geometry)
         self.add_child(self._color)
 
 
@@ -60,6 +62,7 @@ class Drawing3D(VtkObjectWrapper):
             # A geometry object was attached to this drawing object
             with self:
                 self.get_handler().SetMapper(source.get_handler())
+
 
 
     def _on_color_changed(self, *args, **kwargs):
@@ -80,8 +83,8 @@ class Drawing3D(VtkObjectWrapper):
 
     def get_geometry(self):
         '''get_geometry() -> Geometry
-        Get the geometry associated to this drawing object
-        :rtype: vtkProp
+        Get the geometry associated to this drawing object if any. False otherwise
+        :rtype: Geometry
 
         '''
         with self:
@@ -94,7 +97,8 @@ class Drawing3D(VtkObjectWrapper):
         Change the geometry associated to this drawing object
         '''
         with self:
-            self.remove_child(self._geometry)
+            if self._geometry is not None:
+                self.remove_child(self._geometry)
             self._geometry = geometry
             self.add_child(geometry)
 
@@ -141,8 +145,50 @@ class Drawing3D(VtkObjectWrapper):
         Add a new rotation transformation to this drawing object
         '''
         with self:
+            rotation = Transform.rotate(*args, **kwargs)
             # Change drawing transformation
-            self.set_transform(self._transform.concatenate(Transform.rotate(*args, **kwargs)))
+            self.set_transform(rotation.concatenate(self._transform))
+
+
+    def rotate_over_axis(self, *args, **kwargs):
+        '''rotate_over_axis(...)
+        Add a new rotation tranformation (over the given axis) to this drawing object
+        '''
+        with self:
+            rotation = Transform.rotation_over_axis(*args, **kwargs)
+            # Change drawing transformation
+            self.set_transform(rotation.concatenate(self._transform))
+
+
+
+    def xrotate(self, *args, **kwargs):
+        '''xrotate(...)
+        Add a new rotation tranformation (over the x axis) to this drawing object
+        '''
+        with self:
+            rotation = Transform.xrotation(*args, **kwargs)
+            # Change drawing transformation
+            self.set_transform(rotation.concatenate(self._transform))
+
+
+    def yrotate(self, *args, **kwargs):
+        '''yrotate(...)
+        Add a new rotation tranformation (over the y axis) to this drawing object
+        '''
+        with self:
+            rotation = Transform.yrotation(*args, **kwargs)
+            # Change drawing transformation
+            self.set_transform(rotation.concatenate(self._transform))
+
+
+    def zrotate(self, *args, **kwargs):
+        '''zrotate(...)
+        Add a new rotation tranformation (over the z axis) to this drawing object
+        '''
+        with self:
+            rotation = Transform.zrotation(*args, **kwargs)
+            # Change drawing transformation
+            self.set_transform(rotation.concatenate(self._transform))
 
 
 
@@ -152,8 +198,9 @@ class Drawing3D(VtkObjectWrapper):
 
         '''
         with self:
+            scale = Transform.scale(*args, **kwargs)
             # Change drawing transformation
-            self.set_transform(self._transform.concatenate(Transform.scale(*args, **kwargs)))
+            self.set_transform(scale.concatenate(self._transform))
 
 
 
@@ -162,8 +209,9 @@ class Drawing3D(VtkObjectWrapper):
         Add a new translation transformation to this drawing object
         '''
         with self:
+            translation = Transform.translation(*args, **kwargs)
             # Change drawing transformation
-            self.set_transform(self._transform.concatenate(Transform.translation(*args, **kwargs)))
+            self.set_transform(translation.concatenate(self._transform))
 
 
 
@@ -172,8 +220,9 @@ class Drawing3D(VtkObjectWrapper):
         Add a new rotation transformation (to vector direction) to this drawing object
         '''
         with self:
+            rotation = Transform.rotation_from_dir(*args, **kwargs)
             # Change drawing transformation
-            self.set_transform(self._transform.concatenate(Transform.rotation_from_dir(*args, **kwargs)))
+            self.set_transform(rotation.concatenate(self._transform))
 
 
 
@@ -209,7 +258,7 @@ class Drawing3D(VtkObjectWrapper):
 
             # Concatenate transformation of the parent drawing if any
             if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
-                matrix = self.get_parent()._transformation_evaluated @ matrix
+                matrix = self.get_parent()._transform_evaluated @ matrix
 
             self._transform_evaluated = matrix
 
@@ -302,3 +351,103 @@ class Drawing3D(VtkObjectWrapper):
     @geometry.setter
     def geometry(self, x):
         self.set_geometry(x)
+
+
+
+
+
+
+
+class PointDrawing(Drawing3D):
+    def __init__(self, radius=0.06, resolution=15, color=(1, 1, 1)):
+        super().__init__(
+            Sphere(radius=radius, resolution=resolution)
+        )
+        self.set_color(color)
+
+
+
+class VectorDrawing(Drawing3D):
+    def __init__(self,
+        shaft_radius=0.03, tip_radius=0.1,
+        shaft_resolution=10, tip_resolution=15,
+        shaft_color=(1, 1, 1), tip_color=(1, 1, 0)):
+        super().__init__()
+
+        shaft_size = 0.8
+        tip_size = 1 - shaft_size
+        shaft = Drawing3D(
+            Cylinder(
+                radius=shaft_radius, resolution=shaft_resolution, height=shaft_size,
+                center=(0, shaft_size/2, 0)
+            )
+        )
+        tip = Drawing3D(
+            Cone(
+                radius=tip_radius, resolution=tip_resolution, height=tip_size,
+                direction=(0, 1, 0), center=(0, shaft_size+tip_size/2, 0)
+            )
+        )
+        # Setup drawings properties
+        shaft.set_color(shaft_color)
+        tip.set_color(tip_color)
+
+        # Add child drawings
+        self.add_child(shaft)
+        self.add_child(tip)
+
+        # Setup transformations
+        self.zrotate(radians(-90))
+
+        # Initialize internal fields
+        self.shaft, self.tip = shaft, tip
+
+
+
+
+
+class FrameDrawing(Drawing3D):
+    def __init__(self,
+        axis_shaft_radius=0.03, axis_tip_radius=0.1, origin_radius=0.06,
+        axis_shaft_resolution=10, axis_tip_resolution=15, origin_resolution=15,
+        axis_shaft_color=(1, 1, 1), axis_tip_colors=((1, 0, 0), (0, 1, 0), (0, 0, 1)), origin_color=(1, 1, 1)):
+
+        try:
+            axis_tip_colors = tuple(axis_tip_colors)
+            if len(axis_tip_colors) != 3:
+                raise TypeError
+        except TypeError:
+            raise TypeError('axis_tip_colors must be a list of three colors')
+
+
+        super().__init__()
+
+        # Create x, y and z axis
+        def create_axis(tip_color):
+            return VectorDrawing(
+                shaft_radius=axis_shaft_radius, tip_radius=axis_tip_radius,
+                shaft_resolution=axis_shaft_resolution, tip_resolution=axis_tip_resolution,
+                shaft_color=axis_shaft_color, tip_color=tip_color
+            )
+
+        x_axis, y_axis, z_axis = map(create_axis, axis_tip_colors)
+
+        # Create origin
+        origin = PointDrawing(
+            radius=origin_radius, resolution=origin_resolution, color=origin_color
+        )
+
+
+        # Setup transformations
+        y_axis.zrotate(radians(90))
+        z_axis.yrotate(radians(-90))
+
+        # Add child drawings
+        self.add_child(x_axis)
+        self.add_child(y_axis)
+        self.add_child(z_axis)
+        self.add_child(origin)
+
+        # Initialize internal fields
+        self.x_axis, self.y_axis, self.z_axis = x_axis, y_axis, z_axis
+        self.origin = origin
