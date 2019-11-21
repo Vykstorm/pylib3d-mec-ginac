@@ -5,8 +5,11 @@ from .viewer import VtkViewer
 from .simulation import Simulation
 from .geometry import Geometry
 from .color import Color
+from .transform import Transform
 from operator import methodcaller
 from itertools import chain
+from lib3d_mec_ginac_ext import Vector3D, Point
+
 
 
 class Scene(Object):
@@ -224,12 +227,37 @@ class Scene(Object):
 
 
 
+    def _get_point_transform(self, point):
+        system = self._system
+        OC = system.position_vector(system.O, point)
+        base = OC.get_base()
+        R = system.rotation_matrix(system.xyz, base)
+        T = R * OC
+        return Transform.translation(T) & Transform.rotation(R)
 
-    def draw_point(self, *args, **kwargs):
-        # Create point drawing
-        # Add point to drawing to the scene
-        # TODO
-        pass
+
+    def draw_point(self, point, *args, **kwargs):
+        # Validate & parse point argument
+        if not isinstance(point, (Point, str)):
+            raise TypeError('Input argument must be a Point or str instance')
+        if isinstance(point, str):
+            point = self._system.get_point(point)
+
+        # Create a point drawing
+        drawing = PointDrawing(*args, **kwargs)
+
+        # Setup drawing transformation
+        drawing.add_transform(self._get_point_transform(point))
+
+        # Add the drawing to the scene
+        self.add_drawing(drawing)
+
+        return drawing
+
+
+
+
+
 
 
     def _event_handler(self, event_type, source, *args, **kwargs):
@@ -277,4 +305,4 @@ class Scene(Object):
 
 
 # This import is moved here to avoid circular dependencies
-from .drawing import Drawing3D
+from .drawing import Drawing3D, PointDrawing, VectorDrawing

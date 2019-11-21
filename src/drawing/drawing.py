@@ -140,24 +140,30 @@ class Drawing3D(VtkObjectWrapper):
 
 
 
+    def add_transform(self, transform):
+        '''
+        Add a new transformation to this drawing object
+        '''
+        if not isinstance(transform, Transform):
+            raise TypeError('Input argument must be a Transform instance')
+        with self:
+            self.set_transform(transform.concatenate(self._transform))
+
+
+
     def rotate(self, *args, **kwargs):
         '''rotate(...)
         Add a new rotation transformation to this drawing object
         '''
-        with self:
-            rotation = Transform.rotate(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(rotation.concatenate(self._transform))
+        self.add_transform(Transform.rotate(*args, **kwargs))
+
 
 
     def rotate_over_axis(self, *args, **kwargs):
         '''rotate_over_axis(...)
         Add a new rotation tranformation (over the given axis) to this drawing object
         '''
-        with self:
-            rotation = Transform.rotation_over_axis(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(rotation.concatenate(self._transform))
+        self.add_transform(Transform.rotation_over_axis(*args, **kwargs))
 
 
 
@@ -165,30 +171,23 @@ class Drawing3D(VtkObjectWrapper):
         '''xrotate(...)
         Add a new rotation tranformation (over the x axis) to this drawing object
         '''
-        with self:
-            rotation = Transform.xrotation(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(rotation.concatenate(self._transform))
+        self.add_transform(Transform.xrotation(*args, **kwargs))
+
 
 
     def yrotate(self, *args, **kwargs):
         '''yrotate(...)
         Add a new rotation tranformation (over the y axis) to this drawing object
         '''
-        with self:
-            rotation = Transform.yrotation(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(rotation.concatenate(self._transform))
+        self.add_transform(Transform.yrotation(*args, **kwargs))
+
 
 
     def zrotate(self, *args, **kwargs):
         '''zrotate(...)
         Add a new rotation tranformation (over the z axis) to this drawing object
         '''
-        with self:
-            rotation = Transform.zrotation(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(rotation.concatenate(self._transform))
+        self.add_transform(Transform.zrotation(*args, **kwargs))
 
 
 
@@ -197,10 +196,7 @@ class Drawing3D(VtkObjectWrapper):
         Add a new scale transformation to this drawing object
 
         '''
-        with self:
-            scale = Transform.scale(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(scale.concatenate(self._transform))
+        self.add_transform(Transform.scale(*args, **kwargs))
 
 
 
@@ -208,10 +204,7 @@ class Drawing3D(VtkObjectWrapper):
         '''translate(...)
         Add a new translation transformation to this drawing object
         '''
-        with self:
-            translation = Transform.translation(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(translation.concatenate(self._transform))
+        self.add_transform(Transform.translation(*args, **kwargs))
 
 
 
@@ -219,10 +212,8 @@ class Drawing3D(VtkObjectWrapper):
         '''rotate_to_dir(...)
         Add a new rotation transformation (to vector direction) to this drawing object
         '''
-        with self:
-            rotation = Transform.rotation_from_dir(*args, **kwargs)
-            # Change drawing transformation
-            self.set_transform(rotation.concatenate(self._transform))
+        self.add_transform(Transform.rotation_from_dir(*args, **kwargs))
+
 
 
 
