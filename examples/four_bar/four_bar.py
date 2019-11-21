@@ -1,11 +1,20 @@
 
 
 ## Imports
-from lib3d_mec_ginac import *
+#from lib3d_mec_ginac import *
+
+from os.path import join, dirname, abspath
+import sys
+
+sys.path.insert(0, abspath(join(dirname(__file__), '../..')))
+from src import *
+
+
+
 from math import pi, e
 
 
-#enable_atomization()
+disable_atomization()
 
 
 # Set gravity value
@@ -267,3 +276,28 @@ beta_init = subs(beta_init, ddq_aux, 0)
 
 Extra_Dyn_Eq_eq = Matrix([dtheta1, ddtheta1]).transpose()
 Dyn_Eq_eq_VP = Matrix.block(5, 1, Dyn_eq_L, ddPhi, dPhi, Phi, Extra_Dyn_Eq_eq)
+
+
+
+######## Drawings ########
+
+
+draw_frame('abs')
+
+draw_frame('Arm1')
+draw_frame('Arm2')
+draw_frame('Arm3')
+#drawing = draw_solid('Arm2', 'cube.stl')
+
+
+draw_point('O')
+draw_point('A')
+draw_point('B')
+draw_point('C')
+draw_point('O2')
+
+draw_position_vector('O', 'B')
+draw_position_vector('OL2', 'OL3')
+
+
+show_drawings()
