@@ -49,7 +49,72 @@ def _parse_vector3(x, argname):
 
 
 
-class Geometry(VtkObjectWrapper):
+
+_geometry_properties = {
+    'radius': {
+        'getter': 'get_radius',
+        'setter': 'set_radius',
+        'parser': partial(_parse_size, argname='radius')
+    },
+    'height': {
+        'getter': 'get_height',
+        'setter': 'set_height',
+        'parser': partial(_parse_size, argname='height')
+    },
+    'direction': {
+        'getter': 'get_direction',
+        'setter': 'set_direction',
+        'parser': partial(_parse_vector3, argname='direction')
+    },
+    'center': {
+        'getter': 'get_center',
+        'setter': 'set_center',
+        'parser': partial(_parse_vector3, argname='center')
+    },
+    'resolution': {
+        'getter': 'get_resolution',
+        'setter': 'set_resolution',
+        'parser': _parse_resolution
+    }
+}
+
+
+
+class GeometryMeta(type):
+    # Metaclass for the class Geometry
+    def _register_property(cls, name):
+        assert name in _geometry_properties
+
+        getter, setter, parse = map(_geometry_properties[name].__getitem__, ('getter', 'setter', 'parser'))
+        vtk_getter, vtk_setter = map(lambda name: name.title().replace('_', ''), (getter, setter))
+        property_changed_event = f'{name}_changed'
+
+        if not hasattr(cls, getter):
+            def fget(self):
+                assert self._source is not None
+                func = getattr(self._source, vtk_getter)
+                with self:
+                    return func()
+
+            setattr(cls, getter, fget)
+
+        if not hasattr(cls, setter):
+            def fset(self, value):
+                assert self._source is not None
+                func = getattr(self._source, vtk_setter)
+                with self:
+                    func(parse(value))
+                    self.fire_event(property_changed_event)
+
+            setattr(cls, setter, fset)
+
+        if not hasattr(cls, name):
+            setattr(cls, name, property(fget=getattr(cls, getter), fset=getattr(cls, setter)))
+
+
+
+
+class Geometry(VtkObjectWrapper, metaclass=GeometryMeta):
     '''
     Instances of this class represents a 3D geometry mesh.
     '''
@@ -60,9 +125,14 @@ class Geometry(VtkObjectWrapper):
         if isinstance(handler, vtkAlgorithm):
             mapper = vtkPolyDataMapper()
             mapper.SetInputConnection(handler.GetOutputPort())
+            self._source = handler
         else:
+            self._source = None
             mapper = handler
         super().__init__(mapper)
+
+
+
 
 
 
@@ -72,54 +142,29 @@ class Sphere(Geometry):
     This represents a sphere geometry
     '''
     def __init__(self, radius=1, center=(0, 0, 0), resolution=15):
-        source = vtkSphereSource()
-        super().__init__(source)
-        self._source = source
+        super().__init__(vtkSphereSource())
         self.set_radius(radius)
-        self.set_resolution(resolution)
+        #self.set_resolution(resolution)
         self.set_center(center)
-
-
-    def get_radius(self):
-        with self:
-            return self._source.GetRadius()
+        self.set_resolution(resolution)
 
 
     def get_resolution(self):
         with self:
-            return self._source.GetPhiResolution()
-
-
-    def set_radius(self, radius):
-        radius = _parse_size(radius, 'radius')
-        with self:
-            self._source.SetRadius(radius)
-            self.fire_event('radius_changed')
+            return self._source.GetThetaResolution()
 
 
     def set_resolution(self, resolution):
         resolution = _parse_resolution(resolution)
         with self:
-            self._source.SetPhiResolution(resolution)
             self._source.SetThetaResolution(resolution)
+            self._source.SetPhiResolution(resolution)
             self.fire_event('resolution_changed')
 
 
-    def get_center(self):
-        with self:
-            return self._source.GetCenter()
-
-
-    def set_center(self, *args):
-        center = _parse_vector3(args, 'center')
-        with self:
-            self._source.SetCenter(*center)
-            self.fire_event('center_changed')
-
-
-    radius = property(fget=get_radius, fset=set_radius)
-    resolution = property(fget=get_resolution, fset=set_resolution)
-    center = property(fget=get_center, fset=set_center)
+Sphere._register_property('radius')
+Sphere._register_property('center')
+Sphere._register_property('resolution')
 
 
 
@@ -130,9 +175,7 @@ class Cube(Geometry):
     This represents a cube geometry
     '''
     def __init__(self, size=1, center=(0, 0, 0)):
-        source = vtkCubeSource()
-        super().__init__(source)
-        self._source = source
+        super().__init__(vtkCubeSource())
         self.set_size(size)
         self.set_center(center)
 
@@ -177,20 +220,10 @@ class Cube(Geometry):
             self.fire_event('size_changed')
 
 
-    def get_center(self):
-        with self:
-            return self._source.GetCenter()
-
-
-    def set_center(self, *args):
-        center = _parse_vector3(args, 'center')
-        with self:
-            self._source.SetCenter(*center)
-            self.fire_event('center_changed')
-
-
     size = property(fget=get_size, fset=set_size)
-    center = property(fget=get_center, fset=set_center)
+
+Cube._register_property('center')
+
 
 
 
@@ -201,102 +234,44 @@ class Cylinder(Geometry):
     Represents a cylinder geometry
     '''
     def __init__(self, height=1, radius=0.25, center=(0, 0, 0), resolution=15):
-        source = vtkCylinderSource()
-        super().__init__(source)
-        self._source = source
+        super().__init__(vtkCylinderSource())
         self.set_height(height)
         self.set_radius(radius)
         self.set_resolution(resolution)
         self.set_center(center)
 
 
-    def get_height(self):
-        with self:
-            return self._source.GetHeight()
-
-
-    def set_height(self, height):
-        height = _parse_size(height, 'height')
-        with self:
-            self._source.SetHeight(height)
-            self.fire_event('height_changed')
-
-
-    def get_radius(self):
-        with self:
-            return self._source.GetRadius()
-
-
-    def set_radius(self, radius):
-        radius = _parse_size(radius, 'radius')
-        with self:
-            self._source.SetRadius(radius)
-            self.fire_event('radius_changed')
-
-
-    def get_resolution(self):
-        with self:
-            return self._source.GetResolution()
-
-
-    def set_resolution(self, resolution):
-        resolution = _parse_resolution(resolution)
-        with self:
-            self._source.SetResolution(resolution)
-            self.fire_event('resolution_changed')
-
-
-    def get_center(self):
-        with self:
-            return self.GetCenter()
-
-    def set_center(self, *args):
-        center = _parse_vector3(args, 'center')
-        with self:
-            self._source.SetCenter(*center)
-            self.fire_event('center_changed')
-
-
-    radius = property(fget=get_radius, fset=set_radius)
-    height = property(fget=get_height, fset=set_height)
-    resolution = property(fget=get_resolution, fset=set_resolution)
-    center = property(fget=get_center, fset=set_center)
+Cylinder._register_property('height')
+Cylinder._register_property('radius')
+Cylinder._register_property('resolution')
+Cylinder._register_property('center')
 
 
 
 
-class Cone(Cylinder):
+class Cone(Geometry):
     def __init__(self, height=1, radius=0.25, center=(0, 0, 0), direction=(1, 0, 0), resolution=15):
-        source = vtkConeSource()
-        Geometry.__init__(self, source)
-        self._source = source
+        Geometry.__init__(self, vtkConeSource())
         self.set_height(height)
         self.set_radius(radius)
         self.set_resolution(resolution)
         self.set_center(center)
         self.set_direction(direction)
 
-    def get_direction(self):
-        with self:
-            return self.GetDirection()
 
-    def set_direction(self, *args):
-        direction = _parse_vector3(args, 'direction')
-        with self:
-            self._source.SetDirection(*direction)
-            self.fire_event('direction_changed')
+Cone._register_property('height')
+Cone._register_property('radius')
+Cone._register_property('resolution')
+Cone._register_property('center')
+Cone._register_property('direction')
 
-
-    direction = property(fget=get_direction, fset=set_direction)
 
 
 
 
 class Line(Geometry):
     def __init__(self, start, end):
-        source = vtkLineSource()
-        super().__init__(source)
-        self._source = source
+        super().__init__(vtkLineSource())
         self.set_start(start)
         self.set_end(end)
 
