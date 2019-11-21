@@ -388,7 +388,8 @@ class VectorDrawing(Drawing3D):
         self.add_child(tip)
 
         # Setup transformations
-        self.zrotate(radians(-90))
+        shaft.zrotate(radians(-90))
+        tip.zrotate(radians(-90))
 
         # Initialize internal fields
         self.shaft, self.tip = shaft, tip

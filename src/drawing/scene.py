@@ -8,7 +8,7 @@ from .color import Color
 from .transform import Transform
 from operator import methodcaller
 from itertools import chain
-from lib3d_mec_ginac_ext import Vector3D, Point, Frame
+from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix
 
 
 
@@ -227,13 +227,31 @@ class Scene(Object):
 
 
 
-    def _get_point_transform(self, point):
+    def _apply_point_transform(self, drawing, point):
         system = self._system
         OC = system.position_vector(system.O, point)
         base = OC.get_base()
         R = system.rotation_matrix(system.xyz, base)
         T = R * OC
-        return Transform.translation(T) & Transform.rotation(R)
+        drawing.add_transform(Transform.translation(T) & Transform.rotation(R))
+
+
+    def _apply_vector_transform(self, drawing, vector):
+        system = self._system
+        # Put the vector into the xyz base
+        vector = vector.in_base(system.xyz)
+
+        shaft, tip = drawing.shaft, drawing.tip
+        shaft_size = shaft.geometry.height
+        tip_size = tip.geometry.height
+
+        drawing.add_transform(Transform.rotation_from_dir(vector))
+        m = vector.get_module()
+        shaft.scale((m+shaft_size-1)/shaft_size, 1, 1)
+        tip.translate(m-shaft_size-tip_size, 0, 0)
+
+
+
 
 
     def draw_point(self, point, *args, **kwargs):
@@ -247,7 +265,7 @@ class Scene(Object):
         drawing = PointDrawing(*args, **kwargs)
 
         # Setup drawing transformation
-        drawing.add_transform(self._get_point_transform(point))
+        self._apply_point_transform(drawing, point)
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
@@ -267,7 +285,7 @@ class Scene(Object):
         drawing = FrameDrawing(*args, **kwargs)
 
         # Setup drawing transformation
-        drawing.add_transform(self._get_point_transform(frame.get_point()))
+        self._apply_point_transform(drawing, frame.get_point())
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
@@ -277,7 +295,24 @@ class Scene(Object):
 
 
     def draw_vector(self, vector, *args, **kwargs):
-        pass
+        # Validate & parse point argument
+        if not isinstance(vector, (Vector3D, str)):
+            raise TypeError('Input argument must be a Vector3D or str instance')
+        if isinstance(vector, str):
+            vector = self._system.get_vector(vector)
+
+        # Create a vector drawing
+        drawing = VectorDrawing(*args, **kwargs)
+
+        # Setup drawing transformation
+        self._apply_vector_transform(drawing, vector)
+
+        # Add the drawing to the scene
+        self.add_drawing(drawing)
+
+        return drawing
+
+
 
 
 
