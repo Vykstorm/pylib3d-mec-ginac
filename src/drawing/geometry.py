@@ -7,7 +7,7 @@ from .object import VtkObjectWrapper
 from vtk import vtkPolyDataMapper, vtkActor, vtkMapper, vtkAlgorithm
 from vtk import vtkPolyData, vtkPoints, vtkLine, vtkCellArray
 from vtk import vtkSphereSource, vtkCubeSource, vtkConeSource, vtkCylinderSource
-from vtk import vtkLineSource
+from vtk import vtkLineSource, vtkSTLReader, vtkSTLWriter
 
 from itertools import repeat
 from collections.abc import Iterable
@@ -53,6 +53,14 @@ def _parse_vector3(x, argname=None):
         return x
     except TypeError:
         raise TypeError(f'{argname} must be a list of numbers')
+
+
+
+def _parse_filename(filename):
+    if not isinstance(filename, str):
+        raise TypeError('filename must be a str object')
+    return filename
+
 
 
 
@@ -138,6 +146,40 @@ class Geometry(VtkObjectWrapper, metaclass=GeometryMeta):
 
         self._source = handler
         super().__init__(mapper)
+
+
+
+    @classmethod
+    def from_stl(self, filename):
+        filename = _parse_filename(filename)
+        reader = vtkSTLReader()
+        reader.SetFileName(filename)
+        reader.Update()
+        return Geometry(reader)
+
+
+    def to_stl(self, filename):
+        filename = _parse_filename(filename)
+        writer = vtkSTLWriter()
+        writer.SetFileName(filename)
+        if isinstance(self._source, vtkAlgorithm):
+            writer.SetInputConnection(self._source.GetOutputPort())
+        else:
+            writer.SetInputData(self._source)
+        writer.Write()
+
+
+
+
+def read_stl(filename):
+    return Geometry.from_stl(filename)
+
+
+
+def write_stl(geometry, filename):
+    if not isinstance(geometry, Geometry):
+        raise TypeError('geometry must be an isntance of the class Geometry')
+    geometry.to_stl(filename)
 
 
 

@@ -38,12 +38,14 @@ from .drawing.transform import Transform, ComposedTransform
 from .drawing.viewer import VtkViewer as Viewer
 from .drawing.drawing import Drawing3D
 from .drawing.geometry import Geometry, Sphere, Cube, Cone, Cylinder, Line, LineStrip
+from .drawing.geometry import read_stl, write_stl
 from .drawing.color import Color
 
 __all__.extend([
     'Scene', 'Timer', 'OneShotTimer', 'Transform',
     'ComposedTransform', 'Viewer', 'Drawing3D', 'Color',
-    'Geometry', 'Sphere', 'Cube', 'Cone', 'Cylinder', 'Line', 'LineStrip'])
+    'Geometry', 'Sphere', 'Cube', 'Cone', 'Cylinder', 'Line', 'LineStrip',
+    'read_stl', 'write_stl'])
 
 
 
