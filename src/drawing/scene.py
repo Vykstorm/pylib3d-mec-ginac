@@ -184,17 +184,11 @@ class Scene(Object):
         '''purge_drawings()
         Remove all the drawing objects created previously
         '''
-        raise NotImplementedError()
         viewer = self._viewer
         with self:
             drawings = self.get_drawings()
-            # Clear drawings
-            # TODO
-            #drawings.clear()
-            # Remove all vtk actors in the viewer
-            viewer._remove_all_actors()
-            # Redraw
-            viewer._redraw()
+            for drawing in drawings:
+                viewer.remove_child(drawing)
 
 
 
