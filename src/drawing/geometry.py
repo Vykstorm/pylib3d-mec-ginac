@@ -5,21 +5,26 @@ Description: This file defines the class Geometry and all its subclasses
 
 from .object import VtkObjectWrapper
 from vtk import vtkPolyDataMapper, vtkActor, vtkMapper, vtkAlgorithm
+from vtk import vtkPolyData, vtkPoints, vtkLine, vtkCellArray
 from vtk import vtkSphereSource, vtkCubeSource, vtkConeSource, vtkCylinderSource
 from vtk import vtkLineSource
+
 from itertools import repeat
 from collections.abc import Iterable
 from operator import gt
 from functools import partial
 
 
-def _parse_size(value, argname):
+def _parse_size(value, argname=None):
+    assert argname is None or isinstance(argname, str)
     try:
         value = float(value)
         if value < 0:
             raise TypeError
         return value
     except TypeError:
+        if argname is None:
+            raise TypeError('Input argument must be a positive argument')
         raise TypeError(f'{argname} must be a positive number')
 
 
@@ -29,7 +34,8 @@ def _parse_resolution(resolution):
     return resolution
 
 
-def _parse_vector3(x, argname):
+def _parse_vector3(x, argname=None):
+    assert argname is None or isinstance(argname, str)
     try:
         if len(x) not in (1, 3):
             raise TypeError
@@ -38,6 +44,8 @@ def _parse_vector3(x, argname):
             if len(x) != 3:
                 raise TypeError
     except TypeError:
+        if argame is None:
+            raise TypeError('Input argument must be a list with three number values')
         raise TypeError(f'Invalid number of components specified for {argname}')
 
     try:
@@ -119,16 +127,16 @@ class Geometry(VtkObjectWrapper, metaclass=GeometryMeta):
     Instances of this class represents a 3D geometry mesh.
     '''
     def __init__(self, handler):
-        assert isinstance(handler, (vtkAlgorithm, vtkMapper))
+        assert isinstance(handler, (vtkAlgorithm, vtkPolyData))
 
         # Validate & parse input arguments
+        mapper = vtkPolyDataMapper()
         if isinstance(handler, vtkAlgorithm):
-            mapper = vtkPolyDataMapper()
             mapper.SetInputConnection(handler.GetOutputPort())
-            self._source = handler
         else:
-            self._source = None
-            mapper = handler
+            mapper.SetInputData(handler)
+
+        self._source = handler
         super().__init__(mapper)
 
 
@@ -250,6 +258,9 @@ Cylinder._register_property('center')
 
 
 class Cone(Geometry):
+    '''
+    Represents a cone geometry
+    '''
     def __init__(self, height=1, radius=0.25, center=(0, 0, 0), direction=(1, 0, 0), resolution=15):
         Geometry.__init__(self, vtkConeSource())
         self.set_height(height)
@@ -270,6 +281,9 @@ Cone._register_property('direction')
 
 
 class Line(Geometry):
+    '''
+    Represents a line geometry
+    '''
     def __init__(self, start, end):
         super().__init__(vtkLineSource())
         self.set_start(start)
@@ -298,3 +312,42 @@ class Line(Geometry):
 
     start = property(fget=get_start, fset=set_start)
     end = property(fget=get_end, fset=set_end)
+
+
+
+
+class LineStrip(Geometry):
+    '''
+    Represents a line strip geometry
+    '''
+    def __init__(self, points):
+        if not isinstance(points, Iterable):
+            raise TypeError('Input argument must be an iterable')
+        try:
+            points = tuple(map(_parse_vector3, points))
+        except TypeError:
+            raise TypeError('All points must be a a list of three number values')
+
+        n = len(points)
+
+
+        lines_data = vtkPolyData()
+
+        # Create the set of points
+        _points = vtkPoints()
+        for point in points:
+            _points.InsertNextPoint(*point)
+
+        lines_data.SetPoints(_points)
+
+        # Connect the points using lines
+        lines = vtkCellArray()
+
+        for i in range(1, n):
+            line = vtkLine()
+            line.GetPointIds().SetId(0, i-1)
+            line.GetPointIds().SetId(1, i)
+            lines.InsertNextCell(line)
+
+        lines_data.SetLines(lines)
+        super().__init__(lines_data)
