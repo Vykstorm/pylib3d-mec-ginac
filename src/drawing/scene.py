@@ -3,12 +3,12 @@
 from .object import Object
 from .viewer import VtkViewer
 from .simulation import Simulation
-from .geometry import Geometry
+from .geometry import Geometry, read_stl
 from .color import Color
 from .transform import Transform
 from operator import methodcaller
 from itertools import chain
-from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix
+from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
 
 
@@ -311,6 +311,31 @@ class Scene(Object):
         self.add_drawing(drawing)
 
         return drawing
+
+
+
+    def draw_solid(self, solid, *args, **kwargs):
+        # Validate & parse point argument
+        if not isinstance(solid, (Solid, str)):
+            raise TypeError('solid argument must be a Vector3D or str instance')
+
+        if isinstance(solid, str):
+            solid = self._system.get_solid(solid)
+
+        # Create a solid drawing
+        drawing = Drawing3D(read_stl(solid.get_name() + '.stl'))
+
+        # Setup drawing transformation
+        self._apply_point_transform(drawing, solid.get_point())
+
+        # Add the drawing to the scene
+        self.add_drawing(drawing)
+
+        return drawing
+
+
+
+
 
 
 
