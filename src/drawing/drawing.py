@@ -364,9 +364,9 @@ class PointDrawing(Drawing3D):
 
 class VectorDrawing(Drawing3D):
     def __init__(self,
-        shaft_radius=0.03, tip_radius=0.1,
-        shaft_resolution=10, tip_resolution=15,
-        shaft_color=(1, 1, 1), tip_color=(1, 1, 0)):
+        shaft_radius=0.03, tip_radius=0.1, origin_radius=0.04,
+        shaft_resolution=10, tip_resolution=15, origin_resolution=15,
+        shaft_color=(1, 1, 1), tip_color=(1, 1, 0), origin_color=(1, 1, 1)):
         super().__init__()
 
         shaft_size = 0.8
@@ -383,6 +383,8 @@ class VectorDrawing(Drawing3D):
                 direction=(0, 1, 0), center=(0, shaft_size+tip_size/2, 0)
             )
         )
+        origin = PointDrawing(radius=origin_radius, resolution=origin_resolution, color=origin_color)
+
         # Setup drawings properties
         shaft.set_color(shaft_color)
         tip.set_color(tip_color)
@@ -390,6 +392,7 @@ class VectorDrawing(Drawing3D):
         # Add child drawings
         self.add_child(shaft)
         self.add_child(tip)
+        self.add_child(origin)
 
         # Setup transformations
         shaft.zrotate(radians(-90))
