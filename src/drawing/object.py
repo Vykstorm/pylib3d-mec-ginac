@@ -6,7 +6,7 @@ Description: This file defines the class Object
 from threading import RLock
 from types import SimpleNamespace
 from collections.abc import Iterable, Mapping
-from operator import attrgetter
+from operator import attrgetter, methodcaller
 from itertools import filterfalse, chain
 from inspect import isclass
 from vtk import vtkObject
@@ -121,6 +121,28 @@ class Object:
             with child._lock:
                 child.fire_event('object_exit')
                 child._parent = None
+
+
+
+
+    def get_predecessors(self, kind=None):
+        '''get_predecessors() -> List[Object]
+        Get a list of all predecessors with the given type. If the input argument is set
+        to None, return all the predecessors.
+        '''
+        def predecessors():
+            if kind is None:
+                yield from self._children
+            else:
+                yield from filter(lambda child: isinstance(child, kind), self._children)
+
+            for child in self._children:
+                yield from child.get_predecessors(kind)
+
+        with self:
+            return tuple(predecessors())
+
+
 
 
 
