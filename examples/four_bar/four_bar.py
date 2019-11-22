@@ -299,6 +299,9 @@ draw_point('O2')
 draw_position_vector('O', 'B')
 draw_position_vector('OL2', 'OL3')
 
-#draw_solid('Arm2')
+draw_solid('Arm1')
+drawing = draw_solid('Arm2')
+draw_solid('Arm3')
+
 
 show_drawings()
