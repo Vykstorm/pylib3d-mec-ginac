@@ -314,7 +314,7 @@ class Scene(Object):
 
 
 
-    def draw_solid(self, solid, *args, **kwargs):
+    def draw_solid(self, solid, color=(1, 1, 0)):
         # Validate & parse point argument
         if not isinstance(solid, (Solid, str)):
             raise TypeError('solid argument must be a Vector3D or str instance')
@@ -326,6 +326,7 @@ class Scene(Object):
         drawing = Drawing3D(read_stl(solid.get_name() + '.stl'))
 
         # Setup drawing transformation
+        drawing.set_color(color)
         self._apply_point_transform(drawing, solid.get_point())
 
         # Add the drawing to the scene
