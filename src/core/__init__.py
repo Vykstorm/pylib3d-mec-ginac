@@ -6,7 +6,10 @@ Description: This file defines the public API of the core submodule
 # Internal imports (to execute this script)
 from functools import wraps
 from re import fullmatch
-
+from ..drawing.scene import Scene
+import lib3d_mec_ginac_ext as _cython_ext
+from .system import System
+from ..config import runtime_config
 
 
 # This variable will store all the public classes & methods
@@ -27,8 +30,6 @@ def __dir__():
 
 
 # Add cython extension & core submodule classes and functions
-import lib3d_mec_ginac_ext as _cython_ext
-
 for name in dir(_cython_ext):
     if name.startswith('_'):
         continue
@@ -40,9 +41,7 @@ for name in dir(_cython_ext):
     __all__.append(name)
     globals()[name] = obj
 
-
 __all__.append('System')
-from .system import System
 
 
 
@@ -77,8 +76,6 @@ for name in dir(System):
 
 
 # Expose methods of the 3d scene manager associated to the default system object (add them as global functions)
-from ..drawing.scene import Scene
-
 def _create_scene_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
@@ -95,6 +92,10 @@ for name in dir(Scene):
     __all__.append(name)
     globals()[name] = _create_scene_global_func(getattr(Scene, name))
 
+
+# Open the scene viewer by default?
+if runtime_config.SHOW_DRAWINGS:
+    show_drawings()
 
 
 
@@ -120,7 +121,18 @@ def set_default_system(system):
     global _default_system
     if not isinstance(system, System):
         raise TypeError('Input argument must be an instance of the class System')
+
+    scene = _default_system.get_scene()
+    drawings_were_shown = scene.are_drawings_shown()
+    if drawings_were_shown:
+        scene.hide_drawings()
+
     _default_system = system
+
+    if drawings_were_shown:
+        scene = _default_system.get_scene()
+        scene.show_drawings()
+
 
 
 __all__.extend(['get_default_system', 'set_default_system'])

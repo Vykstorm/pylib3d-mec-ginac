@@ -173,7 +173,10 @@ RUNTIME_CONFIG = {
     'ATOMIZATION': 'off',
 
     # Gravity direction by default
-    'GRAVITY_DIRECTION': 'up'
+    'GRAVITY_DIRECTION': 'up',
+
+    # Open 3D scene viewer when importing the package
+    'SHOW_DRAWINGS': False
 }
 
 
