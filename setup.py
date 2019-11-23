@@ -170,7 +170,7 @@ RUNTIME_CONFIG = {
     'OPENSCADCMD': 'openscad-nightly',
 
     # Enable/Disable atomization by default
-    'ATOMIZATION_ENABLED': False,
+    'ATOMIZATION': 'off',
 
     # Gravity direction by default
     'GRAVITY_DIRECTION': 'up'

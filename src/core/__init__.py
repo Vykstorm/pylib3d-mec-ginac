@@ -131,5 +131,5 @@ __all__.extend(['get_default_system', 'set_default_system'])
 
 from ..config import runtime_config
 
-set_atomization_state(runtime_config.ATOMIZATION_ENABLED)
+set_atomization_state(runtime_config.ATOMIZATION)
 set_gravity_direction(runtime_config.GRAVITY_DIRECTION)
