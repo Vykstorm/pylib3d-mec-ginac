@@ -146,3 +146,6 @@ examples/test*.ipynb
 
 # Ignore untitled ipython notebook
 examples/Untitled.ipynb
+
+# Ignore runtime settings data file
+config.json
