@@ -260,7 +260,7 @@ if __name__ == '__main__':
 
 
     ## Generate C-Python extension
-    print('\u2022 Generating cython extension', end='')
+    print('\u2022 Generating cpython extension', end='')
     with output_suppressed():
         extensions = cythonize(EXTENSIONS,
             compiler_directives={'language_level': 3}, nthreads=2, force=True)
