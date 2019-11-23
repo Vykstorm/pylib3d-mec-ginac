@@ -14,11 +14,7 @@ from subprocess import CalledProcessError
 from itertools import repeat, chain
 from operator import add
 from functools import reduce
-
-
-
-with open(join(dirname(__file__), '../../config.json')) as file:
-    config = SimpleNamespace(**json.load(file))
+from ..config import runtime_config
 
 
 
@@ -79,7 +75,7 @@ def scad_to_stl(scad_filename, stl_filename=None, **kwargs):
     var_options = reduce(add, zip(repeat('-D'), map('='.join, zip(kwargs.keys(), map(str, kwargs.values())))), ())
 
     # Spawn subprocess to call openscad command line
-    program = config.OPENSCADCMD
+    program = runtime_config.OPENSCADCMD
     options = ['-o', stl_filename, scad_filename]
     args = list(chain([program], var_options, options))
 

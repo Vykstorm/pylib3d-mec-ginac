@@ -5,6 +5,7 @@ Setup script to install pylib3d-mec-ginac library.
 '''
 
 # Import statements
+from setuptools.command.build_ext import build_ext
 from distutils.core import setup
 from distutils.extension import Extension
 from os import listdir
@@ -13,6 +14,10 @@ from functools import reduce, partial
 from re import sub, DOTALL
 from itertools import chain
 import json
+from contextlib import contextmanager
+import sys
+from io import StringIO
+
 
 
 
@@ -156,27 +161,26 @@ EXTENSIONS = [
 
 
 
-######## OPENSCAD CONFIGURATION ########
-
-
-# Name of the command line utility of openscad (this is used to convert scad
-# to stl files).
-
-OPENSCADCMD = 'openscad-nightly'
-
-
-
-
-
-
-
 ######## RUNTIME CONFIGURATION ########
 
 
-# This variable holds all the settings to configure the python package at runtime
 RUNTIME_CONFIG = {
-    'OPENSCADCMD': OPENSCADCMD
+    # openscad command line utility executable (this is used to convert scad
+    # to stl files).
+    'OPENSCADCMD': 'openscad-nightly',
+
+    # Enable/Disable atomization by default
+    'ATOMIZATION_ENABLED': False,
+
+    # Gravity direction by default
+    'GRAVITY_DIRECTION': 'up'
 }
+
+
+# Configuration file where runtime settings will be stored (relative to the root package)
+RUNTIME_CONFIG_FILE = 'config.json'
+
+
 
 
 
@@ -188,6 +192,29 @@ RUNTIME_CONFIG = {
 ######## INSTALLATION PROCEDURE ########
 
 if __name__ == '__main__':
+
+    ## Helper functions
+
+    # Context manager to supress messages on stdout and stderr
+    @contextmanager
+    def output_suppressed():
+        sys.stdout.flush()
+        sys.stderr.flush()
+        prev_stdout, sys.stdout = sys.stdout, StringIO()
+        prev_stderr, sys.stderr = sys.stderr, StringIO()
+        yield
+        sys.stdout, sys.stderr = prev_stdout, prev_stderr
+
+    # Class to avoid "command line option ‘-Wstrict-prototypes’ is valid" warning
+    class BuildExt(build_ext):
+        def build_extensions(self):
+            if '-Wstrict-prototypes' in self.compiler.compiler_so:
+                self.compiler.compiler_so.remove('-Wstrict-prototypes')
+            super().build_extensions()
+
+
+
+
     ## Import statements
     try:
         from Cython.Build import cythonize
@@ -201,13 +228,16 @@ if __name__ == '__main__':
         exit(-1)
 
 
+
     ## Create config.json (this is used to configure the library at runtime)
-    with open('config.json', 'w') as file:
+    print(f"\u2022 Generating runtime settings file", end='')
+    with open(join(ROOT_PACKAGE_DIR, RUNTIME_CONFIG_FILE), 'w') as file:
         json.dump(RUNTIME_CONFIG, file)
+    print(' [done]')
 
 
     ## Merge .pyx definition files into one
-    print(f"Generating {PYX_MAIN} file")
+    print(f"\u2022 Generating {PYX_MAIN} file", end='')
     with open(PYX_MAIN, 'w') as f_out: # All source code will be merged to this file
         # Insert a header comment in the output file
         f_out.write('\n'.join([
@@ -225,30 +255,43 @@ if __name__ == '__main__':
                 code = sub("'''.*?'''", '#'*8 + f' {filename} ' + '#'*8, f_in.read(), count=1, flags=DOTALL)
                 f_out.write(code)
                 f_out.write('\n'*3)
+    print(' [done]')
+
 
 
     ## Generate C-Python extension
-    extensions = cythonize(EXTENSIONS,
-        compiler_directives={'language_level': 3}, nthreads=2, force=True)
+    print('\u2022 Generating cython extension', end='')
+    with output_suppressed():
+        extensions = cythonize(EXTENSIONS,
+            compiler_directives={'language_level': 3}, nthreads=2, force=True)
+    print(' [done]')
 
 
     ## Invoke distutils setup
-    setup(
-        name=NAME,
-        version=VERSION,
+    print("\u2022 Compiling extension and installing package", end='')
+    with output_suppressed():
+        setup(
+            name=NAME,
+            version=VERSION,
 
-        author=AUTHOR,
-        author_email=AUTHOR_EMAIL,
+            author=AUTHOR,
+            author_email=AUTHOR_EMAIL,
 
-        description=DESCRIPTION,
-        long_description=LONG_DESCRIPTION,
-        license=LICENSE,
+            description=DESCRIPTION,
+            long_description=LONG_DESCRIPTION,
+            license=LICENSE,
 
-        keywords=KEYWORDS,
-        classifiers=CLASSIFIERS,
+            keywords=KEYWORDS,
+            classifiers=CLASSIFIERS,
 
-        packages=PACKAGES,
-        package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
-        package_data={ROOT_PACKAGE: ['config.json']},
-        ext_modules=extensions
-    )
+            packages=PACKAGES,
+            package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
+            package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]},
+            ext_modules=extensions,
+            cmdclass={'build_ext': BuildExt},
+        )
+    print(' [done]')
+
+
+    # Helper tip
+    print(f'Type python -i -c "from {ROOT_PACKAGE} import *" to open a console with this library imported')
