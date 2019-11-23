@@ -3,7 +3,7 @@
 from .object import Object
 from .timer import Timer
 from time import time
-
+from ..config import runtime_config
 
 
 
@@ -21,8 +21,8 @@ class Simulation(Object):
         # Initialize internal fields
         self._scene, self._system = scene, system
         self._state = 'stopped'
-        self._time_multiplier = 1.0
-        self._update_freq = 30
+        self._time_multiplier = runtime_config.SIMULATION_TIME_MULTIPLIER
+        self._update_freq = runtime_config.SIMULATION_UPDATE_FREQUENCY
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
 
