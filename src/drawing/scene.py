@@ -4,6 +4,7 @@ from .object import Object
 from .viewer import VtkViewer
 from .simulation import Simulation
 from .geometry import Geometry, read_stl
+from .scad import scad_to_stl
 from .color import Color
 from .transform import Transform
 from operator import methodcaller
@@ -314,21 +315,17 @@ class Scene(Object):
 
 
 
-    def draw_solid(self, solid, color=(1, 1, 0), scale=5):
-        # Validate & parse point argument
-        if not isinstance(solid, (Solid, str)):
-            raise TypeError('solid argument must be a Vector3D or str instance')
 
-        if isinstance(solid, str):
-            solid = self._system.get_solid(solid)
+    def draw_stl(self, filename, color=(1, 1, 0), scale=5):
+        # Create STL geometry
+        geometry = read_stl(filename)
 
-        # Create a solid drawing
-        drawing = Drawing3D(read_stl(solid.get_name() + '.stl'))
+        # Create the drawing object
+        drawing = Drawing3D(geometry)
         drawing.set_color(color)
 
         # Setup drawing transformation
         drawing.scale(scale)
-        self._apply_point_transform(drawing, solid.get_point())
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
@@ -337,12 +334,37 @@ class Scene(Object):
 
 
 
+    def draw_scad(self, filename, color=(1, 1, 0), scale=5, **kwargs):
+        # Convert the scad file to a stl
+        stl_filename = scad_to_stl(filename, **kwargs)
+        return self.draw_stl(stl_filename, color, scale)
+
+
+
+
+    def draw_solid(self, solid, *args, **kwargs):
+        # Validate & parse point argument
+        if not isinstance(solid, (Solid, str)):
+            raise TypeError('solid argument must be a Vector3D or str instance')
+
+        if isinstance(solid, str):
+            solid = self._system.get_solid(solid)
+
+        # Create the drawing
+        drawing = self.draw_stl(solid.get_name() + '.stl', *args, **kwargs)
+
+        # Setup drawing transformation
+        self._apply_point_transform(drawing, solid.get_point())
+
+        return drawing
+
 
 
 
 
     def draw_position_vector(self, a, b, *args, **kwargs):
         return self.draw_vector(a, self._system.position_vector(a, b), *args, **kwargs)
+
 
 
     def draw_velocity_vector(self, frame, point):
