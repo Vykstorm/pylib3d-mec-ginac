@@ -235,3 +235,11 @@ Mathematic functions
 .. autofunction:: tan
 
 .. autofunction:: sqrt
+
+
+
+
+Drawing utility functions
+~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: scad_to_stl
