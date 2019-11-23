@@ -12,6 +12,7 @@ from os.path import join, abspath, dirname
 from functools import reduce, partial
 from re import sub, DOTALL
 from itertools import chain
+import json
 
 
 
@@ -154,6 +155,36 @@ EXTENSIONS = [
 
 
 
+
+######## OPENSCAD CONFIGURATION ########
+
+
+# Name of the command line utility of openscad (this is used to convert scad
+# to stl files).
+
+OPENSCADCMD = 'openscad-nightly'
+
+
+
+
+
+
+
+######## RUNTIME CONFIGURATION ########
+
+
+# This variable holds all the settings to configure the python package at runtime
+RUNTIME_CONFIG = {
+    'OPENSCADCMD': OPENSCADCMD
+}
+
+
+
+
+
+
+
+
 ######## INSTALLATION PROCEDURE ########
 
 if __name__ == '__main__':
@@ -168,6 +199,11 @@ if __name__ == '__main__':
         print(f'Failed to import "{e.name}" module')
         print('Make sure to install dependencies with "pip install -r requirements.txt"')
         exit(-1)
+
+
+    ## Create config.json (this is used to configure the library at runtime)
+    with open('config.json', 'w') as file:
+        json.dump(RUNTIME_CONFIG, file)
 
 
     ## Merge .pyx definition files into one
@@ -213,5 +249,6 @@ if __name__ == '__main__':
 
         packages=PACKAGES,
         package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
+        package_data={ROOT_PACKAGE: ['config.json']},
         ext_modules=extensions
     )
