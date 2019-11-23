@@ -39,13 +39,14 @@ from .drawing.viewer import VtkViewer as Viewer
 from .drawing.drawing import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .drawing.geometry import Geometry, Sphere, Cube, Cone, Cylinder, Line, LineStrip
 from .drawing.geometry import read_stl, write_stl
+from .drawing.scad import scad_to_stl, scad2stl
 from .drawing.color import Color
 
 __all__.extend([
     'Scene', 'Timer', 'OneShotTimer', 'Transform', 'ComposedTransform', 'Viewer', 'Color',
     'Drawing3D', 'PointDrawing', 'FrameDrawing', 'VectorDrawing',
     'Geometry', 'Sphere', 'Cube', 'Cone', 'Cylinder', 'Line', 'LineStrip',
-    'read_stl', 'write_stl'])
+    'read_stl', 'write_stl', 'scad2stl', 'scad_to_stl'])
 
 
 
