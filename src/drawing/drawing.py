@@ -15,7 +15,7 @@ from operator import methodcaller
 # Imports from other modules
 from lib3d_mec_ginac_ext import Matrix
 from .transform import Transform
-from .object import VtkObjectWrapper
+from .vtkobjectwrapper import VtkObjectWrapper
 from .geometry import Geometry, Sphere, Cylinder, Cone
 from .scene import Scene
 from .color import Color

@@ -12,7 +12,6 @@ from itertools import chain
 # imports from other modules
 from .object import Object
 from .simulation import Simulation
-from .geometry import Geometry, read_stl
 from .scad import scad_to_stl
 from .color import Color
 from .transform import Transform
@@ -20,6 +19,7 @@ from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
 # vtk imports
 from vtk import vtkRenderer
+
 
 
 
@@ -34,6 +34,10 @@ class Scene(Object):
 
         # Create vtk renderer
         renderer = vtkRenderer()
+
+        # Set default camera position
+        renderer.GetActiveCamera().SetPosition(7, 7, 7)
+
 
         # Create simulation
         simulation = Simulation(self, system)
@@ -168,30 +172,6 @@ class Scene(Object):
 
         '''
         self._simulation.pause()
-
-
-
-    def are_drawings_shown(self):
-        '''are_drawings_shown() -> bool
-        Returns True if the drawing objects are being shown. False otherwise.
-        '''
-        return self._viewer.is_open()
-
-
-
-    def show_drawings(self):
-        '''show_drawings()
-        Show the drawing objects of this scene in the 3D viewer
-        '''
-        # TODO
-        pass
-
-
-
-    def hide_drawings(self):
-        # TODO
-        pass
-
 
 
 
@@ -395,5 +375,7 @@ class Scene(Object):
 
 
 
-# This import is moved here to avoid circular dependencies
+# This imports are moved here to avoid circular dependencies
 from .drawing import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .geometry import Geometry, read_stl
+from .viewer import get_viewer

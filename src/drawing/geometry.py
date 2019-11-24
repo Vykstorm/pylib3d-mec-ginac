@@ -13,7 +13,7 @@ from operator import gt
 from functools import partial
 
 # imports from other modules
-from .object import VtkObjectWrapper
+from .vtkobjectwrapper import VtkObjectWrapper
 
 # vtk imports
 from vtk import vtkPolyDataMapper, vtkActor, vtkMapper, vtkAlgorithm

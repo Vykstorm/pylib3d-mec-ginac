@@ -28,9 +28,6 @@ class VtkViewer(Object):
     def __init__(self):
         super().__init__()
 
-        # Set default camera position
-        renderer.GetActiveCamera().SetPosition(7, 7, 7)
-
         # Initialize internal fields
         self._interactor, self._window = None, None
         self._title = ''
@@ -185,6 +182,23 @@ class VtkViewer(Object):
             if self._interactor is None:
                 return
             self._interactor.Render()
+
+
+
+
+_viewer = VtkViewer()
+
+def get_viewer():
+    '''get_viewer() -> Viewer
+    Get the viewer where the 3d scene will be shown
+
+    :rtype: Viewer
+
+    '''
+    return _viewer
+
+
+
 
 
 from .scene import Scene
