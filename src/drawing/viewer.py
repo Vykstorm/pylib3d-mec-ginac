@@ -12,6 +12,7 @@ from time import sleep
 # imports from other modules
 from .object import Object
 from .color import Color
+from ..core import get_default_system
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
@@ -48,17 +49,18 @@ class VtkViewer(Object):
     def _event_handler(self, event_type, source, *args, **kwargs):
         # This method is called when any event is fired by child object (or the viewer)
 
-        if isinstance(source, Scene):
+        if isinstance(source, Scene) and self._interactor is not None:
             if event_type == 'object_entered':
                 # A scene was attached to the viewer
-                window.AddRenderer(source._renderer)
+                self._window.AddRenderer(source._renderer)
             elif event_type == 'object_exit':
                 # The scene was detached from the viewer
-                window.RemoveRenderer(source._renderer)
+                self._window.RemoveRenderer(source._renderer)
 
 
         # For any change, redraw the scene
         self._redraw()
+
 
 
     def main(self):
