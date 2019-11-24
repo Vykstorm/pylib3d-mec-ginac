@@ -1,9 +1,18 @@
+'''
+Author: Víctor Ruiz Gómez.
+Description: This file defines the classes Timer and OneShotTimer
+'''
 
+
+######## Import statements ########
 
 from threading import Thread, Condition
 from time import sleep
 from collections.abc import Iterable, Mapping
 
+
+
+######## class Timer ########
 
 class Timer(Thread):
     '''
@@ -264,6 +273,9 @@ class Timer(Thread):
 
 
 
+
+
+######## class OneShotTimer ########
 
 class OneShotTimer(Timer):
     '''

@@ -3,16 +3,27 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the class Geometry and all its subclasses
 '''
 
+
+######## Import statements ########
+
+# standard imports
+from itertools import repeat
+from collections.abc import Iterable
+from operator import gt
+from functools import partial
+
+# imports from other modules
 from .object import VtkObjectWrapper
+
+# vtk imports
 from vtk import vtkPolyDataMapper, vtkActor, vtkMapper, vtkAlgorithm
 from vtk import vtkPolyData, vtkPoints, vtkLine, vtkCellArray
 from vtk import vtkSphereSource, vtkCubeSource, vtkConeSource, vtkCylinderSource
 from vtk import vtkLineSource, vtkSTLReader, vtkSTLWriter
 
-from itertools import repeat
-from collections.abc import Iterable
-from operator import gt
-from functools import partial
+
+
+######## Helper methods ########
 
 
 def _parse_size(value, argname=None):
@@ -96,6 +107,8 @@ _geometry_properties = {
 
 
 
+######## Metaclass for class Geometry ########
+
 class GeometryMeta(type):
     # Metaclass for the class Geometry
     def _register_property(cls, name):
@@ -129,6 +142,9 @@ class GeometryMeta(type):
 
 
 
+
+
+######## class Geometry ########
 
 class Geometry(VtkObjectWrapper, metaclass=GeometryMeta):
     '''
@@ -186,6 +202,7 @@ def write_stl(geometry, filename):
 
 
 
+######## class Sphere ########
 
 class Sphere(Geometry):
     '''
@@ -219,6 +236,7 @@ Sphere._register_property('resolution')
 
 
 
+######## class Cube ########
 
 class Cube(Geometry):
     '''
@@ -277,7 +295,7 @@ Cube._register_property('center')
 
 
 
-
+######## class Cylinder ########
 
 class Cylinder(Geometry):
     '''
@@ -298,6 +316,8 @@ Cylinder._register_property('center')
 
 
 
+
+######## class Cone ########
 
 class Cone(Geometry):
     '''
@@ -321,6 +341,7 @@ Cone._register_property('direction')
 
 
 
+######## class Line ########
 
 class Line(Geometry):
     '''
@@ -357,6 +378,8 @@ class Line(Geometry):
 
 
 
+
+######## class LineStrip ########
 
 class LineStrip(Geometry):
     '''

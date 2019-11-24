@@ -3,15 +3,24 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the class Object
 '''
 
+
+######## Import statements ########
+
+# Standard imports
 from threading import RLock
 from types import SimpleNamespace
 from collections.abc import Iterable, Mapping
 from operator import attrgetter, methodcaller
 from itertools import filterfalse, chain
 from inspect import isclass
+
+# vtk
 from vtk import vtkObject
 
 
+
+
+######## class Object ########
 
 class Object:
     '''
@@ -237,6 +246,8 @@ class Object:
 
 
 
+
+######## class VtkObjectWrapper ########
 
 class VtkObjectWrapper(Object):
     '''

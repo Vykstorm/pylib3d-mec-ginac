@@ -4,21 +4,30 @@ Description:
 This script implements the class Drawing3D
 '''
 
+######## Import statements ########
 
-from lib3d_mec_ginac_ext import Matrix
-from vtk import vtkProp, vtkMatrix4x4, vtkActor
-import numpy as np
+
+# Standard imports
 from math import radians
 from itertools import chain
 from operator import methodcaller
+
+# Imports from other modules
+from lib3d_mec_ginac_ext import Matrix
 from .transform import Transform
 from .object import VtkObjectWrapper
 from .geometry import Geometry, Sphere, Cylinder, Cone
 from .scene import Scene
 from .color import Color
 
+# Third party libraries
+from vtk import vtkProp, vtkMatrix4x4, vtkActor
+import numpy as np
 
 
+
+
+######## class Drawing3D ########
 
 class Drawing3D(VtkObjectWrapper):
     '''
@@ -58,9 +67,9 @@ class Drawing3D(VtkObjectWrapper):
 
     def _on_object_entered(self, event_type, source, *args, **kwargs):
         if self == source:
-            # This drawing was added to another drawing or to the viewers
+            # This drawing was added to another drawing or to the scene
             self._update()
-        elif isinstance(source, Geometry):
+        elif isinstance(source, Geometry) and event_type == 'object_entered':
             # A geometry object was attached to this drawing object
             with self:
                 self.get_handler().SetMapper(source.get_handler())
@@ -352,6 +361,7 @@ class Drawing3D(VtkObjectWrapper):
 
 
 
+######## class PointDrawing ########
 
 class PointDrawing(Drawing3D):
     def __init__(self, radius=0.06, resolution=15, color=(1, 1, 1)):
@@ -361,6 +371,9 @@ class PointDrawing(Drawing3D):
         self.set_color(color)
 
 
+
+
+######## class VectorDrawing ########
 
 class VectorDrawing(Drawing3D):
     def __init__(self,
@@ -404,6 +417,7 @@ class VectorDrawing(Drawing3D):
 
 
 
+######## class FrameDrawing ########
 
 class FrameDrawing(Drawing3D):
     def __init__(self,

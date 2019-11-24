@@ -3,14 +3,22 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the class Color
 '''
 
-from .object import Object
+######## Import statements ########
+
+# Standard imports
 from array import array
 from collections.abc import Iterable
 from functools import partial
 from itertools import repeat, chain
 from copy import copy
 
+# Imports from other modules
+from .object import Object
 
+
+
+
+######## class Color ########
 
 class Color(Object):
     '''

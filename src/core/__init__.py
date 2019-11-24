@@ -93,11 +93,6 @@ for name in dir(Scene):
     globals()[name] = _create_scene_global_func(getattr(Scene, name))
 
 
-# Open the scene viewer by default?
-if runtime_config.SHOW_DRAWINGS:
-    show_drawings()
-
-
 
 
 # Additional methods exposed to the api
@@ -122,16 +117,7 @@ def set_default_system(system):
     if not isinstance(system, System):
         raise TypeError('Input argument must be an instance of the class System')
 
-    scene = _default_system.get_scene()
-    drawings_were_shown = scene.are_drawings_shown()
-    if drawings_were_shown:
-        scene.hide_drawings()
-
     _default_system = system
-
-    if drawings_were_shown:
-        scene = _default_system.get_scene()
-        scene.show_drawings()
 
 
 

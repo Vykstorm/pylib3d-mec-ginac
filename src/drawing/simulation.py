@@ -1,11 +1,22 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This file defines the class Simulation
+'''
 
+######## Import statements ########
 
+# Standard imports
+from time import time
+
+# Imports from other modules
 from .object import Object
 from .timer import Timer
-from time import time
 from ..config import runtime_config
 
 
+
+
+######## class Simulation ########
 
 class Simulation(Object):
     '''

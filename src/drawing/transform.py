@@ -3,6 +3,9 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the class Transform
 '''
 
+
+######## Import statements ########
+
 from lib3d_mec_ginac_ext import Matrix, SymbolNumeric, Expr, cos, sin
 import numpy as np
 from collections.abc import Iterable
@@ -11,6 +14,8 @@ from functools import reduce
 from operator import matmul, mul, methodcaller, attrgetter
 
 
+
+######## class Transform ########
 
 class Transform:
     '''
@@ -440,6 +445,9 @@ class Transform:
 
 
 
+
+
+######## class ComposedTransform ########
 
 class ComposedTransform(Transform):
     '''

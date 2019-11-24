@@ -1,35 +1,53 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This file defines the class Scene
+'''
 
+######## Import statements ########
 
+# standard imports
+from operator import methodcaller
+from itertools import chain
+
+# imports from other modules
 from .object import Object
-from .viewer import VtkViewer
 from .simulation import Simulation
 from .geometry import Geometry, read_stl
 from .scad import scad_to_stl
 from .color import Color
 from .transform import Transform
-from operator import methodcaller
-from itertools import chain
 from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
+# vtk imports
+from vtk import vtkRenderer
 
+
+
+
+
+######## class VtkViewer ########
 
 class Scene(Object):
     def __init__(self, system):
+        # Initialize super instance
         super().__init__()
-        self._viewer, self._system = VtkViewer(), system
-        self._simulation = Simulation(self, system)
 
+        # Create vtk renderer
+        renderer = vtkRenderer()
+
+        # Create simulation
+        simulation = Simulation(self, system)
+        self.add_child(simulation)
+
+        # Initialize internal fields
+        self._renderer = renderer
+        self._system = system
+        self._simulation = simulation
+
+        # Listen for events
         self.add_event_handler(self._event_handler)
-        self.add_child(self._viewer)
-        self.add_child(self._simulation)
 
 
-
-    def get_viewer(self):
-        '''get_viewer() -> Viewer
-        Get the viewer object associated to this scene
-        '''
-        return self._viewer
 
 
 
@@ -163,21 +181,17 @@ class Scene(Object):
 
     def show_drawings(self):
         '''show_drawings()
-        Show the drawing objects
+        Show the drawing objects of this scene in the 3D viewer
         '''
-        viewer = self._viewer
-        # Open viewer & redraw
-        viewer.open()
-        self._viewer._redraw()
+        # TODO
+        pass
 
 
 
     def hide_drawings(self):
-        '''hide_drawings()
-        Close the window which shows the drawing objects
-        '''
-        # Close the viewer
-        self._viewer.close()
+        # TODO
+        pass
+
 
 
 
@@ -185,30 +199,10 @@ class Scene(Object):
         '''purge_drawings()
         Remove all the drawing objects created previously
         '''
-        viewer = self._viewer
         with self:
             drawings = self.get_drawings()
             for drawing in drawings:
-                viewer.remove_child(drawing)
-
-
-
-    def get_background_color(self):
-        '''get_background_color() -> Color
-        Get the background color of the viewer
-
-        :rtype: Color
-
-        '''
-        return self._viewer.get_background_color()
-
-
-
-    def set_background_color(self, *args):
-        '''set_background_color(...)
-        Change the background color of the viewer
-        '''
-        self._viewer.set_background_color(*args)
+                self.remove_child(drawing)
 
 
 
@@ -218,7 +212,7 @@ class Scene(Object):
         '''
         if not isinstance(drawing, Drawing3D):
             raise TypeError('Input argument must be a Drawing3D instance')
-        self._viewer.add_child(drawing)
+        self.add_child(drawing)
 
 
 
@@ -376,42 +370,25 @@ class Scene(Object):
 
     def _event_handler(self, event_type, source, *args, **kwargs):
         # This method is called when an event of any kind occurs
+
         if event_type == 'simulation_step':
-            self._update()
+            # Update drawings
+            for drawing in self.get_drawings():
+                drawing._update()
             return
 
-        viewer = self._viewer
-
-        if isinstance(source, Drawing3D):
+        if isinstance(source, Drawing3D) and event_type in ('object_entered', 'object_exit'):
+            # A new drawing object entered or exit this 3d scene
             actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
             if event_type == 'object_entered':
+                # Add all actors attached to the drawing object to the scene renderer
                 for actor in actors:
-                    viewer._add_actor(actor)
+                    self._renderer.AddActor(actor)
 
             elif event_type == 'object_exit':
+                # Remove all actors attached to the drawing object to the scene renderer
                 for actor in actors:
-                    viewer._remove_actor(actor)
-
-        # Redraw the scene if a drawing object property, geometry or color changed
-        if isinstance(source, (Drawing3D, Color, Geometry)):
-            viewer._redraw()
-
-
-
-    def _update(self):
-        '''
-        Updates the scene
-        '''
-        with self:
-            drawings = self.get_drawings()
-
-            # Update drawings
-            for drawing in drawings:
-                drawing._update()
-
-            # Redraw scene
-            self._viewer._redraw()
-
+                    self._renderer.RemoveActor(actor)
 
 
 

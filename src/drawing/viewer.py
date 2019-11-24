@@ -1,11 +1,23 @@
+'''
+Author: Víctor Ruiz Gómez
+Description: This file defines the class VtkViewer
+'''
 
+######## Import statements ########
 
-from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
-from vtk import vtkGenericRenderWindowInteractor
+# imports from other modules
 from .object import Object
 from .color import Color
 
+# vtk imports
+from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
+from vtk import vtkRenderWindowInteractor
 
+
+
+
+
+######## class VtkViewer ########
 
 class VtkViewer(Object):
     '''
@@ -16,33 +28,34 @@ class VtkViewer(Object):
     def __init__(self):
         super().__init__()
 
-        # Create vtk renderer
-        renderer = vtkRenderer()
-
         # Set default camera position
         renderer.GetActiveCamera().SetPosition(7, 7, 7)
 
         # Initialize internal fields
         self._interactor, self._window = None, None
         self._title = ''
-        self._renderer = renderer
-        self._color = Color()
 
-        # Initialize background color
-        renderer.SetBackground(*self._color.rgb)
-        renderer.SetBackgroundAlpha(self._color.a)
 
-        self.add_child(self._color)
-        self._color.add_event_handler(self._on_background_color_changed, 'color_changed')
+        self.add_event_handler(self._event_handler)
 
 
 
-    def _on_background_color_changed(self, *args, **kwargs):
-        renderer = self._renderer
-        renderer.SetBackground(*self._color.rgb)
-        renderer.SetBackgroundAlpha(self._color.a)
+
+    def _event_handler(self, event_type, source, *args, **kwargs):
+        # This method is called when any event is fired by child object (or the viewer)
+
+        if isinstance(source, Scene):
+            if event_type == 'object_entered':
+                # A scene was attached to the viewer
+                window.AddRenderer(source._renderer)
+            elif event_type == 'object_exit':
+                # The scene was detached from the viewer
+                window.RemoveRenderer(source._renderer)
+
+
+        # For any change, redraw the scene
         self._redraw()
-        return True
+
 
 
 
@@ -50,21 +63,17 @@ class VtkViewer(Object):
         '''open()
         Open the window where the 3d objects will be displayed
         '''
-        renderer = self._renderer
         with self:
             if self._interactor is not None:
                 raise RuntimeError('Viewer is being shown already')
 
             # Create the vtk window & interactor
             window = vtkRenderWindow()
-            interactor = vtkGenericRenderWindowInteractor()
+            interactor = vtkRenderWindowInteractor()
             self._window, self._interactor = window, interactor
 
             # Set window title
             window.SetWindowName(self._title)
-
-            # Added renderer to the window
-            window.AddRenderer(renderer)
 
             # Set window size
             window.SetSize(640, 480)
@@ -72,11 +81,19 @@ class VtkViewer(Object):
             # Bind window to the interactor
             interactor.SetRenderWindow(window)
 
+            # Bind scene renderer to the window
+            scene = self.get_scene()
+            if scene is not None:
+                window.AddRenderer(scene._renderer)
+
+
+            # Fire viewer open event
+            self.fire_event('viewer_open')
+
             # Initialize & Start interactor
             interactor.Initialize()
             interactor.Start()
 
-            self.fire_event('viewer_open')
 
 
 
@@ -119,6 +136,31 @@ class VtkViewer(Object):
 
 
 
+    def get_scene(self):
+        '''get_scene() -> Scene
+        Get the 3D scene associated to the viewer if any. None otherwise.
+        '''
+        return next(iter(self.get_children(Scene)), None)
+
+
+
+    def set_scene(self, scene):
+        '''set_scene(scene: Scene)
+        Set the 3D scene associated to the viewer.
+        :type scene: Scene
+        '''
+        if not isinstance(scene, Scene):
+            raise TypeError('Input argument must be a Scene object')
+        with self:
+            current_scene = self.get_scene()
+            if current_scene is not None:
+                self.remove_child(current_scene)
+            self.add_child(scene)
+
+
+
+
+
     def set_title(self, title):
         '''set_title(title: str)
         Set the title of the window where 3d objects are being rendered
@@ -137,26 +179,6 @@ class VtkViewer(Object):
 
 
 
-    def get_background_color(self):
-        '''get_background_color() -> Color
-        Get the background color of the viewer
-
-        :rtype: Color
-
-        '''
-        return self._color
-
-
-    def set_background_color(self, *args):
-        '''set_background_color(...)
-        Set the background color of the viewer
-        '''
-        self._color.set(*args)
-
-
-
-
-
     def _redraw(self):
         # Redraw the 3d objects and update the view
         with self:
@@ -165,25 +187,4 @@ class VtkViewer(Object):
             self._interactor.Render()
 
 
-
-    def _add_actor(self, actor):
-        assert isinstance(actor, vtkProp)
-
-        with self:
-            self._renderer.AddActor(actor)
-
-
-
-    def _remove_actor(self, actor):
-        assert isinstance(actor, vtkProp)
-
-        with self:
-            self._renderer.RemoveActor(actor)
-
-
-
-
-    def _remove_all_actors(self):
-        with self:
-            # Remove all actors from the renderer
-            self._renderer.RemoveAllViewProps()
+from .scene import Scene

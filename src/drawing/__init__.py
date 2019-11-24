@@ -29,3 +29,22 @@ from .scad import scad2stl, scad_to_stl
 from .timer import Timer, OneShotTimer
 from .color import Color
 from .transform import Transform
+
+
+
+
+
+# Additional classes & functions of this submodule
+
+_viewer = Viewer()
+
+def get_viewer():
+    '''get_viewer() -> Viewer
+    Get the viewer where the 3d scene will be shown
+
+    :rtype: Viewer
+
+    '''
+    return _viewer
+
+__all__.append('get_viewer')

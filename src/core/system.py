@@ -473,12 +473,6 @@ class System(_System):
         return self._scene
 
 
-    def get_viewer(self):
-        '''get_viewer() -> Viewer
-        Get the 3D viewer associated to this system
-        '''
-        return self.get_scene().get_viewer()
-
 
 
 
@@ -1693,17 +1687,6 @@ class System(_System):
         return self.get_scene()
 
 
-    @property
-    def viewer(self):
-        '''
-        Read only property that returns the 3d viewer associated to this system
-
-        :rtype: Viewer
-
-        .. seealso:: :func:`get_viewer`
-
-        '''
-        return self.get_viewer()
 
 
 
