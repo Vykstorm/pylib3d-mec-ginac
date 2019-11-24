@@ -38,11 +38,13 @@ class Object:
     to provide a scope where the internal lock of the object is locked
 
     '''
-    def __init__(self):
+    def __init__(self, lock=None):
         super().__init__()
         self._children, self._parent = [], None
         self._event_handlers = []
-        self._lock = RLock()
+        if lock is None:
+            lock = RLock()
+        self._lock = lock
 
 
     def get_parent(self):

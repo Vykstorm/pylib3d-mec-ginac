@@ -5,6 +5,10 @@ Description: This file defines the class VtkViewer
 
 ######## Import statements ########
 
+# standard imports
+from threading import Condition, RLock
+from time import sleep
+
 # imports from other modules
 from .object import Object
 from .color import Color
@@ -26,11 +30,14 @@ class VtkViewer(Object):
     '''
 
     def __init__(self):
-        super().__init__()
+        lock = RLock()
+        super().__init__(lock)
 
         # Initialize internal fields
         self._interactor, self._window = None, None
         self._title = ''
+        self._event = False
+        self._cv = Condition(lock=lock)
 
 
         self.add_event_handler(self._event_handler)
@@ -54,15 +61,16 @@ class VtkViewer(Object):
         self._redraw()
 
 
-
-
-    def open(self):
-        '''open()
-        Open the window where the 3d objects will be displayed
+    def main(self):
+        '''main()
+        This is the viewer main function.
         '''
-        with self:
-            if self._interactor is not None:
-                raise RuntimeError('Viewer is being shown already')
+        self._cv.acquire()
+        while True:
+            # Wait until another thread calls the method open()
+            while not self._event:
+                self._cv.wait()
+            self._event = False
 
             # Create the vtk window & interactor
             window = vtkRenderWindow()
@@ -83,15 +91,50 @@ class VtkViewer(Object):
             if scene is not None:
                 window.AddRenderer(scene._renderer)
 
-
             # Fire viewer open event
             self.fire_event('viewer_open')
 
-            # Initialize & Start interactor
+            # Initialize the interactor
             interactor.Initialize()
+
+            # Create a repeating timer which sleeps the event loop thread half
+            # of the time to release the GIL
+            interactor.CreateRepeatingTimer(10)
+            interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.005))
+
+
+            # Start the interactor and the main event loop
+            self._cv.release() # Release the lock before (because the main event loop will block the thread)
             interactor.Start()
+            self._cv.acquire()
+
+            # Reset internal fields
+            if self._interactor is not None:
+                # window closed by the user
+                window.Finalize()
+                interactor.TerminateApp()
+                self._interactor, self._window = None, None
+
+            # decrease window & interactor reference count
+            del window, interactor
+
+            # Fire viewer close event
+            self.fire_event('viewer_close')
 
 
+
+
+    def open(self):
+        '''open()
+        Open the window where the 3d objects will be displayed
+        '''
+        with self._cv:
+            # Window already open?
+            if self._interactor is not None:
+                raise RuntimeError('Viewer is already open')
+            # Tell to main() that we want to open the window
+            self._event = True
+            self._cv.notify() # Notify thread which called main()
 
 
 
@@ -100,16 +143,15 @@ class VtkViewer(Object):
         Closes the window where 3d objects are rendered
         '''
         with self:
-            interactor, window = self._interactor, self._window
+            window, interactor = self._window, self._interactor
             if interactor is None:
                 raise RuntimeError('Viewer is not open yet')
+            self._event = False
 
             # Destroy vtk window & interactor
             window.Finalize()
             interactor.TerminateApp()
-            self._interactor, self._window = None, None
-
-            self.fire_event('viewer_close')
+            self._window, self._interactor = None, None
 
 
 
