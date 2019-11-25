@@ -14,6 +14,7 @@ from .object import Object
 from .color import Color
 from ..core.system import get_default_system
 
+
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
 from vtk import vtkRenderWindowInteractor
@@ -37,10 +38,11 @@ class VtkViewer(Object):
         # Initialize internal fields
         self._interactor, self._window = None, None
         self._title = ''
-        self._event = False
+        self._open_request = False
+        self._state = 'closed'
         self._cv = Condition(lock=lock)
 
-
+        # Add event handler
         self.add_event_handler(self._event_handler)
 
 
@@ -63,97 +65,128 @@ class VtkViewer(Object):
 
 
 
+
+
+    def _wait_until_open_request(self):
+        # Wait until the open request is sent
+        while not self._open_request:
+            self._cv.wait()
+        # Clear open request flag
+        self._open_request = False
+
+
+    def _initialize(self):
+        # Create interactor & window
+        window, interactor = vtkRenderWindow(), vtkRenderWindowInteractor()
+        self._window, self._interactor = window, interactor
+
+        # Set window title
+        window.SetWindowName(self._title)
+
+        # Set window size
+        window.SetSize(640, 480)
+
+        # Bind window to the interactor
+        interactor.SetRenderWindow(window)
+
+        # Initialize interactor
+        interactor.Initialize()
+
+        # Create a repeating timer which sleeps the event loop thread half
+        # of the time to release the GIL
+        interactor.CreateRepeatingTimer(10)
+        interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.005))
+
+        # Bind scene to the renderer
+        scene = self.get_scene()
+        if scene is not None:
+            window.AddRenderer(scene._renderer)
+
+
+
+
+    def _destroy(self):
+        # Destroy vtk window & interactor (if not done yet)
+        if self._interactor is not None:
+            self._window.Finalize()
+            self._interactor.TerminateApp()
+            self._window, self._interactor = None, None
+
+
+    def _main_event_loop(self):
+        self._interactor.Start()
+
+
+
+
     def main(self):
-        '''main()
-        This is the viewer main function.
-        '''
-        self._cv.acquire()
+        cv = self._cv
+
+        cv.acquire()
         while True:
-            # Wait until another thread calls the method open()
-            while not self._event:
-                self._cv.wait()
-            self._event = False
+            # Wait until an open request is sent
+            self._wait_until_open_request()
 
-            # Create the vtk window & interactor
-            window = vtkRenderWindow()
-            interactor = vtkRenderWindowInteractor()
-            self._window, self._interactor = window, interactor
+            # Create interactor & window
+            self._initialize()
 
-            # Set window title
-            window.SetWindowName(self._title)
-
-            # Set window size
-            window.SetSize(640, 480)
-
-            # Bind window to the interactor
-            interactor.SetRenderWindow(window)
-
-            # Bind scene renderer to the window
-            scene = self.get_scene()
-            if scene is not None:
-                window.AddRenderer(scene._renderer)
-
-            # Fire viewer open event
+            # Change viewer state & fire open event
+            self._state = 'open'
+            cv.notify()
             self.fire_event('viewer_open')
 
-            # Initialize the interactor
-            interactor.Initialize()
+            # Start main event loop
+            cv.release()
+            self._main_event_loop()
+            cv.acquire()
 
-            # Create a repeating timer which sleeps the event loop thread half
-            # of the time to release the GIL
-            interactor.CreateRepeatingTimer(10)
-            interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.005))
+            # Window was closed by close() method or by the user
+            self._destroy()
 
-
-            # Start the interactor and the main event loop
-            self._cv.release() # Release the lock before (because the main event loop will block the thread)
-            interactor.Start()
-            self._cv.acquire()
-
-            # Reset internal fields
-            if self._interactor is not None:
-                # window closed by the user
-                window.Finalize()
-                interactor.TerminateApp()
-                self._interactor, self._window = None, None
-
-            # decrease window & interactor reference count
-            del window, interactor
-
-            # Fire viewer close event
+            # Change viewer state & fire close event
+            self._state = 'closed'
+            cv.notify()
             self.fire_event('viewer_close')
+
+
+
+
 
 
 
 
     def open(self):
         '''open()
-        Open the window where the 3d objects will be displayed
+        Open the viewer
         '''
-        with self._cv:
-            # Window already open?
-            if self._interactor is not None:
-                raise RuntimeError('Viewer is already open')
-            # Tell to main() that we want to open the window
-            self._event = True
-            self._cv.notify() # Notify thread which called main()
+        cv = self._cv
+        with cv:
+            if self._state == 'open':
+                raise RuntimeError('viewer already open')
+
+            self._open_request = True
+            cv.notify()
+            while self._state == 'closed':
+                cv.wait()
+
+
 
 
 
     def close(self):
         '''close()
-        Closes the window where 3d objects are rendered
+        Closes the viewer
         '''
-        with self:
-            window, interactor = self._window, self._interactor
-            if interactor is None:
-                raise RuntimeError('Viewer is not open yet')
-            self._event = False
+        # TODO
+        cv = self._cv
+        with cv:
+            if self._state == 'closed':
+                raise RuntimeError('viewer is not open yet')
+            self._destroy()
+            while self._state == 'open':
+                cv.wait()
 
-            # Destroy vtk window & interactor
-            window.Finalize()
-            interactor.TerminateApp()
-            self._window, self._interactor = None, None
+
 
 
 
@@ -163,7 +196,7 @@ class VtkViewer(Object):
         this method returns False
         '''
         with self:
-            return self._interactor is not None
+            return self._state == 'open'
 
 
     def is_closed(self):
@@ -173,7 +206,7 @@ class VtkViewer(Object):
         .. seealso:: :func:`is_open`
 
         '''
-        return not self.is_open()
+        return not self._state == 'closed'
 
 
 
@@ -223,9 +256,16 @@ class VtkViewer(Object):
     def _redraw(self):
         # Redraw the 3d objects and update the view
         with self:
-            if self._interactor is None:
-                return
-            self._interactor.Render()
+            if self._state == 'open':
+                self._interactor.Render()
+
+
+
+# This import is moved here to avoid circular dependencies
+from .scene import Scene
+
+
+
 
 
 
@@ -242,7 +282,6 @@ def get_viewer():
     return _viewer
 
 
-
 def show_viewer():
     '''show_viewer()
     Open the viewer window
@@ -255,8 +294,3 @@ def close_viewer():
     Closes the viewer window
     '''
     get_viewer().close()
-
-
-
-
-from .scene import Scene
