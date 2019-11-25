@@ -243,16 +243,18 @@ if __name__ == '__main__':
         exit(-1)
 
     from vtk import vtkVersion
-    if vtkVersion.GetVTKMajorVersion() < 8 or vtkVersion.GetVTKMinorVersion() < 90:
-        print('version of the vtk library must be >= 8.90.*')
+    if vtkVersion.GetVTKMajorVersion() < 8 or vtkVersion.GetVTKMinorVersion() < 1 or vtkVersion.GetVTKBuildVersion() < 2:
+        print('version of the vtk library must be >= 8.1.2')
         exit(-1)
 
+    '''
     try:
         import vtk.tk.vtkTkRenderWindowInteractor
     except ImportError as e:
         print(f'Failed to import VTK Tkinter extension')
         exit(-1)
 
+    '''
     print(" [done]")
 
 
