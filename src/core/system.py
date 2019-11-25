@@ -1696,6 +1696,35 @@ class System(_System):
 
 
 
+# This variable will store the "default" system object.
+_default_system = System()
+
+
+def get_default_system():
+    '''get_default_system() -> System
+    Get the default system instance.
+
+    :rtype: System
+    '''
+    return _default_system
+
+
+def set_default_system(system):
+    '''set_default_system(system: System)
+    Set the default system instance
+
+    :param System system: The system instance to be set as default
+    :raises TypeError: If the input argument is not an instance of the class System
+    '''
+    global _default_system
+    if not isinstance(system, System):
+        raise TypeError('Input argument must be an instance of the class System')
+    _default_system = system
+
+
+
+
+
 
 
 

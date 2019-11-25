@@ -12,7 +12,7 @@ from time import sleep
 # imports from other modules
 from .object import Object
 from .color import Color
-from ..core import get_default_system
+from ..core.system import get_default_system
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
@@ -241,6 +241,20 @@ def get_viewer():
     '''
     return _viewer
 
+
+
+def show_viewer():
+    '''show_viewer()
+    Open the viewer window
+    '''
+    get_viewer().open()
+
+
+def close_viewer():
+    '''close_viewer()
+    Closes the viewer window
+    '''
+    get_viewer().close()
 
 
 

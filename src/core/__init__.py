@@ -8,8 +8,9 @@ from functools import wraps
 from re import fullmatch
 from ..drawing.scene import Scene
 import lib3d_mec_ginac_ext as _cython_ext
-from .system import System
+from .system import System, get_default_system, set_default_system
 from ..config import runtime_config
+
 
 
 # This variable will store all the public classes & methods
@@ -41,21 +42,17 @@ for name in dir(_cython_ext):
     __all__.append(name)
     globals()[name] = obj
 
-__all__.append('System')
+__all__.extend(['System', 'get_default_system', 'set_default_system'])
 
 
 
-
-
-# This variable will store the "default" system object.
-_default_system = System()
 
 
 # Expose get_*, new_*, set_* methods of the default system object (add them as global functions)
 def _create_system_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
-        return method(_default_system, *args, **kwargs)
+        return method(get_default_system(), *args, **kwargs)
     return func
 
 for name in dir(System):
@@ -79,7 +76,7 @@ for name in dir(System):
 def _create_scene_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
-        return method(_default_system.get_scene(), *args, **kwargs)
+        return method(get_default_system().get_scene(), *args, **kwargs)
     return func
 
 for name in dir(Scene):
@@ -93,34 +90,6 @@ for name in dir(Scene):
 
 
 
-
-# Additional methods exposed to the api
-
-def get_default_system():
-    '''get_default_system() -> System
-    Get the default system instance.
-
-    :rtype: System
-    '''
-    return _default_system
-
-
-def set_default_system(system):
-    '''set_default_system(system: System)
-    Set the default system instance
-
-    :param System system: The system instance to be set as default
-    :raises TypeError: If the input argument is not an instance of the class System
-    '''
-    global _default_system
-    if not isinstance(system, System):
-        raise TypeError('Input argument must be an instance of the class System')
-
-    _default_system = system
-
-
-
-__all__.extend(['get_default_system', 'set_default_system'])
 
 
 
