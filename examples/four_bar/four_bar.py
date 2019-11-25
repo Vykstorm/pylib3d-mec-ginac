@@ -1,13 +1,13 @@
 
 
 ## Imports
-#from lib3d_mec_ginac import *
+from lib3d_mec_ginac import *
 
 from os.path import join, dirname, abspath
 import sys
 
-sys.path.insert(0, abspath(join(dirname(__file__), '../..')))
-from src import *
+#sys.path.insert(0, abspath(join(dirname(__file__), '../..')))
+#from src import *
 
 
 
@@ -302,6 +302,3 @@ draw_position_vector('OL2', 'OL3')
 draw_solid('Arm1')
 drawing = draw_solid('Arm2')
 draw_solid('Arm3')
-
-
-show_drawings()
