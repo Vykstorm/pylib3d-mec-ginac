@@ -14,8 +14,6 @@ from operator import attrgetter, methodcaller
 from itertools import filterfalse, chain
 from inspect import isclass
 
-# vtk
-from vtk import vtkObject
 
 
 

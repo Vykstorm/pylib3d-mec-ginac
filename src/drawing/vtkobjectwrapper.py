@@ -5,9 +5,12 @@ Description: This file defines the class VtkObjectWrapper
 
 ######## Import statements ########
 
+# imports from other modules
 from .object import Object
 from .viewer import VtkViewer
 
+# vtk
+from vtk import vtkObject
 
 
 

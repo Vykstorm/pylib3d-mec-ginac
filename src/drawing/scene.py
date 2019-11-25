@@ -127,7 +127,7 @@ class Scene(Object):
         '''get_drawings() -> List[Drawing3D]
         Get all the drawings previously created in the scene
         '''
-        return self._viewer.get_children(kind=Drawing3D)
+        return self.get_children(kind=Drawing3D)
 
 
 
