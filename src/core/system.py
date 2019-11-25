@@ -1632,18 +1632,6 @@ class System(_System):
         return self.get_frame('abs')
 
 
-    @property
-    def viewer(self):
-        '''
-        Only read property that returns the viewer object associated to this system
-
-        :rtype: Viewer
-
-        .. seealso:: :func:`get_viewer`
-
-        '''
-        return self.get_viewer()
-
 
 
     @property
