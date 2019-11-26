@@ -61,20 +61,13 @@ if __name__ == '__main__':
 
         # Read script file source
         with open(script_path, 'r') as file:
-            code = compile(file.read(), '<string>', 'exec')
+            script = file.read()
 
         # Change current working directory
         chdir(dirname(script_path))
 
     else:
-        code = None
+        script = None
 
 
-    # Create the python prompt
-    prompt = Console(globals())
-
-    # Execute the given script in the prompt
-    if code is not None:
-        prompt.runcode(code)
-
-    prompt.run()
+    # TODO
