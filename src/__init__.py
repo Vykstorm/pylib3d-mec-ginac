@@ -18,3 +18,9 @@ __all__.extend(_core_api)
 from .drawing import __all__ as _drawing_api
 from .drawing import *
 __all__.extend(_drawing_api)
+
+
+# Add extra classes & methods (utils submodule)
+from .utils import __all__ as _utils_api
+from .utils import *
+__all__.extend(_utils_api)

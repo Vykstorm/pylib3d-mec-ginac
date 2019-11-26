@@ -5,53 +5,76 @@ the lib3d-mec-ginac graphical interface.
 '''
 
 
-
-from code import InteractiveConsole
-from threading import Thread
-import rlcompleter
-import readline
 from argparse import ArgumentParser
-
-
-import numpy as np
-import vtk
+from os.path import join, isdir, isfile, exists, normpath, dirname
+from os import getcwd, chdir
+from re import match
+from copy import copy
+import sys
+from functools import partial
 from lib3d_mec_ginac import *
 
 
 
-class Prompt(InteractiveConsole, Thread):
-    def __init__(self):
-        InteractiveConsole.__init__(self, globals(), '<console>')
-        Thread.__init__(self)
-        self.daemon = True
-
-
-    def run(self):
-        # Enable tab autocomplete
-        readline.parse_and_bind("tab: complete")
-        # Interact interaction with the user
-        self.interact(banner='', exitmsg='')
-
-
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    parser.add_argument('file', type=open, nargs=1, help='Python file to be executed')
+    # The next code creates a command line interface (execute the script with the option -h for more info)
+    parser = ArgumentParser(
+        description=\
+        'Open a python prompt with all the functions and methods of the ' +\
+        'lib3d-mec-ginac library imported by default and the 3D viewer can be open asynchronously ' +\
+        'calling to show_viewer()'
+    )
 
+    parser.add_argument('file', type=str, nargs='?', default=None,
+        help='Optional python script to be executed after lib3d-mec-ginac library is imported. ' +\
+        'This can also be a directory. In such case, a file with the name __main__.py  will be ' +\
+        'searched inside the given folder. This can be set also to any predefined example of the library (e.g: "four_bar")' +\
+        'The current working directory will be changed to the parent directory of the script indicated ' +\
+        'before it is executed.')
+
+    parser.add_argument('--show-viewer', action='store_true',
+        help='Open 3D viewer after running the given script. By default is not open. You must invoke ' +\
+            'show_viewer() to open it')
+
+    ## Parse input arguments
     parsed_args = parser.parse_args()
 
-    file = parsed_args.file[0]
-    source = file.read()
-    file.close()
 
-    code = compile(source, '<string>', 'exec')
-    exec(code, globals())
+    # Parse script file path
+    script_path = parsed_args.file
+    if script_path is not None:
+        script_path = normpath(script_path)
+        if not exists(script_path):
+            if match('\w+', script_path):
+                script_path = join(dirname(__file__), '..', 'examples', script_path)
+            else:
+                parser.error(f'File or directory "{script_path}" doesnt exist')
+
+        if isdir(script_path):
+            script_path = join(script_path, '__main__.py')
+            if not isfile(script_path):
+                parser.error(f'File "{script_path}" not found')
+        else:
+            if not script_path.endswith('.py'):
+                parser.error(f'Script must be a file with .py extension')
 
 
-    # Run the user prompt in another thread
-    prompt = Prompt()
-    prompt.start()
+        # Read script file source
+        with open(script_path, 'r') as file:
+            code = compile(file.read(), '<string>', 'exec')
 
-    # Attach the scene of the default system to the viewer & run the viewer main loop
-    viewer = get_viewer()
-    viewer.set_scene(get_default_system().get_scene())
-    viewer.main()
+        # Change current working directory
+        chdir(dirname(script_path))
+
+    else:
+        code = None
+
+
+    # Create the python prompt
+    prompt = Console(globals())
+
+    # Execute the given script in the prompt
+    if code is not None:
+        prompt.runcode(code)
+
+    prompt.run()
