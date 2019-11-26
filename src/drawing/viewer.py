@@ -129,6 +129,10 @@ class VtkViewer(Object):
         cv.notify()
         self.fire_event('viewer_open')
 
+        # Attach the scene of the default system if no scene was attached yet
+        if self.get_scene() is None:
+            self.set_scene(get_default_system().get_scene())
+
         # Start main event loop
         cv.release()
         self._main_event_loop()
@@ -275,6 +279,7 @@ from .scene import Scene
 
 
 _viewer = VtkViewer()
+
 
 def get_viewer():
     '''get_viewer() -> Viewer
