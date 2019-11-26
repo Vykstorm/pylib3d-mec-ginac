@@ -6,7 +6,7 @@ Description: This file defines the class VtkViewer
 ######## Import statements ########
 
 # standard imports
-from threading import Condition, RLock
+from threading import Condition, RLock, Event
 from time import sleep
 
 # imports from other modules
@@ -41,6 +41,7 @@ class VtkViewer(Object):
         self._open_request = False
         self._state = 'closed'
         self._cv = Condition(lock=lock)
+        self._is_main_running = Event()
 
         # Add event handler
         self.add_event_handler(self._event_handler)
@@ -117,40 +118,40 @@ class VtkViewer(Object):
         self._interactor.Start()
 
 
+    def _main(self):
+        cv = self._cv
+
+        # Create interactor & window
+        self._initialize()
+
+        # Change viewer state & fire open event
+        self._state = 'open'
+        cv.notify()
+        self.fire_event('viewer_open')
+
+        # Start main event loop
+        cv.release()
+        self._main_event_loop()
+        cv.acquire()
+
+        # Window was closed by close() method or by the user
+        self._destroy()
+
+        # Change viewer state & fire close event
+        self._state = 'closed'
+        cv.notify()
+        self.fire_event('viewer_close')
+
 
 
     def main(self):
-        cv = self._cv
-
-        cv.acquire()
+        self._is_main_running.set()
+        self._cv.acquire()
         while True:
             # Wait until an open request is sent
             self._wait_until_open_request()
 
-            # Create interactor & window
-            self._initialize()
-
-            # Change viewer state & fire open event
-            self._state = 'open'
-            cv.notify()
-            self.fire_event('viewer_open')
-
-            # Start main event loop
-            cv.release()
-            self._main_event_loop()
-            cv.acquire()
-
-            # Window was closed by close() method or by the user
-            self._destroy()
-
-            # Change viewer state & fire close event
-            self._state = 'closed'
-            cv.notify()
-            self.fire_event('viewer_close')
-
-
-
-
+            self._main()
 
 
 
@@ -161,13 +162,16 @@ class VtkViewer(Object):
         '''
         cv = self._cv
         with cv:
-            if self._state == 'open':
-                raise RuntimeError('viewer already open')
+            if self._is_main_running.is_set():
+                if self._state == 'open':
+                    raise RuntimeError('viewer already open')
 
-            self._open_request = True
-            cv.notify()
-            while self._state == 'closed':
-                cv.wait()
+                self._open_request = True
+                cv.notify()
+                while self._state == 'closed':
+                    cv.wait()
+            else:
+                self._main()
 
 
 
