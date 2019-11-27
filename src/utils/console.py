@@ -10,6 +10,68 @@ import rlcompleter
 import readline
 import socket
 
+import json
+from queue import Queue
+from types import SimpleNamespace
+
+
+
+class MessageReader:
+    def __init__(self, s):
+        self._socket = s
+
+
+    def read(self):
+        s = self._socket
+        buffer = bytearray()
+        try:
+            # Read the header
+            while True:
+                c = s.recv(1)
+                if c == b'\n':
+                    break
+                buffer.extend(c)
+            header = buffer.decode()
+            # Compute payload size
+            payload_size = int(header)
+            # Read the payload
+            payload = s.recv(payload_size).decode()
+            # Decode the message
+            message = SimpleNamespace(**json.loads(payload))
+            return message
+        except:
+            raise ConnectionError('Failed to read message')
+
+
+
+
+class MessageWriter:
+    def __init__(self, s):
+        self._socket = s
+
+    def write(self, message):
+        s = self._socket
+        try:
+            # Encode the message
+            payload = json.dumps(message).encode()
+            # Send the header
+            payload_size = len(payload)
+            header = (str(payload_size) + '\n').encode()
+            s.send(header)
+            # Send the payload
+            s.send(payload)
+
+        except:
+            raise ConnectionError('Failed to write message')
+
+
+
+
+
+
+
+
+
 
 
 def _sendmsg(s, msg):
@@ -88,9 +150,11 @@ class ClientConsole(InteractiveConsole):
 
 
 if __name__ == '__main__':
+    '''
     client = ClientConsole()
 
     try:
         client.interact()
     except ConnectionError:
         raise ConnectionError('Failed to connect to the remote python console')
+    '''
