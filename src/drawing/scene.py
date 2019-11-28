@@ -38,6 +38,10 @@ class Scene(Object):
         # Set default camera position
         renderer.GetActiveCamera().SetPosition(7, 7, 7)
 
+        # Set default background color
+        #renderer.SetBackgroundColor(1, 1, 1)
+        #renderer.SetBackgroundOpacity(1)
+
 
         # Create simulation
         simulation = Simulation(self, system)

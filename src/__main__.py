@@ -69,5 +69,11 @@ if __name__ == '__main__':
     else:
         script = None
 
+    # Execute the given script
 
-    # TODO
+    # Execute server command prompt in parallel
+    server = ServerConsole(context=globals())
+    server.start()
+
+    # Execute VTK main loop
+    get_viewer().main()

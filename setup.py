@@ -168,7 +168,7 @@ EXTENSIONS = [
 RUNTIME_CONFIG = {
     # openscad command line utility executable (this is used to convert scad
     # to stl files).
-    'OPENSCADCMD': 'openscad-nightly',
+    'OPENSCADCMD': 'openscad',
 
     # Enable/Disable atomization by default
     'ATOMIZATION': 'off',

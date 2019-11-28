@@ -3,16 +3,20 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the class Console
 '''
 
-from code import InteractiveConsole, compile_command
-from functools import partial
-from threading import Thread, RLock
+from threading import Thread, RLock, Condition
 import rlcompleter
 import readline
-import socket
+from code import InteractiveConsole, compile_command
 
+import socket
 import json
 from queue import Queue
 from types import SimpleNamespace
+from contextlib import contextmanager
+from io import StringIO
+from functools import partial
+import sys
+import traceback
 
 
 
@@ -24,11 +28,11 @@ class MessageReader(Thread):
         super().__init__()
         self.daemon = True
         self._socket = s
-        self._callbacks = []
-        self._lock = RLock()
+        self._queues = {}
+        self._cv = Condition(lock=RLock())
 
 
-    def read(self):
+    def _read(self):
         s = self._socket
         buffer = bytearray()
         try:
@@ -42,26 +46,65 @@ class MessageReader(Thread):
             # Compute payload size
             payload_size = int(header)
             # Read the payload
-            payload = s.recv(payload_size).decode()
+            payload = json.loads(s.recv(payload_size).decode())
             # Decode the message
-            message = SimpleNamespace(**json.loads(payload))
-            return message
-        except:
+            kind, data = payload['kind'], SimpleNamespace(**payload['data'])
+            return kind, data
+        except Exception as e:
+            print(e)
             raise ConnectionError('Failed to read message')
 
 
 
-    def add_callback(self, callback):
-        with self._lock:
-            self._callbacks.append(callback)
+    def run(self):
+        while True:
+            kind, message = self._read()
+            with self._cv:
+                if kind not in self._queues:
+                    self._queues[kind] = Queue()
+                self._cv.notify_all()
+            self._queues[kind].put(message)
+
+
+    def read(self, kind):
+        cv = self._cv
+        with cv:
+            while kind not in self._queues:
+                cv.wait()
+            queue = self._queues[kind]
+        return queue.get()
+
+
+
+
+class AutoCompleteMessageReader(Thread):
+    '''
+    This class is used to receive text autocomplete requests from the client prompt
+    and send back the response (using readling completer)
+    '''
+    def __init__(self, reader, writer):
+        super().__init__()
+        self.daemon = True
+        self._reader, self._writer = reader, writer
 
 
     def run(self):
+        reader, writer = self._reader, self._writer
+        completer = readline.get_completer()
+
         while True:
-            message = self.read()
-            with self._lock:
-                for callback in self._callbacks:
-                    callback(message)
+            request = reader.read('autocomplete')
+            text = request.text
+            results, i = [], 0
+            while True:
+                result = completer(text, i)
+                if not isinstance(result, str):
+                    break
+                results.append(result)
+                i += 1
+
+            writer.send('autocomplete-response', SimpleNamespace(results=results))
+
 
 
 
@@ -73,23 +116,26 @@ class MessageWriter:
     '''
     def __init__(self, s):
         self._socket = s
+        self._lock = RLock()
 
-    def send(self, message):
+    def send(self, kind, message):
         s = self._socket
         try:
-            # Encode the message
-            payload = json.dumps(message.__dict__).encode()
-            # Send the header
-            payload_size = len(payload)
-            header = (str(payload_size) + '\n').encode()
-            s.send(header)
-            # Send the payload
-            s.send(payload)
+            with self._lock:
+                # Encode the message
+                payload = json.dumps({
+                    'data': message.__dict__,
+                    'kind': kind
+                }).encode()
+                # Send the header
+                payload_size = len(payload)
+                header = (str(payload_size) + '\n').encode()
+                s.send(header)
+                # Send the payload
+                s.send(payload)
 
         except:
             raise ConnectionError('Failed to write message')
-
-
 
 
 
@@ -117,11 +163,31 @@ class ClientConsole(InteractiveConsole):
         s = socket.socket()
         s.connect((self._address, self._host))
         self._socket = s
+
+        # Create socket reader & writer
         self._reader = MessageReader(self._socket)
         self._writer = MessageWriter(self._socket)
+        self._reader.start()
 
+        # Enable text autocomplete
         readline.parse_and_bind('tab: complete')
 
+        # Change text autocompleter
+        completer_cache = {}
+        def completer(text, state):
+            if text not in completer_cache:
+                self._writer.send('autocomplete', SimpleNamespace(text=text))
+                response = self._reader.read('autocomplete-response')
+                results = response.results
+                completer_cache[text] = results
+            results = completer_cache[text]
+            return results[state]
+
+
+        readline.set_completer(completer)
+
+
+        # Start user interaction
         super().interact(*args, **kwargs)
 
 
@@ -145,22 +211,91 @@ class ClientConsole(InteractiveConsole):
         # Send the source code, filename and symbol to the server
         reader, writer = self._reader, self._writer
 
-        writer.send(SimpleNamespace(source=source, filename=filename, symbol=symbol))
-
-        '''
-        if result == 'ok':
-            output = readmsg()
-            print(output)
-        elif result == 'exit':
+        writer.send('exec', SimpleNamespace(source=source, filename=filename, symbol=symbol))
+        response = reader.read('exec-response')
+        response_code = response.code
+        if response_code in ('ok', 'error'):
+            print(response.output, end='', flush=True)
+        elif response_code == 'exit':
             exit(0)
-        elif result == 'error':
-            info = readmsg()
-            print(info)
         else:
             raise ConnectionError
-        '''
 
         return False
+
+
+
+
+
+class ServerConsole(Thread):
+    '''
+    This class is used as the backend to execute python commands sent by the client
+    promt.
+    '''
+    def __init__(self, context, address='localhost', host=15010):
+        super().__init__()
+        self.daemon = True
+        self._address, self._host = address, host
+        self._context = context
+
+
+    def run(self):
+        # Create the server socket
+        s = socket.socket()
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind((self._address, self._host))
+        s.listen(1)
+        # Accept just one client
+        client, adress_info = s.accept()
+
+        # Create socket reader & writer
+        reader, writer = MessageReader(client), MessageWriter(client)
+        reader.start()
+        # Create autocompleter manager
+        autocompleter = AutoCompleteMessageReader(reader, writer)
+        autocompleter.start()
+
+        try:
+            # Start reading messages
+            while True:
+                # Wait for a execute source code request message
+                message = reader.read('exec')
+                try:
+                    # Execute the code received
+                    output = self._exec(message.source, message.filename, message.symbol)
+                    # Return a response to the client (with the execution output)
+                    writer.send('exec-response', SimpleNamespace(code='ok', output=output))
+                except SystemExit:
+                    # The result of the execution is a halt requestsw
+                    writer.send('exec-response', SimpleNamespace(code='exit'))
+
+        finally:
+            # Close the connection with the client and the server socket
+            client.close()
+            s.close()
+
+
+
+    def _exec(self, source, filename, symbol):
+        # Execute the given source code
+        context = self._context
+        code = compile(source, filename, symbol)
+
+        prev_stdout, output = sys.stdout, StringIO()
+        sys.stdout = output
+        try:
+            exec(code, context)
+        except SystemExit:
+            raise SystemExit
+        except:
+            traceback.print_exc(file=sys.stdout)
+        finally:
+            sys.stdout = prev_stdout
+        return output.getvalue()
+
+
+
+
 
 
 
