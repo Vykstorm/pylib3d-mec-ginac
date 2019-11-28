@@ -5,7 +5,7 @@ Description: This file defines the class Console
 
 from code import InteractiveConsole, compile_command
 from functools import partial
-from threading import Thread
+from threading import Thread, RLock
 import rlcompleter
 import readline
 import socket
@@ -16,9 +16,13 @@ from types import SimpleNamespace
 
 
 
-class MessageReader:
+class MessageReader(THread):
     def __init__(self, s):
+        super().__init__()
+        self.daemon = True
         self._socket = s
+        self._callbacks = []
+        self._lock = RLock()
 
 
     def read(self):
@@ -44,6 +48,21 @@ class MessageReader:
 
 
 
+    def add_callback(self, callback):
+        with self._lock:
+            self._callbacks.append(callback)
+
+
+    def run(self):
+        while True:
+            message = self.read()
+            with self._lock:
+                for callback in self._callbacks:
+                    callback(message)
+
+
+
+
 
 class MessageWriter:
     def __init__(self, s):
@@ -63,6 +82,8 @@ class MessageWriter:
 
         except:
             raise ConnectionError('Failed to write message')
+
+
 
 
 
