@@ -16,7 +16,10 @@ from types import SimpleNamespace
 
 
 
-class MessageReader(THread):
+class MessageReader(Thread):
+    '''
+    This class can be used to read messages from the given socket
+    '''
     def __init__(self, s):
         super().__init__()
         self.daemon = True
@@ -65,14 +68,17 @@ class MessageReader(THread):
 
 
 class MessageWriter:
+    '''
+    This class can be used to send messages from the given socket
+    '''
     def __init__(self, s):
         self._socket = s
 
-    def write(self, message):
+    def send(self, message):
         s = self._socket
         try:
             # Encode the message
-            payload = json.dumps(message).encode()
+            payload = json.dumps(message.__dict__).encode()
             # Send the header
             payload_size = len(payload)
             header = (str(payload_size) + '\n').encode()
@@ -92,33 +98,18 @@ class MessageWriter:
 
 
 
-
-
-
-def _sendmsg(s, msg):
-    s.send((str(len(msg)) + '\n').encode())
-    s.send(msg.encode())
-
-
-def _readmsg(s):
-    buffer = bytearray()
-    while True:
-        c = s.recv(1)
-        if c == b'\n':
-            break
-        buffer.extend(c)
-    msg_len = int(buffer.decode())
-    return s.recv(msg_len).decode()
-
-
-
-
-
 class ClientConsole(InteractiveConsole):
+    '''
+    This class is a python prompt where code is executed remotely in a server.
+    The communication with the server is done via sockets. It also supports
+    autocomplete.
+    '''
     def __init__(self, address='localhost', host=15010):
         super().__init__(locals=None, filename='<console>')
         self._address, self._host = address, host
         self._socket = None
+        self._reader, self._writer = None, None
+
 
 
     def interact(self, *args, **kwargs):
@@ -126,6 +117,8 @@ class ClientConsole(InteractiveConsole):
         s = socket.socket()
         s.connect((self._address, self._host))
         self._socket = s
+        self._reader = MessageReader(self._socket)
+        self._writer = MessageWriter(self._socket)
 
         readline.parse_and_bind('tab: complete')
 
@@ -133,7 +126,9 @@ class ClientConsole(InteractiveConsole):
 
 
 
+
     def runsource(self, source, filename='<input>', symbol='single'):
+        # Check for syntax errors in the source code
         try:
             result = compile_command(source, filename, symbol)
         except (SyntaxError, OverflowError):
@@ -147,14 +142,12 @@ class ClientConsole(InteractiveConsole):
             return False
 
 
-        # TODO
-        s = self._socket
-        sendmsg, readmsg = partial(_sendmsg, s), partial(_readmsg, s)
+        # Send the source code, filename and symbol to the server
+        reader, writer = self._reader, self._writer
 
-        sendmsg(source)
-        sendmsg(filename)
-        sendmsg(symbol)
-        result = readmsg()
+        writer.send(SimpleNamespace(source=source, filename=filename, symbol=symbol))
+
+        '''
         if result == 'ok':
             output = readmsg()
             print(output)
@@ -165,17 +158,17 @@ class ClientConsole(InteractiveConsole):
             print(info)
         else:
             raise ConnectionError
+        '''
 
         return False
 
 
 
+
 if __name__ == '__main__':
-    '''
     client = ClientConsole()
 
     try:
         client.interact()
     except ConnectionError:
         raise ConnectionError('Failed to connect to the remote python console')
-    '''
