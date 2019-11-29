@@ -76,6 +76,8 @@ PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.draw
 
 
 
+
+
 ######## C COMPILER CONFIGURATION ########
 
 # Directory that contains all lib3d-mec-ginac headers
@@ -315,7 +317,7 @@ if __name__ == '__main__':
 
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
-            package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]},
+            package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE, 'examples']},
             ext_modules=extensions,
             cmdclass={'build_ext': BuildExt},
         )

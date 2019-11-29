@@ -16,7 +16,7 @@ import subprocess
 import threading
 from signal import signal, getsignal, SIGINT, SIGPIPE
 from lib3d_mec_ginac import *
-from src.utils.console import *
+
 
 
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         description=\
         'Open a python prompt with all the functions and methods of the ' +\
         'lib3d-mec-ginac library imported by default and the 3D viewer can be open asynchronously ' +\
-        'calling to show_viewer()'
+        'by calling to ``show_viewer()``'
     )
 
     parser.add_argument('file', type=str, nargs='?', default=None,
@@ -74,15 +74,19 @@ if __name__ == '__main__':
     else:
         script = None
 
-    # Execute the given script
 
     # Execute server command prompt in parallel
     viewer = get_viewer()
-    server = ServerConsole(context=globals())
+    server = ServerConsole(context=globals(), host='localhost', port=15010)
     server.start()
 
+    # Execute the given script
+    if script is not None:
+        server.exec(script, mode='exec')
+
+
     # Execute client python prompt in a different process
-    prompt = subprocess.Popen([sys.executable, join(dirname(__file__), 'utils', 'console.py'), 'localhost:15010'])
+    prompt = subprocess.Popen([sys.executable, join(dirname(__file__), 'utils', 'console.py'), f'localhost:15010'])
 
     # This is used to prevent a bug when subprocess reads from stdin and a keyboard
     # interrupt is made
