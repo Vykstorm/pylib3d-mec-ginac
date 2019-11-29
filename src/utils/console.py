@@ -295,7 +295,7 @@ class ClientConsole(InteractiveConsole):
     text autocompletion (syntax error checking is peformed locally before commands
     are sent to the remote console)
     '''
-    def __init__(self, address='localhost', port=15010):
+    def __init__(self, host='localhost', port=15010):
         '''
         Initialize this instance
 
@@ -306,7 +306,7 @@ class ClientConsole(InteractiveConsole):
         # Initialize InteractiveConsole super instance
         super().__init__(locals=None, filename='<console>')
         # Initialize fields
-        self._address, self._port = address, port
+        self._host, self._port = host, port
         self._socket = None
         self._reader, self._writer = None, None
 
@@ -320,7 +320,7 @@ class ClientConsole(InteractiveConsole):
 
         # Connect to the remote console
         s = socket.socket()
-        s.connect((self._address, self._port))
+        s.connect((self._host, self._port))
         self._socket = s
 
         # Create socket reader & writer
@@ -441,7 +441,7 @@ class ServerConsole(Thread):
                     message = reader.read('exec')
                     try:
                         # Execute the code received
-                        output = self._server._exec(message.source, message.filename, message.symbol)
+                        output = self._server.exec(message.source, message.filename, message.symbol)
                         # Return a response to the client (with the execution output)
                         writer.send('exec-response', SimpleNamespace(code='ok', output=output))
                     except SystemExit:
@@ -458,13 +458,13 @@ class ServerConsole(Thread):
 
 
 
-    def __init__(self, context, address='localhost', port=15010):
+    def __init__(self, context, host='localhost', port=15010):
         # Initialize thread supert instance
         super().__init__()
         # Set thread as daemon
         self.daemon = True
         # Initialize internal fields
-        self._address, self._port = address, port
+        self._host, self._port = host, port
         self._context = context
         self._lock = RLock()
 
@@ -474,7 +474,7 @@ class ServerConsole(Thread):
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # Bind the address & port to the socket
-        s.bind((self._address, self._port))
+        s.bind((self._host, self._port))
         s.listen(5)
 
         while True:
@@ -483,11 +483,11 @@ class ServerConsole(Thread):
 
 
 
-    def _exec(self, source, filename, symbol):
+    def exec(self, source, filename='<input>', mode='single'):
         with self._lock:
             context = self._context
             # Compile the given source code
-            code = compile(source, filename, symbol)
+            code = compile(source, filename, mode)
 
             # Redirect stdout to a temporal buffer
             prev_stdout, output = sys.stdout, StringIO()

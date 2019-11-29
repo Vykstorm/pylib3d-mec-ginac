@@ -148,9 +148,11 @@ class VtkViewer(Object):
 
 
 
-    def main(self):
+    def main(self, open=False):
         self._is_main_running.set()
         self._cv.acquire()
+        if open:
+            self._main()
         while True:
             # Wait until an open request is sent
             self._wait_until_open_request()
