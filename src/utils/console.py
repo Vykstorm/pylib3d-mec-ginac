@@ -25,6 +25,7 @@ from io import StringIO
 from functools import partial
 import sys
 import traceback
+from argparse import ArgumentParser
 
 
 
@@ -486,9 +487,33 @@ class ServerConsole(Thread):
 
 
 if __name__ == '__main__':
+    '''
+    When executing this file as a script a client console prompt is run.
+    You can indicate the address and port of the remote server.
+    '''
+    # Validate & parse CLI arguments
+    parser = ArgumentParser(description='This script runs a python prompt where the code is executed '+\
+        'remotely on the given server (it support text autocompletion)')
+    parser.add_argument('address', type=str, default='localhost:15010', nargs='?',
+        help='Server address (localhost:15010 by default)')
+    parsed_args = parser.parse_args()
+
+    try:
+        address = parsed_args.address
+        tokens = address.split(':')
+        if len(tokens) != 2:
+            raise Exception
+        host, port = tokens
+        port = int(port)
+    except:
+        parser.error('Invalid server address')
+
+
+    # Create client console
     client = ClientConsole()
 
     try:
+        # Start user interaction
         client.interact()
     except ConnectionError:
         raise ConnectionError('Failed to connect to the remote python console')
