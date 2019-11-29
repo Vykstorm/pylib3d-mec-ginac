@@ -6,13 +6,17 @@ the lib3d-mec-ginac graphical interface.
 
 
 from argparse import ArgumentParser
-from os.path import join, isdir, isfile, exists, normpath, dirname
+from os.path import join, isdir, isfile, exists, normpath, dirname, abspath
 from os import getcwd, chdir
 from re import match
 from copy import copy
 import sys
 from functools import partial
+import subprocess
+import threading
+from signal import signal, getsignal, SIGINT, SIGPIPE
 from lib3d_mec_ginac import *
+from src.utils.console import *
 
 
 
@@ -35,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('--show-viewer', action='store_true',
         help='Open 3D viewer after running the given script. By default is not open. You must invoke ' +\
             'show_viewer() to open it')
+
 
     ## Parse input arguments
     parsed_args = parser.parse_args()
@@ -72,8 +77,19 @@ if __name__ == '__main__':
     # Execute the given script
 
     # Execute server command prompt in parallel
+    viewer = get_viewer()
     server = ServerConsole(context=globals())
     server.start()
 
+    # Execute client python prompt in a different process
+    prompt = subprocess.Popen([sys.executable, join(dirname(__file__), 'utils', 'console.py'), 'localhost:15010'])
+
+    # This is used to prevent a bug when subprocess reads from stdin and a keyboard
+    # interrupt is made
+    def sigint_callback(*args, **kwargs):
+        if prompt.poll() is not None:
+            exit(0)
+    signal(SIGINT, sigint_callback)
+
     # Execute VTK main loop
-    get_viewer().main()
+    viewer.main()
