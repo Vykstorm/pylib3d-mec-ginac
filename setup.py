@@ -178,9 +178,6 @@ RUNTIME_CONFIG = {
     # Gravity direction by default
     'GRAVITY_DIRECTION': 'up',
 
-    # Open 3D scene viewer when importing the package
-    'SHOW_DRAWINGS': False,
-
     # Default simulation update frequency
     'SIMULATION_UPDATE_FREQUENCY': 30,
 
