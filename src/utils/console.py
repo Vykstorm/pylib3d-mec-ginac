@@ -1,25 +1,36 @@
 '''
 Author: Víctor Ruiz Gómez
-Description: This file defines the class Console
+Description: This file defines the classes ClientConsole and ServerConsole
 '''
 
-from threading import Thread, RLock, Condition
+######## Import statements ########
+
+# text autocomplete & interactive console utilities
 import rlcompleter
 import readline
 from code import InteractiveConsole, compile_command
 
-from collections.abc import Mapping
-import socket
-import json
+# multithreading & networking
+from threading import Thread, RLock, Condition
 from queue import Queue
+import socket
+
+# messages codification
+import json
 from types import SimpleNamespace
-from contextlib import contextmanager
+
+# other
+from collections.abc import Mapping
 from io import StringIO
 from functools import partial
 import sys
 import traceback
 
 
+
+
+
+######## class MessageReader ########
 
 class MessageReader(Thread):
     '''
@@ -112,6 +123,8 @@ class MessageReader(Thread):
 
 
 
+######## class AutoCompleteMessageReader ########
+
 class AutoCompleteMessageReader(Thread):
     '''
     This class is used to receive text autocomplete requests from the client prompt
@@ -194,6 +207,10 @@ class AutoCompleteMessageReader(Thread):
 
 
 
+
+
+######## class MessageWriter ########
+
 class MessageWriter:
     '''
     This class can be used to send messages to the given socket. To do that,
@@ -260,6 +277,8 @@ class MessageWriter:
 
 
 
+
+######## class ClientConsole ########
 
 class ClientConsole(InteractiveConsole):
     '''
@@ -374,6 +393,9 @@ class ClientConsole(InteractiveConsole):
 
 
 
+
+
+######## class ServerConsole ########
 
 class ServerConsole(Thread):
     '''
