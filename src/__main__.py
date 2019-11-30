@@ -49,12 +49,6 @@ if __name__ == '__main__':
     script_path = parsed_args.file
     if script_path is not None:
         script_path = normpath(script_path)
-        if not exists(script_path):
-            if match('\w+', script_path):
-                script_path = join(dirname(__file__), '..', 'examples', script_path)
-            else:
-                parser.error(f'File or directory "{script_path}" doesnt exist')
-
         if isdir(script_path):
             script_path = join(script_path, '__main__.py')
             if not isfile(script_path):
@@ -62,7 +56,6 @@ if __name__ == '__main__':
         else:
             if not script_path.endswith('.py'):
                 parser.error(f'Script must be a file with .py extension')
-
 
         # Read script file source
         with open(script_path, 'r') as file:
