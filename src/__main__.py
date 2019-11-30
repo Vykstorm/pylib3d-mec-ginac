@@ -32,17 +32,39 @@ if __name__ == '__main__':
     parser.add_argument('file', type=str, nargs='?', default=None,
         help='Optional python script to be executed after lib3d-mec-ginac library is imported. ' +\
         'This can also be a directory. In such case, a file with the name __main__.py  will be ' +\
-        'searched inside the given folder. This can be set also to any predefined example of the library (e.g: "four_bar")' +\
+        'searched inside the given folder. ' +\
         'The current working directory will be changed to the parent directory of the script indicated ' +\
-        'before it is executed.')
+        'before it is executed. ' +\
+        'The file can also be a jupyter notebook')
 
     parser.add_argument('--show-viewer', '-s', action='store_true',
         help='Open 3D viewer after running the given script. By default is not open. You must invoke ' +\
             'show_viewer() to open it')
 
+    parser.add_argument('--atomization', '-a', nargs=1, default=None, choices=['on', 'off', 'true', 'false', '0', '1'],
+        help='Enable/Disable atomization ' +\
+        '(by default is enabled only if ``ATOMIZATION`` variable setting in the setup.py was set to "on")')
 
-    ## Parse input arguments
+    parser.add_argument('--gravity', '-g', nargs=1, default=None, choices=['up', 'down', '1', '0'],
+        help='Set gravity direction up or down ' +\
+        '(by default it is set by the setting variable ``GRAVITY_DIRECTION`` in the setup.py)')
+
+
+
+    # Parse input arguments
     parsed_args = parser.parse_args()
+
+    # Enable/Disable atomization
+    if parsed_args.atomization is not None:
+        atomization = parsed_args.atomization[0] in ('on', 'true', '1')
+        set_atomization_state(atomization)
+
+    # Set gravity direction
+    if parsed_args.gravity is not None:
+        gravity_direction = parsed_args.gravity[0]
+        if gravity_direction in ('0', '1'):
+            gravity_direction = int(gravity_direction)
+        set_gravity_direction(gravity_direction)
 
 
     # Parse script file path
@@ -80,6 +102,7 @@ if __name__ == '__main__':
 
     # Execute client python prompt in a different process
     prompt = subprocess.Popen([sys.executable, join(dirname(__file__), 'utils', 'console.py'), f'localhost:15010'])
+
 
     # This is used to prevent a bug when subprocess reads from stdin and a keyboard
     # interrupt is made
