@@ -282,42 +282,25 @@ class MessageWriter:
 
 
 
-
-
-
-
 ######## class ClientConsole ########
 
-class ClientConsole(InteractiveConsole):
+class ClientConsole:
     '''
-    This class is a python prompt where code is executed remotely in a server.
-    The communication with the server is done via sockets. It also supports
-    text autocompletion (syntax error checking is peformed locally before commands
-    are sent to the remote console)
+    Base class for ClientInteractiveConsole and JupyterClientConsole.
+    It exposes the methods ``exec``, ``autocomplete`` to execute the code and autocomplete the
+    text on a remote server prompt (connected at the other extreme of the given socket)
     '''
     def __init__(self, host='localhost', port=15010):
-        '''
-        Initialize this instance
-
-        :param address: Server address
-        :param host: Server port
-
-        '''
-        # Initialize InteractiveConsole super instance
-        super().__init__(locals=None, filename='<console>')
         # Initialize fields
         self._host, self._port = host, port
         self._socket = None
         self._reader, self._writer = None, None
 
 
-
     def interact(self, *args, **kwargs):
         '''
-        This method is overriden from the InteractiveConsole class.
-        Must be executed on the main thread
+        Start this client console.
         '''
-
         # Connect to the remote console
         s = socket.socket()
         s.connect((self._host, self._port))
@@ -328,6 +311,67 @@ class ClientConsole(InteractiveConsole):
         self._writer = MessageWriter(self._socket)
         self._reader.start()
 
+
+    def autocomplete(self, text):
+        '''
+        Send an autocomplete request to the remote server prompt
+        '''
+        # Send autocomplete request to the server
+        self._writer.send('autocomplete', SimpleNamespace(text=text))
+        # Read the response
+        response = self._reader.read('autocomplete-response')
+        return response
+
+
+    def exec(self, source, filename='<input>', symbol='single'):
+        '''
+        Execute the given source code in the remote server prompt.
+        '''
+        reader, writer = self._reader, self._writer
+
+        # Send the source code, filename and symbol to the server
+        writer.send('exec', SimpleNamespace(source=source, filename=filename, symbol=symbol))
+        # Read the response
+        response = reader.read('exec-response')
+        return response
+
+
+
+
+
+
+
+
+######## class ClientInteractiveConsole ########
+
+class ClientInteractiveConsole(ClientConsole, InteractiveConsole):
+    '''
+    This class is a python prompt where code is executed remotely in a server.
+    The communication with the server is done via sockets. It also supports
+    text autocompletion (syntax error checking is peformed locally before commands
+    are sent to the remote console)
+    '''
+    def __init__(self, *args, **kwargs):
+        '''
+        Initialize this instance
+
+        :param address: Server address
+        :param host: Server port
+
+        '''
+        ClientConsole.__init__(self, *args, **kwargs)
+        InteractiveConsole.__init__(self, locals=None, filename='<console>')
+
+
+
+
+    def interact(self, *args, **kwargs):
+        '''
+        This method is overriden from the InteractiveConsole class.
+        Must be executed on the main thread
+        '''
+        ClientConsole.interact(self, *args, **kwargs)
+
         # Enable text autocomplete
         readline.parse_and_bind('tab: complete')
 
@@ -337,10 +381,8 @@ class ClientConsole(InteractiveConsole):
             if text not in completer_cache:
                 # Clear cache
                 completer_cache.clear()
-                # Send autocomplete request to the server
-                self._writer.send('autocomplete', SimpleNamespace(text=text))
-                # Read the response
-                response = self._reader.read('autocomplete-response')
+                # Send an autocomplete text request
+                response = self.autocomplete(text)
                 # Store the results in the cache
                 results = response.results
                 completer_cache[text] = results
@@ -352,7 +394,7 @@ class ClientConsole(InteractiveConsole):
 
 
         # Start user interaction
-        super().interact(*args, **kwargs)
+        InteractiveConsole.interact(self, *args, **kwargs)
 
 
 
@@ -378,12 +420,7 @@ class ClientConsole(InteractiveConsole):
             # Source code is an empty string
             return False
 
-        reader, writer = self._reader, self._writer
-
-        # Send the source code, filename and symbol to the server
-        writer.send('exec', SimpleNamespace(source=source, filename=filename, symbol=symbol))
-        # Read the response
-        response = reader.read('exec-response')
+        response = self.exec(source, filename, symbol)
         response_code = response.code
         if response_code in ('ok', 'error'):
             # The execution in the server was okay or raised an exception (not a SystemExit)
@@ -547,7 +584,7 @@ if __name__ == '__main__':
 
     else:
         # Create client console
-        client = ClientConsole()
+        client = ClientInteractiveConsole()
 
         try:
             # Start user interaction
