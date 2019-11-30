@@ -37,7 +37,7 @@ try:
                     if floor(value) == value:
                         return floor(value)
                     return value
-                except TypeError:
+                except:
                     pass
                 return value
             except:

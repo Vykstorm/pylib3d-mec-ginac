@@ -24,3 +24,9 @@ __all__.extend(_drawing_api)
 from .utils import __all__ as _utils_api
 from .utils import *
 __all__.extend(_utils_api)
+
+
+# Apply default runtime configuration
+from .config import runtime_config
+set_atomization_state(runtime_config.ATOMIZATION)
+set_gravity_direction(runtime_config.GRAVITY_DIRECTION)
