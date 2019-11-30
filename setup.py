@@ -314,7 +314,7 @@ if __name__ == '__main__':
 
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
-            package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE, 'examples']},
+            package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]},
             ext_modules=extensions,
             cmdclass={'build_ext': BuildExt},
         )
