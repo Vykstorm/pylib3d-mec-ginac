@@ -518,8 +518,14 @@ if __name__ == '__main__':
     # Validate & parse CLI arguments
     parser = ArgumentParser(description='This script runs a python prompt where the code is executed '+\
         'remotely on the given server (it support text autocompletion)')
+
     parser.add_argument('address', type=str, default='localhost:15010', nargs='?',
         help='Server address (localhost:15010 by default)')
+
+    parser.add_argument('--server', '-s', action='store_true',
+        help='If this option is added, the command will create the server with the given address. '+\
+            'Then you can spawn client console prompts and connect them to it')
+
     parsed_args = parser.parse_args()
 
     try:
@@ -532,12 +538,19 @@ if __name__ == '__main__':
     except:
         parser.error('Invalid server address')
 
+    create_server = parsed_args.server
 
-    # Create client console
-    client = ClientConsole()
+    if create_server:
+        server = ServerConsole(context=globals(), host='localhost', port=15010)
+        server.start()
+        server.join()
 
-    try:
-        # Start user interaction
-        client.interact()
-    except ConnectionError:
-        raise ConnectionError('Failed to connect to the remote python console')
+    else:
+        # Create client console
+        client = ClientConsole()
+
+        try:
+            # Start user interaction
+            client.interact()
+        except ConnectionError:
+            raise ConnectionError('Failed to connect to the remote python console')
