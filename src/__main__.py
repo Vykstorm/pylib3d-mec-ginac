@@ -34,8 +34,7 @@ if __name__ == '__main__':
         'This can also be a directory. In such case, a file with the name __main__.py  will be ' +\
         'searched inside the given folder. ' +\
         'The current working directory will be changed to the parent directory of the script indicated ' +\
-        'before it is executed. ' +\
-        'The file can also be a jupyter notebook')
+        'before it is executed. ')
 
     parser.add_argument('--show-viewer', '-s', action='store_true',
         help='Open 3D viewer after running the given script. By default is not open. You must invoke ' +\
@@ -47,7 +46,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--gravity', '-g', nargs=1, default=None, choices=['up', 'down', '1', '0'],
         help='Set gravity direction up or down ' +\
-        '(by default it is set by the setting variable ``GRAVITY_DIRECTION`` in the setup.py)')
+        '(by default it is set by the variable ``GRAVITY_DIRECTION`` in the setup.py)')
 
 
 
