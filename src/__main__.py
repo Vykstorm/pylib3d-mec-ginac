@@ -36,9 +36,9 @@ if __name__ == '__main__':
         'The current working directory will be changed to the parent directory of the script indicated ' +\
         'before it is executed. ')
 
-    parser.add_argument('--show-viewer', '-s', action='store_true',
-        help='Open 3D viewer after running the given script. By default is not open. You must invoke ' +\
-            'show_viewer() to open it')
+
+    #parser.add_argument('--'
+    #)
 
     parser.add_argument('--atomization', '-a', nargs=1, default=None, choices=['on', 'off', 'true', 'false', '0', '1'],
         help='Enable/Disable atomization ' +\
@@ -111,4 +111,4 @@ if __name__ == '__main__':
     signal(SIGINT, sigint_callback)
 
     # Execute VTK main loop
-    viewer.main(open=parsed_args.show_viewer)
+    viewer.main(open=True)
