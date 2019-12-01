@@ -18,6 +18,28 @@ from .object import Object
 
 
 
+# a string -> color mapping
+
+_colors = {
+    'black':    [0, 0, 0],
+    'white':    [1, 1, 1],
+    'red':      [1, 0, 0],
+    'green':    [0, 1, 0],
+    'blue':     [0, 0, 1],
+    'yellow':   [1, 1, 0],
+    'cyan':     [0, 1, 1],
+    'magenta':  [1, 0, 1],
+    'silver':   [.75]*3,
+    'gray':     [.5]*3,
+    'maroon':   [.5, 0, 0],
+    'olive':    [.5, .5, 0],
+    'purple':   [.5, 0, .5],
+    'teal':     [0, .5, .5],
+    'navy':     [0, 0, .5]
+}
+
+
+
 ######## class Color ########
 
 class Color(Object):
@@ -27,6 +49,7 @@ class Color(Object):
     def __init__(self, *args):
         super().__init__()
         self._values = array('f', repeat(1.0, 4))
+        self.set(*args)
 
 
     def __iter__(self):
@@ -71,7 +94,13 @@ class Color(Object):
         if len(args) not in (0, 1, 3, 4):
             raise TypeError('Invalid number of arguments specified')
         if len(args) == 1:
-            args = args[0]
+            if isinstance(args[0], str):
+                name = args[0].lower()
+                if name not in _colors:
+                    raise TypeError('Invalid color name')
+                args = _colors[name]
+            else:
+                args = args[0]
         if len(args) == 3:
             self.rgba = chain(args, [1])
         elif len(args) == 4:
