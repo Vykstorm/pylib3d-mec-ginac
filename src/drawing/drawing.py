@@ -575,14 +575,14 @@ class TextDrawing(Drawing2D):
     '''
     This represents a text which is shown at the screen in 2D
     '''
-    def __init__(self, text='', position=(0, 0), color=(1, 0, 0), size=20):
+    def __init__(self, text='', position=(0, 0), color=(1, 0, 0), font_size=20):
         actor = vtkTextActor()
         super().__init__(actor, position)
 
         # Set default actor properties
         self._color.set(color)
         actor.SetInput(text)
-        actor.GetTextProperty().SetFontSize(size)
+        actor.GetTextProperty().SetFontSize(font_size)
 
 
     def _update_color(self):
@@ -590,3 +590,48 @@ class TextDrawing(Drawing2D):
         actor = self.get_handler()
         actor.GetTextProperty().SetColor(*self._color.rgb)
         actor.GetTextProperty().SetOpacity(self._color.a)
+
+
+
+    def set_font_size(self, value):
+        '''set_font_size(value: int)
+        Change the font size of this text drawing
+
+        :type value: int
+
+        '''
+        if not isinstance(value, int) or value <= 0:
+            raise TypeError('font size must be an integer greater than zero')
+
+        actor = self.get_handler()
+        with self:
+            actor.GetTextProperty().SetFontSize(value)
+            self.fire_event('font_size_changed')
+
+
+    def get_font_size(self):
+        '''get_font_size() -> int
+        Get the font size for this text drawing
+
+        :rtype: int
+
+        '''
+        with self:
+            return self.get_handler().GetTextProperty().GetFontSize()
+
+
+
+    @property
+    def font_size(self):
+        '''
+        Property that can be used to set/get the font size of this text drawing
+
+        .. seealso:: :func:`set_font_size`, :func:`get_font_size`
+
+        '''
+        return self.get_font_size()
+
+
+    @font_size.setter
+    def font_size(self, value):
+        self.set_font_size(value)
