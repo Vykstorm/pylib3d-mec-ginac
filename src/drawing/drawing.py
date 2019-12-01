@@ -114,7 +114,7 @@ class Drawing(VtkObjectWrapper):
 
     @color.setter
     def color(self, args):
-        self.set_color(*args)
+        self.set_color(args)
 
 
 
