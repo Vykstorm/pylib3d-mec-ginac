@@ -23,6 +23,8 @@ from vtk import vtkRenderer
 
 
 
+_render_modes = ['points', 'wireframe', 'solid']
+
 
 
 ######## class VtkViewer ########
@@ -52,10 +54,14 @@ class Scene(Object):
         self._system = system
         self._simulation = simulation
         self._background_color = Color()
+        self._render_mode = 'solid'
+
 
         # Listen for events
         self.add_child(self._background_color)
         self.add_event_handler(self._event_handler)
+        self.add_event_handler(self._on_render_mode_changed, 'render_mode_changed')
+        self._simulation.add_event_handler(self._on_simulation_step, 'simulation_step')
         self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
 
 
@@ -221,6 +227,28 @@ class Scene(Object):
 
 
 
+    def set_render_mode(self, mode):
+        '''set_render_mode(mode: str)
+        Change the rendering mode of the drawings.
+
+        :param mode: The rendering mode. Possible values are 'solid', 'wireframe' or
+            'points'
+
+        '''
+        if not isinstance(mode, str):
+            raise TypeError('Input argument must be string')
+        if mode not in _render_modes:
+            raise TypeError(f'Invalid render mode. Possible values are: {", ".join(_render_modes)}')
+        with self:
+            self._render_mode = mode
+            self.fire_event('render_mode_changed')
+
+
+    def get_render_mode(self):
+        with self:
+            return self._render_mode
+
+
 
     def _apply_point_transform(self, drawing, point):
         system = self._system
@@ -375,26 +403,45 @@ class Scene(Object):
 
 
     def _event_handler(self, event_type, source, *args, **kwargs):
-        # This method is called when an event of any kind occurs
+        # This method is called when an event occurs
+        if isinstance(source, Drawing3D):
+            if event_type in ('object_entered', 'object_exit'):
+                # A new drawing object entered or exit this 3d scene
+                actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
+                if event_type == 'object_entered':
+                    # Add all actors attached to the drawing object to the scene renderer
+                    render_mode = self._render_mode
+                    render_mode_id = _render_modes.index(render_mode)
+                    for actor in actors:
+                        actor.GetProperty().SetRepresentation(render_mode_id)
+                        self._renderer.AddActor(actor)
 
-        if event_type == 'simulation_step':
-            # Update drawings
-            for drawing in self.get_drawings():
-                drawing._update()
-            return
+                elif event_type == 'object_exit':
+                    # Remove all actors attached to the drawing object to the scene renderer
+                    for actor in actors:
+                        self._renderer.RemoveActor(actor)
 
-        if isinstance(source, Drawing3D) and event_type in ('object_entered', 'object_exit'):
-            # A new drawing object entered or exit this 3d scene
-            actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
-            if event_type == 'object_entered':
-                # Add all actors attached to the drawing object to the scene renderer
-                for actor in actors:
-                    self._renderer.AddActor(actor)
 
-            elif event_type == 'object_exit':
-                # Remove all actors attached to the drawing object to the scene renderer
-                for actor in actors:
-                    self._renderer.RemoveActor(actor)
+
+    def _on_render_mode_changed(self, *args, **kwargs):
+        # This is called when the render mode changes
+        render_mode = self._render_mode
+        render_mode_id = _render_modes.index(render_mode)
+
+        for drawing in self.get_drawings():
+            actors = map(methodcaller('get_handler'), chain([drawing], drawing.get_predecessors(Drawing3D)))
+            for actor in actors:
+                actor.GetProperty().SetRepresentation(render_mode_id)
+
+
+
+
+    def _on_simulation_step(self, *args, **kwargs):
+        # This method is called when the simulation executes the next step
+        # Update drawings
+        for drawing in self.get_drawings():
+            drawing._update()
+        return
 
 
     def _on_background_color_changed(self, *args, **kwargs):
@@ -421,6 +468,23 @@ class Scene(Object):
     def background_color(self, args):
         self.set_background_color(*args)
 
+
+
+    @property
+    def render_mode(self):
+        '''
+        Property that can be used to set/get the render mode for the drawings of this
+        scene.
+
+        .. seealso::
+            :func:`set_render_mode`, :func:`get_render_mode`
+
+        '''
+        return self.get_render_mode()
+
+    @render_mode.setter
+    def render_mode(self, mode):
+        self.set_render_mode(mode)
 
 
 
