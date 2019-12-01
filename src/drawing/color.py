@@ -49,7 +49,8 @@ class Color(Vector):
     '''
     def __init__(self, *args):
         super().__init__(4)
-        self.set(*args)
+        if args:
+            self.set(*args)
 
     def __setitem__(self, index, value):
         try:
@@ -70,7 +71,7 @@ class Color(Vector):
 
 
     def set(self, *args):
-        if len(args) not in (0, 1, 3, 4):
+        if len(args) not in (1, 3, 4):
             raise TypeError('Invalid number of arguments specified')
         if len(args) == 1:
             if isinstance(args[0], str):
@@ -143,7 +144,3 @@ class Color(Vector):
 
     red, green, blue, alpha = r, g, b, a
     opacity = a
-
-
-    def __repr__(self):
-        return repr(list(map(partial(round, ndigits=3), self._values)))

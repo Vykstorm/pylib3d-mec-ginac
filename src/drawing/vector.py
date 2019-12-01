@@ -53,3 +53,40 @@ class Vector(Object):
 
     def __repr__(self):
         return repr(list(map(partial(round, ndigits=3), self._values)))
+
+
+
+
+
+######## class Vector2 ########
+
+
+class Vector2(Vector):
+    def __init__(self, *args):
+        super().__init__(n=2)
+        if args:
+            self.set(*args)
+
+    def set(self, *args):
+        if len(args) not in (1, 2):
+            raise TypeError('Invalid number of arguments specified')
+        if len(args) == 1:
+            args = args[0]
+        self.__setitem__(slice(0,2), args)
+
+
+    @property
+    def x(self):
+        return self.__getitem__(0)
+
+    @x.setter
+    def x(self, value):
+        self.__setitem__(0, value)
+
+    @property
+    def y(self):
+        return self.__getitem__(1)
+
+    @y.setter
+    def y(self, value):
+        self.__setitem__(1, value)
