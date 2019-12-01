@@ -39,8 +39,8 @@ class Scene(Object):
         renderer.GetActiveCamera().SetPosition(7, 7, 7)
 
         # Set default background color
-        #renderer.SetBackgroundColor(1, 1, 1)
-        #renderer.SetBackgroundOpacity(1)
+        renderer.SetBackground(1, 1, 1)
+        renderer.SetBackgroundAlpha(1)
 
 
         # Create simulation
