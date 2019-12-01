@@ -14,6 +14,7 @@ from copy import copy
 
 # Imports from other modules
 from .object import Object
+from .vector import Vector
 
 
 
@@ -42,32 +43,15 @@ _colors = {
 
 ######## class Color ########
 
-class Color(Object):
+class Color(Vector):
     '''
     Instances of this class represents a color with components red, green, blue and alpha
     '''
     def __init__(self, *args):
-        super().__init__()
-        self._values = array('f', repeat(1.0, 4))
+        super().__init__(4)
         self.set(*args)
 
-
-    def __iter__(self):
-        with self:
-            values = tuple(self._values)
-            return iter(values)
-
-
-    def __getitem__(self, index):
-        with self:
-            return self._values.__getitem__(index)
-
-
     def __setitem__(self, index, value):
-        if not isinstance(index, (int, slice)):
-            raise TypeError('Index must be an integer or slice')
-
-
         try:
             if isinstance(index, int):
                 value = float(value)
@@ -81,13 +65,8 @@ class Color(Object):
         except TypeError:
             raise TypeError('Color components must be numbers in the range [0, 1]')
 
-        with self:
-            x = copy(self._values)
-            x.__setitem__(index, value)
-            if len(x) != 4:
-                raise ValueError('Invalid number of color components specified')
-            self._values = x
-            self.fire_event('changed')
+        super().__setitem__(index, value)
+
 
 
     def set(self, *args):
