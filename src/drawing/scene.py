@@ -51,10 +51,12 @@ class Scene(Object):
         self._renderer = renderer
         self._system = system
         self._simulation = simulation
+        self._background_color = Color()
 
         # Listen for events
+        self.add_child(self._background_color)
         self.add_event_handler(self._event_handler)
-
+        self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
 
 
 
@@ -197,6 +199,26 @@ class Scene(Object):
         if not isinstance(drawing, Drawing3D):
             raise TypeError('Input argument must be a Drawing3D instance')
         self.add_child(drawing)
+
+
+
+    def get_background_color(self):
+        '''get_background_color() -> Color
+        Get the background color of the scene
+
+        :rtype: Color
+
+        '''
+        return self._background_color
+
+
+
+    def set_background_color(self, *args):
+        '''set_background_color(...)
+        Set the background color of the scene
+        '''
+        self._background_color.set(*args)
+
 
 
 
@@ -374,6 +396,30 @@ class Scene(Object):
                 for actor in actors:
                     self._renderer.RemoveActor(actor)
 
+
+    def _on_background_color_changed(self, *args, **kwargs):
+        # This method is invoked when the background color of the scene is changed
+        renderer = self._renderer
+        renderer.SetBackground(*self._background_color.rgb)
+        renderer.SetBackgroundAlpha(self._background_color.a)
+
+
+
+
+    @property
+    def background_color(self):
+        '''
+        Property that can be used to set/get the background color of this scene
+
+        .. seealso::
+            :func:`set_background_color`, :func:`get_background_color`
+        '''
+        return self.get_background_color()
+
+
+    @background_color.setter
+    def background_color(self, args):
+        self.set_background_color(*args)
 
 
 
