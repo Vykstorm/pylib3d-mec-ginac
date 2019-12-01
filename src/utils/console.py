@@ -323,14 +323,14 @@ class ClientConsole:
         return response
 
 
-    def exec(self, source, filename='<input>', symbol='single'):
+    def exec(self, source, filename='<input>', mode='single'):
         '''
         Execute the given source code in the remote server prompt.
         '''
         reader, writer = self._reader, self._writer
 
         # Send the source code, filename and symbol to the server
-        writer.send('exec', SimpleNamespace(source=source, filename=filename, symbol=symbol))
+        writer.send('exec', SimpleNamespace(source=source, filename=filename, mode=mode))
         # Read the response
         response = reader.read('exec-response')
         return response
@@ -478,7 +478,7 @@ class ServerConsole(Thread):
                     message = reader.read('exec')
                     try:
                         # Execute the code received
-                        output = self._server.exec(message.source, message.filename, message.symbol)
+                        output = self._server.exec(message.source, message.filename, message.mode)
                         # Return a response to the client (with the execution output)
                         writer.send('exec-response', SimpleNamespace(code='ok', output=output))
                     except SystemExit:
