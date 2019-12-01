@@ -35,9 +35,13 @@ class VtkViewer(Object):
         lock = RLock()
         super().__init__(lock)
 
+        # Default title for the viewer window
+        title = 'lib3d-mec-ginac 3D viewer'
+
+
         # Initialize internal fields
         self._interactor, self._window = None, None
-        self._title = ''
+        self._title = title
         self._open_request = False
         self._state = 'closed'
         self._cv = Condition(lock=lock)
