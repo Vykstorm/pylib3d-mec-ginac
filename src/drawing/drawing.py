@@ -19,17 +19,166 @@ from .vtkobjectwrapper import VtkObjectWrapper
 from .geometry import Geometry, Sphere, Cylinder, Cone
 from .scene import Scene
 from .color import Color
+from .vector import Vector2
 
 # Third party libraries
-from vtk import vtkProp, vtkMatrix4x4, vtkActor
+from vtk import vtkProp, vtkMatrix4x4, vtkActor, vtkTextActor
 import numpy as np
+
+
+
+######## class Drawing ########
+
+class Drawing(VtkObjectWrapper):
+    '''
+    Represents any kind of renderable entity
+    '''
+    def __init__(self, actor):
+        # Initialize super instance
+        super().__init__(actor)
+
+        # Initialize internal fields
+        self._color = Color()
+
+        # Set default properties for the actor
+        actor.VisibilityOn()
+        self._update_color()
+
+        # Add event handlers
+        self.add_child(self._color)
+        self._color.add_event_handler(self._on_color_changed, 'changed')
+
+
+
+    def _on_color_changed(self, *args, **kwargs):
+        # This method is invoked when drawing color changed
+        self._update_color()
+
+
+    def _update_color(self):
+        # This method updates the color of the underline vtk actor
+        actor = self.get_handler()
+        actor.GetProperty().SetColor(*self._color.rgb)
+        actor.GetProperty().SetOpacity(self._color.a)
+
+
+    def get_color(self):
+        '''get_color() -> Color
+        Get the color of this drawing object
+        :rtype: Color
+
+        '''
+        return self._color
+
+
+    def set_color(self, *args):
+        '''set_color(...)
+        Change the color of this drawing object
+        '''
+        self._color.set(*args)
+
+
+
+    def show(self):
+        '''show()
+        Toogle visibility on for this drawing object
+        '''
+        with self:
+            self.get_handler().VisibilityOn()
+            # Fire 'visibility_changed' event
+            self.fire_event('visibility_changed')
+
+
+
+    def hide(self):
+        '''hide()
+        Toggle visibility off for this drawing object
+        '''
+        with self:
+            self.get_handler().VisibilityOff()
+            # Fire 'visibility_changed' event
+            self.fire_event('visibility_changed')
+
+
+
+    @property
+    def color(self):
+        '''
+        Property that can be used to get/set the color of this drawing object
+
+        :rtype: Color
+
+        .. seealso:: :func:`get_color` :func:`set_color`
+        '''
+        return self.get_color()
+
+    @color.setter
+    def color(self, args):
+        self.set_color(*args)
+
+
+
+
+
+######## class Drawing2D ########
+
+class Drawing2D(Drawing):
+    '''
+    An instance of this class represents any 2D renderable entity.
+    '''
+    def __init__(self, actor, position=(0, 0)):
+        super().__init__(actor)
+
+        # Initialize internal fields
+        self._position = Vector2(position)
+
+        # Set default actor properties
+        actor.SetPosition(self._position)
+
+        # Add event handlers
+        self.add_child(self._position)
+        self._position.add_event_handler(self._on_position_changed, 'changed')
+
+
+    def _on_position_changed(self, *args, **kwargs):
+        # This is called when the drawing position changed
+        self.get_handler().SetPosition(*self._position)
+
+
+    def set_position(self, *args):
+        '''set_position(...)
+        Change the position of this 2D drawing
+        '''
+        return self._position.set(*args)
+
+
+    def get_position(self):
+        '''get_position() -> Vector2
+        Get the current position of this 2D drawing
+
+        :rtype: Vector2
+
+        '''
+        return self._position
+
+
+    @property
+    def position(self):
+        return self.get_position()
+
+    @position.setter
+    def position(self, args):
+        self.set_position(*args)
+
+
+
 
 
 
 
 ######## class Drawing3D ########
 
-class Drawing3D(VtkObjectWrapper):
+class Drawing3D(Drawing):
     '''
     An instance of this class represents any 3D renderable entity.
     '''
@@ -45,23 +194,18 @@ class Drawing3D(VtkObjectWrapper):
         self._transform = Transform.identity()
         self._transform_evaluated = np.eye(4).astype(np.float64)
         self._geometry = geometry
-        self._color = Color()
+
+        # Set default actor properties
+        actor.GetProperty().SetColor(*self._color.rgb)
+        actor.GetProperty().SetOpacity(self._color.a)
 
         # Initialize vtk actor user matrix
         actor.SetUserMatrix(vtkMatrix4x4())
 
-        # Set default properties for the actor
-        actor.VisibilityOn()
-        actor.GetProperty().SetColor(*self._color.rgb)
-        actor.GetProperty().SetOpacity(self._color.a)
-
-
-        # Add event handlers & child objects
+        # Add event handlers
         self.add_event_handler(self._on_object_entered, 'object_entered')
-        self._color.add_event_handler(self._on_color_changed, 'changed')
         if geometry is not None:
             self.add_child(geometry)
-        self.add_child(self._color)
 
 
 
@@ -75,13 +219,6 @@ class Drawing3D(VtkObjectWrapper):
                 self.get_handler().SetMapper(source.get_handler())
 
 
-
-    def _on_color_changed(self, *args, **kwargs):
-        # Drawing object color changed
-        actor = self.get_handler()
-        with self:
-            actor.GetProperty().SetColor(*self._color.rgb)
-            actor.GetProperty().SetOpacity(self._color.a)
 
 
     def get_scene(self):
@@ -274,12 +411,9 @@ class Drawing3D(VtkObjectWrapper):
         Toogle visibility on for this drawing object (and all child drawings)
         '''
         with self:
-            actors = map(methodcaller('get_handler'), chain([self], self.get_predecessors(Drawing3D)))
-            for actor in actors:
+            for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
                 actor.VisibilityOn()
-            # Fire 'visibility_changed' event
-            self.fire_event('visibility_changed')
-
+            super().show()
 
 
     def hide(self):
@@ -287,29 +421,11 @@ class Drawing3D(VtkObjectWrapper):
         Toggle visibility off for this drawing object (and all child drawings)
         '''
         with self:
-            actors = map(methodcaller('get_handler'), chain([self], self.get_predecessors(Drawing3D)))
-            for actor in actors:
+            for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
                 actor.VisibilityOff()
-            # Fire 'visibility_changed' event
-            self.fire_event('visibility_changed')
+            super().show()
 
 
-
-
-    def get_color(self):
-        '''get_color() -> Color
-        Get the color of this drawing object
-        :rtype: Color
-
-        '''
-        return self._color
-
-
-    def set_color(self, *args):
-        '''set_color(...)
-        Change the color of this drawing object
-        '''
-        self._color.set(*args)
 
 
 
@@ -331,21 +447,6 @@ class Drawing3D(VtkObjectWrapper):
     def transform(self, x):
         self.set_transform(x)
 
-
-    @property
-    def color(self):
-        '''
-        Property that can be used to get/set the color of this drawing object
-
-        :rtype: Color
-
-        .. seealso:: :func:`get_color` :func:`set_color`
-        '''
-        return self.get_color()
-
-    @color.setter
-    def color(self, args):
-        self.set_color(*args)
 
 
     @property
@@ -464,3 +565,28 @@ class FrameDrawing(Drawing3D):
         # Initialize internal fields
         self.x_axis, self.y_axis, self.z_axis = x_axis, y_axis, z_axis
         self.origin = origin
+
+
+
+
+######## class TextDrawing ########
+
+class TextDrawing(Drawing2D):
+    '''
+    This represents a text which is shown at the screen in 2D
+    '''
+    def __init__(self, text='', position=(0, 0), color=(1, 0, 0), size=20):
+        actor = vtkTextActor()
+        super().__init__(actor, position)
+
+        # Set default actor properties
+        self._color.set(color)
+        actor.SetInput(text)
+        actor.GetTextProperty().SetFontSize(size)
+
+
+    def _update_color(self):
+        # This method updates the color of the underline vtk actor
+        actor = self.get_handler()
+        actor.GetTextProperty().SetColor(*self._color.rgb)
+        actor.GetTextProperty().SetOpacity(self._color.a)

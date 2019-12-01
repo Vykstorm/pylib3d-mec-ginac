@@ -44,7 +44,6 @@ class Scene(Object):
         renderer.SetBackground(1, 1, 1)
         renderer.SetBackgroundAlpha(1)
 
-
         # Create simulation
         simulation = Simulation(self, system)
         self.add_child(simulation)
@@ -136,10 +135,34 @@ class Scene(Object):
 
 
     def get_drawings(self):
-        '''get_drawings() -> List[Drawing3D]
+        '''get_drawings() -> List[Drawing]
         Get all the drawings previously created in the scene
+
+        :rtype: List[Drawing]
+
+        '''
+        return self.get_children(kind=Drawing)
+
+
+    def get_2D_drawings(self):
+        '''get_2D_drawings() -> List[Drawing2D]
+        Get all the 2D drawings previously created in the scene
+
+        :rtype: List[Drawing2D]
+
+        '''
+        return self.get_children(kind=Drawing2D)
+
+
+    def get_3D_drawings(self):
+        '''get_3D_drawings() -> List[Drawing2D]
+        Get all the 3D drawings previously created in the scene
+
+        :rtype: List[Drawing3D]
+
         '''
         return self.get_children(kind=Drawing3D)
+
 
 
 
@@ -199,11 +222,11 @@ class Scene(Object):
 
 
     def add_drawing(self, drawing):
-        '''add_drawing(drawing: Drawing3D)
+        '''add_drawing(drawing: Drawing)
         Add a new drawing object to the scene
         '''
-        if not isinstance(drawing, Drawing3D):
-            raise TypeError('Input argument must be a Drawing3D instance')
+        if not isinstance(drawing, Drawing):
+            raise TypeError('Input argument must be a Drawing instance')
         self.add_child(drawing)
 
 
@@ -388,15 +411,18 @@ class Scene(Object):
 
 
 
-
-
     def draw_position_vector(self, a, b, *args, **kwargs):
         return self.draw_vector(a, self._system.position_vector(a, b), *args, **kwargs)
 
 
-
     def draw_velocity_vector(self, frame, point):
         return self.draw_vector(point, self._system.velocity_vector(frame, point))
+
+
+    def draw_text(self, *args, **kwargs):
+        drawing = TextDrawing(*args, **kwargs)
+        self.add_drawing(drawing)
+        return drawing
 
 
 
@@ -421,6 +447,14 @@ class Scene(Object):
                     for actor in actors:
                         self._renderer.RemoveActor(actor)
 
+        elif isinstance(source, Drawing2D):
+            # A new 2D drawing entered / exit the scene
+            actor = source.get_handler()
+            if event_type == 'object_entered':
+                self._renderer.AddActor2D(actor)
+            elif event_type == 'object_exit':
+                self._renderer.RemoveActor2D(actor)
+
 
 
     def _on_render_mode_changed(self, *args, **kwargs):
@@ -428,7 +462,7 @@ class Scene(Object):
         render_mode = self._render_mode
         render_mode_id = _render_modes.index(render_mode)
 
-        for drawing in self.get_drawings():
+        for drawing in self.get_3D_drawings():
             actors = map(methodcaller('get_handler'), chain([drawing], drawing.get_predecessors(Drawing3D)))
             for actor in actors:
                 actor.GetProperty().SetRepresentation(render_mode_id)
@@ -439,7 +473,7 @@ class Scene(Object):
     def _on_simulation_step(self, *args, **kwargs):
         # This method is called when the simulation executes the next step
         # Update drawings
-        for drawing in self.get_drawings():
+        for drawing in self.get_3D_drawings():
             drawing._update()
         return
 
@@ -490,6 +524,6 @@ class Scene(Object):
 
 
 # This imports are moved here to avoid circular dependencies
-from .drawing import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .drawing import Drawing, Drawing2D, TextDrawing, Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .geometry import Geometry, read_stl
 from .viewer import get_viewer

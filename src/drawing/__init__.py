@@ -7,7 +7,7 @@ Description: Public API for the submodule drawing
 # The next variable will contain all public API methods & classes
 __all__ = [
     # Main classes
-    'Scene', 'Viewer', 'Drawing3D', 'Geometry',
+    'Scene', 'Viewer', 'Drawing', 'Drawing2D', 'TextDrawing', 'Drawing3D', 'Geometry',
     # Drawing3D subclasses
     'PointDrawing', 'VectorDrawing', 'FrameDrawing',
     # Geometry subclasses
@@ -15,7 +15,7 @@ __all__ = [
     # stl & scad utilities
     'read_stl', 'write_stl', 'scad2stl', 'scad_to_stl',
     # Other utility classes
-    'Timer', 'OneShotTimer', 'Color', 'Transform',
+    'Timer', 'OneShotTimer', 'Transform',
 
     # viewer functions
     'get_viewer', 'show_viewer', 'close_viewer',
@@ -24,7 +24,7 @@ __all__ = [
 # Import all the class & functions of the public API
 from .scene import Scene
 from .viewer import VtkViewer as Viewer, get_viewer, show_viewer, close_viewer
-from .drawing import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .drawing import Drawing, Drawing2D, TextDrawing, Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .geometry import Geometry
 from .geometry import Sphere, Cube, Cone, Cylinder, Line, LineStrip
 from .geometry import read_stl, write_stl
