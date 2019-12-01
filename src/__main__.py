@@ -37,8 +37,8 @@ if __name__ == '__main__':
         'before it is executed. ')
 
 
-    #parser.add_argument('--'
-    #)
+    parser.add_argument('--no-console', action='store_true',
+        help='If specified, dont create the python prompt')
 
     parser.add_argument('--atomization', '-a', nargs=1, default=None, choices=['on', 'off', 'true', 'false', '0', '1'],
         help='Enable/Disable atomization ' +\
@@ -65,6 +65,8 @@ if __name__ == '__main__':
             gravity_direction = int(gravity_direction)
         set_gravity_direction(gravity_direction)
 
+
+    client_console_script_path = abspath(join(dirname(__file__), 'utils', 'console.py'))
 
     # Parse script file path
     script_path = parsed_args.file
@@ -99,16 +101,16 @@ if __name__ == '__main__':
         server.exec(script, mode='exec')
 
 
-    # Execute client python prompt in a different process
-    prompt = subprocess.Popen([sys.executable, join(dirname(__file__), 'utils', 'console.py'), f'localhost:15010'])
+    if not parsed_args.no_console:
+        # Execute client python prompt in a different process
+        prompt = subprocess.Popen([sys.executable, client_console_script_path, f'localhost:15010'])
 
-
-    # This is used to prevent a bug when subprocess reads from stdin and a keyboard
-    # interrupt is made
-    def sigint_callback(*args, **kwargs):
-        if prompt.poll() is not None:
-            exit(0)
-    signal(SIGINT, sigint_callback)
+        # This is used to prevent a bug when subprocess reads from stdin and a keyboard
+        # interrupt is made
+        def sigint_callback(*args, **kwargs):
+            if prompt.poll() is not None:
+                exit(0)
+        signal(SIGINT, sigint_callback)
 
     # Execute VTK main loop
     viewer.main(open=True)
