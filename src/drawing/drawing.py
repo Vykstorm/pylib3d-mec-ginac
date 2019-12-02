@@ -621,6 +621,30 @@ class TextDrawing(Drawing2D):
 
 
 
+    def set_text(self, text):
+        '''set_text(text: str)
+        Change the displayed text of this drawing
+        '''
+        if not isinstance(text, str):
+            raise TypeError('Text must be a string')
+        with self:
+            self.get_handler().SetInput(text)
+            self.fire_event('text_changed')
+
+
+    def get_text(self):
+        '''get_text() -> str
+        Get the displayed text of this drawing
+
+        :rtype: str
+
+        '''
+        with self:
+            return self.get_handler().GetInput()
+
+
+
+
     @property
     def font_size(self):
         '''
@@ -635,3 +659,19 @@ class TextDrawing(Drawing2D):
     @font_size.setter
     def font_size(self, value):
         self.set_font_size(value)
+
+
+
+    @property
+    def text(self):
+        '''
+        Property that can be used to set/get the displayed text of this drawing
+
+        .. seealso:: :func:`set_text`, :func:`get_text`
+
+        '''
+        return self.get_text()
+
+    @text.setter
+    def text(self, value):
+        self.set_text(value)
