@@ -24,6 +24,7 @@ from .vector import Vector2
 
 # Third party libraries
 from vtk import vtkProp, vtkMatrix4x4, vtkActor, vtkTextActor
+from vtk import VTK_TEXT_LEFT, VTK_TEXT_CENTERED, VTK_TEXT_RIGHT
 import numpy as np
 
 
@@ -583,8 +584,11 @@ class TextDrawing(Drawing2D):
         # Set default actor properties
         self._color.set(color)
         actor.SetInput(text)
-        actor.GetTextProperty().SetFontSize(font_size)
-        actor.GetTextProperty().SetJustificationToCentered()
+        text_prop = actor.GetTextProperty()
+        text_prop.SetFontSize(font_size)
+        text_prop.SetJustificationToLeft()
+        text_prop.SetFontFamilyToCourier()
+
 
 
     def _update_color(self):
@@ -671,12 +675,12 @@ class TextDrawing(Drawing2D):
             raise ValueError('alignment must be "left", "center" or "right"')
         text_prop = self.get_handler().GetTextProperty()
         with self:
-            text_prop.SetJustification(['left', 'center', 'right'].index(mode))
+            self.get_handler().GetTextProperty().SetJustification({'left': VTK_TEXT_LEFT, 'center': VTK_TEXT_CENTERED, 'right': VTK_TEXT_RIGHT}.get(mode))
 
 
     def get_horizontal_alignment(self):
         with self:
-            return ['left', 'center', 'right'].__getitem__(self.get_handler().GetTextProperty().GetJustification())
+            return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
 
 
 
