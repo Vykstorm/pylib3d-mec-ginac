@@ -11,6 +11,7 @@ This script implements the class Drawing3D
 from math import radians
 from itertools import chain
 from operator import methodcaller
+from functools import partial, partialmethod
 
 # Imports from other modules
 from lib3d_mec_ginac_ext import Matrix
@@ -583,6 +584,7 @@ class TextDrawing(Drawing2D):
         self._color.set(color)
         actor.SetInput(text)
         actor.GetTextProperty().SetFontSize(font_size)
+        actor.GetTextProperty().SetJustificationToCentered()
 
 
     def _update_color(self):
@@ -643,6 +645,40 @@ class TextDrawing(Drawing2D):
             return self.get_handler().GetInput()
 
 
+    def set_italic(self, enabled):
+        if not isinstance(enabled, bool):
+            raise TypeError('Input argument must be bool')
+        with self:
+            self.get_handler().GetTextProperty().SetItalic(enabled)
+
+
+    def set_bold(self, enabled):
+        if not isinstance(enabled, bool):
+            raise TypeError('Input argument must be bool')
+        with self:
+            self.get_handler().GetTextProperty().SetBold(enabled)
+
+    italic_on = partialmethod(set_italic, True)
+    italic_off = partialmethod(set_italic, False)
+    bold_on = partialmethod(set_bold, True)
+    bold_off = partialmethod(set_bold, False)
+
+
+    def set_horizontal_alignment(self, mode):
+        if not isinstance(mode, str):
+            raise TypeError('Input argument must be string')
+        if mode not in ('left', 'center', 'right'):
+            raise ValueError('alignment must be "left", "center" or "right"')
+        text_prop = self.get_handler().GetTextProperty()
+        with self:
+            text_prop.SetJustification(['left', 'center', 'right'].index(mode))
+
+
+    def get_horizontal_alignment(self):
+        with self:
+            return ['left', 'center', 'right'].__getitem__(self.get_handler().GetTextProperty().GetJustification())
+
+
 
 
     @property
@@ -675,3 +711,18 @@ class TextDrawing(Drawing2D):
     @text.setter
     def text(self, value):
         self.set_text(value)
+
+
+    @property
+    def horizontal_alignment(self):
+        '''
+        Property that can be used to set/get the horizontal alignment of the displayed text of
+        this drawing.
+
+        .. seealso:: :func::`get_horizontal_alignment` :func:`set_horizontal_alignment`
+        '''
+        return self.get_horizontal_alignment()
+
+    @horizontal_alignment.setter
+    def horizontal_alignment(self, value):
+        self.set_horizontal_alignment(value)
