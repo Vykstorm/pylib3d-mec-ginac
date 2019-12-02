@@ -24,7 +24,7 @@ from .vector import Vector2
 
 # Third party libraries
 from vtk import vtkProp, vtkMatrix4x4, vtkActor, vtkTextActor
-from vtk import VTK_TEXT_LEFT, VTK_TEXT_CENTERED, VTK_TEXT_RIGHT
+from vtk import VTK_TEXT_LEFT, VTK_TEXT_CENTERED, VTK_TEXT_RIGHT, VTK_ARIAL, VTK_COURIER, VTK_TIMES
 import numpy as np
 
 
@@ -673,7 +673,6 @@ class TextDrawing(Drawing2D):
             raise TypeError('Input argument must be string')
         if mode not in ('left', 'center', 'right'):
             raise ValueError('alignment must be "left", "center" or "right"')
-        text_prop = self.get_handler().GetTextProperty()
         with self:
             self.get_handler().GetTextProperty().SetJustification({'left': VTK_TEXT_LEFT, 'center': VTK_TEXT_CENTERED, 'right': VTK_TEXT_RIGHT}.get(mode))
 
@@ -682,6 +681,19 @@ class TextDrawing(Drawing2D):
         with self:
             return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
 
+
+    def set_font_family(self, family):
+        if not isinstance(family, str):
+            raise TypeError('Input argument must be string')
+        if family not in ('arial', 'courier', 'times'):
+            raise ValueError('font family must be "arial", "courier" or "times"')
+        with self:
+            self.get_handler().GetTextProperty().SetFontFamily({'arial': VTK_ARIAL, 'courier': VTK_COURIER, 'times': VTK_TIMES}.get(family))
+
+
+    def get_font_family(self):
+        with self:
+            return {VTK_ARIAL: 'arial', VTK_COURIER: 'courier', VTK_TIMES: 'times'}.get(self.get_handler().GetTextProperty().GetFontFamily())
 
 
 
@@ -730,3 +742,20 @@ class TextDrawing(Drawing2D):
     @horizontal_alignment.setter
     def horizontal_alignment(self, value):
         self.set_horizontal_alignment(value)
+
+
+
+    @property
+    def font_family(self):
+        '''
+        Property that can be sued to set/get the fony family for the displayed text.
+
+
+        .. seealso:: :func:`get_font_family`, :func:`set_font_family`
+
+        '''
+        return self.get_font_family()
+
+    @font_family.setter
+    def font_family(self, value):
+        self.set_font_family(value)
