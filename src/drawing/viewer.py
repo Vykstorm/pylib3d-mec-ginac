@@ -47,9 +47,15 @@ class VtkViewer(Object):
         self._cv = Condition(lock=lock)
         self._is_main_running = Event()
 
-        # Add event handler
+        # Add event handlers
         self.add_event_handler(self._event_handler)
+        self.add_event_handler(self._on_resized, 'resized')
 
+
+    def _on_resized(self, *args, **kwargs):
+        scene = self.get_scene()
+        if scene is not None:
+            scene._update()
 
 
 
@@ -101,6 +107,7 @@ class VtkViewer(Object):
         # of the time to release the GIL
         interactor.CreateRepeatingTimer(10)
         interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.005))
+        interactor.AddObserver(vtkCommand.ModifiedEvent, lambda *args, **kwargs: self.fire_event('resized'))
 
         # Bind scene to the renderer
         scene = self.get_scene()
@@ -131,7 +138,7 @@ class VtkViewer(Object):
         # Change viewer state & fire open event
         self._state = 'open'
         cv.notify()
-        self.fire_event('viewer_open')
+        self.fire_event('open')
 
         # Attach the scene of the default system if no scene was attached yet
         if self.get_scene() is None:
@@ -148,7 +155,7 @@ class VtkViewer(Object):
         # Change viewer state & fire close event
         self._state = 'closed'
         cv.notify()
-        self.fire_event('viewer_close')
+        self.fire_event('closed')
 
 
 

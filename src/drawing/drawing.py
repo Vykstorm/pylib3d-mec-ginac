@@ -18,12 +18,13 @@ from lib3d_mec_ginac_ext import Matrix
 from .transform import Transform
 from .vtkobjectwrapper import VtkObjectWrapper
 from .geometry import Geometry, Sphere, Cylinder, Cone
-from .scene import Scene
 from .color import Color
 from .vector import Vector2
 
+
 # Third party libraries
 from vtk import vtkProp, vtkMatrix4x4, vtkActor, vtkTextActor
+from vtk import vtkCoordinate
 from vtk import VTK_TEXT_LEFT, VTK_TEXT_CENTERED, VTK_TEXT_RIGHT, VTK_ARIAL, VTK_COURIER, VTK_TIMES
 import numpy as np
 
@@ -49,6 +50,7 @@ class Drawing(VtkObjectWrapper):
         # Add event handlers
         self.add_child(self._color)
         self._color.add_event_handler(self._on_color_changed, 'changed')
+        self.add_event_handler(self._on_object_entered, 'object_entered')
 
 
 
@@ -62,6 +64,27 @@ class Drawing(VtkObjectWrapper):
         actor = self.get_handler()
         actor.GetProperty().SetColor(*self._color.rgb)
         actor.GetProperty().SetOpacity(self._color.a)
+
+
+
+    def _update(self):
+        # Method called to update this drawing
+        self._update_subdrawings()
+
+
+    def _update_subdrawings(self):
+        # This method is invoked to update subdrawings
+        with self:
+            for child in self.get_children(kind=Drawing):
+                child._update()
+
+
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
+        if source == self:
+            # This drawing is added to the scene or another
+            # drawing
+            self._update()
+
 
 
     def get_color(self):
@@ -122,6 +145,66 @@ class Drawing(VtkObjectWrapper):
 
 
 
+
+
+######## class ScreenPoint ########
+
+class ScreenPoint(Vector2):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._x_coord_screen_ref, self._y_coord_screen_ref = 'left', 'bottom'
+        coord = vtkCoordinate()
+        coord.SetCoordinateSystemToNormalizedDisplay()
+        self._coord = coord
+
+
+    def _get_absolute_screen_coords(self):
+        scene = self.get_ancestor(Scene)
+        if scene is None:
+            return
+        renderer = scene._renderer
+
+        with self:
+            x, y = self._values
+            x_ref, y_ref = self._x_coord_screen_ref, self._y_coord_screen_ref
+            coord = self._coord
+            if x_ref != 'left':
+                x += 0.5 if x_ref == 'center' else 1
+            if y_ref != 'bottom':
+                y += 0.5 if y_ref == 'center' else 1
+
+            coord.SetValue(x, y)
+            return coord.GetComputedDisplayValue(renderer)
+
+
+
+    def set_relative_to(self, s):
+        if not isinstance(s, str):
+            raise TypeError('Input argument must be a string')
+        try:
+            tokens =  s.lower().replace('_', '-').split('-')
+            if len(tokens) != 2 and (len(tokens) != 1 or tokens[0] != 'center'):
+                raise ValueError
+            if len(tokens) == 2:
+                y, x = tokens
+                if x not in ('left', 'center', 'right'):
+                    raise ValueError
+                if y not in ('bottom', 'center', 'top'):
+                    raise ValueError
+            else:
+                y, x = 'center', 'center'
+        except ValueError:
+            raise ValueError(f'Invalid argument value: "{s}"')
+
+        with self:
+            self._x_coord_screen_ref, self._y_coord_screen_ref = x, y
+
+
+
+
+
+
+
 ######## class Drawing2D ########
 
 class Drawing2D(Drawing):
@@ -132,19 +215,31 @@ class Drawing2D(Drawing):
         super().__init__(actor)
 
         # Initialize internal fields
-        self._position = Vector2(position)
-
-        # Set default actor properties
-        actor.SetPosition(self._position)
+        self._position = ScreenPoint(position)
+        self.add_child(self._position)
 
         # Add event handlers
-        self.add_child(self._position)
         self._position.add_event_handler(self._on_position_changed, 'changed')
+        self._position.add_event_handler(self._on_position_changed, 'object_entered')
+
+
+
+    def _update(self):
+        # This is called when this drawing must be updated
+        self._update_position()
+        super()._update()
+
+
+    def _update_position(self):
+        # This is called when the position of this 2D drawing must be updated
+        with self:
+            handler = self.get_handler()
+            handler.SetPosition(*self._position._get_absolute_screen_coords())
 
 
     def _on_position_changed(self, *args, **kwargs):
-        # This is called when the drawing position changed
-        self.get_handler().SetPosition(*self._position)
+        # This is invoked when any of the coordinates of the drawing`s position is changed
+        self._update_position()
 
 
     def set_position(self, *args):
@@ -162,6 +257,37 @@ class Drawing2D(Drawing):
 
         '''
         return self._position
+
+
+    def position_relative_to(self, *args, **kwargs):
+        '''position_relative_to(x: str, y: str)
+        Set the position of this 2D drawing relative to the left, center or right side
+        of the viewport for the x coordinate, and to the top, center or bottom for the
+        y coordinate.
+
+        The next example shows how to draw text in the middle of the screen:
+
+            :Example:
+
+            >>> drawing = TextDrawing('Hello world!', position=[0, 0])
+            >>> drawing.position_relative_to('center')
+
+        The example above shows how to display text at the bottom right side of the screen:
+
+            :Example:
+
+            >>> drawing = TextDrawing('Hello world!', position=[-0.2, 0])
+            >>> drawing.position_relative_to('bottom-right')
+        '''
+        self._position.set_relative_to(*args, **kwargs)
+
+
+    position_relative_to_center = partialmethod(position_relative_to, 'center')
+    position_relative_to_top_left = partialmethod(position_relative_to, 'top-left')
+    position_relative_to_top_right = partialmethod(position_relative_to, 'top-right')
+    position_relative_to_bottom_left = partialmethod(position_relative_to, 'bottom-left')
+    position_relative_to_bottom_right = partialmethod(position_relative_to, 'bottom-right')
+
 
 
     @property
@@ -205,20 +331,16 @@ class Drawing3D(Drawing):
         actor.SetUserMatrix(vtkMatrix4x4())
 
         # Add event handlers
-        self.add_event_handler(self._on_object_entered, 'object_entered')
         if geometry is not None:
             self.add_child(geometry)
 
 
 
     def _on_object_entered(self, event_type, source, *args, **kwargs):
-        if self == source:
-            # This drawing was added to another drawing or to the scene
-            self._update()
-        elif isinstance(source, Geometry) and event_type == 'object_entered':
+        super()._on_object_entered(event_type, source, *args, **kwargs)
+        if isinstance(source, Geometry):
             # A geometry object was attached to this drawing object
-            with self:
-                self.get_handler().SetMapper(source.get_handler())
+            self.get_handler().SetMapper(source.get_handler())
 
 
 
@@ -374,16 +496,7 @@ class Drawing3D(Drawing):
         with self:
             # Update this drawing transformation matrix
             self._update_transform()
-            # Update child drawings
-            self._update_subdrawings()
-
-
-
-    def _update_subdrawings(self):
-        with self:
-            for child in self.get_children(kind=Drawing3D):
-                child._update()
-
+            super()._update()
 
 
     def _update_transform(self):
@@ -654,6 +767,8 @@ class TextDrawing(Drawing2D):
             raise TypeError('Input argument must be bool')
         with self:
             self.get_handler().GetTextProperty().SetItalic(enabled)
+            self.fire_event('italic_changed')
+
 
 
     def set_bold(self, enabled):
@@ -661,6 +776,8 @@ class TextDrawing(Drawing2D):
             raise TypeError('Input argument must be bool')
         with self:
             self.get_handler().GetTextProperty().SetBold(enabled)
+            self.fire_event('bold_changed')
+
 
     italic_on = partialmethod(set_italic, True)
     italic_off = partialmethod(set_italic, False)
@@ -675,6 +792,7 @@ class TextDrawing(Drawing2D):
             raise ValueError('alignment must be "left", "center" or "right"')
         with self:
             self.get_handler().GetTextProperty().SetJustification({'left': VTK_TEXT_LEFT, 'center': VTK_TEXT_CENTERED, 'right': VTK_TEXT_RIGHT}.get(mode))
+            self.fire_event('horizontal_alignment_changed')
 
 
     def get_horizontal_alignment(self):
@@ -689,6 +807,7 @@ class TextDrawing(Drawing2D):
             raise ValueError('font family must be "arial", "courier" or "times"')
         with self:
             self.get_handler().GetTextProperty().SetFontFamily({'arial': VTK_ARIAL, 'courier': VTK_COURIER, 'times': VTK_TIMES}.get(family))
+            self.fire_event('font_family_changed')
 
 
     def get_font_family(self):
@@ -759,3 +878,9 @@ class TextDrawing(Drawing2D):
     @font_family.setter
     def font_family(self, value):
         self.set_font_family(value)
+
+
+
+
+# This import is added here to avoid circular dependencies
+from .scene import Scene

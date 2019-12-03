@@ -427,6 +427,14 @@ class Scene(Object):
 
 
 
+    def _update(self):
+        # This method is called whenever the scene should be updated
+
+        # Update drawings
+        for drawing in self.get_drawings():
+            drawing._update()
+
+
 
     def _event_handler(self, event_type, source, *args, **kwargs):
         # This method is called when an event occurs
@@ -473,9 +481,8 @@ class Scene(Object):
     def _on_simulation_step(self, *args, **kwargs):
         # This method is called when the simulation executes the next step
         # Update drawings
-        for drawing in self.get_3D_drawings():
-            drawing._update()
-        return
+        self._update()
+
 
 
     def _on_background_color_changed(self, *args, **kwargs):
@@ -526,4 +533,3 @@ class Scene(Object):
 # This imports are moved here to avoid circular dependencies
 from .drawing import Drawing, Drawing2D, TextDrawing, Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .geometry import Geometry, read_stl
-from .viewer import get_viewer
