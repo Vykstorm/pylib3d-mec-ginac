@@ -690,7 +690,7 @@ class TextDrawing(Drawing2D):
     '''
     This represents a text which is shown at the screen in 2D
     '''
-    def __init__(self, text='', position=(0, 0), color=(1, 0, 0), font_size=20):
+    def __init__(self, text='', position=(0, 0), color=(0, 0, 0), font_size=20):
         actor = vtkTextActor()
         super().__init__(actor, position)
 
