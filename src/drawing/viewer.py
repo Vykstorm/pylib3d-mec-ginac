@@ -17,7 +17,7 @@ from ..core.system import get_default_system
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
-from vtk import vtkRenderWindowInteractor
+from vtk import vtkRenderWindowInteractor, vtkPropPicker
 
 
 
@@ -42,11 +42,13 @@ class VtkViewer(Object):
         # Initialize internal fields
         self._interactor, self._window = None, None
         self._prev_viewport_size = None
+        self._selected_drawing = None
         self._title = title
         self._open_request = False
         self._state = 'closed'
         self._cv = Condition(lock=lock)
         self._is_main_running = Event()
+
 
         # Add event handlers
         self.add_event_handler(self._event_handler)
@@ -121,7 +123,31 @@ class VtkViewer(Object):
         interactor.AddObserver(vtkCommand.ModifiedEvent, _on_modified)
 
         # Event handler that listens to click events
-        #interactor.AddObserver(vtkCommand.vtk)
+        def _on_mouse_clicked(*args, **kwargs):
+            scene = self.get_scene()
+            if scene is None:
+                return
+            renderer = scene._renderer
+            x, y = interactor.GetEventPosition()
+            picker = vtkPropPicker()
+            picker.Pick(x, y, 0, renderer)
+            # Get the actor picked
+            actor = picker.GetActor()
+
+            # Get the 3D drawing attached to the picked actor
+            for drawing in scene.get_3D_drawings():
+                if drawing.get_handler() == actor:
+                    if self._selected_drawing != drawing:
+                        # Fire 'unselected' event
+                        if self._selected_drawing is not None:
+                            self._selected_drawing.fire_event('unselected')
+                        # Fire 'selected' event
+                        drawing.fire_event('selected')
+                        self._selected_drawing = drawing
+                    break
+
+
+        interactor.AddObserver(vtkCommand.LeftButtonPressEvent, _on_mouse_clicked)
 
         # Bind scene to the renderer
         scene = self.get_scene()
