@@ -46,6 +46,7 @@ class VtkViewer(Object):
         self._title = title
         self._open_request = False
         self._redraw_request = False
+        self._prev_viewport_size = None
         self._state = 'closed'
         self._cv = Condition(lock=lock)
         self._is_main_running = Event()
@@ -118,7 +119,18 @@ class VtkViewer(Object):
         # of the time to release the GIL
         interactor.CreateRepeatingTimer(5)
         interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: self._update())
-        #interactor.AddObserver(vtkCommand.ModifiedEvent, lambda *args, **kwargs: self.fire_event('resized'))
+
+        # Add an event handler which is invoked when the window is modified. This will trigger the event
+        # 'resized' when the viewport size is changed
+        def modified_event_handler(*args, **kwargs):
+            renderer = self.get_scene()._renderer
+            current_size = renderer.GetSize()
+            prev_size = self._prev_viewport_size
+            if prev_size is None or current_size != prev_size:
+                self.fire_event('resized')
+            self._prev_viewport_size = current_size
+
+        interactor.AddObserver(vtkCommand.ModifiedEvent, lambda *args, **kwargs: modified_event_handler())
 
         # Bind scene to the renderer
         scene = self.get_scene()
