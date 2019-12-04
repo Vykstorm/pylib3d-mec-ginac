@@ -31,6 +31,8 @@ class VtkViewer(Object):
     library
     '''
 
+    ######## Constructor ########
+
     def __init__(self):
         lock = RLock()
         super().__init__(lock)
@@ -43,37 +45,46 @@ class VtkViewer(Object):
         self._interactor, self._window = None, None
         self._title = title
         self._open_request = False
+        self._redraw_request = False
         self._state = 'closed'
         self._cv = Condition(lock=lock)
         self._is_main_running = Event()
 
         # Add event handlers
-        self.add_event_handler(self._event_handler)
+        self.add_event_handler(self._on_any_event)
         self.add_event_handler(self._on_resized, 'resized')
+        self.add_event_handler(self._on_object_entered, 'object_entered')
+
+
+
+
+    ######## Event handlers ########
 
 
     def _on_resized(self, *args, **kwargs):
+        # This function is called when the window is resized
         scene = self.get_scene()
         if scene is not None:
-            scene._update()
+            # We need to update scene 2D drawings (because their positions could be
+            # relative to the viewport size)
+            scene._update_2D_drawings()
 
 
-
-    def _event_handler(self, event_type, source, *args, **kwargs):
-        # This method is called when any event is fired by child object (or the viewer)
-
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
         if isinstance(source, Scene) and self._interactor is not None:
-            if event_type == 'object_entered':
-                # A scene was attached to the viewer
-                self._window.AddRenderer(source._renderer)
-            elif event_type == 'object_exit':
-                # The scene was detached from the viewer
-                self._window.RemoveRenderer(source._renderer)
+            # A new scene was attached to the viewer
+            self._window.AddRenderer(source._renderer)
 
 
-        # For any change, redraw the scene
+    def _on_object_exit(self, event_type, source, *args, **kwargs):
+        if isinstance(source, Scene) and self._interactor is not None:
+            # The scene was detached from the viewer
+            self._window.RemoveRenderer(source._renderer)
+
+
+    def _on_any_event(self, *args, **kwargs):
+        # If any event happened, redraw the scene
         self._redraw()
-
 
 
 
@@ -103,11 +114,11 @@ class VtkViewer(Object):
         # Initialize interactor
         interactor.Initialize()
 
-        # Create a repeating timer which sleeps the event loop thread half
+        # Create a repeating timer which redraws the scene and sleeps the event loop thread half
         # of the time to release the GIL
-        interactor.CreateRepeatingTimer(10)
-        interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.005))
-        interactor.AddObserver(vtkCommand.ModifiedEvent, lambda *args, **kwargs: self.fire_event('resized'))
+        interactor.CreateRepeatingTimer(5)
+        interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: self._update())
+        #interactor.AddObserver(vtkCommand.ModifiedEvent, lambda *args, **kwargs: self.fire_event('resized'))
 
         # Bind scene to the renderer
         scene = self.get_scene()
@@ -274,11 +285,21 @@ class VtkViewer(Object):
 
 
 
+    def _update(self):
+        # Redraw the scene if requested
+        with self:
+            if self._state == 'open':
+                if self._redraw_request:
+                    self._interactor.Render()
+                self._redraw_request = False
+        # Sleep the main thread to free the GIL for a while
+        sleep(0.01)
+
+
     def _redraw(self):
         # Redraw the 3d objects and update the view
         with self:
-            if self._state == 'open':
-                self._interactor.Render()
+            self._redraw_request = True
 
 
 
