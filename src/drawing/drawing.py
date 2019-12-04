@@ -36,6 +36,10 @@ class Drawing(VtkObjectWrapper):
     '''
     Represents any kind of renderable entity
     '''
+
+    ######## Constructor ########
+
+
     def __init__(self, actor):
         # Initialize super instance
         super().__init__(actor)
@@ -44,8 +48,8 @@ class Drawing(VtkObjectWrapper):
         self._color = Color()
 
         # Set default properties for the actor
-        actor.VisibilityOn()
-        self._update_color()
+        actor.VisibilityOn() # Turn on drawing visibility
+        self._update_color() # Initialize color
 
         # Add event handlers
         self.add_child(self._color)
@@ -54,9 +58,25 @@ class Drawing(VtkObjectWrapper):
 
 
 
+
+    ######## Event handlers ########
+
+
     def _on_color_changed(self, *args, **kwargs):
         # This method is invoked when drawing color changed
         self._update_color()
+
+
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
+        if source == self:
+            # This drawing is added to the scene or another
+            # drawing as a child object
+            self._update()
+
+
+
+
+    ######## Updating ########
 
 
     def _update_color(self):
@@ -66,12 +86,6 @@ class Drawing(VtkObjectWrapper):
         actor.GetProperty().SetOpacity(self._color.a)
 
 
-
-    def _update(self):
-        # Method called to update this drawing
-        self._update_subdrawings()
-
-
     def _update_subdrawings(self):
         # This method is invoked to update subdrawings
         with self:
@@ -79,12 +93,13 @@ class Drawing(VtkObjectWrapper):
                 child._update()
 
 
-    def _on_object_entered(self, event_type, source, *args, **kwargs):
-        if source == self:
-            # This drawing is added to the scene or another
-            # drawing
-            self._update()
+    def _update(self):
+        # Method called to update this drawing
+        self._update_subdrawings()
 
+
+
+    ######## Getters ########
 
 
     def get_color(self):
@@ -94,6 +109,11 @@ class Drawing(VtkObjectWrapper):
 
         '''
         return self._color
+
+
+
+
+    ######## Setters ########
 
 
     def set_color(self, *args):
@@ -126,6 +146,10 @@ class Drawing(VtkObjectWrapper):
 
 
 
+
+    ######## Properties ########
+
+
     @property
     def color(self):
         '''
@@ -147,9 +171,23 @@ class Drawing(VtkObjectWrapper):
 
 
 
+
+
+
+
 ######## class ScreenPoint ########
 
 class ScreenPoint(Vector2):
+    '''
+    This represents a point in the screen. Coordinates are normalized (Starting from
+    0, 0 to represent the bottom-left corner of the screen and 1, 1 for the top right)
+
+    You can also define a coordinate relative to any of the corners of the screen using
+    the method ``set_relative_to``
+
+    .. seealso:: :func:`set_relative_to`
+
+    '''
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._x_coord_screen_ref, self._y_coord_screen_ref = 'left', 'bottom'
@@ -211,6 +249,10 @@ class Drawing2D(Drawing):
     '''
     An instance of this class represents any 2D renderable entity.
     '''
+
+
+    ######## Constructor ########
+
     def __init__(self, actor, position=(0, 0)):
         super().__init__(actor)
 
@@ -224,17 +266,7 @@ class Drawing2D(Drawing):
 
 
 
-    def _update(self):
-        # This is called when this drawing must be updated
-        self._update_position()
-        super()._update()
-
-
-    def _update_position(self):
-        # This is called when the position of this 2D drawing must be updated
-        with self:
-            handler = self.get_handler()
-            handler.SetPosition(*self._position._get_absolute_screen_coords())
+    ######## Event handlers ########
 
 
     def _on_position_changed(self, *args, **kwargs):
@@ -242,11 +274,25 @@ class Drawing2D(Drawing):
         self._update_position()
 
 
-    def set_position(self, *args):
-        '''set_position(...)
-        Change the position of this 2D drawing
-        '''
-        return self._position.set(*args)
+
+    ######## Updating ########
+
+
+    def _update(self):
+        # This is called when this drawing must be updated
+        self._update_position()
+        super()._update()
+
+
+    def _update_position(self):
+        # This is called when the position of this 2D drawing must be updated on VTK
+        with self:
+            handler = self.get_handler()
+            handler.SetPosition(*self._position._get_absolute_screen_coords())
+
+
+
+    ######## Getters ########
 
 
     def get_position(self):
@@ -257,6 +303,18 @@ class Drawing2D(Drawing):
 
         '''
         return self._position
+
+
+
+    ######## Setters ########
+
+
+    def set_position(self, *args):
+        '''set_position(...)
+        Change the position of this 2D drawing
+        '''
+        return self._position.set(*args)
+
 
 
     def position_relative_to(self, *args, **kwargs):
@@ -290,6 +348,10 @@ class Drawing2D(Drawing):
 
 
 
+
+    ######## Properties ########
+
+
     @property
     def position(self):
         return self.get_position()
@@ -310,6 +372,8 @@ class Drawing3D(Drawing):
     '''
     An instance of this class represents any 3D renderable entity.
     '''
+
+    ######## Constructor ########
 
     def __init__(self, geometry=None):
         if geometry is not None and not isinstance(geometry, Geometry):
@@ -336,6 +400,10 @@ class Drawing3D(Drawing):
 
 
 
+
+    ######## Event handlers ########
+
+
     def _on_object_entered(self, event_type, source, *args, **kwargs):
         super()._on_object_entered(event_type, source, *args, **kwargs)
         if isinstance(source, Geometry):
@@ -343,6 +411,44 @@ class Drawing3D(Drawing):
             self.get_handler().SetMapper(source.get_handler())
 
 
+
+    ######## Updating ########
+
+
+    def _update(self):
+        with self:
+            # Update this drawing transformation matrix
+            self._update_transform()
+            super()._update()
+
+
+    def _update_transform(self):
+        # Update transformation
+        with self:
+            scene = self.get_scene()
+            if scene is None:
+                # This drawing object is not attached to any scene yet
+                return
+
+            # Compute transformation numerically for this drawing
+            matrix = self._transform.evaluate(scene._system)
+
+            # Concatenate transformation of the parent drawing if any
+            if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
+                matrix = self.get_parent()._transform_evaluated @ matrix
+
+            self._transform_evaluated = matrix
+
+            # Change the vtk user matrix of the actor associated to this drawing
+            self.get_handler().GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
+
+
+
+
+
+
+
+    ######## Getters ########
 
 
     def get_scene(self):
@@ -363,6 +469,18 @@ class Drawing3D(Drawing):
             return self._geometry
 
 
+    def get_transform(self):
+        '''get_transform() -> Transform
+        Get the transformation of the drawing object
+        '''
+        with self:
+            return self._transform
+
+
+
+
+    ######## Setters ########
+
 
     def set_geometry(self, geometry):
         '''set_geometry(geometry: Geometry)
@@ -373,15 +491,6 @@ class Drawing3D(Drawing):
                 self.remove_child(self._geometry)
             self._geometry = geometry
             self.add_child(geometry)
-
-
-
-    def get_transform(self):
-        '''get_transform() -> Transform
-        Get the transformation of the drawing object
-        '''
-        with self:
-            return self._transform
 
 
 
@@ -488,39 +597,6 @@ class Drawing3D(Drawing):
 
 
 
-
-
-
-
-    def _update(self):
-        with self:
-            # Update this drawing transformation matrix
-            self._update_transform()
-            super()._update()
-
-
-    def _update_transform(self):
-        # Update transformation
-        with self:
-            scene = self.get_scene()
-            if scene is None:
-                # This drawing object is not attached to any scene yet
-                return
-
-            # Compute transformation numerically for this drawing
-            matrix = self._transform.evaluate(scene._system)
-
-            # Concatenate transformation of the parent drawing if any
-            if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
-                matrix = self.get_parent()._transform_evaluated @ matrix
-
-            self._transform_evaluated = matrix
-
-            # Change the vtk user matrix of the actor associated to this drawing
-            self.get_handler().GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
-
-
-
     def show(self):
         '''show()
         Toogle visibility on for this drawing object (and all child drawings)
@@ -539,8 +615,6 @@ class Drawing3D(Drawing):
             for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
                 actor.VisibilityOff()
             super().show()
-
-
 
 
 
@@ -577,9 +651,20 @@ class Drawing3D(Drawing):
 
 
 
+
+
 ######## class PointDrawing ########
 
+
 class PointDrawing(Drawing3D):
+    '''
+    This represents a drawing which can be used to render points in the 3D scene.
+    The geometry of this drawing is a sphere.
+    '''
+
+
+    ######## Constructor ########
+
     def __init__(self, radius=0.06, resolution=15, color=(1, 1, 1)):
         super().__init__(
             Sphere(radius=radius, resolution=resolution)
@@ -589,9 +674,19 @@ class PointDrawing(Drawing3D):
 
 
 
+
+
 ######## class VectorDrawing ########
 
 class VectorDrawing(Drawing3D):
+    '''
+    This represents a drawing which can be used to render vectors in the 3D scene.
+    It has three subdrawings: The origin of the vector (with a sphere as geometry), the
+    shaft (rendered with a cylinder) and the tip (with a cone shape)
+    '''
+
+    ######## Constructor ########
+
     def __init__(self,
         shaft_radius=0.03, tip_radius=0.1, origin_radius=0.04,
         shaft_resolution=10, tip_resolution=15, origin_resolution=15,
@@ -633,9 +728,17 @@ class VectorDrawing(Drawing3D):
 
 
 
+
 ######## class FrameDrawing ########
 
 class FrameDrawing(Drawing3D):
+    '''
+    This represents a drawing which can be used to draw frames in a 3D scene.
+    It consists of 3 different vectors pointing at each axis in the 3D space.
+
+    .. seealso:: VectorDrawing
+
+    '''
     def __init__(self,
         axis_shaft_radius=0.03, axis_tip_radius=0.1, origin_radius=0.06,
         axis_shaft_resolution=10, axis_tip_resolution=15, origin_resolution=15,
@@ -684,12 +787,17 @@ class FrameDrawing(Drawing3D):
 
 
 
+
+
 ######## class TextDrawing ########
 
 class TextDrawing(Drawing2D):
     '''
     This represents a text which is shown at the screen in 2D
     '''
+
+    ######## Constructor ########
+
     def __init__(self, text='', position=(0, 0), color=(0, 0, 0), font_size=20):
         actor = vtkTextActor()
         super().__init__(actor, position)
@@ -704,12 +812,67 @@ class TextDrawing(Drawing2D):
 
 
 
+    ######## Updating ########
+
     def _update_color(self):
         # This method updates the color of the underline vtk actor
         actor = self.get_handler()
         actor.GetTextProperty().SetColor(*self._color.rgb)
         actor.GetTextProperty().SetOpacity(self._color.a)
 
+
+
+    ######## Getters ########
+
+
+    def get_font_size(self):
+        '''get_font_size() -> int
+        Get the font size for this text drawing
+
+        :rtype: int
+
+        '''
+        with self:
+            return self.get_handler().GetTextProperty().GetFontSize()
+
+
+    def get_text(self):
+        '''get_text() -> str
+        Get the displayed text of this drawing
+
+        :rtype: str
+
+        '''
+        with self:
+            return self.get_handler().GetInput()
+
+
+    def get_horizontal_alignment(self):
+        '''get_horizontal_alignment() -> str
+        Get the current horizontal alignment of the text
+
+        :return: 'left', 'center' or 'right'
+
+        '''
+        with self:
+            return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
+
+
+    def get_font_family(self):
+        '''get_font_family() -> str
+        Get the current font family for the displayed text
+
+        :return: 'arial', 'courier' or 'times'
+
+        '''
+        with self:
+            return {VTK_ARIAL: 'arial', VTK_COURIER: 'courier', VTK_TIMES: 'times'}.get(self.get_handler().GetTextProperty().GetFontFamily())
+
+
+
+
+
+    ######## Setters ########
 
 
     def set_font_size(self, value):
@@ -728,16 +891,6 @@ class TextDrawing(Drawing2D):
             self.fire_event('font_size_changed')
 
 
-    def get_font_size(self):
-        '''get_font_size() -> int
-        Get the font size for this text drawing
-
-        :rtype: int
-
-        '''
-        with self:
-            return self.get_handler().GetTextProperty().GetFontSize()
-
 
 
     def set_text(self, text):
@@ -750,16 +903,6 @@ class TextDrawing(Drawing2D):
             self.get_handler().SetInput(text)
             self.fire_event('text_changed')
 
-
-    def get_text(self):
-        '''get_text() -> str
-        Get the displayed text of this drawing
-
-        :rtype: str
-
-        '''
-        with self:
-            return self.get_handler().GetInput()
 
 
     def set_italic(self, enabled):
@@ -795,11 +938,6 @@ class TextDrawing(Drawing2D):
             self.fire_event('horizontal_alignment_changed')
 
 
-    def get_horizontal_alignment(self):
-        with self:
-            return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
-
-
     def set_font_family(self, family):
         if not isinstance(family, str):
             raise TypeError('Input argument must be string')
@@ -810,11 +948,9 @@ class TextDrawing(Drawing2D):
             self.fire_event('font_family_changed')
 
 
-    def get_font_family(self):
-        with self:
-            return {VTK_ARIAL: 'arial', VTK_COURIER: 'courier', VTK_TIMES: 'times'}.get(self.get_handler().GetTextProperty().GetFontFamily())
 
 
+    ######## Properties ########
 
     @property
     def font_size(self):
