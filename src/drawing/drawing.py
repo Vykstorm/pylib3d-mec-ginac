@@ -426,12 +426,15 @@ class Drawing3D(Drawing):
 
 
     def _on_selected(self, event_type, source, *args, **kwargs):
-        self._update_color()
+        self._update_color(highlighted=True)
+        for drawing in self.get_predecessors(Drawing3D):
+            drawing._update_color(highlighted=True)
 
 
     def _on_unselected(self, event_type, source, *args, **kwargs):
-        self._update_color()
-
+        self._update_color(highlighted=False)
+        for drawing in self.get_predecessors(Drawing3D):
+            drawing._update_color(highlighted=False)
 
 
     ######## Updating ########
@@ -444,9 +447,9 @@ class Drawing3D(Drawing):
             super()._update()
 
 
-    def _update_color(self):
+    def _update_color(self, highlighted=False):
         # This method updates the color of the underline vtk actor
-        color = self._selected_color if self._selected else self._color
+        color = self._selected_color if highlighted else self._color
         actor = self.get_handler()
         actor.GetProperty().SetColor(*color.rgb)
         actor.GetProperty().SetOpacity(color.a)

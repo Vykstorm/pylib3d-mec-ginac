@@ -16,15 +16,9 @@ from .object import Object
 from .color import Color
 from ..core.system import get_default_system
 
-
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
-<<<<<<< HEAD
 from vtk import vtkRenderWindowInteractor, vtkPropPicker
-=======
-from vtk import vtkRenderWindowInteractor
-from vtk import vtkPicker
->>>>>>> 03b91f677ee5194d18118c81dcf996bb2c92481d
 
 
 
@@ -132,14 +126,6 @@ class VtkViewer(Object):
 
         # Create a repeating timer which redraws the scene and sleeps the event loop thread half
         # of the time to release the GIL
-<<<<<<< HEAD
-        interactor.CreateRepeatingTimer(10)
-        interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.02))
-
-        # Event handler to update the scene when the viewport is resized
-        def _on_modified(*args, **kwargs):
-            current_size = self.get_scene()._renderer.GetSize()
-=======
         interactor.CreateRepeatingTimer(5)
         interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: self._update())
 
@@ -148,42 +134,11 @@ class VtkViewer(Object):
         def modified_event_handler(*args, **kwargs):
             renderer = self.get_scene()._renderer
             current_size = renderer.GetSize()
->>>>>>> 03b91f677ee5194d18118c81dcf996bb2c92481d
             prev_size = self._prev_viewport_size
             if prev_size is None or current_size != prev_size:
                 self.fire_event('resized')
             self._prev_viewport_size = current_size
 
-<<<<<<< HEAD
-        interactor.AddObserver(vtkCommand.ModifiedEvent, _on_modified)
-
-        # Event handler that listens to click events
-        def _on_mouse_clicked(*args, **kwargs):
-            scene = self.get_scene()
-            if scene is None:
-                return
-            renderer = scene._renderer
-            x, y = interactor.GetEventPosition()
-            picker = vtkPropPicker()
-            picker.Pick(x, y, 0, renderer)
-            # Get the actor picked
-            actor = picker.GetActor()
-
-            # Get the 3D drawing attached to the picked actor
-            for drawing in scene.get_3D_drawings():
-                if drawing.get_handler() == actor:
-                    if self._selected_drawing != drawing:
-                        # Fire 'unselected' event
-                        if self._selected_drawing is not None:
-                            self._selected_drawing.fire_event('unselected')
-                        # Fire 'selected' event
-                        drawing.fire_event('selected')
-                        self._selected_drawing = drawing
-                    break
-
-
-        interactor.AddObserver(vtkCommand.LeftButtonPressEvent, _on_mouse_clicked)
-=======
         interactor.AddObserver(vtkCommand.ModifiedEvent, modified_event_handler)
 
         # Add an event handler which is invoked when the user clicks on the screen. This will manage
@@ -193,12 +148,11 @@ class VtkViewer(Object):
             renderer = scene._renderer
 
             x, y = interactor.GetEventPosition()
-            picker = vtkPicker()
+            picker = vtkPropPicker()
             picker.Pick(x, y, 0, renderer)
-            actor_selected = picker.GetActor()
+            drawing = scene._get_3D_drawing_by_handler(picker.GetActor())
 
-            drawings = scene.get_3D_drawings()
-            drawing = next(filter(lambda drawing: drawing.get_handler() == actor_selected, drawings), None) if actor_selected is not None else None
+
             with self:
                 if drawing is not None:
                     if self._selected_drawing != drawing:
@@ -212,14 +166,8 @@ class VtkViewer(Object):
                         self._selected_drawing.unselect()
                         self._selected_drawing = None
 
-
-
-
-
         interactor.AddObserver(vtkCommand.LeftButtonPressEvent, click_event_handler)
 
-
->>>>>>> 03b91f677ee5194d18118c81dcf996bb2c92481d
 
         # Bind scene to the renderer
         scene = self.get_scene()

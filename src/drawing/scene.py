@@ -6,7 +6,8 @@ Description: This file defines the class Scene
 ######## Import statements ########
 
 # standard imports
-from operator import methodcaller
+from operator import methodcaller, eq
+from functools import partial
 from itertools import chain
 
 # imports from other modules
@@ -226,7 +227,7 @@ class Scene(Object):
 
     def get_drawings(self):
         '''get_drawings() -> List[Drawing]
-        Get all the drawings previously created in the scene
+        Get all the drawings previously created in the scene.
 
         :rtype: List[Drawing]
 
@@ -276,6 +277,25 @@ class Scene(Object):
             return self._render_mode
 
 
+
+    def _get_drawing_by_handler(self, handler):
+        for drawing in self.get_drawings():
+            if drawing.get_handler() == handler or\
+                any(map(partial(eq, handler), map(methodcaller('get_handler'), drawing.get_predecessors(Drawing)))):
+                return drawing
+        return None
+
+    def _get_2D_drawing_by_handler(self, handler):
+        drawing = self._get_drawing_by_handler(handler)
+        if not isinstance(drawing, Drawing2D):
+            return None
+        return drawing
+
+    def _get_3D_drawing_by_handler(self, handler):
+        drawing = self._get_drawing_by_handler(handler)
+        if not isinstance(drawing, Drawing3D):
+            return None
+        return drawing
 
 
 
