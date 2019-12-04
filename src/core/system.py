@@ -1697,7 +1697,7 @@ class System(_System):
 
 
 # This variable will store the "default" system object.
-_default_system = System()
+_default_system = None
 
 
 def get_default_system():
@@ -1706,6 +1706,9 @@ def get_default_system():
 
     :rtype: System
     '''
+    global _default_system
+    if _default_system is None:
+        _default_system = System()
     return _default_system
 
 
