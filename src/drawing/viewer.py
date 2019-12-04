@@ -8,6 +8,8 @@ Description: This file defines the class VtkViewer
 # standard imports
 from threading import Condition, RLock, Event
 from time import sleep
+from operator import methodcaller, eq
+from functools import partial
 
 # imports from other modules
 from .object import Object
@@ -18,6 +20,7 @@ from ..core.system import get_default_system
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
 from vtk import vtkRenderWindowInteractor
+from vtk import vtkPicker
 
 
 
@@ -47,6 +50,7 @@ class VtkViewer(Object):
         self._open_request = False
         self._redraw_request = False
         self._prev_viewport_size = None
+        self._selected_drawing = None
         self._state = 'closed'
         self._cv = Condition(lock=lock)
         self._is_main_running = Event()
@@ -81,6 +85,9 @@ class VtkViewer(Object):
         if isinstance(source, Scene) and self._interactor is not None:
             # The scene was detached from the viewer
             self._window.RemoveRenderer(source._renderer)
+            if self._selected_drawing is not None:
+                self._selected_drawing.unselect()
+                self._selected_drawing = None
 
 
     def _on_any_event(self, *args, **kwargs):
@@ -130,7 +137,41 @@ class VtkViewer(Object):
                 self.fire_event('resized')
             self._prev_viewport_size = current_size
 
-        interactor.AddObserver(vtkCommand.ModifiedEvent, lambda *args, **kwargs: modified_event_handler())
+        interactor.AddObserver(vtkCommand.ModifiedEvent, modified_event_handler)
+
+        # Add an event handler which is invoked when the user clicks on the screen. This will manage
+        # 3D object selection
+        def click_event_handler(*args, **kwargs):
+            scene = self.get_scene()
+            renderer = scene._renderer
+
+            x, y = interactor.GetEventPosition()
+            picker = vtkPicker()
+            picker.Pick(x, y, 0, renderer)
+            actor_selected = picker.GetActor()
+
+            drawings = scene.get_3D_drawings()
+            drawing = next(filter(lambda drawing: drawing.get_handler() == actor_selected, drawings), None) if actor_selected is not None else None
+            with self:
+                if drawing is not None:
+                    if self._selected_drawing != drawing:
+                        if self._selected_drawing is not None:
+                            self._selected_drawing.unselect()
+                        drawing.select()
+                        self._selected_drawing = drawing
+                else:
+                    # User clicker to the screen but it didnt select anything
+                    if self._selected_drawing is not None:
+                        self._selected_drawing.unselect()
+                        self._selected_drawing = None
+
+
+
+
+
+        interactor.AddObserver(vtkCommand.LeftButtonPressEvent, click_event_handler)
+
+
 
         # Bind scene to the renderer
         scene = self.get_scene()

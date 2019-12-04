@@ -76,6 +76,7 @@ class Drawing(VtkObjectWrapper):
 
 
 
+
     ######## Updating ########
 
 
@@ -387,6 +388,10 @@ class Drawing3D(Drawing):
             raise TypeError('geometry must be an instance of the class Geometry')
 
         actor = vtkActor()
+
+        self._selected = False
+        self._selected_color = Color('red')
+
         super().__init__(actor)
 
         # Initialize internal fields
@@ -404,7 +409,9 @@ class Drawing3D(Drawing):
         # Add event handlers
         if geometry is not None:
             self.add_child(geometry)
-
+        self.add_event_handler(self._on_selected, 'selected')
+        self.add_event_handler(self._on_unselected, 'unselected')
+        self._selected_color.add_event_handler(self._on_color_changed, 'changed')
 
 
 
@@ -418,6 +425,14 @@ class Drawing3D(Drawing):
             self.get_handler().SetMapper(source.get_handler())
 
 
+    def _on_selected(self, event_type, source, *args, **kwargs):
+        self._update_color()
+
+
+    def _on_unselected(self, event_type, source, *args, **kwargs):
+        self._update_color()
+
+
 
     ######## Updating ########
 
@@ -427,6 +442,14 @@ class Drawing3D(Drawing):
             # Update this drawing transformation matrix
             self._update_transform()
             super()._update()
+
+
+    def _update_color(self):
+        # This method updates the color of the underline vtk actor
+        color = self._selected_color if self._selected else self._color
+        actor = self.get_handler()
+        actor.GetProperty().SetColor(*color.rgb)
+        actor.GetProperty().SetOpacity(color.a)
 
 
     def _update_transform(self):
@@ -471,10 +494,31 @@ class Drawing3D(Drawing):
     def get_transform(self):
         '''get_transform() -> Transform
         Get the transformation of the drawing object
+
+        :rtype: Transform
+
         '''
         with self:
             return self._transform
 
+
+    def is_selected(self):
+        '''is_selected() -> bool
+        Is this drawing selected
+
+        :rtype: bool
+        '''
+        with self:
+            return self._selected
+
+
+    def get_selected_color(self):
+        '''get_selected_color() -> Color
+        Get the color which is used to paint the drawing when it is selected
+
+        :rtype: Color
+        '''
+        return self._selected_color
 
 
 
@@ -490,6 +534,13 @@ class Drawing3D(Drawing):
                 self.remove_child(self._geometry)
             self._geometry = geometry
             self.add_child(geometry)
+
+
+    def set_selected_color(self, *args):
+        '''set_selected_color(...)
+        Change the color of the drawing when it is selected
+        '''
+        self._selected_color.set(*args)
 
 
 
@@ -616,6 +667,25 @@ class Drawing3D(Drawing):
             super().show()
 
 
+    def select(self):
+        '''select()
+        Select this drawing
+        '''
+        with self:
+            if not self._selected:
+                self._selected = True
+                self.fire_event('selected')
+
+
+
+    def unselect(self):
+        '''unselect()
+        Unselect this drawing
+        '''
+        with self:
+            if self._selected:
+                self._selected = False
+                self.fire_event('unselected')
 
 
     @property
@@ -646,6 +716,13 @@ class Drawing3D(Drawing):
         self.set_geometry(x)
 
 
+    @property
+    def selected_color(self):
+        return self.get_selected_color()
+
+    @selected_color.setter
+    def selected_color(self, args):
+        self.set_selected_color(args)
 
 
 
