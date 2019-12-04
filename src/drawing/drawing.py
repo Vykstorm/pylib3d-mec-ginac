@@ -111,6 +111,13 @@ class Drawing(VtkObjectWrapper):
         return self._color
 
 
+    def get_scene(self):
+        '''get_scene() -> Scene
+        Get the scene attached to this drawing object if any. None otherwise
+        '''
+        return self.get_ancestor(Scene)
+
+
 
 
     ######## Setters ########
@@ -449,14 +456,6 @@ class Drawing3D(Drawing):
 
 
     ######## Getters ########
-
-
-    def get_scene(self):
-        '''get_scene() -> Scene
-        Get the scene attached to this drawing object if any. None otherwise
-        '''
-        return self.get_ancestor(Scene)
-
 
 
     def get_geometry(self):
