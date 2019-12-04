@@ -7,6 +7,7 @@ Description: This file defines the class Simulation
 
 # Standard imports
 from time import time
+from collections import deque
 
 # Imports from other modules
 from .object import Object
@@ -36,6 +37,7 @@ class Simulation(Object):
         self._update_freq = runtime_config.SIMULATION_UPDATE_FREQUENCY
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
+        self._diff_times = deque(maxlen=10)
 
 
 
@@ -130,6 +132,13 @@ class Simulation(Object):
             return self._update_freq
 
 
+    def get_real_update_frequency(self):
+        with self:
+            if not self._diff_times:
+                return 0
+            return len(self._diff_times) / sum(self._diff_times)
+
+
     def set_update_frequency(self, frequency):
         try:
             frequency = float(frequency)
@@ -154,7 +163,9 @@ class Simulation(Object):
                 if self._last_update_time is None:
                     self._last_update_time = current_time
                 else:
-                    self._elapsed_time += current_time - self._last_update_time
+                    diff_time = current_time - self._last_update_time
+                    self._elapsed_time += diff_time
+                    self._diff_times.appendleft(diff_time)
                     self._last_update_time = current_time
 
 

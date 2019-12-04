@@ -214,6 +214,16 @@ class Scene(Object):
 
 
 
+    def get_simulation_real_update_frequency(self):
+        '''get_simulation_real_update_frequency() -> float
+        Returns the current simulation real update frequency (in number of updates per second)
+
+        :rtype: float
+        '''
+        return self._simulation.get_real_update_frequency()
+
+
+
     def get_simulation_time_multiplier(self):
         '''get_simulation_time_multiplier() -> float
         Returns the current simulation time multiplier
