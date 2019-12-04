@@ -89,6 +89,22 @@ class Color(Vector):
             self.rgba = args
 
 
+    def lerp(self, other, m=0.5):
+        if not isinstance(other, Color):
+            raise TypeError('Input argument must be a Color object')
+        xr, xg, xb, xa = self._values
+        yr, yg, yb, ya = other._values
+
+        q = 1 - m
+        return Color(
+            m * xr + q * yr,
+            m * xg + q * yg,
+            m * xb + q * yb,
+            m * xa + q * ya
+        )
+
+
+
     @property
     def rgba(self):
         with self:

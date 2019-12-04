@@ -449,7 +449,10 @@ class Drawing3D(Drawing):
 
     def _update_color(self, highlighted=False):
         # This method updates the color of the underline vtk actor
-        color = self._selected_color if highlighted else self._color
+        if highlighted:
+            color = self._color.lerp(self._selected_color, 0.3)
+        else:
+            color = self._color
         actor = self.get_handler()
         actor.GetProperty().SetColor(*color.rgb)
         actor.GetProperty().SetOpacity(color.a)
