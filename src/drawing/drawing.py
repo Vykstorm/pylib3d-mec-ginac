@@ -324,7 +324,7 @@ class Drawing2D(Drawing):
 
 
 
-    def position_relative_to(self, *args, **kwargs):
+    def set_position_relative_to(self, *args, **kwargs):
         '''position_relative_to(x: str, y: str)
         Set the position of this 2D drawing relative to the left, center or right side
         of the viewport for the x coordinate, and to the top, center or bottom for the
@@ -347,11 +347,11 @@ class Drawing2D(Drawing):
         self._position.set_relative_to(*args, **kwargs)
 
 
-    position_relative_to_center = partialmethod(position_relative_to, 'center')
-    position_relative_to_top_left = partialmethod(position_relative_to, 'top-left')
-    position_relative_to_top_right = partialmethod(position_relative_to, 'top-right')
-    position_relative_to_bottom_left = partialmethod(position_relative_to, 'bottom-left')
-    position_relative_to_bottom_right = partialmethod(position_relative_to, 'bottom-right')
+    set_position_relative_to_center = partialmethod(set_position_relative_to, 'center')
+    set_position_relative_to_top_left = partialmethod(set_position_relative_to, 'top-left')
+    set_position_relative_to_top_right = partialmethod(set_position_relative_to, 'top-right')
+    set_position_relative_to_bottom_left = partialmethod(set_position_relative_to, 'bottom-left')
+    set_position_relative_to_bottom_right = partialmethod(set_position_relative_to, 'bottom-right')
 
 
 
