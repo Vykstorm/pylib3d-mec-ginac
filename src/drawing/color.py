@@ -45,7 +45,9 @@ _colors = {
 
 class Color(Vector):
     '''
-    Instances of this class represents a color with components red, green, blue and alpha
+    Instances of this class represents a color with components red, green, blue and alpha.
+    When any of the 4 components is changed using the methods & properties, this objects
+    raises the event 'changed'
     '''
     def __init__(self, *args):
         super().__init__(4)

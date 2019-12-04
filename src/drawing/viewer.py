@@ -8,6 +8,8 @@ Description: This file defines the class VtkViewer
 # standard imports
 from threading import Condition, RLock, Event
 from time import sleep
+from operator import methodcaller, eq
+from functools import partial
 
 # imports from other modules
 from .object import Object
@@ -17,7 +19,12 @@ from ..core.system import get_default_system
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
+<<<<<<< HEAD
 from vtk import vtkRenderWindowInteractor, vtkPropPicker
+=======
+from vtk import vtkRenderWindowInteractor
+from vtk import vtkPicker
+>>>>>>> 03b91f677ee5194d18118c81dcf996bb2c92481d
 
 
 
@@ -30,6 +37,8 @@ class VtkViewer(Object):
     This is a helper class to create a window and display 3d objects using vtk
     library
     '''
+
+    ######## Constructor ########
 
     def __init__(self):
         lock = RLock()
@@ -45,39 +54,53 @@ class VtkViewer(Object):
         self._selected_drawing = None
         self._title = title
         self._open_request = False
+        self._redraw_request = False
+        self._prev_viewport_size = None
+        self._selected_drawing = None
         self._state = 'closed'
         self._cv = Condition(lock=lock)
         self._is_main_running = Event()
 
 
         # Add event handlers
-        self.add_event_handler(self._event_handler)
+        self.add_event_handler(self._on_any_event)
         self.add_event_handler(self._on_resized, 'resized')
+        self.add_event_handler(self._on_object_entered, 'object_entered')
+
+
+
+
+    ######## Event handlers ########
 
 
 
     def _on_resized(self, *args, **kwargs):
+        # This function is called when the window is resized
         scene = self.get_scene()
         if scene is not None:
-            scene._update()
+            # We need to update scene 2D drawings (because their positions could be
+            # relative to the viewport size)
+            scene._update_2D_drawings()
 
 
-
-    def _event_handler(self, event_type, source, *args, **kwargs):
-        # This method is called when any event is fired by child object (or the viewer)
-
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
         if isinstance(source, Scene) and self._interactor is not None:
-            if event_type == 'object_entered':
-                # A scene was attached to the viewer
-                self._window.AddRenderer(source._renderer)
-            elif event_type == 'object_exit':
-                # The scene was detached from the viewer
-                self._window.RemoveRenderer(source._renderer)
+            # A new scene was attached to the viewer
+            self._window.AddRenderer(source._renderer)
 
 
-        # For any change, redraw the scene
+    def _on_object_exit(self, event_type, source, *args, **kwargs):
+        if isinstance(source, Scene) and self._interactor is not None:
+            # The scene was detached from the viewer
+            self._window.RemoveRenderer(source._renderer)
+            if self._selected_drawing is not None:
+                self._selected_drawing.unselect()
+                self._selected_drawing = None
+
+
+    def _on_any_event(self, *args, **kwargs):
+        # If any event happened, redraw the scene
         self._redraw()
-
 
 
 
@@ -107,19 +130,31 @@ class VtkViewer(Object):
         # Initialize interactor
         interactor.Initialize()
 
-        # Create a repeating timer which sleeps the event loop thread half
+        # Create a repeating timer which redraws the scene and sleeps the event loop thread half
         # of the time to release the GIL
+<<<<<<< HEAD
         interactor.CreateRepeatingTimer(10)
         interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: sleep(0.02))
 
         # Event handler to update the scene when the viewport is resized
         def _on_modified(*args, **kwargs):
             current_size = self.get_scene()._renderer.GetSize()
+=======
+        interactor.CreateRepeatingTimer(5)
+        interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: self._update())
+
+        # Add an event handler which is invoked when the window is modified. This will trigger the event
+        # 'resized' when the viewport size is changed
+        def modified_event_handler(*args, **kwargs):
+            renderer = self.get_scene()._renderer
+            current_size = renderer.GetSize()
+>>>>>>> 03b91f677ee5194d18118c81dcf996bb2c92481d
             prev_size = self._prev_viewport_size
             if prev_size is None or current_size != prev_size:
                 self.fire_event('resized')
             self._prev_viewport_size = current_size
 
+<<<<<<< HEAD
         interactor.AddObserver(vtkCommand.ModifiedEvent, _on_modified)
 
         # Event handler that listens to click events
@@ -148,6 +183,43 @@ class VtkViewer(Object):
 
 
         interactor.AddObserver(vtkCommand.LeftButtonPressEvent, _on_mouse_clicked)
+=======
+        interactor.AddObserver(vtkCommand.ModifiedEvent, modified_event_handler)
+
+        # Add an event handler which is invoked when the user clicks on the screen. This will manage
+        # 3D object selection
+        def click_event_handler(*args, **kwargs):
+            scene = self.get_scene()
+            renderer = scene._renderer
+
+            x, y = interactor.GetEventPosition()
+            picker = vtkPicker()
+            picker.Pick(x, y, 0, renderer)
+            actor_selected = picker.GetActor()
+
+            drawings = scene.get_3D_drawings()
+            drawing = next(filter(lambda drawing: drawing.get_handler() == actor_selected, drawings), None) if actor_selected is not None else None
+            with self:
+                if drawing is not None:
+                    if self._selected_drawing != drawing:
+                        if self._selected_drawing is not None:
+                            self._selected_drawing.unselect()
+                        drawing.select()
+                        self._selected_drawing = drawing
+                else:
+                    # User clicker to the screen but it didnt select anything
+                    if self._selected_drawing is not None:
+                        self._selected_drawing.unselect()
+                        self._selected_drawing = None
+
+
+
+
+
+        interactor.AddObserver(vtkCommand.LeftButtonPressEvent, click_event_handler)
+
+
+>>>>>>> 03b91f677ee5194d18118c81dcf996bb2c92481d
 
         # Bind scene to the renderer
         scene = self.get_scene()
@@ -314,11 +386,21 @@ class VtkViewer(Object):
 
 
 
+    def _update(self):
+        # Redraw the scene if requested
+        with self:
+            if self._state == 'open':
+                if self._redraw_request:
+                    self._interactor.Render()
+                self._redraw_request = False
+        # Sleep the main thread to free the GIL for a while
+        sleep(0.01)
+
+
     def _redraw(self):
         # Redraw the 3d objects and update the view
         with self:
-            if self._state == 'open':
-                self._interactor.Render()
+            self._redraw_request = True
 
 
 

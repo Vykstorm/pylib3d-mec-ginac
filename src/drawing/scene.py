@@ -23,13 +23,21 @@ from vtk import vtkRenderer
 
 
 
+######## Helper variables ########
+
+
 _render_modes = ['points', 'wireframe', 'solid']
 
 
 
-######## class VtkViewer ########
+
+
+######## class Scene ########
 
 class Scene(Object):
+
+    ######## Constructor ########
+
     def __init__(self, system):
         # Initialize super instance
         super().__init__()
@@ -40,10 +48,6 @@ class Scene(Object):
         # Set default camera position
         renderer.GetActiveCamera().SetPosition(7, 7, 7)
 
-        # Set default background color
-        renderer.SetBackground(1, 1, 1)
-        renderer.SetBackgroundAlpha(1)
-
         # Create simulation
         simulation = Simulation(self, system)
         self.add_child(simulation)
@@ -52,18 +56,126 @@ class Scene(Object):
         self._renderer = renderer
         self._system = system
         self._simulation = simulation
-        self._background_color = Color()
+        self._background_color = Color('white')
         self._render_mode = 'solid'
 
+        # Initialize background color
+        self.add_child(self._background_color)
+        self._update_background_color()
 
         # Listen for events
-        self.add_child(self._background_color)
-        self.add_event_handler(self._event_handler)
         self.add_event_handler(self._on_render_mode_changed, 'render_mode_changed')
         self._simulation.add_event_handler(self._on_simulation_step, 'simulation_step')
         self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
+        self.add_event_handler(self._on_object_entered, 'object_entered')
+        self.add_event_handler(self._on_object_exit, 'object_exit')
 
 
+
+
+    ######## Event handlers ########
+
+
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
+        if isinstance(source, Drawing3D):
+            # A new 3D drawing object entered or exit the scene
+            actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
+            # Add all actors attached to the drawing object to the scene renderer
+            render_mode = self._render_mode
+            render_mode_id = _render_modes.index(render_mode)
+            for actor in actors:
+                actor.GetProperty().SetRepresentation(render_mode_id)
+                self._renderer.AddActor(actor)
+
+        elif isinstance(source, Drawing2D):
+            # A new 2D drawing entered the scene
+            self._renderer.AddActor2D(source.get_handler())
+
+
+
+
+
+    def _on_object_exit(self, event_type, source, *args, **kwargs):
+        if isinstance(source, Drawing3D):
+            # A 3D drawing object exit the scene
+            actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
+            # Remove all actors attached to the drawing object to the scene renderer
+            for actor in actors:
+                self._renderer.RemoveActor(actor)
+
+        elif isinstance(source, Drawing2D):
+            # A 2D drawing object exit the scene
+            self._renderer.RemoveActor2D(source.get_handler())
+
+
+
+    def _on_render_mode_changed(self, *args, **kwargs):
+        # This is called when the render mode changes
+        render_mode = self._render_mode
+        render_mode_id = _render_modes.index(render_mode)
+
+        for drawing in self.get_3D_drawings():
+            actors = map(methodcaller('get_handler'), chain([drawing], drawing.get_predecessors(Drawing3D)))
+            for actor in actors:
+                actor.GetProperty().SetRepresentation(render_mode_id)
+
+
+
+    def _on_simulation_step(self, *args, **kwargs):
+        # This method is called when the simulation executes the next step
+        # Update drawings
+        self._update()
+
+
+
+    def _on_background_color_changed(self, *args, **kwargs):
+        # This method is called whenever the background color is changed
+        self._update_background_color()
+
+
+
+
+    ######## Update ########
+
+
+    def _update(self):
+        # This method is called whenever the scene should be updated
+
+        # Update drawings
+        for drawing in self.get_drawings():
+            drawing._update()
+
+
+    def _update_drawings(self):
+        # This method is called whenever the drawings of this scene must be updated
+        self._update_2D_drawings()
+        self._update_3D_drawings()
+
+
+    def _update_2D_drawings(self):
+        # This method is called when 2D drawings of this scene must be updated
+        for drawing in self.get_2D_drawings():
+            drawing._update()
+
+
+    def _update_3D_drawings(self):
+        # This method is called when 3D drawings of this scene must be updated
+        for drawing in self.get_3D_drawings():
+            drawing._update()
+
+
+    def _update_background_color(self):
+        # This method is called whenever the background color must be updated
+        renderer = self._renderer
+        renderer.SetBackground(*self._background_color.rgb)
+        renderer.SetBackgroundAlpha(self._background_color.a)
+
+
+
+
+
+
+    ######## Getters ########
 
 
     def is_simulation_running(self):
@@ -101,17 +213,6 @@ class Scene(Object):
 
 
 
-    def set_simulation_update_frequency(self, frequency):
-        '''set_simulation_update_frequency(frequency: numeric)
-        Change the simulation update frequency.
-
-        :param frequency: The new simulation update frequency (in number of updates per second)
-
-        '''
-        self._simulation.set_update_frequency(frequency)
-
-
-
     def get_simulation_time_multiplier(self):
         '''get_simulation_time_multiplier() -> float
         Returns the current simulation time multiplier
@@ -120,17 +221,6 @@ class Scene(Object):
 
         '''
         return self._simulation.get_time_multiplier()
-
-
-
-    def set_simulation_time_multiplier(self, multiplier):
-        '''set_simulation_time_multiplier(multiplier: numeric)
-        Change the simulation time multiplier
-
-        :param multiplier: The new simulation time multiplier
-
-        '''
-        self._simulation.set_time_multiplier(multiplier)
 
 
 
@@ -164,6 +254,86 @@ class Scene(Object):
         return self.get_children(kind=Drawing3D)
 
 
+
+    def get_background_color(self):
+        '''get_background_color() -> Color
+        Get the background color of the scene
+
+        :rtype: Color
+
+        '''
+        return self._background_color
+
+
+
+    def get_render_mode(self):
+        '''get_render_mode() -> str
+        Get the current rendering mode.
+
+        :return: 'wireframe', 'solid' or 'points'
+        '''
+        with self:
+            return self._render_mode
+
+
+
+
+
+    ######## Setters ########
+
+
+    def set_simulation_update_frequency(self, frequency):
+        '''set_simulation_update_frequency(frequency: numeric)
+        Change the simulation update frequency.
+
+        :param frequency: The new simulation update frequency (in number of updates per second)
+
+        '''
+        self._simulation.set_update_frequency(frequency)
+
+
+
+
+    def set_simulation_time_multiplier(self, multiplier):
+        '''set_simulation_time_multiplier(multiplier: numeric)
+        Change the simulation time multiplier
+
+        :param multiplier: The new simulation time multiplier
+
+        '''
+        self._simulation.set_time_multiplier(multiplier)
+
+
+
+    def set_background_color(self, *args):
+        '''set_background_color(...)
+        Set the background color of the scene
+        '''
+        self._background_color.set(*args)
+
+
+
+    def set_render_mode(self, mode):
+        '''set_render_mode(mode: str)
+        Change the rendering mode of the drawings.
+
+        :param mode: The rendering mode. Possible values are 'solid', 'wireframe' or
+            'points'
+
+        '''
+        if not isinstance(mode, str):
+            raise TypeError('Input argument must be string')
+        if mode not in _render_modes:
+            raise TypeError(f'Invalid render mode. Possible values are: {", ".join(_render_modes)}')
+        with self:
+            self._render_mode = mode
+            self.fire_event('render_mode_changed')
+
+
+
+
+
+    ######## Simulation controls ########
 
 
     def start_simulation(self):
@@ -210,6 +380,10 @@ class Scene(Object):
 
 
 
+
+    ######## Add/Remove drawings ########
+
+
     def purge_drawings(self):
         '''purge_drawings()
         Remove all the drawing objects created previously
@@ -229,47 +403,6 @@ class Scene(Object):
             raise TypeError('Input argument must be a Drawing instance')
         self.add_child(drawing)
 
-
-
-    def get_background_color(self):
-        '''get_background_color() -> Color
-        Get the background color of the scene
-
-        :rtype: Color
-
-        '''
-        return self._background_color
-
-
-
-    def set_background_color(self, *args):
-        '''set_background_color(...)
-        Set the background color of the scene
-        '''
-        self._background_color.set(*args)
-
-
-
-    def set_render_mode(self, mode):
-        '''set_render_mode(mode: str)
-        Change the rendering mode of the drawings.
-
-        :param mode: The rendering mode. Possible values are 'solid', 'wireframe' or
-            'points'
-
-        '''
-        if not isinstance(mode, str):
-            raise TypeError('Input argument must be string')
-        if mode not in _render_modes:
-            raise TypeError(f'Invalid render mode. Possible values are: {", ".join(_render_modes)}')
-        with self:
-            self._render_mode = mode
-            self.fire_event('render_mode_changed')
-
-
-    def get_render_mode(self):
-        with self:
-            return self._render_mode
 
 
 
@@ -423,74 +556,6 @@ class Scene(Object):
         drawing = TextDrawing(*args, **kwargs)
         self.add_drawing(drawing)
         return drawing
-
-
-
-
-    def _update(self):
-        # This method is called whenever the scene should be updated
-
-        # Update drawings
-        for drawing in self.get_drawings():
-            drawing._update()
-
-
-
-    def _event_handler(self, event_type, source, *args, **kwargs):
-        # This method is called when an event occurs
-        if isinstance(source, Drawing3D):
-            if event_type in ('object_entered', 'object_exit'):
-                # A new drawing object entered or exit this 3d scene
-                actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
-                if event_type == 'object_entered':
-                    # Add all actors attached to the drawing object to the scene renderer
-                    render_mode = self._render_mode
-                    render_mode_id = _render_modes.index(render_mode)
-                    for actor in actors:
-                        actor.GetProperty().SetRepresentation(render_mode_id)
-                        self._renderer.AddActor(actor)
-
-                elif event_type == 'object_exit':
-                    # Remove all actors attached to the drawing object to the scene renderer
-                    for actor in actors:
-                        self._renderer.RemoveActor(actor)
-
-        elif isinstance(source, Drawing2D):
-            # A new 2D drawing entered / exit the scene
-            actor = source.get_handler()
-            if event_type == 'object_entered':
-                self._renderer.AddActor2D(actor)
-            elif event_type == 'object_exit':
-                self._renderer.RemoveActor2D(actor)
-
-
-
-    def _on_render_mode_changed(self, *args, **kwargs):
-        # This is called when the render mode changes
-        render_mode = self._render_mode
-        render_mode_id = _render_modes.index(render_mode)
-
-        for drawing in self.get_3D_drawings():
-            actors = map(methodcaller('get_handler'), chain([drawing], drawing.get_predecessors(Drawing3D)))
-            for actor in actors:
-                actor.GetProperty().SetRepresentation(render_mode_id)
-
-
-
-
-    def _on_simulation_step(self, *args, **kwargs):
-        # This method is called when the simulation executes the next step
-        # Update drawings
-        self._update()
-
-
-
-    def _on_background_color_changed(self, *args, **kwargs):
-        # This method is invoked when the background color of the scene is changed
-        renderer = self._renderer
-        renderer.SetBackground(*self._background_color.rgb)
-        renderer.SetBackgroundAlpha(self._background_color.a)
-
 
 
 
