@@ -48,10 +48,6 @@ class Scene(Object):
         # Set default camera position
         renderer.GetActiveCamera().SetPosition(7, 7, 7)
 
-        # Set default background color
-        renderer.SetBackground(1, 1, 1)
-        renderer.SetBackgroundAlpha(1)
-
         # Create simulation
         simulation = Simulation(self, system)
         self.add_child(simulation)
@@ -60,47 +56,56 @@ class Scene(Object):
         self._renderer = renderer
         self._system = system
         self._simulation = simulation
-        self._background_color = Color()
+        self._background_color = Color('white')
         self._render_mode = 'solid'
 
+        # Initialize background color
+        self.add_child(self._background_color)
+        self._update_background_color()
 
         # Listen for events
-        self.add_child(self._background_color)
-        self.add_event_handler(self._event_handler)
         self.add_event_handler(self._on_render_mode_changed, 'render_mode_changed')
         self._simulation.add_event_handler(self._on_simulation_step, 'simulation_step')
         self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
+        self.add_event_handler(self._on_object_entered, 'object_entered')
+        self.add_event_handler(self._on_object_exit, 'object_exit')
+
 
 
 
     ######## Event handlers ########
 
-    def _event_handler(self, event_type, source, *args, **kwargs):
-        # This method is called when an event occurs
-        if isinstance(source, Drawing3D):
-            if event_type in ('object_entered', 'object_exit'):
-                # A new drawing object entered or exit this 3d scene
-                actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
-                if event_type == 'object_entered':
-                    # Add all actors attached to the drawing object to the scene renderer
-                    render_mode = self._render_mode
-                    render_mode_id = _render_modes.index(render_mode)
-                    for actor in actors:
-                        actor.GetProperty().SetRepresentation(render_mode_id)
-                        self._renderer.AddActor(actor)
 
-                elif event_type == 'object_exit':
-                    # Remove all actors attached to the drawing object to the scene renderer
-                    for actor in actors:
-                        self._renderer.RemoveActor(actor)
+    def _on_object_entered(self, event_type, source, *args, **kwargs):
+        if isinstance(source, Drawing3D):
+            # A new 3D drawing object entered or exit the scene
+            actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
+            # Add all actors attached to the drawing object to the scene renderer
+            render_mode = self._render_mode
+            render_mode_id = _render_modes.index(render_mode)
+            for actor in actors:
+                actor.GetProperty().SetRepresentation(render_mode_id)
+                self._renderer.AddActor(actor)
 
         elif isinstance(source, Drawing2D):
-            # A new 2D drawing entered / exit the scene
-            actor = source.get_handler()
-            if event_type == 'object_entered':
-                self._renderer.AddActor2D(actor)
-            elif event_type == 'object_exit':
-                self._renderer.RemoveActor2D(actor)
+            # A new 2D drawing entered the scene
+            self._renderer.AddActor2D(source.get_handler())
+
+
+
+
+
+    def _on_object_exit(self, event_type, source, *args, **kwargs):
+        if isinstance(source, Drawing3D):
+            # A 3D drawing object exit the scene
+            actors = map(methodcaller('get_handler'), chain([source], source.get_predecessors(Drawing3D)))
+            # Remove all actors attached to the drawing object to the scene renderer
+            for actor in actors:
+                self._renderer.RemoveActor(actor)
+
+        elif isinstance(source, Drawing2D):
+            # A 2D drawing object exit the scene
+            self._renderer.RemoveActor2D(source.get_handler())
 
 
 
@@ -124,10 +129,8 @@ class Scene(Object):
 
 
     def _on_background_color_changed(self, *args, **kwargs):
-        # This method is invoked when the background color of the scene is changed
-        renderer = self._renderer
-        renderer.SetBackground(*self._background_color.rgb)
-        renderer.SetBackgroundAlpha(self._background_color.a)
+        # This method is called whenever the background color is changed
+        self._update_background_color()
 
 
 
@@ -141,6 +144,31 @@ class Scene(Object):
         # Update drawings
         for drawing in self.get_drawings():
             drawing._update()
+
+
+    def _update_drawings(self):
+        # This method is called whenever the drawings of this scene must be updated
+        self._update_2D_drawings()
+        self._update_3D_drawings()
+
+
+    def _update_2D_drawings(self):
+        # This method is called when 2D drawings of this scene must be updated
+        for drawing in self.get_2D_drawings():
+            drawing._update()
+
+
+    def _update_3D_drawings(self):
+        # This method is called when 3D drawings of this scene must be updated
+        for drawing in self.get_3D_drawings():
+            drawing._update()
+
+
+    def _update_background_color(self):
+        # This method is called whenever the background color must be updated
+        renderer = self._renderer
+        renderer.SetBackground(*self._background_color.rgb)
+        renderer.SetBackgroundAlpha(self._background_color.a)
 
 
 
