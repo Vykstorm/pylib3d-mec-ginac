@@ -126,7 +126,7 @@ class VtkViewer(EventProducer):
 
         # Create a repeating timer which redraws the scene and sleeps the event loop thread half
         # of the time to release the GIL
-        interactor.CreateRepeatingTimer(5)
+        interactor.CreateRepeatingTimer(10)
         interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: self._update())
 
         # Add an event handler which is invoked when the window is modified. This will trigger the event
@@ -356,7 +356,7 @@ class VtkViewer(EventProducer):
                     self._interactor.Render()
                 self._redraw_request = False
         # Sleep the main thread to free the GIL for a while
-        sleep(0.01)
+        sleep(0.02)
 
 
     def _redraw(self):
