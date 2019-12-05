@@ -333,6 +333,14 @@ class VtkViewer(EventProducer):
 
 
 
+    def get_selected_drawing(self):
+        '''get_selected_drawing() -> Drawing3D | None
+        Get the current selected 3D drawing by the user if any. None otherwise.
+        '''
+        with self:
+            return self._selected_drawing
+
+
 
     def _update(self):
         # Redraw the scene if requested
@@ -386,3 +394,13 @@ def close_viewer():
     Closes the viewer window
     '''
     get_viewer().close()
+
+
+def get_selected_drawing():
+    '''get_selected_drawing() -> Drawing3D | None
+    Get the current 3D drawing selected by the user
+
+    :rtype: Drawing3D | None
+
+    '''
+    return get_viewer().get_selected_drawing()

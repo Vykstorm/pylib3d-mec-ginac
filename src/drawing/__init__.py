@@ -18,12 +18,12 @@ __all__ = [
     'Timer', 'OneShotTimer', 'Transform', 'EventProducer',
 
     # viewer functions
-    'get_viewer', 'show_viewer', 'close_viewer',
+    'get_viewer', 'show_viewer', 'close_viewer', 'get_selected_drawing'
 ]
 
 # Import all the class & functions of the public API
 from .scene import Scene
-from .viewer import VtkViewer as Viewer, get_viewer, show_viewer, close_viewer
+from .viewer import VtkViewer as Viewer, get_viewer, show_viewer, close_viewer, get_selected_drawing
 from .drawing import Drawing
 from .drawing2D import Drawing2D, TextDrawing
 from .drawing3D import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
