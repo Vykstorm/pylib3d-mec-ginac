@@ -67,9 +67,26 @@ class Scene(EventProducer):
         # Listen for events
         self.add_event_handler(self._on_render_mode_changed, 'render_mode_changed')
         self._simulation.add_event_handler(self._on_simulation_step, 'simulation_step')
+        self._simulation.add_event_handler(self._on_simulation_started, 'simulation_started')
+        self._simulation.add_event_handler(self._on_simulation_stopped, 'simulation_stopped')
+        self._simulation.add_event_handler(self._on_simulation_resumed, 'simulation_resumed')
+        self._simulation.add_event_handler(self._on_simulation_paused, 'simulation_paused')
+
+
         self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
         self.add_event_handler(self._on_object_entered, 'object_entered')
         self.add_event_handler(self._on_object_exit, 'object_exit')
+
+
+        # Add simulation info text display
+        simulation_display_info = TextDrawing('', position=(0.01, -0.02))
+        simulation_display_info.set_position_relative_to_top_left()
+        simulation_display_info.vertical_justification = 'top'
+        simulation_display_info.font_size = 15
+        simulation_display_info.color.a = 0.8
+        simulation_display_info.hide()
+        self._simulation_display_info = simulation_display_info
+        self.add_drawing(simulation_display_info)
 
 
 
@@ -124,9 +141,28 @@ class Scene(EventProducer):
 
     def _on_simulation_step(self, *args, **kwargs):
         # This method is called when the simulation executes the next step
+
+        self._update_simulation_display_info()
+
         # Update drawings
         self._update()
 
+
+    def _on_simulation_started(self, *args, **kwargs):
+        self._simulation_display_info.show()
+        self._update_simulation_display_info()
+
+
+    def _on_simulation_stopped(self, *args, **kwargs):
+        self._simulation_display_info.hide()
+
+
+    def _on_simulation_paused(self, *args, **kwargs):
+        self._update_simulation_display_info()
+
+
+    def _on_simulation_resumed(self, *args, **kwargs):
+        self._update_simulation_display_info()
 
 
     def _on_background_color_changed(self, *args, **kwargs):
@@ -137,6 +173,17 @@ class Scene(EventProducer):
 
 
     ######## Update ########
+
+
+    def _update_simulation_display_info(self):
+        display = self._simulation_display_info
+        lines = [
+            f'simulation is {"paused" if self._simulation.is_paused() else "resumed"}',
+            't = {:.3f} secs'.format(self._system.get_time().get_value()),
+            f'{int(self._simulation.get_real_update_frequency())} updates/sec'
+        ]
+        display.text = '\n'.join(lines)
+
 
 
     def _update(self):

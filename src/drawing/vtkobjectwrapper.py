@@ -45,6 +45,7 @@ class VtkObjectWrapper(EventProducer):
 
     def __enter__(self):
         self._lock.acquire()
+        '''
         node = self._parent
         while node is not None:
             node._lock.acquire()
@@ -53,11 +54,13 @@ class VtkObjectWrapper(EventProducer):
             parent = node._parent
             node._lock.release()
             node = parent
+        '''
 
         return self
 
 
     def __exit__(self, exc_type, exc_value, tb):
+        '''
         node = self._parent
         while node is not None:
             if isinstance(node, VtkViewer):
@@ -67,5 +70,6 @@ class VtkObjectWrapper(EventProducer):
             parent = node._parent
             node._lock.release()
             node = parent
+        '''
 
         self._lock.release()
