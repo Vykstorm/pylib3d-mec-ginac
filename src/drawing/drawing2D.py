@@ -15,7 +15,8 @@ from .vector import Vector2
 
 # VTK imports
 from vtk import vtkTextActor, vtkCoordinate
-from vtk import VTK_TEXT_LEFT, VTK_TEXT_CENTERED, VTK_TEXT_RIGHT, VTK_ARIAL, VTK_COURIER, VTK_TIMES
+from vtk import VTK_TEXT_LEFT, VTK_TEXT_CENTERED, VTK_TEXT_RIGHT, VTK_TEXT_TOP, VTK_TEXT_BOTTOM
+from vtk import VTK_ARIAL, VTK_COURIER, VTK_TIMES
 
 
 
@@ -234,6 +235,7 @@ class TextDrawing(Drawing2D):
         text_prop = actor.GetTextProperty()
         text_prop.SetFontSize(font_size)
         text_prop.SetJustificationToLeft()
+        text_prop.SetVerticalJustificationToBottom()
         text_prop.SetFontFamilyToCourier()
 
 
@@ -273,15 +275,29 @@ class TextDrawing(Drawing2D):
             return self.get_handler().GetInput()
 
 
-    def get_horizontal_alignment(self):
-        '''get_horizontal_alignment() -> str
-        Get the current horizontal alignment of the text
+    def get_horizontal_justification(self):
+        '''get_horizontal_justification() -> str
+        Get the current horizontal justification of the text
 
         :return: 'left', 'center' or 'right'
 
         '''
         with self:
             return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
+
+
+
+    def get_vertical_justification(self):
+        '''get_vertical_justification() -> str
+        Get the current vertical justification of the text
+
+        :return: 'bottom', 'center', 'top'
+        '''
+        with self:
+            return {VTK_TEXT_BOTTOM: 'bottom', VTK_TEXT_CENTERED: 'center', VTK_TEXT_TOP: 'top'}.get(self.get_handler().GetTextProperty().GetVerticalJustification())
+
+
+
 
 
     def get_font_family(self):
@@ -354,14 +370,38 @@ class TextDrawing(Drawing2D):
     bold_off = partialmethod(set_bold, False)
 
 
-    def set_horizontal_alignment(self, mode):
+    def set_horizontal_justification(self, mode):
         if not isinstance(mode, str):
             raise TypeError('Input argument must be string')
         if mode not in ('left', 'center', 'right'):
-            raise ValueError('alignment must be "left", "center" or "right"')
+            raise ValueError('horizontal justification must be "left", "center" or "right"')
         with self:
             self.get_handler().GetTextProperty().SetJustification({'left': VTK_TEXT_LEFT, 'center': VTK_TEXT_CENTERED, 'right': VTK_TEXT_RIGHT}.get(mode))
-            self.fire_event('horizontal_alignment_changed')
+            self.fire_event('horizontal_justification_changed')
+
+
+    set_horizontal_justification_to_left = partialmethod(set_horizontal_justification, 'left')
+    set_horizontal_justification_to_center = partialmethod(set_horizontal_justification, 'center')
+    set_horizontal_justification_to_right = partialmethod(set_horizontal_justification, 'right')
+
+
+
+    def set_vertical_justification(self, mode):
+        if not isinstance(mode, str):
+            raise TypeError('Input argument must be string')
+        if mode not in ('bottom', 'center', 'top'):
+            raise ValueError('vertical justification must be "left", "center" or "right"')
+        with self:
+            self.get_handler().GetTextProperty().SetVerticalJustification({'bottom': VTK_TEXT_BOTTOM, 'center': VTK_TEXT_CENTERED, 'top': VTK_TEXT_TOP}.get(mode))
+            self.fire_event('vertical_justification_changed')
+
+
+    set_vertical_justification_to_bottom = partialmethod(set_vertical_justification, 'bottom')
+    set_vertical_justification_to_center = partialmethod(set_vertical_justification, 'center')
+    set_vertical_justification_to_top = partialmethod(set_vertical_justification, 'top')
+
+
+
 
 
     def set_font_family(self, family):
@@ -411,18 +451,35 @@ class TextDrawing(Drawing2D):
 
 
     @property
-    def horizontal_alignment(self):
+    def horizontal_justification(self):
         '''
-        Property that can be used to set/get the horizontal alignment of the displayed text of
+        Property that can be used to set/get the horizontal justification of the displayed text of
         this drawing.
 
-        .. seealso:: :func::`get_horizontal_alignment` :func:`set_horizontal_alignment`
+        .. seealso:: :func::`get_horizontal_justification` :func:`set_horizontal_justification`
         '''
-        return self.get_horizontal_alignment()
+        return self.get_horizontal_justification()
 
-    @horizontal_alignment.setter
-    def horizontal_alignment(self, value):
-        self.set_horizontal_alignment(value)
+    @horizontal_justification.setter
+    def horizontal_justification(self, value):
+        self.set_horizontal_justification(value)
+
+
+
+    @property
+    def vertical_justification(self):
+        '''
+        Property that can be used to set/get the horizontal justification of the displayed text of
+        this drawing.
+
+        .. seealso:: :func::`get_vertical_justification` :func:`set_vertical_justification`
+        '''
+        return self.get_vertical_justification()
+
+    @vertical_justification.setter
+    def vertical_justification(self, value):
+        self.set_vertical_justification(value)
+
 
 
 
