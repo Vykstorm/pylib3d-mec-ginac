@@ -24,7 +24,9 @@ __all__ = [
 # Import all the class & functions of the public API
 from .scene import Scene
 from .viewer import VtkViewer as Viewer, get_viewer, show_viewer, close_viewer
-from .drawing import Drawing, Drawing2D, TextDrawing, Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .drawing import Drawing
+from .drawing2D import Drawing2D, TextDrawing
+from .drawing3D import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .geometry import Geometry
 from .geometry import Sphere, Cube, Cone, Cylinder, Line, LineStrip
 from .geometry import read_stl, write_stl

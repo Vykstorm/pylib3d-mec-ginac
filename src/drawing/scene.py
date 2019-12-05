@@ -626,5 +626,7 @@ class Scene(EventProducer):
 
 
 # This imports are moved here to avoid circular dependencies
-from .drawing import Drawing, Drawing2D, TextDrawing, Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .drawing import Drawing
+from .drawing2D import Drawing2D, TextDrawing
+from .drawing3D import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
 from .geometry import Geometry, read_stl
