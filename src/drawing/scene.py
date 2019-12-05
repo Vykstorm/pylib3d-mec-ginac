@@ -84,6 +84,7 @@ class Scene(EventProducer):
         simulation_display_info.vertical_justification = 'top'
         simulation_display_info.font_size = 15
         simulation_display_info.color.a = 0.8
+        simulation_display_info.italic_on()
         simulation_display_info.hide()
 
         self._simulation_display_info = simulation_display_info
