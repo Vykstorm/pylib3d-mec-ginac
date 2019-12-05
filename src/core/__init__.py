@@ -30,7 +30,7 @@ def __dir__():
 
 
 
-# Add cython extension & core submodule classes and functions
+# Add cython extension classes, functions
 for name in dir(_cython_ext):
     if name.startswith('_'):
         continue
@@ -42,6 +42,20 @@ for name in dir(_cython_ext):
     __all__.append(name)
     globals()[name] = obj
 
+# Add symbolic math constants
+for name in ('pi', 'euler', 'tau', 'catalan'):
+    cte = getattr(_cython_ext, name)
+    __all__.extend([name, name.upper()])
+    globals()[name] = cte
+    globals()[name.upper()] = cte
+
+E = e = _cython_ext.euler
+__all__.extend(['e', 'E'])
+
+
+
+
+# Add classes & functions from core submodule
 __all__.extend(['System', 'get_default_system', 'set_default_system'])
 
 

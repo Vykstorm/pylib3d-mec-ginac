@@ -149,3 +149,6 @@ examples/Untitled.ipynb
 
 # Ignore runtime settings data file
 config.json
+
+# Ignore setup.py logs
+setup.log.txt

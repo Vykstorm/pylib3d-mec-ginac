@@ -81,6 +81,9 @@ from src.core.pxd.ginac.cprint cimport set_print_func as c_ginac_set_print_func
 from src.core.pxd.ginac.cmath cimport pow as c_sym_pow
 from src.core.pxd.ginac.cmath cimport sin as c_sym_sin, cos as c_sym_cos, tan as c_sym_tan
 
+# Symbolic math constants
+from src.core.pxd.ginac.cmath cimport Pi as c_sym_pi, Catalan as c_sym_catalan, Euler as c_sym_euler
+
 
 
 
