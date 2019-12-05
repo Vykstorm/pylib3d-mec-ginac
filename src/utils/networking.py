@@ -151,19 +151,9 @@ class SocketMessageReader(Thread):
 
     def _read(self):
         s = self._conn
-        buffer = bytearray()
         try:
-            # Read the header (read char by char until '\n' is encountered)
-            while True:
-                c = s.recv(1)
-                if not c:
-                    raise Exception
-                if c == b'\n':
-                    break
-                buffer.extend(c)
-            header = buffer.decode()
-            # Compute payload size
-            payload_size = int(header)
+            # Read payload size
+            payload_size = int.from_bytes(s.recv(8), byteorder='little')
             # Read the payload
             payload = json.loads(s.recv(payload_size).decode())
             # Decode the message
@@ -234,8 +224,7 @@ class SocketMessageWriter:
                 }).encode()
                 # Send the header
                 payload_size = len(payload)
-                header = (str(payload_size) + '\n').encode()
-                s.send(header)
+                s.send(payload_size.to_bytes(8, byteorder='little'))
                 # Send the payload
                 s.send(payload)
         except Exception as e:
