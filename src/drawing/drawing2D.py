@@ -42,10 +42,8 @@ class ScreenPoint(Vector2):
         self._coord = coord
 
 
-    def _get_absolute_screen_coords(self):
-        scene = self.get_ancestor(Scene)
-        if scene is None:
-            return
+    def _get_absolute_screen_coords(self, scene):
+        assert isinstance(scene, Scene)
         renderer = scene._renderer
 
         with self:
@@ -133,7 +131,10 @@ class Drawing2D(Drawing):
         # This is called when the position of this 2D drawing must be updated on VTK
         with self:
             handler = self.get_handler()
-            handler.SetPosition(*self._position._get_absolute_screen_coords())
+            scene = self.get_ancestor(Scene)
+            if scene is None:
+                return
+            handler.SetPosition(*self._position._get_absolute_screen_coords(scene))
 
 
 
