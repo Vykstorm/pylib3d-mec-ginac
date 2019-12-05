@@ -13,7 +13,6 @@ from itertools import repeat, chain
 from copy import copy
 
 # Imports from other modules
-from .object import Object
 from .vector import Vector
 
 

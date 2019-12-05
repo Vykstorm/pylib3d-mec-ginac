@@ -12,7 +12,7 @@ from operator import methodcaller, eq
 from functools import partial
 
 # imports from other modules
-from .object import Object
+from .events import EventProducer
 from .color import Color
 from ..core.system import get_default_system
 
@@ -26,7 +26,7 @@ from vtk import vtkRenderWindowInteractor, vtkPropPicker
 
 ######## class VtkViewer ########
 
-class VtkViewer(Object):
+class VtkViewer(EventProducer):
     '''
     This is a helper class to create a window and display 3d objects using vtk
     library

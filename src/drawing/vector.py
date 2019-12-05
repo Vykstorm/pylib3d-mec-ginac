@@ -13,13 +13,13 @@ from itertools import repeat
 from functools import partial
 from collections.abc import Iterable
 from copy import copy
-from .object import Object
+from .events import EventProducer
 
 
 
 ######## class Vector ########
 
-class Vector(Object):
+class Vector(EventProducer):
     def __init__(self, n):
         super().__init__()
         self._values = array('f', repeat(0.0, n))

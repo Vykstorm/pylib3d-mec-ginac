@@ -15,7 +15,7 @@ __all__ = [
     # stl & scad utilities
     'read_stl', 'write_stl', 'scad2stl', 'scad_to_stl',
     # Other utility classes
-    'Timer', 'OneShotTimer', 'Transform',
+    'Timer', 'OneShotTimer', 'Transform', 'EventProducer',
 
     # viewer functions
     'get_viewer', 'show_viewer', 'close_viewer',
@@ -32,3 +32,4 @@ from .scad import scad2stl, scad_to_stl
 from .timer import Timer, OneShotTimer
 from .color import Color
 from .transform import Transform
+from .events import EventProducer

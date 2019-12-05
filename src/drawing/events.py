@@ -20,12 +20,12 @@ from inspect import isclass
 
 ######## class Object ########
 
-class Object:
+class EventProducer:
     '''
     Instances of this class are used to implemented the observer pattern:
     - An instance of this class can have an arbitrary number of children objects
-    (also Object instances) and only one parent (optional).
-    An object can be seen in other way as a tree where nodes are objects.
+    (also EventProducer instances) and only one parent (optional).
+    An object can be seen in other way as a tree where nodes are objects of this class.
 
     - Objects can trigger events. Events are propagated from bottom to the top of the object
     hierachy.
@@ -104,7 +104,7 @@ class Object:
             Once the child was added to this object, it fires a 'object_entered' event.
 
         '''
-        assert isinstance(child, Object)
+        assert isinstance(child, EventProducer)
         with self:
             self._children.append(child)
             with child._lock:
@@ -122,7 +122,7 @@ class Object:
             Before the given child is remove from this object, it fires a 'object_exit' event.
 
         '''
-        assert isinstance(child, Object)
+        assert isinstance(child, EventProducer)
         with self:
             if child not in self._children:
                 return

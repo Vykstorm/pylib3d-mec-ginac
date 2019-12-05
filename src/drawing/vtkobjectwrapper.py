@@ -6,7 +6,7 @@ Description: This file defines the class VtkObjectWrapper
 ######## Import statements ########
 
 # imports from other modules
-from .object import Object
+from .events import EventProducer
 from .viewer import VtkViewer
 
 # vtk
@@ -16,7 +16,7 @@ from vtk import vtkObject
 
 ######## class VtkObjectWrapper ########
 
-class VtkObjectWrapper(Object):
+class VtkObjectWrapper(EventProducer):
     '''
     This class inherits the features of the Object class and its a wrapper around
     a vtk object (it holds a reference to an instance of the class vtk.vtkObject)

@@ -10,7 +10,7 @@ from time import time
 from collections import deque
 
 # Imports from other modules
-from .object import Object
+from .events import EventProducer
 from .timer import Timer
 from ..config import runtime_config
 
@@ -19,7 +19,7 @@ from ..config import runtime_config
 
 ######## class Simulation ########
 
-class Simulation(Object):
+class Simulation(EventProducer):
     '''
     This class is responsible of storing & update the simulation state (change the
     time symbol value periodically and integrate).

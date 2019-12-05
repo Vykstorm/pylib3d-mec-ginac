@@ -11,7 +11,7 @@ from functools import partial
 from itertools import chain
 
 # imports from other modules
-from .object import Object
+from .events import EventProducer
 from .simulation import Simulation
 from .scad import scad_to_stl
 from .color import Color
@@ -35,7 +35,7 @@ _render_modes = ['points', 'wireframe', 'solid']
 
 ######## class Scene ########
 
-class Scene(Object):
+class Scene(EventProducer):
 
     ######## Constructor ########
 
