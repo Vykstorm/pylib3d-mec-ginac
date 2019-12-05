@@ -18,7 +18,7 @@ from ..core.system import get_default_system
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp
-from vtk import vtkRenderWindowInteractor, vtkPropPicker
+from vtk import vtkRenderWindowInteractor, vtkPropPicker, vtkInteractorStyleTrackballCamera
 
 
 
@@ -173,6 +173,12 @@ class VtkViewer(EventProducer):
         scene = self.get_scene()
         if scene is not None:
             window.AddRenderer(scene._renderer)
+
+
+        # Set interaction style
+        interaction_style = vtkInteractorStyleTrackballCamera()
+        interactor.SetInteractorStyle(interaction_style)
+
 
 
 
