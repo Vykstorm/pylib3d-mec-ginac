@@ -85,8 +85,22 @@ class Scene(EventProducer):
         simulation_display_info.font_size = 15
         simulation_display_info.color.a = 0.8
         simulation_display_info.hide()
+
         self._simulation_display_info = simulation_display_info
         self.add_drawing(simulation_display_info)
+
+
+        # Add drawings info text display
+        drawings_display_info = TextDrawing('', position=(-0.01, -0.02))
+        drawings_display_info.set_position_relative_to_top_right()
+        drawings_display_info.vertical_justification = 'top'
+        drawings_display_info.horizontal_justification = 'right'
+        drawings_display_info.font_size = 15
+        drawings_display_info.color.a = 0.8
+
+        self._drawings_display_info = drawings_display_info
+        self.add_drawing(drawings_display_info)
+        self._update_drawings_display_info()
 
 
 
@@ -183,6 +197,15 @@ class Scene(EventProducer):
             f'{int(self._simulation.get_real_update_frequency())} updates/sec'
         ]
         display.text = '\n'.join(lines)
+
+
+    def _update_drawings_display_info(self):
+        display = self._drawings_display_info
+        lines = [
+            #'object name: '
+        ]
+        display.text = '\n'.join(lines)
+
 
 
 
