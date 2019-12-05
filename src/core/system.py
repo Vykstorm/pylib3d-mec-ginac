@@ -30,11 +30,6 @@ class System(_System):
     def __init__(self):
         super().__init__()
 
-        # Define mathematical constants
-        self.new_parameter('pi', r'\pi', math.pi)
-        self.new_parameter('e', 'e', math.e)
-        self.new_parameter('tau', r'\tau', math.tau)
-
         # Create scene visualizer (to show drawings)
         self._scene = Scene(self)
 
