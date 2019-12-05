@@ -439,3 +439,11 @@ class TextDrawing(Drawing2D):
     @font_family.setter
     def font_family(self, value):
         self.set_font_family(value)
+
+
+
+
+
+
+# This import is added here to avoid circular dependencies
+from .scene import Scene
