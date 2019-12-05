@@ -20,6 +20,12 @@ from .drawing import *
 __all__.extend(_drawing_api)
 
 
+# Add extra classes & methods (ui submodule)
+from .ui import __all__ as _ui_api
+from .ui import *
+__all__.extend(_ui_api)
+
+
 # Add extra classes & methods (utils submodule)
 from .utils import __all__ as _utils_api
 from .utils import *

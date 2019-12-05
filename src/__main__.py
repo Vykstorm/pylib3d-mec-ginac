@@ -5,17 +5,130 @@ the lib3d-mec-ginac graphical interface.
 '''
 
 
+
+######## Imports ########
+
+# CL
 from argparse import ArgumentParser
+
+# Filepaths & working directory handling
 from os.path import join, isdir, isfile, exists, normpath, dirname, abspath
 from os import getcwd, chdir
-from re import match
-from copy import copy
-import sys
-from functools import partial
+
+# Multithreading
+from threading import RLock, Thread
+
+# Subprocesses & signals
 import subprocess
-import threading
 from signal import signal, getsignal, SIGINT, SIGPIPE
+
+# other
+import sys
+from io import StringIO
+import traceback
+
+# From other modules
 from lib3d_mec_ginac import *
+
+
+
+
+
+
+class AutoCompleteRequestManager(Thread):
+    def __init__(self, conn, context):
+        super().__init__()
+        self.daemon = True
+        self._conn = conn
+        self._context = context
+
+
+    def run(self):
+        conn = self._conn
+        try:
+            while True:
+                # Wait for the next autocomplete request
+                request = conn.readmsg('autocomplete')
+
+                # Genereate autocomplete output using the completer function
+                results = autocomplete(request.text, self._context)
+
+                # Send back a response
+                conn.writemsg('autocomplete-response', dict(results=results))
+
+        except ConnectionError:
+            pass
+
+
+
+
+######## class Controller ########
+
+class Controller(Server):
+    def __init__(self, address):
+        super().__init__(address)
+        self._viewer = get_viewer()
+        self._context = globals()
+        self._lock = RLock()
+        self.start()
+
+
+    def handle_connection(self, conn):
+        # Handle autocomplete requests asynchronously
+        AutoCompleteRequestManager(conn, self._context).start()
+
+        try:
+            with conn:
+                # Start reading messages
+                while True:
+                    # Wait for source code execution request message
+                    message = conn.readmsg('exec')
+                    try:
+                        # Execute the code received
+                        output = self.exec(**message.__dict__)
+                        # Return a response to the client (with the execution output)
+                        conn.writemsg('exec-response', dict(code='ok', output=output))
+                    except SystemExit:
+                        # The result of the execution is a system exit
+                        conn.writemsg('exec-response', dict(code='exit'))
+                        break
+        except ConnectionError:
+            pass
+
+
+
+    def exec(self, source, filename='<input>', mode='single'):
+        with self._lock:
+            context = self._context
+
+            # Compile the given source code
+            code = compile(source, filename, mode)
+            # Redirect stdout to a temporal buffer
+            prev_stdout, output = sys.stdout, StringIO()
+            sys.stdout = output
+            try:
+                # Execute the code
+                exec(code, context)
+            except SystemExit:
+                raise SystemExit
+            except:
+                # If a exception was generated, print the exception traceback
+                traceback.print_exc(file=sys.stdout)
+            finally:
+                # Retore stdout
+                sys.stdout = prev_stdout
+            # Return output temporal buffer contents
+            return output.getvalue()
+
+
+    def main(self):
+        self._viewer.main(open=True)
+
+
+
+
+
+
 
 
 
@@ -66,8 +179,6 @@ if __name__ == '__main__':
         set_gravity_direction(gravity_direction)
 
 
-    client_console_script_path = abspath(join(dirname(__file__), 'utils', 'console.py'))
-
     # Parse script file path
     script_path = parsed_args.file
     if script_path is not None:
@@ -91,19 +202,24 @@ if __name__ == '__main__':
         script = None
 
 
-    # Execute server command prompt in parallel
-    viewer = get_viewer()
-    server = ServerConsole(context=globals(), host='localhost', port=15010)
-    server.start()
+    address = 'localhost:15010'
+    controller = Controller(address=address)
 
-    # Execute the given script
+    # Execute the script given by the user
     if script is not None:
-        server.exec(script, mode='exec')
+        controller.exec(script, mode='exec')
 
 
     if not parsed_args.no_console:
         # Execute client python prompt in a different process
-        prompt = subprocess.Popen([sys.executable, client_console_script_path, f'localhost:15010'])
+        prompt = subprocess.Popen([
+            sys.executable,
+            '-c',
+            ';'.join([
+                'from lib3d_mec_ginac.ui.console import ConsoleClient',
+                f'ConsoleClient("{address}").interact()'
+            ])
+        ])
 
         # This is used to prevent a bug when subprocess reads from stdin and a keyboard
         # interrupt is made
@@ -113,4 +229,4 @@ if __name__ == '__main__':
         signal(SIGINT, sigint_callback)
 
     # Execute VTK main loop
-    viewer.main(open=True)
+    controller.main()
