@@ -214,8 +214,7 @@ class Scene(EventProducer):
         # This method is called whenever the scene should be updated
 
         # Update drawings
-        for drawing in self.get_drawings():
-            drawing._update()
+        self._update_drawings()
 
 
     def _update_drawings(self):
