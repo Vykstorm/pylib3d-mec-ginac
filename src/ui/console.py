@@ -61,7 +61,7 @@ class ConsoleClient(Client, InteractiveConsole):
         # Check for syntax errors locally
         try:
             result = compile_command(source, filename, symbol)
-        except (SyntaxError, OverflowError):
+        except (SyntaxError, ValueError, OverflowError):
             # Syntax error (show it in stderr)
             self.showsyntaxerror()
             return False
