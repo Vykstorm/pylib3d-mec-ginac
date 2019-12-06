@@ -72,7 +72,7 @@ ROOT_PACKAGE = 'lib3d_mec_ginac'
 ROOT_PACKAGE_DIR = join(root_dir, 'src')
 
 # List of all packages (including subpackages but not the extension) to be installed within this library
-PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.drawing', '.utils', '.ui'))))
+PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.drawing', '.utils', '.ui', '.jupyter'))))
 
 
 

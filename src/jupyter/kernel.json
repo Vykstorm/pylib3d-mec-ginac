@@ -1,0 +1,3 @@
+{"argv":["python","-m", "lib3d_mec_ginac.jupyter", "-f", "{connection_file}"],
+ "display_name":"lib3d-mec-ginac"
+}
