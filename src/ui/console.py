@@ -9,6 +9,7 @@ Description: This file defines the class ConsoleClient
 
 
 # Standard imports
+from argparse import ArgumentParser
 import rlcompleter
 import readline
 from code import InteractiveConsole, compile_command
@@ -110,7 +111,7 @@ if __name__ == '__main__':
 
 
     # Create client console
-    client = ConsoleClient()
+    client = ConsoleClient(parsed_args.address)
 
     try:
         # Start user interaction
