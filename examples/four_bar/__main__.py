@@ -1,13 +1,11 @@
 
 
-## Imports
+######## Imports ########
+
 from lib3d_mec_ginac import *
 from math import pi
 
 
-
-# Set gravity value
-set_value('g', 9.80665)
 
 
 ######## Solver parameters ########
@@ -270,7 +268,6 @@ Dyn_Eq_eq_VP = Matrix.block(5, 1, Dyn_eq_L, ddPhi, dPhi, Phi, Extra_Dyn_Eq_eq)
 
 ######## Drawings ########
 
-'''
 # Generate stls from scad files
 for i in range(1, 4):
     scad2stl('Arm', f'Arm{i}',
@@ -279,7 +276,6 @@ for i in range(1, 4):
         d     = 0.2*l1.value,
         l     = get_value(f'l{i}')
     )
-'''
 
 # Draw points, frames and bodies
 draw_frame('abs')
