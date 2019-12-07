@@ -154,15 +154,66 @@ API Reference
 
 
 
+
+.. autoclass:: Drawing
+    :members:
+        get_color, get_scene,
+        set_color, show, hide,
+        color
+
+
+.. autoclass:: Drawing2D
+    :members:
+        get_position,
+        set_position, set_position_relative_to,
+        position
+
+
 .. autoclass:: Drawing3D
     :members:
-        get_geometry, set_geometry,
-        get_transform, set_transform, clear_transform,
+        get_geometry, get_transform,
+        is_selected, get_selected_color,
+        set_geometry, set_selected_color, set_transform, clear_transform,
         rotate, scale, translate, rotate_to_dir,
-        show, hide,
-        get_color, set_color,
-        transform, color
+        select, unselect,
+        transform, geometry, selected_color
 
+
+.. autoclass:: PointDrawing
+    :members:
+
+
+.. autoclass:: FrameDrawing
+    :members:
+
+
+.. autoclass:: VectorDrawing
+    :members:
+
+
+
+.. autoclass:: Geometry
+    :members:
+        from_stl, to_stl
+
+
+.. autoclass:: Sphere
+    :members:
+
+.. autoclass:: Cylinder
+    :members:
+
+.. autoclass:: Cone
+    :members:
+
+.. autoclass:: Cube
+    :members:
+
+.. autoclass:: Line
+    :members:
+
+.. autoclass:: LineStrip
+    :members:
 
 
 .. autoclass:: Transform
@@ -229,3 +280,7 @@ Drawing utility functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: scad_to_stl
+
+.. autofunction:: read_stl
+
+.. autofunction:: write_stl
