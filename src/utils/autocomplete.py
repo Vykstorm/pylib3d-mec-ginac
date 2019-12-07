@@ -23,6 +23,7 @@ def autocomplete(text, context):
     if not isinstance(context, Mapping):
         raise TypeError('context must be a mapping')
 
+    add_keywords = False
     m = match('(\w+)\.(\w*)$', text)
     if m:
         try:
@@ -32,6 +33,7 @@ def autocomplete(text, context):
             pass
     else:
         context = ChainMap(context, builtins.__dict__)
+        add_keywords = True
 
     if text:
         names = filter(methodcaller('startswith', text), context.keys())
@@ -41,4 +43,6 @@ def autocomplete(text, context):
 
 
     results = [name+'(' if callable(value) else name for name, value in zip(names, map(context.__getitem__, names))]
+    if add_keywords:
+        results.extend(filter(methodcaller('startswith', text), keyword.kwlist))
     return results
