@@ -2,19 +2,8 @@
 
 ## Imports
 from lib3d_mec_ginac import *
+from math import pi
 
-from os.path import join, dirname, abspath
-import sys
-
-#sys.path.insert(0, abspath(join(dirname(__file__), '../..')))
-#from src import *
-
-
-
-from math import pi, e
-
-
-disable_atomization()
 
 
 # Set gravity value
@@ -281,24 +270,35 @@ Dyn_Eq_eq_VP = Matrix.block(5, 1, Dyn_eq_L, ddPhi, dPhi, Phi, Extra_Dyn_Eq_eq)
 
 ######## Drawings ########
 
+'''
+# Generate stls from scad files
+for i in range(1, 4):
+    scad2stl('Arm', f'Arm{i}',
+        rod_r = 0.05*l1.value,
+        r_in  = 0.1*l1.value,
+        d     = 0.2*l1.value,
+        l     = get_value(f'l{i}')
+    )
+'''
 
+# Draw points, frames and bodies
 draw_frame('abs')
 
-draw_frame('Arm1')
-draw_frame('Arm2')
-draw_frame('Arm3')
-#drawing = draw_solid('Arm2', 'cube.stl')
+draw_solid('Arm1', color='olive')
+draw_solid('Arm2', color=[0.8, 0.3, 0])
+draw_solid('Arm3', color=[0.5, 0.5, 1])
+
+draw_frame('Arm1', scale=1)
+draw_frame('Arm2', scale=1)
+draw_frame('Arm3', scale=1)
+
+draw_point('O',  scale=2, color=[0, 0.5, 0.5])
+draw_point('A',  scale=2, color=[1, 0.5, 0.5])
+draw_point('B',  scale=2, color=[0, 1, 0.5])
 
 
-draw_point('O')
-draw_point('A')
-draw_point('B')
-draw_point('C')
-draw_point('O2')
+# Draw position, velocity and angular velocity
 
-draw_position_vector('O', 'B')
-draw_position_vector('OL2', 'OL3')
-
-draw_solid('Arm1')
-drawing = draw_solid('Arm2')
-draw_solid('Arm3')
+draw_position_vector('O', 'B', tip_color='cyan')
+draw_velocity_vector('abs', 'B', tip_color='cyan')
+draw_position_vector('OL2', 'OL3', tip_color='cyan')
