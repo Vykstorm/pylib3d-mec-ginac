@@ -553,7 +553,7 @@ class Scene(EventProducer):
 
 
 
-    def draw_frame(self, frame, *args, **kwargs):
+    def draw_frame(self, frame, scale=1, *args, **kwargs):
         # Validate & parse point argument
         if not isinstance(frame, (Frame, str)):
             raise TypeError('Input argument must be a Point or str instance')
@@ -564,6 +564,7 @@ class Scene(EventProducer):
         drawing = FrameDrawing(*args, **kwargs)
 
         # Setup drawing transformation
+        drawing.scale(scale)
         self._apply_point_transform(drawing, frame.get_point())
 
         # Add the drawing to the scene
