@@ -207,7 +207,8 @@ if __name__ == '__main__':
 
     # Execute the script given by the user
     if script is not None:
-        controller.exec(script, mode='exec')
+        output = controller.exec(script, mode='exec')
+        print(output)
 
 
     if not parsed_args.no_console:
