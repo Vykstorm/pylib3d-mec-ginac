@@ -7,7 +7,7 @@ Description: This file defines the function scad_to_stl function.
 import json
 from os import devnull
 from os.path import dirname, join, exists, normpath
-from re import sub
+from re import sub, match
 from types import SimpleNamespace
 import subprocess
 from subprocess import CalledProcessError
@@ -54,15 +54,20 @@ def scad_to_stl(scad_filename, stl_filename=None, **kwargs):
     if stl_filename is not None and not isinstance(stl_filename, str):
         raise TypeError('stl_filename must be a str object')
 
-    # Scad filename must end with .scad and stl filename with .stl
-    if not scad_filename.endswith('.scad'):
+    if '.' not in scad_filename:
+        scad_filename += '.scad'
+    elif not scad_filename.endswith('.scad'):
+        # Scad filename must end with .scad
         raise ValueError('scad filename must have .scad extension')
     if stl_filename is None:
         # stl filename not specified (use scad filename but replacing its extension)
         stl_filename = sub('.scad$', '.stl', scad_filename)
 
-    elif not stl_filename.endswith('.stl'):
-        raise ValueError('stl filename must have .stl extension')
+    else:
+        if '.' not in stl_filename:
+            stl_filename += '.stl'
+        elif not stl_filename.endswith('.stl'):
+            raise ValueError('stl filename must have .stl extension')
 
     # Check that input scad file exists
     if not exists(scad_filename):
