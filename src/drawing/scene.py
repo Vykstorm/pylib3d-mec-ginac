@@ -79,28 +79,23 @@ class Scene(EventProducer):
 
 
         # Add simulation info text display
-        simulation_display_info = TextDrawing('', position=(0.01, -0.02))
-        simulation_display_info.set_position_relative_to_top_left()
-        simulation_display_info.vertical_justification = 'top'
-        simulation_display_info.font_size = 15
-        simulation_display_info.color.a = 0.8
-        simulation_display_info.italic_on()
-        simulation_display_info.hide()
+        display = TextDrawing('', position=(0.01, -0.02), font_size=15, color=(0, 0, 0, 0.8), italic=True)
+        display.set_position_relative_to_top_left()
+        display.vertical_justification = 'top'
+        display.hide()
 
-        self._simulation_display_info = simulation_display_info
-        self.add_drawing(simulation_display_info)
+        self._simulation_display_info = display
+        self.add_drawing(display)
 
 
         # Add drawings info text display
-        drawings_display_info = TextDrawing('', position=(-0.01, -0.02))
-        drawings_display_info.set_position_relative_to_top_right()
-        drawings_display_info.vertical_justification = 'top'
-        drawings_display_info.horizontal_justification = 'right'
-        drawings_display_info.font_size = 15
-        drawings_display_info.color.a = 0.8
+        display = TextDrawing('', position=(-0.01, -0.02), font_size=15, color=(0, 0, 0, 0.8), italic=True)
+        display.set_position_relative_to_top_right()
+        display.vertical_justification = 'top'
+        display.horizontal_justification = 'right'
 
-        self._drawings_display_info = drawings_display_info
-        self.add_drawing(drawings_display_info)
+        self._drawings_display_info = display
+        self.add_drawing(display)
         self._update_drawings_display_info()
 
 
@@ -251,7 +246,10 @@ class Scene(EventProducer):
 
     def is_simulation_running(self):
         '''is_simulation_running() -> bool
-        Returns True if the simulation is running. False otherwise.
+
+        :return: True if the simulation is running. False otherwise.
+        :rtype: bool
+
         '''
         return self._simulation.is_running()
 
@@ -259,7 +257,10 @@ class Scene(EventProducer):
 
     def is_simulation_paused(self):
         '''is_simulation_paused() -> bool
-        Returns True if the simulation is paused. False otherwise.
+
+        :return: True if the simulation is paused. False otherwise.
+        :rtype: bool
+
         '''
         return self._simulation.is_paused()
 
@@ -267,7 +268,10 @@ class Scene(EventProducer):
 
     def is_simulation_stopped(self):
         '''is_simulation_stopped() -> bool
-        Returns True if the simulation is stopped. False otherwise.
+
+        :return: True if the simulation is stopped. False otherwise.
+        :rtype: bool
+
         '''
         return self._simulation.is_stopped()
 
@@ -275,8 +279,8 @@ class Scene(EventProducer):
 
     def get_simulation_update_frequency(self):
         '''get_simulation_update_frequency() -> float
-        Returns the current simulation update frequency (in number of updates per second)
 
+        :return: The current simulation update frequency (in number of updates per second)
         :rtype: float
 
         '''
@@ -286,9 +290,10 @@ class Scene(EventProducer):
 
     def get_simulation_real_update_frequency(self):
         '''get_simulation_real_update_frequency() -> float
-        Returns the current simulation real update frequency (in number of updates per second)
 
+        :return: The current simulation real update frequency (in number of updates per second)
         :rtype: float
+
         '''
         return self._simulation.get_real_update_frequency()
 
@@ -296,8 +301,8 @@ class Scene(EventProducer):
 
     def get_simulation_time_multiplier(self):
         '''get_simulation_time_multiplier() -> float
-        Returns the current simulation time multiplier
 
+        :return: The current simulation time multiplier
         :rtype: float
 
         '''
@@ -307,8 +312,8 @@ class Scene(EventProducer):
 
     def get_drawings(self):
         '''get_drawings() -> List[Drawing]
-        Get all the drawings previously created in the scene.
 
+        :return: All the drawings previously created in the scene.
         :rtype: List[Drawing]
 
         '''
@@ -317,8 +322,8 @@ class Scene(EventProducer):
 
     def get_2D_drawings(self):
         '''get_2D_drawings() -> List[Drawing2D]
-        Get all the 2D drawings previously created in the scene
 
+        :return: All the 2D drawings previously created in the scene
         :rtype: List[Drawing2D]
 
         '''
@@ -327,8 +332,8 @@ class Scene(EventProducer):
 
     def get_3D_drawings(self):
         '''get_3D_drawings() -> List[Drawing2D]
-        Get all the 3D drawings previously created in the scene
 
+        :return: All the 3D drawings previously created in the scene
         :rtype: List[Drawing3D]
 
         '''
@@ -338,8 +343,8 @@ class Scene(EventProducer):
 
     def get_background_color(self):
         '''get_background_color() -> Color
-        Get the background color of the scene
 
+        :return: The background color of the scene
         :rtype: Color
 
         '''
@@ -349,9 +354,10 @@ class Scene(EventProducer):
 
     def get_render_mode(self):
         '''get_render_mode() -> str
-        Get the current rendering mode.
 
-        :return: 'wireframe', 'solid' or 'points'
+        :return: The current rendering mode: 'wireframe', 'solid' or 'points'
+        :rtype: str
+
         '''
         with self:
             return self._render_mode
@@ -387,6 +393,7 @@ class Scene(EventProducer):
         Change the simulation update frequency.
 
         :param frequency: The new simulation update frequency (in number of updates per second)
+        :type frequency: numeric
 
         '''
         self._simulation.set_update_frequency(frequency)
@@ -399,6 +406,7 @@ class Scene(EventProducer):
         Change the simulation time multiplier
 
         :param multiplier: The new simulation time multiplier
+        :type multiplier: numeric
 
         '''
         self._simulation.set_time_multiplier(multiplier)
@@ -497,7 +505,7 @@ class Scene(EventProducer):
 
     def add_drawing(self, drawing):
         '''add_drawing(drawing: Drawing)
-        Add a new drawing object to the scene
+        Add manually a new drawing object to the scene
         '''
         if not isinstance(drawing, Drawing):
             raise TypeError('Input argument must be a Drawing instance')
@@ -534,6 +542,38 @@ class Scene(EventProducer):
 
 
     def draw_point(self, point, scale=1, **kwargs):
+        '''draw_point(point: Point, ...) -> PointDrawing
+        Draw the given point in the scene
+
+        :param point: The point to draw
+        :type point: Point, str
+
+        :param scale: Scale of the drawing. It can be a single value or a list of three values
+            (indicating the scale on each dimension). Values can be numbers or symbolic
+            expressions
+
+        :param color: Color of the drawing. It can be a list of three or four numeric
+            values in the range [0, 1] to indicate the rgb or rgba components of the
+            color. It can also be a predefined color name (string)
+
+            .. seealso:: :func:`get_predefined_colors`
+        :param numeric radius: Radius of the sphere which is used to draw the point.
+            By default is 0.06
+        :param numeric resolution: Resolution of the sphere geometry.
+            By default is 15
+
+        :rtype: PointDrawing
+
+
+        The next example draws the origin point with green color. The radius of the sphere
+        geometry is set to 0.25
+
+            :Example:
+
+            >>> drawing = draw_point('O', color='green', radius=0.25)
+
+
+        '''
         # Validate & parse point argument
         if not isinstance(point, (Point, str)):
             raise TypeError('Input argument must be a Point or str instance')
@@ -555,6 +595,37 @@ class Scene(EventProducer):
 
 
     def draw_frame(self, frame, scale=1, **kwargs):
+        '''draw_frame(frame: Frame, ...) -> FrameDrawing
+        Draw the given frame in the 3D scene.
+
+        :param scale: Scale of the drawing. It can be a single value or a list of three values
+            (indicating the scale on each dimension). Values can be numbers or symbolic
+            expressions
+
+        :param axis_shaft_radius: Radius of the shaft of each axis. By default is 0.03
+        :param axis_tip_radius: Radius of the tip of each axis. By default is 0.1
+        :param origin_radius: Radius of the sphere drawn at the origin. By default is 0.06
+
+        :param axis_shaft_resolution: Resolution of the shaft of each axis. By default is 10
+        :param axis_tip_resolution: Resolution of the tip of each axis. By default is 15
+        :param origin_resolution: Resolution of the sphere drawn at the origin. By default is 15
+
+        :param axis_shaft_color: Color of the shaft of each axis. By default is white.
+        :param axis_tip_colors: A list of three colors, one color for each axis. Default is red, green and blue
+        :param origin_color: Color of the sphere drawn at the origin. By default is white.
+
+
+        :rtype: FrameDrawing
+
+        The next example draws the 'abs' frame. The arrow colors are set to yellow, magenta and cyan
+        for the x, y and z axis respectively. Finally, the frame is scaled by the parameter 'a':
+
+            :Example:
+
+            >>> a = new_param('a', 1.2)
+            >>> drawing = draw_frame('abs', scale=a, axis_tip_colors=['yellow', 'magenta', 'cyan'])
+
+        '''
         # Validate & parse point argument
         if not isinstance(frame, (Frame, str)):
             raise TypeError('Input argument must be a Point or str instance')
@@ -576,6 +647,38 @@ class Scene(EventProducer):
 
 
     def draw_vector(self, point, vector, **kwargs):
+        '''draw_vector(point: Point, vector: Vector3D, ...) -> VectorDrawing
+        Draws a vector starting from the given point
+
+        :param point: The point that will be the origin of the vector
+        :param vector: The vector to draw
+        :type point: Point, str
+        :type vector: Vector3D, str
+
+        :param shaft_radius: Radius of the shaft. By default is 0.03
+        :param tip_radius: Radius of the tip. By default is 0.1
+        :param origin_radius: Radius of the sphere drawn at the origin. By default is 0.06
+
+        :param shaft_resolution: Resolution of the shaft. By default is 10
+        :param tip_resolution: Resolution of the tip. By default is 15
+        :param origin_resolution: Resolution of the sphere drawn at the origin. By default is 15
+
+        :param shaft_color: Color of the shaft. By default is white
+        :param tip_color: Color of the tip. By default is yellow
+        :param origin_color: Color of the sphere drawn at the origin. By default is white
+
+        :rtype: VectorDrawing
+
+        The next example illustrates how to draw a vector with components sin(a), 0 and cos(a) with the
+        point 'O' as the origin point. The color of the tip is set to red.
+
+            :Example:
+
+            >>> a = new_param('a')
+            >>> v = new_vector('v', sin(a), 0, cos(a))
+            >>> drawing = draw_vector('O', v, tip_color='red')
+
+        '''
         # Validate & parse point argument
         if not isinstance(vector, (Vector3D, str)):
             raise TypeError('vector argument must be a Vector3D or str instance')
@@ -601,10 +704,57 @@ class Scene(EventProducer):
 
 
 
+    def draw_position_vector(self, a, b, **kwargs):
+        '''draw_position_vector(start: Point, end: Point, ...) -> VectorDrawing
+        Draw a vector from the point a to b
 
-    def draw_stl(self, filename, color=(1, 1, 0), scale=5):
+        :rtype: VectorDrawing
+
+        .. note::
+            This is a a shorthand for ``draw_vector(a, position_vector(a, n), ...)``
+
+            .. seealso:: :func:`draw_vector`
+            .. seealso:: :func:`position_vector`
+
+        '''
+        return self.draw_vector(a, self._system.position_vector(a, b), **kwargs)
+
+
+
+    def draw_velocity_vector(self, frame, point, **kwargs):
+        '''draw_velocity_vector(frame: Frame, point: Point, ...) -> VectorDrawing
+        Draw the velocity vector of the given point with respect the specified frame
+
+        :rtype: VectorDrawing
+
+        .. note::
+            This is a shorthand for ``draw_vector(point, velocity_vector(frame, point), ...)``
+
+            .. seealso:: :func:`draw_vector`
+            .. seealso:: :func:`velocity_vector`
+
+        '''
+        return self.draw_vector(point, self._system.velocity_vector(frame, point), **kwargs)
+
+
+
+    def draw_stl(self, filepath, color=(1, 1, 0), scale=5):
+        '''draw_stl(filepath: str, color, scale) -> Drawing3D
+        Draw the given stl model in the 3D scene.
+
+        :param filepath: Path of the stl file.
+        :param color: Color of the drawing. It can be a list of three or four numeric
+            values in the range [0, 1] to indicate the rgb or rgba components of the
+            color. It can also be a predefined color name (string)
+        :param scale: Scale of the drawing. It can be a single value or a list of three values
+            (indicating the scale on each dimension). Values can be numbers or symbolic
+            expressions
+
+        :rtype: Drawing3D
+
+        '''
         # Create STL geometry
-        geometry = read_stl(filename)
+        geometry = read_stl(filepath)
 
         # Create the drawing object
         drawing = Drawing3D(geometry)
@@ -620,15 +770,52 @@ class Scene(EventProducer):
 
 
 
-    def draw_scad(self, filename, color=(1, 1, 0), scale=5, **kwargs):
+    def draw_scad(self, filepath, color=(1, 1, 0), scale=5, **kwargs):
+        '''draw_scad(filepath: str, color, scale, ...) -> Drawing3D
+        Draws the given scad model in the 3D scene.
+
+        :param filepath: Path of the scad file.
+        :param color: Color of the drawing. It can be a list of three or four numeric
+            values in the range [0, 1] to indicate the rgb or rgba components of the
+            color. It can also be a predefined color name (string)
+        :param scale: Scale of the drawing. It can be a single value or a list of three values
+            (indicating the scale on each dimension). Values can be numbers or symbolic
+            expressions
+
+        :rtype: Drawing3D
+
+        You can parametrize the scad model by specifything extra keyword arguments.
+        The next example draws the scad file 'Arm.scad' (included in the four_bar example)
+        setting the parameter ``n_facets`` to 20
+
+            :Example:
+
+            >>> drawing = draw_scad('Arm.scad', n_facets=20)
+
+        '''
         # Convert the scad file to a stl
-        stl_filename = scad_to_stl(filename, **kwargs)
-        return self.draw_stl(stl_filename, color, scale)
+        stl_filename = scad_to_stl(filepath, **kwargs)
+        return self.draw_stl(filepath, color, scale)
 
 
 
 
     def draw_solid(self, solid, **kwargs):
+        '''draw_solid(solid: Solid, ...) -> Drawing3D
+        Draws the given solid in the 3D scene. A stl file in the working directory with
+        the same name as the solid must exist.
+
+        :param solid: Is the solid to be drawn
+        :type solid: Solid, str
+
+        :rtype: Drawing3D
+
+        .. note::
+            This is a shorthand for ``draw_stl(solid.get_name() + '.stl', ...)``
+
+            .. seealso:: :func:`draw_stl`
+
+        '''
         # Validate & parse point argument
         if not isinstance(solid, (Solid, str)):
             raise TypeError('solid argument must be a Vector3D or str instance')
@@ -646,15 +833,26 @@ class Scene(EventProducer):
 
 
 
-    def draw_position_vector(self, a, b, **kwargs):
-        return self.draw_vector(a, self._system.position_vector(a, b), **kwargs)
 
+    def draw_text(self, **kwargs):
+        '''draw_text(text: str, position, color, font_size) -> TextDrawing
+        Draws text in the screen
 
-    def draw_velocity_vector(self, frame, point, **kwargs):
-        return self.draw_vector(point, self._system.velocity_vector(frame, point), **kwargs)
+        :param text: The text to be drawn.
+        :param position: The position (two numbers) in which text should appear in normalized
+            screen coordinates (in the range 0 to 1). By default is (0, 0)
+        :param color: Color of the text. It can be a list of three or four numeric
+            values in the range [0, 1] to indicate the rgb or rgba components of the
+            color. It can also be a predefined color name (string)
 
+        :param font_size: Size of the font. By defaut is 20
+        :param font_family: Font family. Must be 'courier', 'times' or 'arial'
+        :param bold: If True, set bold text mode on
+        :param italic: If True, set italic text mode on
 
-    def draw_text(self, *args, **kwargs):
+        :rtype: TextDrawing
+
+        '''
         drawing = TextDrawing(*args, **kwargs)
         self.add_drawing(drawing)
         return drawing

@@ -225,7 +225,8 @@ class TextDrawing(Drawing2D):
 
     ######## Constructor ########
 
-    def __init__(self, text='', position=(0, 0), color=(0, 0, 0), font_size=20):
+    def __init__(self, text='', position=(0, 0), color=(0, 0, 0),
+        font_size=20, font_family='courier', bold=False, italic=False):
         actor = vtkTextActor()
         super().__init__(actor, position)
 
@@ -233,10 +234,14 @@ class TextDrawing(Drawing2D):
         self._color.set(color)
         actor.SetInput(text)
         text_prop = actor.GetTextProperty()
-        text_prop.SetFontSize(font_size)
         text_prop.SetJustificationToLeft()
         text_prop.SetVerticalJustificationToBottom()
         text_prop.SetFontFamilyToCourier()
+
+        self.set_font_size(font_size)
+        self.set_font_family(font_family)
+        self.set_bold(bold)
+        self.set_italic(italic)
 
 
 
