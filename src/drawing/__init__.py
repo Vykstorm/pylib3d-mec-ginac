@@ -15,8 +15,7 @@ __all__ = [
     # stl & scad utilities
     'read_stl', 'write_stl', 'scad2stl', 'scad_to_stl',
     # Other utility classes
-    'Timer', 'OneShotTimer', 'Transform', 'EventProducer',
-
+    'Transform',
     # viewer functions
     'get_viewer', 'show_viewer', 'close_viewer', 'get_selected_drawing'
 ]
@@ -32,6 +31,4 @@ from .geometry import Sphere, Cube, Cone, Cylinder, Line, LineStrip
 from .geometry import read_stl, write_stl
 from .scad import scad2stl, scad_to_stl
 from .timer import Timer, OneShotTimer
-from .color import Color
 from .transform import Transform
-from .events import EventProducer
