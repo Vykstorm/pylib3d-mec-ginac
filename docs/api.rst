@@ -31,7 +31,7 @@ API Reference
         get_coordinates_matrix, get_velocities_matrix, get_accelerations_matrix,
         get_aux_coordinates_matrix, get_aux_velocities_matrix, get_aux_accelerations_matrix,
         get_parameters_matrix, get_joint_unknowns_matrix, get_inputs_matrix,
-        get_scene, get_viewer,
+        get_scene,
         new_parameter, new_joint_unknown, new_input,
         new_coordinate, new_aux_coordinate, new_symbol,
         new_base, new_matrix, new_vector, new_tensor,
@@ -49,11 +49,11 @@ API Reference
         parameters, inputs, joint_unknowns,
         bases, matrices, vectors, tensors,
         points, frames, solids, wrenches,
-        O, abs, xyz, viewer,
+        O, abs, xyz,
         evaluate,
         autogen_latex_names,
         set_as_default,
-        scene, viewer
+        scene
 
 
 
@@ -129,14 +129,20 @@ API Reference
 
 .. autoclass:: Scene
     :members:
-        get_viewer,
         is_simulation_running, is_simulation_paused, is_simulation_stopped,
         get_simulation_update_frequency, get_simulation_time_multiplier,
+        get_simulation_real_update_frequency,
+        get_drawings, get_2D_drawings, get_3D_drawings,
+        get_background_color, get_render_mode,
         set_simulation_update_frequency, set_simulation_time_multiplier,
+        set_background_color, set_render_mode,
         start_simulation, stop_simulation, resume_simulation, pause_simulation,
-        are_drawings_shown, show_drawings, hide_drawings,
         purge_drawings, add_drawing,
-        get_background_color, set_background_color
+        draw_point, draw_frame, draw_vector, draw_stl, draw_scad, draw_solid,
+        draw_position_vector, draw_velocity_vector,
+        draw_text,
+        background_color, render_mode
+
 
 
 
@@ -148,10 +154,9 @@ API Reference
 
 
 
-
 .. autoclass:: Drawing3D
     :members:
-        get_geometry, set_geometry, get_actor,
+        get_geometry, set_geometry,
         get_transform, set_transform, clear_transform,
         rotate, scale, translate, rotate_to_dir,
         show, hide,
@@ -160,30 +165,11 @@ API Reference
 
 
 
-.. autoclass:: Timer
-    :members:
-        get_callback, get_time_interval, is_one_shot,
-        is_active, is_alive, is_death, is_running, is_paused,
-        start, resume, pause, kill,
-        set_time_interval
-
-
-
-.. autoclass:: OneShotTimer
-    :members:
-
-
-.. autoclass:: Color
-
-
 .. autoclass:: Transform
     :members:
         evaluate, concatenate,
         identity, translation, rotation, scale, rotation_from_dir,
         __and__
-
-.. autoclass:: ComposedTransform
-    :members:
 
 
 
@@ -240,6 +226,6 @@ Mathematic functions
 
 
 Drawing utility functions
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: scad_to_stl
