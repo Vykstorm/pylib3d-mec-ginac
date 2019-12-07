@@ -136,3 +136,16 @@ class JupyterClient(ipykernel.kernelbase.Kernel, Client):
             # Code is invalid
             response['status'] = 'invalid'
         return response
+
+
+
+    def do_complete(self, source, pos):
+        results = self.autocomplete(source)
+        response = {
+            'matches': results,
+            'cursor_start': 0,
+            'cursor_end': pos,
+            'metadata': {},
+            'status': 'ok'
+        }
+        return response
