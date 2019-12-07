@@ -533,7 +533,7 @@ class Scene(EventProducer):
 
 
 
-    def draw_point(self, point, scale=1, *args, **kwargs):
+    def draw_point(self, point, scale=1, **kwargs):
         # Validate & parse point argument
         if not isinstance(point, (Point, str)):
             raise TypeError('Input argument must be a Point or str instance')
@@ -541,7 +541,7 @@ class Scene(EventProducer):
             point = self._system.get_point(point)
 
         # Create a point drawing
-        drawing = PointDrawing(*args, **kwargs)
+        drawing = PointDrawing(**kwargs)
 
         # Setup drawing transformation
         drawing.scale(scale)
@@ -554,7 +554,7 @@ class Scene(EventProducer):
 
 
 
-    def draw_frame(self, frame, scale=1, *args, **kwargs):
+    def draw_frame(self, frame, scale=1, **kwargs):
         # Validate & parse point argument
         if not isinstance(frame, (Frame, str)):
             raise TypeError('Input argument must be a Point or str instance')
@@ -562,7 +562,7 @@ class Scene(EventProducer):
             frame = self._system.get_frame(frame)
 
         # Create a frame drawing
-        drawing = FrameDrawing(*args, **kwargs)
+        drawing = FrameDrawing(**kwargs)
 
         # Setup drawing transformation
         drawing.scale(scale)
@@ -575,7 +575,7 @@ class Scene(EventProducer):
 
 
 
-    def draw_vector(self, point, vector, *args, **kwargs):
+    def draw_vector(self, point, vector, **kwargs):
         # Validate & parse point argument
         if not isinstance(vector, (Vector3D, str)):
             raise TypeError('vector argument must be a Vector3D or str instance')
@@ -588,7 +588,7 @@ class Scene(EventProducer):
             point = self._system.get_point(point)
 
         # Create a vector drawing
-        drawing = VectorDrawing(*args, **kwargs)
+        drawing = VectorDrawing(**kwargs)
 
         # Setup drawing transformation
         self._apply_vector_transform(drawing, vector)
@@ -628,7 +628,7 @@ class Scene(EventProducer):
 
 
 
-    def draw_solid(self, solid, *args, **kwargs):
+    def draw_solid(self, solid, **kwargs):
         # Validate & parse point argument
         if not isinstance(solid, (Solid, str)):
             raise TypeError('solid argument must be a Vector3D or str instance')
@@ -637,7 +637,7 @@ class Scene(EventProducer):
             solid = self._system.get_solid(solid)
 
         # Create the drawing
-        drawing = self.draw_stl(solid.get_name() + '.stl', *args, **kwargs)
+        drawing = self.draw_stl(solid.get_name() + '.stl', **kwargs)
 
         # Setup drawing transformation
         self._apply_point_transform(drawing, solid.get_point())
@@ -646,18 +646,19 @@ class Scene(EventProducer):
 
 
 
-    def draw_position_vector(self, a, b, *args, **kwargs):
-        return self.draw_vector(a, self._system.position_vector(a, b), *args, **kwargs)
+    def draw_position_vector(self, a, b, **kwargs):
+        return self.draw_vector(a, self._system.position_vector(a, b), **kwargs)
 
 
-    def draw_velocity_vector(self, frame, point):
-        return self.draw_vector(point, self._system.velocity_vector(frame, point))
+    def draw_velocity_vector(self, frame, point, **kwargs):
+        return self.draw_vector(point, self._system.velocity_vector(frame, point), **kwargs)
 
 
     def draw_text(self, *args, **kwargs):
         drawing = TextDrawing(*args, **kwargs)
         self.add_drawing(drawing)
         return drawing
+
 
 
 
