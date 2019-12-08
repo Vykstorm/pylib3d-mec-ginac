@@ -64,7 +64,7 @@ class Scene(EventProducer):
         self.add_child(self._background_color)
         self._update_background_color()
 
-        # Listen for events
+        # Listen for simulation events
         self.add_event_handler(self._on_render_mode_changed, 'render_mode_changed')
         self._simulation.add_event_handler(self._on_simulation_step, 'simulation_step')
         self._simulation.add_event_handler(self._on_simulation_started, 'simulation_started')
@@ -72,10 +72,14 @@ class Scene(EventProducer):
         self._simulation.add_event_handler(self._on_simulation_resumed, 'simulation_resumed')
         self._simulation.add_event_handler(self._on_simulation_paused, 'simulation_paused')
 
-
+        # Refresh background color when changed
         self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
         self.add_event_handler(self._on_object_entered, 'object_entered')
         self.add_event_handler(self._on_object_exit, 'object_exit')
+
+        # Listen for drawing select events
+        self.add_event_handler(self._on_drawing_selected, 'selected')
+        self.add_event_handler(self._on_drawing_unselected, 'unselected')
 
 
         # Add simulation info text display
@@ -178,6 +182,18 @@ class Scene(EventProducer):
     def _on_background_color_changed(self, *args, **kwargs):
         # This method is called whenever the background color is changed
         self._update_background_color()
+
+
+
+    def _on_drawing_selected(self, event_type, source, *args, **kwargs):
+        # This is invoked when a 3D drawing is selected
+        self._update_drawings_display_info()
+
+
+
+    def _on_drawing_unselected(self, event_type, source, *args, **kwargs):
+        # This is invoked when a 3D drawing is unselected
+        self._update_drawings_display_info()
 
 
 
@@ -810,7 +826,7 @@ class Scene(EventProducer):
 
 
 
-    def draw_solid(self, solid, **kwargs):
+    def draw_solid(self, solid, color=(1, 1, 0), scale=5):
         '''draw_solid(solid: Solid, ...) -> Drawing3D
         Draws the given solid in the 3D scene. A stl file in the working directory with
         the same name as the solid must exist.
@@ -834,7 +850,7 @@ class Scene(EventProducer):
             solid = self._system.get_solid(solid)
 
         # Create the drawing
-        drawing = self._draw_stl(SolidDrawing, solid.get_name() + '.stl', solid)
+        drawing = self._draw_stl(SolidDrawing, solid.get_name() + '.stl', color, scale, solid)
 
         # Setup drawing transformation
         self._apply_point_transform(drawing, solid.get_point())

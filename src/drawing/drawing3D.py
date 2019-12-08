@@ -477,7 +477,7 @@ class VectorDrawing(Drawing3D):
                 direction=(0, 1, 0), center=(0, shaft_size+tip_size/2, 0)
             )
         )
-        origin = PointDrawing(radius=origin_radius, resolution=origin_resolution, color=origin_color)
+        origin = PointDrawing(None, radius=origin_radius, resolution=origin_resolution, color=origin_color)
 
         # Setup drawings properties
         shaft.set_color(shaft_color)
