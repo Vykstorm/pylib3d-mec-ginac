@@ -162,17 +162,21 @@ class VtkViewer(EventProducer):
             drawing = scene._get_3D_drawing_by_handler(picker.GetActor())
             # Select the drawing clicked (and unselect the previous selected drawing if any)
             with self:
+                prev_selected_drawing = self._selected_drawing
+
                 if drawing is not None:
                     if self._selected_drawing != drawing:
-                        if self._selected_drawing is not None:
-                            self._selected_drawing.unselect()
-                        drawing.select()
+                        self._selected_drawing = None
+                        if prev_selected_drawing is not None:
+                            prev_selected_drawing.unselect()
                         self._selected_drawing = drawing
+                        drawing.select()
                 else:
                     # User clicker to the screen but it didnt select anything
-                    if self._selected_drawing is not None:
-                        self._selected_drawing.unselect()
+                    if prev_selected_drawing is not None:
                         self._selected_drawing = None
+                        prev_selected_drawing.unselect()
+
 
         interactor.AddObserver(vtkCommand.LeftButtonPressEvent, click_event_handler)
 

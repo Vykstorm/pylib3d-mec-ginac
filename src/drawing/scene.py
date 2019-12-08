@@ -6,9 +6,9 @@ Description: This file defines the class Scene
 ######## Import statements ########
 
 # standard imports
-from operator import methodcaller, eq
+from operator import methodcaller, eq, add, itemgetter
 from functools import partial
-from itertools import chain
+from itertools import chain, starmap
 
 # imports from other modules
 from .events import EventProducer
@@ -20,6 +20,9 @@ from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
 # vtk imports
 from vtk import vtkRenderer
+
+# third party imports
+from tabulate import tabulate
 
 
 
@@ -213,10 +216,77 @@ class Scene(EventProducer):
 
     def _update_drawings_display_info(self):
         display = self._drawings_display_info
-        lines = [
-            #'object name: '
-        ]
-        display.text = '\n'.join(lines)
+
+        # Get current selected drawing
+        selected = get_selected_drawing()
+
+        text = ''
+        if selected is not None:
+            # If any drawing is currently selected...
+            info = []
+            if isinstance(selected, PointDrawing):
+                point = selected.point
+                if point != self._system.O:
+                    position = point.position
+                    text += f'point {point.name} \n'
+                    info.extend([
+                        ['x', position.x],
+                        ['y', position.y],
+                        ['z', position.z],
+                        ['base', position.base.name]
+                    ])
+                else:
+                    text += f'origin point'
+
+            elif isinstance(selected, VectorDrawing):
+                vector = selected.vector
+                if isinstance(selected, PositionVectorDrawing):
+                    a, b = selected.start_point, selected.end_point
+                    text += f'position vector ({a.name} -> {b.name}) \n'
+                elif isinstance(selected, VelocityVectorDrawing):
+                    frame, point = selected.frame, selected.point
+                    text += f'velocity vector of {point.name} with respect {frame.name} \n'
+                else:
+                    text += f'vector {vector.name}'
+                info.extend([
+                    ['x', vector.x],
+                    ['y', vector.y],
+                    ['z', vector.z],
+                    ['base', vector.base.name]
+                ])
+
+            elif isinstance(selected, FrameDrawing):
+                frame = selected.frame
+                text += f'frame {frame.name} \n'
+                info.extend([
+                    ['point', frame.point.name],
+                    ['scale', frame.scale],
+                    ['base', frame.base.name]
+                ])
+
+            elif isinstance(selected, SolidDrawing):
+                solid = selected.solid
+                text += f'solid {solid.name} \n'
+                info.extend([
+                    ['point', solid.point.name],
+                    ['base', solid.base.name],
+                    ['mass', f'{solid.mass.name} = {solid.mass.value}'],
+                    ['CM', solid.CM.name],
+                    ['IT', solid.IT.name]
+                ])
+
+            if info:
+                def fixedlen(s, n):
+                    if len(s) < n-4:
+                        return s
+                    return s[:n-4] + ' ...'
+                # Display selected object info as tabular data
+                info = zip(map(itemgetter(0), info), map(partial(fixedlen, n=50), map(str, map(itemgetter(1), info))))
+                text += tabulate(info, headers=(), tablefmt='orgtbl', colalign=['left', 'right'])
+
+        # Update displayed text
+        display.text = text
+
 
 
 
@@ -737,6 +807,15 @@ class Scene(EventProducer):
             .. seealso:: :func:`position_vector`
 
         '''
+        if not isinstance(a, (Point, str)):
+            raise TypeError('a must be a Point or str object')
+        if not isinstance(b, (Point, str)):
+            raise TypeError('b must be a Point or str object')
+        if isinstance(a, str):
+            a = self._system.get_point(a)
+        if isinstance(b, str):
+            b = self._system.get_point(b)
+
         return self._draw_vector(PositionVectorDrawing, a, self._system.position_vector(a, b), a, b, **kwargs)
 
 
@@ -751,7 +830,16 @@ class Scene(EventProducer):
             .. seealso:: :func:`draw_vector`
             .. seealso:: :func:`velocity_vector`
         '''
-        return self.draw_vector(point, self._system.velocity_vector(frame, point), frame, point, **kwargs)
+        if not isinstance(frame, (Frame, str)):
+            raise TypeError('frame must be a Frame or str object')
+        if not isinstance(point, (Point, str)):
+            raise TypeError('point must be a Point or str object')
+        if isinstance(frame, str):
+            frame = self._system.get_frame(frame)
+        if isinstance(point, str):
+            point = self._system.get_point(point)
+
+        return self._draw_vector(VelocityVectorDrawing, point, self._system.velocity_vector(frame, point), frame, point, **kwargs)
 
 
 
@@ -927,3 +1015,4 @@ from .drawing import Drawing
 from .drawing2D import *
 from .drawing3D import *
 from .geometry import Geometry, read_stl
+from .viewer import get_selected_drawing
