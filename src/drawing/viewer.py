@@ -147,12 +147,14 @@ class VtkViewer(EventProducer):
             scene = self.get_scene()
             renderer = scene._renderer
 
+            # Get mouse click position
             x, y = interactor.GetEventPosition()
             picker = vtkPropPicker()
+            # Get the 3D model which is clicked
             picker.Pick(x, y, 0, renderer)
+            # Get the drawing attached to the 3D model clicked
             drawing = scene._get_3D_drawing_by_handler(picker.GetActor())
-
-
+            # Select the drawing clicked (and unselect the previous selected drawing if any)
             with self:
                 if drawing is not None:
                     if self._selected_drawing != drawing:
