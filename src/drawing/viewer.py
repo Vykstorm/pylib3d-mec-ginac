@@ -126,8 +126,14 @@ class VtkViewer(EventProducer):
 
         # Create a repeating timer which redraws the scene and sleeps the event loop thread half
         # of the time to release the GIL
+        def timer_event_handler(*args, **kwargs):
+            self._update()
+            # Sleep the main thread to free the GIL for a while
+            sleep(0.02)
+
+
         interactor.CreateRepeatingTimer(10)
-        interactor.AddObserver(vtkCommand.TimerEvent, lambda *args, **kwargs: self._update())
+        interactor.AddObserver(vtkCommand.TimerEvent, timer_event_handler)
 
         # Add an event handler which is invoked when the window is modified. This will trigger the event
         # 'resized' when the viewport size is changed
@@ -357,9 +363,6 @@ class VtkViewer(EventProducer):
                 if self._redraw_request:
                     self._interactor.Render()
                 self._redraw_request = False
-        # Sleep the main thread to free the GIL for a while
-        sleep(0.02)
-
 
     def _redraw(self):
         # Redraw the 3d objects and update the view
