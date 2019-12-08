@@ -581,7 +581,7 @@ class Scene(EventProducer):
             point = self._system.get_point(point)
 
         # Create a point drawing
-        drawing = PointDrawing(**kwargs)
+        drawing = PointDrawing(point, **kwargs)
 
         # Setup drawing transformation
         drawing.scale(scale)
@@ -633,11 +633,37 @@ class Scene(EventProducer):
             frame = self._system.get_frame(frame)
 
         # Create a frame drawing
-        drawing = FrameDrawing(**kwargs)
+        drawing = FrameDrawing(frame, **kwargs)
 
         # Setup drawing transformation
         drawing.scale(scale)
         self._apply_point_transform(drawing, frame.get_point())
+
+        # Add the drawing to the scene
+        self.add_drawing(drawing)
+
+        return drawing
+
+
+
+    def _draw_vector(self, cls, point, vector, *args, **kwargs):
+        # Validate & parse point argument
+        if not isinstance(vector, (Vector3D, str)):
+            raise TypeError('vector argument must be a Vector3D or str instance')
+        if not isinstance(point, (Point, str)):
+            raise TypeError('point argument must be a Point or str instance')
+
+        if isinstance(vector, str):
+            vector = self._system.get_vector(vector)
+        if isinstance(point, str):
+            point = self._system.get_point(point)
+
+        # Create a vector drawing
+        drawing = cls(vector, *args, **kwargs)
+
+        # Setup drawing transformation
+        self._apply_vector_transform(drawing, vector)
+        self._apply_point_transform(drawing, point)
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
@@ -679,62 +705,58 @@ class Scene(EventProducer):
             >>> drawing = draw_vector('O', v, tip_color='red')
 
         '''
-        # Validate & parse point argument
-        if not isinstance(vector, (Vector3D, str)):
-            raise TypeError('vector argument must be a Vector3D or str instance')
-        if not isinstance(point, (Point, str)):
-            raise TypeError('point argument must be a Point or str instance')
+        return self._draw_vector(VectorDrawing, point, vector, **kwargs)
 
-        if isinstance(vector, str):
-            vector = self._system.get_vector(vector)
-        if isinstance(point, str):
-            point = self._system.get_point(point)
 
-        # Create a vector drawing
-        drawing = VectorDrawing(**kwargs)
+
+
+    def draw_position_vector(self, a, b, **kwargs):
+        '''draw_position_vector(start: Point, end: Point, ...) -> PositionVectorDrawing
+        Draw a vector from the point a to b
+
+        :rtype: VectorDrawing
+
+        .. note::
+            .. seealso:: :func:`draw_vector`
+            .. seealso:: :func:`position_vector`
+
+        '''
+        return self._draw_vector(PositionVectorDrawing, a, self._system.position_vector(a, b), a, b, **kwargs)
+
+
+
+    def draw_velocity_vector(self, frame, point, **kwargs):
+        '''draw_velocity_vector(frame: Frame, point: Point, ...) -> VelocityVectorDrawing
+        Draw the velocity vector of the given point with respect the specified frame
+
+        :rtype: VectorDrawing
+
+        .. note::
+            .. seealso:: :func:`draw_vector`
+            .. seealso:: :func:`velocity_vector`
+        '''
+        return self.draw_vector(point, self._system.velocity_vector(frame, point), frame, point, **kwargs)
+
+
+
+
+    def _draw_stl(self, cls, filepath, color, scale, *args, **kwargs):
+        # Create STL geometry
+        geometry = read_stl(filepath)
+
+        # Create the drawing object
+        drawing = cls(*args, **kwargs)
+        drawing.set_geometry(geometry)
+        drawing.set_color(color)
 
         # Setup drawing transformation
-        self._apply_vector_transform(drawing, vector)
-        self._apply_point_transform(drawing, point)
+        drawing.scale(scale)
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
 
         return drawing
 
-
-
-    def draw_position_vector(self, a, b, **kwargs):
-        '''draw_position_vector(start: Point, end: Point, ...) -> VectorDrawing
-        Draw a vector from the point a to b
-
-        :rtype: VectorDrawing
-
-        .. note::
-            This is a a shorthand for ``draw_vector(a, position_vector(a, n), ...)``
-
-            .. seealso:: :func:`draw_vector`
-            .. seealso:: :func:`position_vector`
-
-        '''
-        return self.draw_vector(a, self._system.position_vector(a, b), **kwargs)
-
-
-
-    def draw_velocity_vector(self, frame, point, **kwargs):
-        '''draw_velocity_vector(frame: Frame, point: Point, ...) -> VectorDrawing
-        Draw the velocity vector of the given point with respect the specified frame
-
-        :rtype: VectorDrawing
-
-        .. note::
-            This is a shorthand for ``draw_vector(point, velocity_vector(frame, point), ...)``
-
-            .. seealso:: :func:`draw_vector`
-            .. seealso:: :func:`velocity_vector`
-
-        '''
-        return self.draw_vector(point, self._system.velocity_vector(frame, point), **kwargs)
 
 
 
@@ -753,20 +775,8 @@ class Scene(EventProducer):
         :rtype: Drawing3D
 
         '''
-        # Create STL geometry
-        geometry = read_stl(filepath)
+        return self._draw_stl(Drawing3D, filepath, color, scale)
 
-        # Create the drawing object
-        drawing = Drawing3D(geometry)
-        drawing.set_color(color)
-
-        # Setup drawing transformation
-        drawing.scale(scale)
-
-        # Add the drawing to the scene
-        self.add_drawing(drawing)
-
-        return drawing
 
 
 
@@ -824,7 +834,7 @@ class Scene(EventProducer):
             solid = self._system.get_solid(solid)
 
         # Create the drawing
-        drawing = self.draw_stl(solid.get_name() + '.stl', **kwargs)
+        drawing = self._draw_stl(SolidDrawing, solid.get_name() + '.stl', solid)
 
         # Setup drawing transformation
         self._apply_point_transform(drawing, solid.get_point())
@@ -898,6 +908,6 @@ class Scene(EventProducer):
 
 # This imports are moved here to avoid circular dependencies
 from .drawing import Drawing
-from .drawing2D import Drawing2D, TextDrawing
-from .drawing3D import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .drawing2D import *
+from .drawing3D import *
 from .geometry import Geometry, read_stl
