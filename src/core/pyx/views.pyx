@@ -40,7 +40,7 @@ class SymbolsTableView(TableView):
             data = [(symbol.name, symbol.type, symbol.value) for symbol in system._get_symbols()]
             headers = ['name', 'type', 'value']
         else:
-            data = [(symbol.name, symbol.value) for symbol in system._get_symbols()]
+            data = [(symbol.name, symbol.value) for symbol in system._get_symbols(kind)]
             headers = None
 
         super().__init__(
