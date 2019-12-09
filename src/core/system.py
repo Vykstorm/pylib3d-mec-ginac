@@ -11,6 +11,11 @@ from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
 from lib3d_mec_ginac_ext import *
 from ..drawing.scene import Scene
 import math
+from functools import partial
+from operator import methodcaller
+import numpy as np
+
+
 
 
 
@@ -455,6 +460,74 @@ class System(_System):
     get_aux_coords_matrix = get_aux_coordinates_matrix
     get_params_matrix = get_parameters_matrix
     get_unknowns_matrix = get_joint_unknowns_matrix
+
+
+
+
+    def get_symbols_values(self, kind):
+        '''get_symbols_values() -> SymbolsVector
+        Returns a special structure which can be used to update the numerical values of the
+        symbols of the system of the given type and can be treated as a regular numpy array:
+
+            :Example:
+
+            >>> new_param('a', 1), new_param('b', 0), new_param('c', 2)
+            >>> param_values = get_symbols_values('parameter')
+            g  9.8
+            a  1
+            b  0
+            c  2
+            >>> param_values -= 1
+            >>> param_values
+            g   8.8
+            a   0
+            b  -1
+            c   1
+            >>> param_values *= 2
+            g  17.6
+            a   0
+            b  -2
+            c   2
+        '''
+        return SymbolsVector(self, kind)
+
+
+
+    def get_coordinates_values(self):
+        return self.get_symbols_values(b'coordinate')
+
+    def get_velocities_values(self):
+        return self.get_symbols_values(b'velocity')
+
+    def get_accelerations_values(self):
+        return self.get_symbols_values(b'acceleration')
+
+    def get_aux_coordinates_values(self):
+        return self.get_symbols_values(b'aux_coordinate')
+
+    def get_aux_velocities_values(self):
+        return self.get_symbols_values(b'aux_velocity')
+
+    def get_aux_accelerations_values(self):
+        return self.get_symbols_values(b'aux_acceleration')
+
+    def get_parameters_values(self):
+        return self.get_symbols_values(b'parameter')
+
+    def get_joint_unknowns_values(self):
+        return self.get_symbols_values(b'joint_unknown')
+
+    def get_inputs_values(self):
+        return self.get_symbols_matrix(b'input')
+
+
+    get_coords_values = get_coordinates_values
+    get_aux_coords_values = get_aux_coordinates_values
+    get_params_values = get_parameters_values
+    get_unknowns_values = get_joint_unknowns_values
+
+
+
 
 
 
@@ -1698,6 +1771,93 @@ class System(_System):
 
     ######## Metamethods ########
     # TODO
+
+
+
+
+
+
+
+
+
+######## class SymbolsVector ########
+
+class SymbolsVector(np.ndarray):
+    '''
+    This is a special structure which can be used to update the numerical values of the
+    symbols of the system and can be treated as a regular numpy array:
+
+        :Example:
+
+        >>> new_param('a', 1), new_param('b', 0), new_param('c', 2)
+        >>> param_values = get_parameters_values()
+        g  9.8
+        a  1
+        b  0
+        c  2
+        >>> param_values -= 1
+        >>> param_values
+        g   8.8
+        a   0
+        b  -1
+        c   1
+        >>> param_values *= 2
+        g  17.6
+        a   0
+        b  -2
+        c   2
+
+
+    '''
+    def __new__(cls, system, kind):
+        symbols = system.get_symbols(kind).values()
+        a = np.array(np.zeros(shape=(len(symbols),), dtype=np.float64), copy=False, order='C', subok=True).view(type=SymbolsVector)
+        a._symbols, a._system, a._kind = symbols, system, kind
+        return a
+
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        def parse_input(input):
+            if input is self:
+                self.__setitem__(slice(None), list(map(methodcaller('get_value'), self._symbols)))
+                return self.view(type=np.ndarray)
+            return input
+        inputs = tuple(map(parse_input, inputs))
+        outputs = kwargs.pop('out', None)
+
+        if outputs:
+            out_args = []
+            for output in outputs:
+                out_args.append(output.view(np.ndarray) if isinstance(output, SymbolsVector) else output)
+            kwargs['out'] = tuple(out_args)
+        else:
+            outputs = (None,) * ufunc.nout
+
+
+        results = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+
+        if results is NotImplemented:
+            return NotImplemented
+
+        if ufunc.nout == 1 and outputs[0] is self:
+            output = outputs[0]
+            # Update symbol values
+            for symbol, value in zip(self._symbols, output.flat):
+                symbol.set_value(value)
+            return self
+        return results
+
+
+    def __repr__(self):
+        return SymbolsTableView(self._system, self._kind).__repr__()
+
+    def __str__(self):
+        return self.__repr__()
+
+
+
+
+
 
 
 
