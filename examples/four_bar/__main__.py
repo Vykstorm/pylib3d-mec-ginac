@@ -4,6 +4,7 @@
 
 from lib3d_mec_ginac import *
 from math import pi
+from numpy.linalg import norm, pinv
 
 
 
@@ -269,6 +270,7 @@ Dyn_Eq_eq_VP = Matrix.block(5, 1, Dyn_eq_L, ddPhi, dPhi, Phi, Extra_Dyn_Eq_eq)
 ######## Drawings ########
 
 # Generate stls from scad files
+'''
 for i in range(1, 4):
     scad2stl('Arm', f'Arm{i}',
         rod_r = 0.05*l1.value,
@@ -276,6 +278,7 @@ for i in range(1, 4):
         d     = 0.2*l1.value,
         l     = get_value(f'l{i}')
     )
+'''
 
 # Draw points, frames and bodies
 draw_frame('abs')
@@ -298,3 +301,45 @@ draw_point('B',  scale=2, color=[0, 1, 0.5])
 draw_position_vector('O', 'B', tip_color='cyan')
 draw_velocity_vector('abs', 'B', tip_color='cyan')
 draw_position_vector('OL2', 'OL3', tip_color='cyan')
+
+
+
+
+
+
+
+
+
+
+Phi_init_func = Phi_init.numeric_function
+Phi_init_q_func = Phi_init_q.numeric_function
+dPhi_init_dq_func = dPhi_init_dq.numeric_function
+
+q_values = get_coords_values()
+dq_values = get_velocities_values()
+ddq_values = get_accelerations_values()
+
+# Assembly init problem
+
+Phi_init_num = evaluate(Phi_init_func)
+while norm(Phi_init_num) > geom_eq_init_tol:
+    q_values -= geom_eq_init_relax * (pinv( evaluate(Phi_init_q_func) ) @ Phi_init_num)
+    Phi_init_num = evaluate(Phi_init_func)
+
+
+dPhi_init_dq_num = evaluate(dPhi_init_dq_func)
+dq_values += pinv(dPhi_init_dq_num) @ (evaluate(beta_init) - dPhi_init_dq_num @ dq_values)
+
+
+
+def simulation_step(*args, **kwargs):
+    global q_values, dq_values, ddq_values
+    # Euler improved integration
+    q_values += delta_t * dq_values + 0.5 * delta_t * ddq_values
+    dq_values += delta_t * ddq_values
+
+
+
+get_scene().add_event_handler(simulation_step, 'simulation_step')
+
+start_simulation()
