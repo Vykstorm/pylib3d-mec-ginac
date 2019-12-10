@@ -1811,7 +1811,7 @@ class SymbolsVector(np.ndarray):
     '''
     def __new__(cls, system, kind):
         symbols = system.get_symbols(kind).values()
-        a = np.array(np.zeros(shape=(len(symbols),), dtype=np.float64), copy=False, order='C', subok=True).view(type=SymbolsVector)
+        a = np.array(np.zeros(shape=(len(symbols),1), dtype=np.float64), copy=False, order='C', subok=True).view(type=SymbolsVector)
         a._symbols, a._system, a._kind = symbols, system, kind
         return a
 
@@ -1819,7 +1819,8 @@ class SymbolsVector(np.ndarray):
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         def parse_input(input):
             if input is self:
-                self.__setitem__(slice(None), list(map(methodcaller('get_value'), self._symbols)))
+                values = np.array(list(map(methodcaller('get_value'), self._symbols)), order='C', dtype=np.float64).reshape([-1, 1])
+                self.__setitem__(slice(None), values)
                 return self.view(type=np.ndarray)
             return input
         inputs = tuple(map(parse_input, inputs))
