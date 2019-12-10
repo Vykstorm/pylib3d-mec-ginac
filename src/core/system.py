@@ -1810,7 +1810,7 @@ class SymbolsVector(np.ndarray):
 
     '''
     def __new__(cls, system, kind):
-        symbols = system.get_symbols(kind).values()
+        symbols = system._get_symbols(kind)
         a = np.array(np.zeros(shape=(len(symbols),1), dtype=np.float64), copy=False, order='C', subok=True).view(type=SymbolsVector)
         a._symbols, a._system, a._kind = symbols, system, kind
         return a
