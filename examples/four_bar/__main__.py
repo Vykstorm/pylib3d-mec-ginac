@@ -280,6 +280,7 @@ for i in range(1, 4):
     )
 '''
 
+
 # Draw points, frames and bodies
 draw_frame('abs')
 
@@ -314,6 +315,15 @@ draw_position_vector('OL2', 'OL3', tip_color='cyan')
 Phi_init_func = Phi_init.numeric_function
 Phi_init_q_func = Phi_init_q.numeric_function
 dPhi_init_dq_func = dPhi_init_dq.numeric_function
+Phi_func = Phi.numeric_function
+Phi_q_func = Phi_q.numeric_function
+dPhi_dq_func = dPhi_dq.numeric_function
+beta_func = beta.numeric_function
+
+
+
+theta2.value, theta3.value = -pi/6, pi/3
+
 
 q_values = get_coords_values()
 dq_values = get_velocities_values()
@@ -322,6 +332,9 @@ ddq_values = get_accelerations_values()
 # Assembly init problem
 
 Phi_init_num = evaluate(Phi_init_func)
+q_values -= geom_eq_init_relax * pinv( evaluate(Phi_init_q_func) ) @ Phi_init_num
+Phi_init_num = evaluate(Phi_init_func)
+
 while norm(Phi_init_num) > geom_eq_init_tol:
     q_values -= geom_eq_init_relax * (pinv( evaluate(Phi_init_q_func) ) @ Phi_init_num)
     Phi_init_num = evaluate(Phi_init_func)
@@ -335,8 +348,22 @@ dq_values += pinv(dPhi_init_dq_num) @ (evaluate(beta_init) - dPhi_init_dq_num @ 
 def simulation_step(*args, **kwargs):
     global q_values, dq_values, ddq_values
     # Euler improved integration
-    q_values += delta_t * dq_values + 0.5 * delta_t * ddq_values
+    q_values += delta_t * (dq_values + 0.5 * delta_t * ddq_values)
     dq_values += delta_t * ddq_values
+
+    # Assembly problem (Coordinate level)
+    Phi_num = evaluate(Phi_func)
+    q_values -= geom_eq_relax *  pinv( evaluate(Phi_q_func) ) @ Phi_num
+    Phi_num = evaluate(Phi_func)
+    while norm(Phi_num) > geom_eq_tol:
+        q_values -= geom_eq_relax *  pinv( evaluate(Phi_q_func) ) @ Phi_num
+        Phi_num = evaluate(Phi_func)
+
+
+    # Assembly problem (velocity level)
+    dPhi_dq_num = evaluate(dPhi_dq_func)
+    dq_values += pinv(dPhi_dq_num) @ (evaluate(beta_func) - dPhi_dq_num @ dq_values)
+
 
 
 
