@@ -67,9 +67,47 @@ The HTML index page will be in ```docs/_build/html/index.html```
 
 If you dont want to generate documentation by hand, you can view it on [this page](http://vykstorm.pythonanywhere.com/).
 
-## Examples
+## Usage
 
-A few usage examples of this library are avaliable under the directory ```examples/```. They are python scripts & jupyter notebooks.
+To start using the library just type:
+
+```
+python -m lib3d_mec_ginac
+```
+
+This will open a python terminal and the 3D viewer which shows the mechanical system simulation.
+
+In the terminal, you can use any of the classes & methods avaliable from the public API.
+For example, you can draw the frame called ``abs``
+```python
+>>> draw_frame('abs')
+```
+
+
+This library provides a few usage examples under the directory ``examples/``
+
+
+You can test the ``four_bar`` example by typing the next line in your terminal (your working directory must be the root of this repository):
+```
+python -m lib3d_mec_ginac examples/four_bar
+```
+
+
+To run your own python script, lets say ``foo.py`` you can do:
+```
+python -m lib3d_mec_ginac foo.py
+```
+This will execute your script, open the 3D viewer and start a python interactive console.
+
+Finally, you can import this library just like a regular package:
+
+```
+python
+>>> from lib3d_mec_ginac import *
+```
+
+
+
 
 
 ## License
