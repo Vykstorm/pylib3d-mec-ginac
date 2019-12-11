@@ -45,22 +45,30 @@ Note: You can also tune ```LD_LIBRARY_PATH``` and ```CFLAGS``` to indicate where
     python -c "import lib3d_mec_ginac"
 ```
 
+-If you wish to use lib3d-mec-ginac in your jupyter notebooks, you can install the jupyter kernel for this library:
+
+```bash
+    jupyter kernelspec install src/jupyter --replace --user --name=lib3d_mec_ginac
+```
+
+
+
 
 ## Documentation
 
 Most of the classes and methods of this extension have docstrings. You can use the command ```help``` inside the Python interpreter to get information about them
 e.g:
 ```python
-from lib3d_mec_ginac import System
-help(System)
+    from lib3d_mec_ginac import System
+    help(System)
 ```
 
 Also, ```docs/``` directory contains documentation pages formatted with reStructuredText syntax. They can be rendered to html/pdf with sphinx (You need to install this library first or build the extension locally with ```python setup.py build_ext --inplace```)
 
 Use the Makefile in ```docs/``` for that task. To build html pages, you can do:
-```
-cd docs
-make html
+```bash
+    cd docs
+    make html
 ```
 The HTML index page will be in ```docs/_build/html/index.html```
 
@@ -69,10 +77,12 @@ If you dont want to generate documentation by hand, you can view it on [this pag
 
 ## Usage
 
+### Python interactive console + 3D viewer
+
 To start using the library just type:
 
-```
-python -m lib3d_mec_ginac
+```bash
+    python -m lib3d_mec_ginac
 ```
 
 This will open a python terminal and the 3D viewer which shows the mechanical system simulation.
@@ -80,32 +90,54 @@ This will open a python terminal and the 3D viewer which shows the mechanical sy
 In the terminal, you can use any of the classes & methods avaliable from the public API.
 For example, you can draw the frame called ``abs``
 ```python
->>> draw_frame('abs')
+    >>> draw_frame('abs')
 ```
+
+If you wish to execute python code from a script (lets say ``foo.py``) and then open the 3D viewer and the python interactive prompt, you can type:
+```bash
+    python -m lib3d_mec_ginac foo.py
+```
+
+### Just like a regular Python package
+
+lib3d-mec-ginac can be imported as a package from your scripts or in a normal python terminal:
+
+```
+    python
+    >>> from lib3d_mec_ginac import *
+```
+Beware that if you call ``show_viewer()`` to open the 3D viewer, your script (or the python prompt) will be blocked until the viewer is closed.
+
+
+
+### Jupyer notebook + 3D viewer
+
+Finally, you can run jupyter notebooks to define your mechanical system and visualize it in the 3D viewer.
+
+First write:
+```bash
+    python -m lib3d_mec_ginac --no-console
+```
+
+In another console type to run jupyer:
+```bash
+    jupyter notebook
+```
+Create a new python notebook and change the kernel to ``lib3d_mec_ginac``
+
+
+
+
+## Examples
 
 
 This library provides a few usage examples under the directory ``examples/``
 
 
-You can test the ``four_bar`` example by typing the next line in your terminal (your working directory must be the root of this repository):
+You can test the ``four_bar`` example easily by typing the next line in your terminal (your working directory must be the root of this repository):
+```bash
+    python -m lib3d_mec_ginac examples/four_bar
 ```
-python -m lib3d_mec_ginac examples/four_bar
-```
-
-
-To run your own python script, lets say ``foo.py`` you can do:
-```
-python -m lib3d_mec_ginac foo.py
-```
-This will execute your script, open the 3D viewer and start a python interactive console.
-
-Finally, you can import this library just like a regular package:
-
-```
-python
->>> from lib3d_mec_ginac import *
-```
-
 
 
 
