@@ -243,7 +243,7 @@ class Drawing3D(Drawing):
         '''rotate(...)
         Add a new rotation transformation to this drawing object
         '''
-        self.add_transform(Transform.rotate(*args, **kwargs))
+        self.add_transform(Transform.rotation(*args, **kwargs))
 
 
 
