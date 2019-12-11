@@ -606,7 +606,7 @@ class Scene(EventProducer):
         base = OC.get_base()
         R = system.rotation_matrix(system.xyz, base)
         T = R * OC
-        drawing.add_transform(Transform.translation(T) & Transform.rotation(R))
+        drawing.add_transform(Transform.translation(T))
 
 
     def _apply_vector_transform(self, drawing, vector):
@@ -671,8 +671,9 @@ class Scene(EventProducer):
 
         # Setup drawing transformation
         drawing.scale(scale)
-        self._apply_point_transform(drawing, point)
-
+        #self._apply_point_transform(drawing, point)
+        OC = self._system.position_vector(self._system.O, point).in_base(self._system.xyz)
+        drawing.translate(OC)
         # Add the drawing to the scene
         self.add_drawing(drawing)
 
@@ -723,7 +724,14 @@ class Scene(EventProducer):
 
         # Setup drawing transformation
         drawing.scale(scale)
-        self._apply_point_transform(drawing, frame.get_point())
+        #self._apply_point_transform(drawing, frame.get_point())
+        point = frame.get_point()
+        OC = self._system.position_vector(self._system.O, point)
+        base = OC.get_base()
+        R = self._system.rotation_matrix(self._system.xyz, base)
+        T = OC.in_base(self._system.xyz)
+        drawing.rotate(R)
+        drawing.translate(T)
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
@@ -749,7 +757,9 @@ class Scene(EventProducer):
 
         # Setup drawing transformation
         self._apply_vector_transform(drawing, vector)
-        self._apply_point_transform(drawing, point)
+        #self._apply_point_transform(drawing, point)
+        v = self._system.position_vector(self._system.O, point).in_base(self._system.xyz)
+        drawing.translate(v)
 
         # Add the drawing to the scene
         self.add_drawing(drawing)
