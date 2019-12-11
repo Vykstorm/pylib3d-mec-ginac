@@ -52,29 +52,6 @@ jupyter kernelspec install src/jupyter --replace --user --name=lib3d_mec_ginac
 ```
 
 
-
-
-## Documentation
-
-Most of the classes and methods of this extension have docstrings. You can use the command ```help``` inside the Python interpreter to get information about them
-e.g:
-```python
-from lib3d_mec_ginac import System
-help(System)
-```
-
-Also, ```docs/``` directory contains documentation pages formatted with reStructuredText syntax. They can be rendered to html/pdf with sphinx (You need to install this library first or build the extension locally with ```python setup.py build_ext --inplace```)
-
-Use the Makefile in ```docs/``` for that task. To build html pages, you can do:
-```bash
-cd docs
-make html
-```
-The HTML index page will be in ```docs/_build/html/index.html```
-
-
-If you dont want to generate documentation by hand, you can view it on [this page](http://vykstorm.pythonanywhere.com/).
-
 ## Usage
 
 ### Python interactive console + 3D viewer
@@ -124,6 +101,30 @@ In another console type to run jupyer:
 jupyter notebook
 ```
 Create a new python notebook and change the kernel to ``lib3d_mec_ginac``
+
+
+
+
+## Documentation
+
+Most of the classes and methods of this extension have docstrings. You can use the command ```help``` inside the Python interpreter to get information about them
+e.g:
+```python
+from lib3d_mec_ginac import System
+help(System)
+```
+
+Also, ```docs/``` directory contains documentation pages formatted with reStructuredText syntax. They can be rendered to html/pdf with sphinx (You need to install this library first or build the extension locally with ```python setup.py build_ext --inplace```)
+
+Use the Makefile in ```docs/``` for that task. To build html pages, you can do:
+```bash
+cd docs
+make html
+```
+The HTML index page will be in ```docs/_build/html/index.html```
+
+
+If you dont want to generate documentation by hand, you can view it on [this page](http://vykstorm.pythonanywhere.com/).
 
 
 
