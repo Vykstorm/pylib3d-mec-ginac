@@ -951,7 +951,15 @@ class Scene(EventProducer):
         drawing = self._draw_stl(SolidDrawing, solid.get_name() + '.stl', color, scale, solid)
 
         # Setup drawing transformation
-        self._apply_point_transform(drawing, solid.get_point())
+        #self._apply_point_transform(drawing, solid.get_point())
+        point = solid.get_point()
+        OC = self._system.position_vector(self._system.O, point)
+        base = OC.get_base()
+        R = self._system.rotation_matrix(self._system.xyz, base)
+        T = OC.in_base(self._system.xyz)
+        drawing.rotate(R)
+        drawing.translate(T)
+
 
         return drawing
 
