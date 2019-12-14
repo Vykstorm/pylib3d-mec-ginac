@@ -1418,7 +1418,7 @@ cdef class _System:
             raise TypeError('Input argument must be a numeric function')
 
         cdef c_symbol_numeric_list c_symbols = self._get_all_c_symbols()
-        return func(dict(zip([(<bytes>c_symbol.get_name()).decode() for c_symbol in c_symbols], [c_symbol.get_value().to_double() for c_symbol in c_symbols])))
+        return func.evaluate(dict(zip([(<bytes>c_symbol.get_name()).decode() for c_symbol in c_symbols], [c_symbol.get_value().to_double() for c_symbol in c_symbols])))
 
 
 

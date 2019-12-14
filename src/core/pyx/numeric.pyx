@@ -4,6 +4,7 @@ Description:
 This module defines the class NumericFunction
 '''
 
+from collections import deque
 
 
 
@@ -20,7 +21,7 @@ class NumericFunction:
 
     ######## Constructor ########
 
-    def __init__(self, atoms, outputs, globals=None):
+    def __init__(self, atoms, outputs, globals=None, output_arrays=None):
         '''
         Initialize the numeric function. This class is not intended to be instantiated
         by the user directly.
@@ -29,12 +30,18 @@ class NumericFunction:
             also), and values will be the expressions assigned to each atom
             (they must be non empty strings)
 
-        :param outputs: Must be a non empty list of lists representing the outputs of the numeric function.
-            All sublists may have the same number of items (at least one). Also each item must be
-            a non empty string that will be the expression to be evaluated for each output.
+
+        :param outputs: Must be a matrix with strings representing the expressions to be evaluated
+            as the outputs of the numeric function.
 
         :param globals: Additional global functions needed to evaluate the atoms or the outputs
             of the numeric function (by default only sin, cos, tan can be used)
+
+        :param output_arrays: An optional iterable (or the number) of independent preallocated numpy arrays where this numeric
+            function will store the evaluation results (for optimization purposes).
+            The first evaluation will store the result in the first array. The second in the next one
+            and so on until the list is exhausted. Then the first array will be selected again.
+
 
 
             :Example:
@@ -61,8 +68,14 @@ class NumericFunction:
         self._outputs = outputs
         self._code = None
         self._globals = globals
-        self._outputs_array = np.zeros(self.get_outputs_shape(), dtype=np.float64)
-        self._locals = {'__output__': self._outputs_array}
+
+        if output_arrays is None:
+            output_arrays = 1
+
+        if isinstance(output_arrays, int):
+            self._output_arrays = deque([np.zeros(self.get_outputs_shape(), dtype=np.float64) for i in range(0, output_arrays)])
+        else:
+            self._output_arrays = deque(output_arrays)
 
         # Compile numeric function body if needed
         if self._code is None:
@@ -170,15 +183,39 @@ class NumericFunction:
 
     ######## Function evaluation ########
 
-    def __call__(self, inputs={}):
+    def __call__(self, *args, **kwargs):
         '''
-        Evaluate this numeric function with the provided inputs.
+        This is an alias of ``evaluate``
+
+        .. seealso:: :func:`evaluate`
+
         '''
-        globals = {}
-        globals.update(self._globals)
-        globals.update(inputs)
-        exec(self._code, globals, self._locals)
-        return self._outputs_array
+        return self.evaluate(*args, **kwargs)
+
+
+
+    def evaluate(self, inputs={}):
+        '''
+        Evaluate this numeric function
+
+        :param inputs: Must be a dictionary with additional inputs for the numeric function.
+            The keys must be valid python variable names and values must be all floats.
+
+        :return: This function evaluated numerically. Returns a numpy array.
+        :rtype: np.ndarray
+
+        '''
+        output_array = self._output_arrays.popleft()
+        self._output_arrays.append(output_array)
+
+        locals = inputs
+        locals['__output__'] = output_array
+
+        exec(self._code, self._globals, locals)
+        return output_array.view()
+
+
+        
 
 
 
