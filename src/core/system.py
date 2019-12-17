@@ -42,10 +42,10 @@ class System(_System):
         self._scene = Scene(self)
 
         # This will store the symbol numeric values
-        self._symbol_values = SymbolsValuesMapping()
+        self._symbols_values = SymbolsValuesMapping()
         # Initialize predfined symbol values
         for symbol in self._get_symbols():
-            self._symbol_values.add(symbol.get_type(), symbol.get_name(), symbol._get_value())
+            self._symbols_values.add(symbol.get_type(), symbol.get_name(), symbol._get_value())
 
 
 
@@ -66,7 +66,7 @@ class System(_System):
         '''
         if not isinstance(symbol, SymbolNumeric):
             symbol = self.get_symbol(symbol)
-        return self._symbol_values[symbol.get_name()]
+        return self._symbols_values[symbol.get_name()]
 
 
 
@@ -83,7 +83,7 @@ class System(_System):
         '''
         if not isinstance(symbol, SymbolNumeric):
             symbol = self.get_symbol(symbol)
-        self._symbol_values[symbol.get_name()] = value
+        self._symbols_values[symbol.get_name()] = value
 
 
 
@@ -585,7 +585,7 @@ class System(_System):
         if isinstance(result, SymbolNumeric):
             result = (result,)
         for symbol in result:
-            self._symbol_values.add(symbol.get_type(), symbol.get_name(), symbol._get_value())
+            self._symbols_values.add(symbol.get_type(), symbol.get_name(), symbol._get_value())
         return result[0] if len(result) == 1 else result
 
 
@@ -1587,7 +1587,11 @@ class System(_System):
         :type x: NumericFunction | Matrix
 
         '''
-        return self._evaluate(x.get_numeric_function() if isinstance(x, Matrix) else x)
+        if not isinstance(x, (NumericFunction, Matrix)):
+            raise TypeError('Input argument must be a numeric function or a Matrix object')
+        if isinstance(x, Matrix):
+            x = x.get_numeric_function()
+        return x.evaluate(self)
 
 
 
@@ -1894,6 +1898,21 @@ class SymbolsValuesMapping(MutableMapping):
                 return values[index:index+size]
             except:
                 return None
+
+
+        def index(self, name):
+            offsets, names, values = self._obj._offsets, self._obj._names, self._obj._values
+            index = self._obj._names.index(name)
+
+            i, n, m = 0, len(values), len(offsets)
+
+            if m > 1:
+                while i < m-1 and offsets[i+1].index <= index:
+                    i += 1
+
+            if offsets[i].type != self._type:
+                raise ValueError
+            return index - offsets[i].index
 
 
 
