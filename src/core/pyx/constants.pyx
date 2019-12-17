@@ -8,7 +8,12 @@ Description: This module defines symbolic mathematical constants
 
 ######## Math constants ########
 
-pi = _expr_from_c(c_ex(c_sym_pi))
-catalan = _expr_from_c(c_ex(c_sym_catalan))
-euler = _expr_from_c(c_ex(c_sym_euler))
-tau = 2 * pi
+# Symbolic constants
+Pi = _expr_from_c(c_ex(c_sym_pi))
+Euler = _expr_from_c(c_ex(c_sym_euler))
+Tau = 2 * Pi
+
+# Numeric constants
+pi = math.pi
+euler = math.e
+tau = math.tau

@@ -43,13 +43,13 @@ for name in dir(_cython_ext):
     globals()[name] = obj
 
 # Add symbolic math constants
-for name in ('pi', 'euler', 'tau', 'catalan'):
-    cte = getattr(_cython_ext, name)
-    __all__.extend([name, name.upper()])
-    globals()[name] = cte
-    globals()[name.upper()] = cte
+for name in ('pi', 'euler', 'tau'):
+    sym_cte, num_cte = getattr(_cython_ext, name.title()), getattr(_cython_ext, name)
+    __all__.extend([name, name.title()])
+    globals()[name] = num_cte
+    globals()[name.title()] = sym_cte
 
-E = e = _cython_ext.euler
+E, e = _cython_ext.Euler, _cython_ext.euler
 __all__.extend(['e', 'E'])
 
 
