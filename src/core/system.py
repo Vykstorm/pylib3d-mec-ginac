@@ -1591,7 +1591,7 @@ class System(_System):
             raise TypeError('Input argument must be a numeric function or a Matrix object')
         if isinstance(x, Matrix):
             x = x.get_numeric_function()
-        return x.evaluate(self)
+        return x.evaluate(self._symbols_values.to_dict())
 
 
 
@@ -1998,6 +1998,9 @@ class SymbolsValuesMapping(MutableMapping):
             return self._values.view()
         return SymbolsValuesMapping.Section(self, kind)
 
+
+    def to_dict(self):
+        return dict(zip(self._names, map(methodcaller('item'), self._values.flat)))
 
 
 

@@ -207,15 +207,14 @@ class NumericFunction:
         '''
         output_array = self._output_arrays.popleft()
         self._output_arrays.append(output_array)
+        self._globals['__output__'] = output_array
 
         locals = inputs
-        locals['__output__'] = output_array
-
         exec(self._code, self._globals, locals)
         return output_array.view()
 
 
-        
+
 
 
 

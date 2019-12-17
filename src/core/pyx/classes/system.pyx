@@ -1409,21 +1409,6 @@ cdef class _System:
 
 
 
-
-    ######## Numeric evaluation ########
-
-
-    cpdef _evaluate(self, func):
-        if not isinstance(func, NumericFunction):
-            raise TypeError('Input argument must be a numeric function')
-
-        cdef c_symbol_numeric_list c_symbols = self._get_all_c_symbols()
-        return func.evaluate(dict(zip([(<bytes>c_symbol.get_name()).decode() for c_symbol in c_symbols], [c_symbol.get_value().to_double() for c_symbol in c_symbols])))
-
-
-
-
-
     ######## Mixin ########
 
     cpdef _set_autogen_latex_names(self, enabled):
