@@ -40,14 +40,21 @@ cdef class SymbolNumeric(Object):
     ######## Getters ########
 
 
-    cpdef double get_value(self):
+    def get_value(self):
         '''get_value() -> float
         :return: The numeric value of this symbol as a float value.
 
         :rtype: float
 
         '''
+        return self.get_owner().get_value(self)
+
+
+
+    cpdef double _get_value(self):
         return self._c_handler.get_value().to_double()
+
+
 
 
     cpdef get_tex_name(self):
@@ -99,7 +106,7 @@ cdef class SymbolNumeric(Object):
     ######## Setters ########
 
 
-    cpdef set_value(self, value):
+    def set_value(self, value):
         '''set_value(value: numeric)
         Assigns a new numeric value to this symbol.
 
@@ -107,17 +114,12 @@ cdef class SymbolNumeric(Object):
         :type value: numeric
         :raises TypeError: If value has an incorrect type
         '''
+        self.get_owner().set_value(self, value)
+
+
+    cpdef _set_value(self, value):
         self._c_handler.set_value(c_numeric(<double>_parse_numeric_value(value)))
 
-        try:
-            # Update drawings and redraw viewer scene.
-            viewer = self.get_owner().get_viewer()
-            with viewer._lock:
-                if viewer.are_drawings_shown() and ((self.get_type() != 'time') or not viewer.is_simulation_running()):
-                    viewer._update_drawings()
-                    viewer._redraw()
-        except:
-            pass
 
 
 

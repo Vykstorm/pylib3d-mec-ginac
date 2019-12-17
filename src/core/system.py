@@ -7,13 +7,16 @@ This module defines the class System
 
 ######## Import statements ########
 
-from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types
+from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types, _parse_symbol_type
 from lib3d_mec_ginac_ext import *
 from ..drawing.scene import Scene
 import math
+from collections.abc import MutableMapping
+from types import SimpleNamespace
 from functools import partial
 from operator import methodcaller
 import numpy as np
+from tabulate import tabulate
 
 
 
@@ -38,37 +41,49 @@ class System(_System):
         # Create scene visualizer (to show drawings)
         self._scene = Scene(self)
 
+        # This will store the symbol numeric values
+        self._symbol_values = SymbolsValuesMapping()
+        # Initialize predfined symbol values
+        for symbol in self._get_symbols():
+            self._symbol_values.add(symbol.get_type(), symbol.get_name(), symbol._get_value())
+
 
 
 
     ######## Get/Set symbol value ########
 
 
-    def get_value(self, name):
-        '''get_value(name: str) -> numeric
+    def get_value(self, symbol):
+        '''get_value(symbol: str | SymbolNumeric) -> numeric
         Get the value of a numeric symbol
 
-        :param str name: Name of the symbol
+        :param symbol: The symbol to get its numeric value
+        :type symbol: str, SymbolNumeric
         :return: The value of the symbol on success
         :rtype: numeric
         :raises TypeError: If input argument is not a valid symbol name
         :raises IndexError: If there is no symbol with that name in the system
         '''
-        return self.get_symbol(name).get_value()
+        if not isinstance(symbol, SymbolNumeric):
+            symbol = self.get_symbol(symbol)
+        return self._symbol_values[symbol.get_name()]
 
 
 
-    def set_value(self, name, value):
-        '''set_value(name: str, value: numeric) -> numeric
+    def set_value(self, symbol, value):
+        '''set_value(symbol: str | SymbolNumeric, value: numeric) -> numeric
         Changes the value of a numeric symbol
 
-        :param str name: Name of the symbol
+        :param symbol: The symbol to change its value
         :param value: New value for the symbol
+        :type symbol: str, SymbolNumeric
         :type value: numeric
         :raises TypeError: If input arguments have invalid types
         :raises IndexError: If there is no symbol with that name in the system
         '''
-        return self.get_symbol(name).set_value(value)
+        if not isinstance(symbol, SymbolNumeric):
+            symbol = self.get_symbol(symbol)
+        self._symbol_values[symbol.get_name()] = value
 
 
 
@@ -463,62 +478,78 @@ class System(_System):
 
 
 
-
-    def get_symbols_values(self, kind):
-        '''get_symbols_values() -> SymbolsVector
+    def get_symbols_values(self, kind=None):
+        '''get_symbols_values() -> SymbolsValuesMapping
         Returns a special structure which can be used to update the numerical values of the
-        symbols of the system of the given type and can be treated as a regular numpy array:
+        symbols of the system, and it can be treated as a regular numpy array:
+
+        :param kind: The kind of symbols. The returned value can be used to fetch or
+            set the numeric values of symbols with the given type (or any of them if it is set to None).
 
             :Example:
 
             >>> new_param('a', 1), new_param('b', 0), new_param('c', 2)
-            >>> param_values = get_symbols_values('parameter')
+            >>> get_params()
             g  9.8
             a  1
             b  0
             c  2
+            >>> p_values = get_symbols_values('parameter')
+            >>> p_values
+            array([[9.8],
+                   [1. ],
+                   [0. ],
+                   [2. ]])
             >>> param_values -= 1
             >>> param_values
-            g   8.8
-            a   0
-            b  -1
-            c   1
+            array([[ 8.8],
+                   [ 0. ],
+                   [-1. ],
+                   [ 1. ]])
             >>> param_values *= 2
+            array([[17.6],
+                   [ 0. ],
+                   [-2. ],
+                   [ 2. ]])
+            >>> get_params()
             g  17.6
             a   0
             b  -2
             c   2
+
         '''
-        return SymbolsVector(self, kind)
+        if kind is None:
+            return self._symbols_values.values()
+        return self._symbol_values.values(kind=_parse_symbol_type(kind).decode())
 
 
 
     def get_coordinates_values(self):
-        return self.get_symbols_values(b'coordinate')
+        return self.get_symbols_values('coordinate')
 
     def get_velocities_values(self):
-        return self.get_symbols_values(b'velocity')
+        return self.get_symbols_values('velocity')
 
     def get_accelerations_values(self):
-        return self.get_symbols_values(b'acceleration')
+        return self.get_symbols_values('acceleration')
 
     def get_aux_coordinates_values(self):
-        return self.get_symbols_values(b'aux_coordinate')
+        return self.get_symbols_values('aux_coordinate')
 
     def get_aux_velocities_values(self):
-        return self.get_symbols_values(b'aux_velocity')
+        return self.get_symbols_values('aux_velocity')
 
     def get_aux_accelerations_values(self):
-        return self.get_symbols_values(b'aux_acceleration')
+        return self.get_symbols_values('aux_acceleration')
 
     def get_parameters_values(self):
-        return self.get_symbols_values(b'parameter')
+        return self.get_symbols_values('parameter')
 
     def get_joint_unknowns_values(self):
-        return self.get_symbols_values(b'joint_unknown')
+        return self.get_symbols_values('joint_unknown')
 
     def get_inputs_values(self):
-        return self.get_symbols_matrix(b'input')
+        return self.get_symbols_values('input')
 
 
     get_coords_values = get_coordinates_values
@@ -549,7 +580,13 @@ class System(_System):
 
 
     def new_symbol(self, kind, *args, **kwargs):
-        return super()._new_symbol(kind, args, kwargs)
+        result = super()._new_symbol(kind, args, kwargs)
+        if isinstance(result, SymbolNumeric):
+            result = (result,)
+        for symbol in result:
+            self._symbol_values.add(symbol.get_type(), symbol.get_name(), symbol._get_value())
+        return result[0] if len(result) == 1 else result
+
 
 
 
@@ -1780,82 +1817,200 @@ class System(_System):
 
 
 
-######## class SymbolsVector ########
+######## class SymbolsValuesMapping ########
 
-class SymbolsVector(np.ndarray):
+class SymbolsValuesMapping(MutableMapping):
     '''
-    This is a special structure which can be used to update the numerical values of the
-    symbols of the system and can be treated as a regular numpy array:
+    An instance of this class is used to represent and store pairs of symbols names and their associated numeric values
+    This class implements the MutableMapping abstract interface:
+    * Its possible to find the value of a symbol using its name.
+    * You can insert new symbol name-numeric value pair using the method ``add``
+    * The function ``values()`` returns a numpy ndarray with all the symbol numeric values (the first items corresponds to
+        the values of the symbols added first to the mapping)
 
         :Example:
 
-        >>> new_param('a', 1), new_param('b', 0), new_param('c', 2)
-        >>> param_values = get_parameters_values()
-        g  9.8
-        a  1
-        b  0
-        c  2
-        >>> param_values -= 1
-        >>> param_values
-        g   8.8
-        a   0
-        b  -1
-        c   1
-        >>> param_values *= 2
-        g  17.6
-        a   0
-        b  -2
-        c   2
+        >>> m = SymbolsValuesMapping()
+        >>> m.add('parameter', 'a', 1)
+        >>> m.add('input', 'x', 1.5)
+        >>> m.add('coordinate', 'z', 0.2)
+        >>> m.add('parameter', 'b', 2)
 
-
+        >>> m['a']
+        1.0
+        >>> m['z']
+        0.2
+        >>> m['x'] = 3
+        >>> m['x']
+        3
+        >>> list(m.keys())
+        'a', 'b', 'x', 'z'
+        >>> m.values()
+        array([[1. ],
+               [2. ],
+               [1.5],
+               [0.2]])
+        >>> p_values = m.values(kind='parameter')
+        >>> p_values
+        array([[1.],
+               [2.]])
+        >>> p_values += 1
+        >>> p_values
+        array([[2.],
+               [3.]])
+        >>> m.values()
+        array([[2. ],
+               [3. ],
+               [3. ],
+               [0.2]])
     '''
-    def __new__(cls, system, kind):
-        symbols = system._get_symbols(kind)
-        a = np.array(np.zeros(shape=(len(symbols),1), dtype=np.float64), copy=False, order='C', subok=True).view(type=SymbolsVector)
-        a._symbols, a._system, a._kind = symbols, system, kind
-        return a
 
 
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        def parse_input(input):
-            if input is self:
-                values = np.array(list(map(methodcaller('get_value'), self._symbols)), order='C', dtype=np.float64).reshape([-1, 1])
-                self.__setitem__(slice(None), values)
-                return self.view(type=np.ndarray)
-            return input
-        inputs = tuple(map(parse_input, inputs))
-        outputs = kwargs.pop('out', None)
+    ######## Helper subclass ########
 
-        if outputs:
-            out_args = []
-            for output in outputs:
-                out_args.append(output.view(np.ndarray) if isinstance(output, SymbolsVector) else output)
-            kwargs['out'] = tuple(out_args)
+    class Section(np.ndarray):
+        def __new__(self, obj, type):
+            a = np.array(np.zeros(shape=(0,1), dtype=np.float64), copy=False, order='C', subok=True).view(type=SymbolsValuesMapping.Section)
+            a._obj, a._type = obj, type
+            return a
+
+        @property
+        def data(self):
+            offsets, values = self._obj._offsets, self._obj._values
+            try:
+                if not offsets:
+                    raise Exception
+
+                i, n, m = 0, len(values), len(offsets)
+                while i < m-1 and offsets[i].type != self._type:
+                    i += 1
+
+                if offsets[i].type != self._type:
+                    raise Exception
+
+                index = offsets[i].index
+                size = n-index if i == m-1 else offsets[i+1].index - index
+                return values[index:index+size]
+            except:
+                return None
+
+
+
+
+        def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+            data = self.data
+
+            def parse_op(input):
+                if input is self and data is not None:
+                    return data
+                return input
+            inputs = tuple(map(parse_op, inputs))
+            outputs = kwargs.pop('out', None)
+
+            if outputs:
+                kwargs['out'] = tuple(map(parse_op, outputs))
+            else:
+                outputs = (None,) * ufunc.nout
+
+
+            results = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+
+            if results is NotImplemented:
+                return NotImplemented
+
+            return results
+
+
+        def __repr__(self):
+            data = self.data
+            if data is not None:
+                return repr(self.data)
+            return repr(self.view(np.ndarray))
+
+        def __str__(self):
+            self.__repr__()
+
+
+
+
+
+    ######## Constructor ########
+
+    def __init__(self):
+        self._names = []
+        self._values = np.array(np.zeros(shape=(0, 1), dtype=np.float64), copy=False, order='C', subok=True)
+        self._offsets = []
+
+
+
+    ######## Operations ########
+
+    def add(self, type, name, value=0):
+        names, values, offsets = self._names, self._values, self._offsets
+
+        n, m = len(names), len(offsets)
+
+        i = 0
+        if offsets:
+            while i < m-1 and offsets[i].type != type:
+                i += 1
+
+
+        if not offsets or offsets[i].type != type:
+            offsets.append(SimpleNamespace(type=type, index=n))
+            index = n
         else:
-            outputs = (None,) * ufunc.nout
+            if i == m-1:
+                index = n
+            else:
+                i += 1
+                index = offsets[i].index
+                while i < m:
+                    offsets[i].index += 1
+                    i += 1
+
+        names.insert(index, name)
+        self._values = np.insert(values, index, value, axis=0)
 
 
-        results = super().__array_ufunc__(ufunc, method, *inputs, **kwargs)
+    def values(self, kind=None):
+        if kind is None:
+            return self._values.view()
+        return SymbolsValuesMapping.Section(self, kind)
 
-        if results is NotImplemented:
-            return NotImplemented
 
-        if ufunc.nout == 1 and outputs[0] is self:
-            output = outputs[0]
-            # Update symbol values
-            for symbol, value in zip(self._symbols, output.flat):
-                symbol.set_value(value)
-            return self
-        return results
 
+
+    ######## Metamethods ########
+
+    def __getitem__(self, name):
+        try:
+            index = self._names.index(name)
+            return self._values[index].item()
+        except ValueError:
+            raise KeyError
+
+
+    def __setitem__(self, name, value):
+        try:
+            index = self._names.index(name)
+            self._values[index] = value
+        except ValueError:
+            raise KeyError
+
+
+    def __delitem__(self, name):
+        raise NotImplementedError
+
+    def __iter__(self):
+        return iter(self._names)
+
+    def __len__(self):
+        return len(self._names)
 
     def __repr__(self):
-        return SymbolsTableView(self._system, self._kind).__repr__()
-
-    def __str__(self):
-        return self.__repr__()
-
-
+        data = list(zip(self._names, self._values.flat))
+        return tabulate(data, tablefmt='plain')
 
 
 
