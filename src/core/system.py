@@ -520,9 +520,10 @@ class System(_System):
         '''
         if kind is None:
             return self._symbols_values.values()
-        return self._symbol_values.values(kind=_parse_symbol_type(kind).decode())
+        return self._symbols_values.values(kind=_parse_symbol_type(kind).decode())
 
 
+    get_values = get_symbols_values
 
     def get_coordinates_values(self):
         return self.get_symbols_values('coordinate')
