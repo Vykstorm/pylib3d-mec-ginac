@@ -4,7 +4,8 @@ Description:
 This module defines the class NumericFunction
 '''
 
-from collections import deque
+import subprocess
+
 
 
 
@@ -21,7 +22,7 @@ class NumericFunction:
 
     ######## Constructor ########
 
-    def __init__(self, atoms, outputs, globals=None, output_arrays=None):
+    def __init__(self, atoms, outputs, system, output_arrays=None, c_optimized=False):
         '''
         Initialize the numeric function. This class is not intended to be instantiated
         by the user directly.
@@ -30,71 +31,131 @@ class NumericFunction:
             also), and values will be the expressions assigned to each atom
             (they must be non empty strings)
 
+        :param system: The system where to take the symbol values at.
 
         :param outputs: Must be a matrix with strings representing the expressions to be evaluated
             as the outputs of the numeric function.
-
-        :param globals: Additional global functions needed to evaluate the atoms or the outputs
-            of the numeric function (by default only sin, cos, tan can be used)
 
         :param output_arrays: An optional iterable (or the number) of independent preallocated numpy arrays where this numeric
             function will store the evaluation results (for optimization purposes).
             The first evaluation will store the result in the first array. The second in the next one
             and so on until the list is exhausted. Then the first array will be selected again.
 
-
-
-            :Example:
-
-            >>> func = NumericFunction(
-            >>>     atoms={'atom1': 'x ** 2', 'atom2': 'y ** 2', 'atom3': 'z ** 2'},
-            >>>     outputs=[
-            >>>         ['atom1 * x + y * z', 'atom2 * (y - z)'],
-            >>>         ['atom3 * z - 1', 'atom1 + atom3 * y + 1']
-            >>>     ]
-            >>> )
-            >>> func({'x'=1.0, 'y'=2.0, 'z'=3.0})
-            array([[ 7., -4.],
-                   [26., 20.]])
-
-
+        :param c_optimized: If True, compile this numeric function as a Cython extension.
+            Otherwise, it is compiled as a python function.
         '''
-        ## Validate input arguments
-        if globals is None:
-            globals = {'sin': math.sin, 'cos': math.cos, 'tan': math.tan}
+        # Validate & parse input arguments
+
+
+        # Parse atoms & output expressions
+        def parse_op(match):
+            op = match.group()
+            try:
+                if not op.isidentifier():
+                    raise Exception
+                if not system.has_symbol(op):
+                    raise Exception
+                symbol = system.get_symbol(op)
+                if symbol == system.get_time():
+                    raise Exception
+
+                symbol_name, symbol_type = symbol.get_name(), symbol.get_type()
+                index = system._symbols_values[symbol_type].index(symbol_name)
+                return f'{symbol_type}[{index}, 0]'
+
+            except:
+                return op
+
+        parse_expr = partial(sub, '\w+', parse_op)
+
+        # Parse atoms
+        atoms = dict(zip(atoms.keys(), map(parse_expr, atoms.values())))
+
+        # Parse outputs
+        outputs = np.matrix(outputs)
+        outputs = np.matrix(tuple(map(parse_expr, map(methodcaller('item'), outputs.flat)))).reshape(outputs.shape)
+
 
         # Initialize internal fields
         self._atoms = atoms
         self._outputs = outputs
-        self._code = None
-        self._globals = globals
+        self._system = system
+        self._c_optimized = c_optimized
 
+
+        # Preallocate output arrays
         if output_arrays is None:
             output_arrays = 1
 
         if isinstance(output_arrays, int):
-            self._output_arrays = deque([np.zeros(self.get_outputs_shape(), dtype=np.float64) for i in range(0, output_arrays)])
+            self._output_arrays = deque([np.zeros(self._outputs.shape, dtype=np.float64) for i in range(0, output_arrays)])
         else:
             self._output_arrays = deque(output_arrays)
 
-        # Compile numeric function body if needed
-        if self._code is None:
-            self._compile()
+        # Compile numeric function body
+        if self._c_optimized:
+            self._compile_cython()
+        else:
+            self._compile_python()
 
 
 
 
-    def _compile(self):
-        # This private method is used to compile the internal numeric function
+    def _compile_python(self):
+        symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
+        symbols = self._system.get_symbols()
+
+        # Parse globals
+        globals = {'sin': math.sin, 'cos': math.cos, 'tan': math.tan}
+        for symbol_type in symbol_types:
+            globals[symbol_type] = self._system.get_symbols_values(kind=symbol_type)
+
+        self._globals = globals
+
+        # This private method is used to compile the internal numeric function (unoptimized version)
         lines = [f'{name} = {value}' for name, value in self.atoms.items()]
-
-        n, m = self.outputs_shape
-        outputs = chain.from_iterable(self._outputs)
-        lines.append(f'__output__.flat = [ {", ".join( outputs )} ]')
+        lines.append(f'__output__.flat = [ {", ".join( map(str, self._outputs.flat) )} ]')
         source = '\n'.join(lines)
         self._code = compile(source, '<string>', 'exec', optimize=2)
 
 
+
+
+    def _compile_cython(self):
+        # This private method is used to compile the internal numeric function (optimized version)
+        symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
+
+        lines = []
+        args = tuple(map(partial(add, 'np.ndarray[np.float64_t, ndim=2] '), chain(symbol_types, ['__output__'])))
+
+        header = f"""
+from math import sin, cos, tan
+import numpy as np
+cimport numpy as np
+
+cpdef evaluate({', '.join(args)}):"""
+
+        body = [f'cdef np.float64_t {name} = {value}' for name, value in self.atoms.items()]
+
+        n, m = self._outputs.shape
+        for i, j in product(range(0, n), range(0, m)):
+            body.append(f'__output__[{i}, {j}] = {str(self._outputs[i, j])}')
+
+        lines.append(header)
+        lines.extend(map(partial(add, '\t'), body))
+
+        source = '\n'.join(lines)
+
+        with open('numfunc.pyx', 'w') as file:
+            file.write(source)
+
+        environ = os.environ.copy()
+        environ['CFLAGS'] = f'-I {np.get_include()}'
+        with open(os.devnull, 'w') as devnull:
+            subprocess.run(['cythonize', '-i', '-q', '-f', '-3', 'numfunc.pyx'], env=environ, stdout=devnull, stderr=devnull)
+
+        import numfunc
+        self._num_func_optimized = partial(numfunc.evaluate, *map(self._system.get_symbols_values, symbol_types))
 
 
     ######## Getters ########
@@ -120,17 +181,6 @@ class NumericFunction:
 
         '''
         return self._outputs
-
-
-    def get_outputs_shape(self):
-        '''get_outputs_shape() -> int, int
-        Get the number of rows and columns of the numpy output arrays when evaluating
-        this function.
-
-        :rtype: int, int
-
-        '''
-        return len(self._outputs), len(self._outputs[0])
 
 
 
@@ -183,18 +233,18 @@ class NumericFunction:
 
     ######## Function evaluation ########
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self):
         '''
         This is an alias of ``evaluate``
 
         .. seealso:: :func:`evaluate`
 
         '''
-        return self.evaluate(*args, **kwargs)
+        return self.evaluate()
 
 
 
-    def evaluate(self, inputs={}):
+    def evaluate(self):
         '''
         Evaluate this numeric function
 
@@ -207,10 +257,15 @@ class NumericFunction:
         '''
         output_array = self._output_arrays.popleft()
         self._output_arrays.append(output_array)
-        self._globals['__output__'] = output_array
 
-        locals = inputs
-        exec(self._code, self._globals, locals)
+        if self._c_optimized:
+            # Evaluate numeric function optimized
+            self._num_func_optimized(output_array)
+        else:
+            # Evaluate numeric function unoptimized
+            self._globals['__output__'] = output_array
+            exec(self._code, None, self._globals)
+
         return output_array.view()
 
 
@@ -239,17 +294,6 @@ class NumericFunction:
         return self.get_outputs()
 
 
-    @property
-    def outputs_shape(self):
-        '''
-        Only read property that returns the shape of the numpy output arrays
-        when evaluating this numeric function
-
-        :rtype: int, int
-
-        '''
-        return self.get_outputs_shape()
-
 
     @property
     def globals(self):
@@ -258,9 +302,3 @@ class NumericFunction:
         this numeric function
         '''
         return self.get_globals()
-
-
-
-
-
-    ######## Printing ########

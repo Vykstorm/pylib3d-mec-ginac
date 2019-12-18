@@ -90,17 +90,17 @@ from src.core.pxd.ginac.cmath cimport Pi as c_sym_pi, Catalan as c_sym_catalan, 
 ######## Python imports ########
 
 # Collections
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from collections.abc import Iterable, Mapping, Sized
 
 # Utilities
 from functools import partial, partialmethod, wraps
 from itertools import chain, starmap, repeat, product
-from operator import attrgetter
+from operator import attrgetter, methodcaller, add
 from warnings import warn
 from abc import ABC
 from types import MethodType
-from re import match, finditer
+from re import match, finditer, sub
 from inspect import Signature, Parameter
 import json
 
@@ -108,6 +108,8 @@ import json
 import math
 from math import floor
 
+# System
+import sys, os
 
 # Third party libraries
 from asciitree import LeftAligned

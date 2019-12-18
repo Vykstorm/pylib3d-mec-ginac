@@ -1409,6 +1409,35 @@ cdef class _System:
 
 
 
+
+    ######## Numeric evaluation ########
+
+
+    cpdef _get_numeric_function(self, matrix, c_optimized):
+        if not isinstance(matrix, Matrix):
+            raise TypeError('Input argument must be a Matrix')
+
+        cdef c_lst atom_lst
+        cdef c_lst expr_lst
+
+        # Optimize matrix list
+        c_matrix_list_optimize(c_deref( (<Matrix>matrix)._get_c_handler()), atom_lst, expr_lst)
+
+        # Get the list of atoms with their expressions
+        atoms = dict(zip([(<bytes>(c_ex_to[c_symbol](atom_lst.op(i))).get_name()).decode() for i in range(0, atom_lst.nops())],
+                        [_print_expr_py(_expr_from_c(expr_lst.op(i))) for i in range(0, expr_lst.nops())]))
+
+        # Get the matrix elements arranged as a list of lists (one list per row)
+        n, m = matrix.shape
+        outputs = [[_print_expr_py(matrix.get(i, j)) for j in range(0, m)] for i in range(0, n)]
+
+        # Create the numeric function
+        return NumericFunction(atoms, outputs, self, c_optimized=c_optimized)
+
+
+
+
+
     ######## Mixin ########
 
     cpdef _set_autogen_latex_names(self, enabled):

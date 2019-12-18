@@ -27,6 +27,7 @@ cdef class SymbolNumeric(Object):
 
     cdef c_symbol_numeric* _c_handler
     cdef object _owner
+    cdef object _type
 
 
 
@@ -34,7 +35,7 @@ cdef class SymbolNumeric(Object):
 
     def __cinit__(self, Py_ssize_t ptr, _System owner=None):
         self._c_handler = <c_symbol_numeric*>ptr
-        self._owner = owner
+        self._owner, self._type = owner, None
 
 
     ######## Getters ########
@@ -93,13 +94,16 @@ cdef class SymbolNumeric(Object):
         :rtype: str
 
         '''
-        owner = self.get_owner()
-        if self == owner._get_time():
-            return 'time'
-        for symbol_type in _symbol_types:
-            if self in owner._get_symbols(symbol_type):
-                return symbol_type.decode()
-        raise RuntimeError
+        if self._type is None:
+            owner = self.get_owner()
+            if self == owner._get_time():
+                return 'time'
+            for symbol_type in _symbol_types:
+                if self in owner._get_symbols(symbol_type):
+                    self._type = symbol_type.decode()
+                    return self._type
+            raise RuntimeError
+        return self._type
 
 
 
