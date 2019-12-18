@@ -14,7 +14,7 @@ from operator import methodcaller
 # Define a dummy matrix where to extract the numeric function to be evaluated.
 a, b, c, d = new_param('a', 1), new_param('b', 2), new_param('c', 3), new_param('d', 4)
 v = new_vector('v', a, b, c)
-m = v.skew * v.skew * v.skew * v.module
+m = v.skew * v.skew * v.skew * v.skew * v.skew * v.module
 func = get_numeric_function(m, c_optimized=False)
 func_optimized = get_numeric_function(m, c_optimized=True)
 
