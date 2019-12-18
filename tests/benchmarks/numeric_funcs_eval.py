@@ -15,20 +15,9 @@ from operator import methodcaller
 a, b, c, d = new_param('a', 1), new_param('b', 2), new_param('c', 3), new_param('d', 4)
 v = new_vector('v', a, b, c)
 m = v.skew * v.skew * v.skew * v.module
-func = m.get_numeric_function()
+func = get_numeric_function(m, c_optimized=False)
+func_optimized = get_numeric_function(m, c_optimized=True)
 
-
-# Print numeric function atoms & output info
-print("Numeric function atoms: ")
-atoms = func.atoms
-print( tabulate(zip(atoms.keys(), atoms.values()), tablefmt='simple', headers=()) )
-
-print("Numeric function output: ")
-outputs = func.outputs
-print('[')
-for row in outputs:
-    print(f'\t[ {", ".join(map(methodcaller("ljust", 20), row))} ]')
-print(']')
 
 
 # Print atomization state on/off and python debug mode
@@ -38,6 +27,8 @@ print()
 
 # Start benchmark & print time metrics
 print("Starting benchmark...")
-n = 50000
-result = min(timeit.repeat(lambda: evaluate(func), repeat=10, number=n)) / n
-print("Average evaluation time: {:5f} milliseconds".format(result*1000))
+n = 10000
+result = min(timeit.repeat(lambda: func.evaluate(), repeat=10, number=n)) / n
+print("Average evaluation time (unoptimized): {:5f} milliseconds".format(result*1000))
+result = min(timeit.repeat(lambda: func_optimized.evaluate(), repeat=10, number=n)) / n
+print("Average evaluation time (optimized): {:5f} milliseconds".format(result*1000))
