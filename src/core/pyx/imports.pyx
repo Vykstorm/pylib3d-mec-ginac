@@ -110,6 +110,7 @@ from math import floor
 
 # System
 import sys, os
+import subprocess
 
 # Third party libraries
 from asciitree import LeftAligned

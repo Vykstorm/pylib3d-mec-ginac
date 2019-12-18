@@ -4,7 +4,7 @@ Description:
 This module defines the class NumericFunction
 '''
 
-import subprocess
+
 
 
 
@@ -146,16 +146,16 @@ cpdef evaluate({', '.join(args)}):"""
 
         source = '\n'.join(lines)
 
-        with open('numfunc.pyx', 'w') as file:
+        with open('_numfunc.pyx', 'w') as file:
             file.write(source)
 
         environ = os.environ.copy()
         environ['CFLAGS'] = f'-I {np.get_include()}'
         with open(os.devnull, 'w') as devnull:
-            subprocess.run(['cythonize', '-i', '-q', '-f', '-3', 'numfunc.pyx'], env=environ, stdout=devnull, stderr=devnull)
+            subprocess.run(['cythonize', '-i', '-q', '-f', '-3', '_numfunc.pyx'], env=environ, stdout=devnull, stderr=devnull)
 
-        import numfunc
-        self._num_func_optimized = partial(numfunc.evaluate, *map(self._system.get_symbols_values, symbol_types))
+        import _numfunc
+        self._num_func_optimized = partial(_numfunc.evaluate, *map(self._system.get_symbols_values, symbol_types))
 
 
     ######## Getters ########
