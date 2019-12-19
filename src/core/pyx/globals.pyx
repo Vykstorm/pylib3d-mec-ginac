@@ -352,3 +352,14 @@ cpdef sqrt(x):
             x = Expr(x)
         return x ** (Expr(1)/Expr(2))
     return math.sqrt(_parse_numeric_value(x))
+
+
+
+
+######## Numeric functions ########
+
+
+def evaluate(func):
+    if not isinstance(func, NumericFunction):
+        raise TypeError('Input argument must be a numeric function')
+    return func.evaluate()
