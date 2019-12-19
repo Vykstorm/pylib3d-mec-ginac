@@ -32,6 +32,7 @@ API Reference
         get_aux_coordinates_matrix, get_aux_velocities_matrix, get_aux_accelerations_matrix,
         get_parameters_matrix, get_joint_unknowns_matrix, get_inputs_matrix,
         get_scene,
+        get_numeric_function, get_numeric_function_c_optimized,
         new_parameter, new_joint_unknown, new_input,
         new_coordinate, new_aux_coordinate, new_symbol,
         new_base, new_matrix, new_vector, new_tensor,
@@ -50,7 +51,6 @@ API Reference
         bases, matrices, vectors, tensors,
         points, frames, solids, wrenches,
         O, abs, xyz,
-        evaluate,
         autogen_latex_names,
         set_as_default,
         scene
@@ -124,7 +124,7 @@ API Reference
     :members:
         get_atoms, get_outputs, get_globals,
         load_from_file, save_to_file,
-        __call__
+        __call__, evaluate
 
 
 .. autoclass:: Scene
@@ -254,11 +254,12 @@ Global functions
 
 .. autofunction:: subs
 
+.. autofunction:: evaluate
 
 
 
-Mathematic functions
-~~~~~~~~~~~~~~~~~~~~
+Mathematical functions
+~~~~~~~~~~~~~~~~~~~~~~
 
 
 .. autofunction:: dot
