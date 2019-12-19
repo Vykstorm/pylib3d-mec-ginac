@@ -1575,7 +1575,12 @@ class System(_System):
         return self._get_numeric_function(matrix, c_optimized)
 
 
+    def get_numeric_function_c_optimized(self, matrix):
+        return self.get_numeric_function(matrix, c_optimized=True)
 
+
+    get_numeric_func = get_numeric_function
+    get_numeric_func_c_optimized = get_numeric_func_c_optimized
 
 
 
