@@ -360,6 +360,28 @@ cpdef sqrt(x):
 
 
 def evaluate(func):
+    '''
+    Evaluate the given numeric function.
+
+        :Example:
+
+        >>> disable_atomization()
+        >>> a, b, c = new_param('a', 1), new_input('b', 2), new_joint_unknown('c', 3)
+        >>> v = new_vector('v', a, b, c)
+        >>> m = v.skew * v.module
+        >>> m
+        ╭                                                                                    ╮
+        │                          0  -c*(b**2+a**2+c**2)**(1/2)   b*(b**2+a**2+c**2)**(1/2) │
+        │  c*(b**2+a**2+c**2)**(1/2)                           0  -(b**2+a**2+c**2)**(1/2)*a │
+        │ -b*(b**2+a**2+c**2)**(1/2)   (b**2+a**2+c**2)**(1/2)*a                           0 │
+        ╰                                                                                    ╯
+        >>> func = get_numeric_function(m)
+        >>> evaluate(func)
+        array([[  0.        , -11.22497216,   7.48331477],
+               [ 11.22497216,   0.        ,  -3.74165739],
+               [ -7.48331477,   3.74165739,   0.        ]])
+
+    '''
     if not isinstance(func, NumericFunction):
         raise TypeError('Input argument must be a numeric function')
     return func.evaluate()

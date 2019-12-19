@@ -1571,11 +1571,28 @@ class System(_System):
 
     def get_numeric_function(self, matrix, c_optimized=False):
         '''
+        Get a function that can be used to evaluate the given matrix numerically.
+
+        :param c_optimized: If set to True, compile the underline numeric function
+            as a cython extension. The numeric function evaluation will be faster but
+            this method will be slower (a few seconds to generate and compile the cython extension)
+            Otherwise, if its False (by default), the underline function is compiled as a
+            regular python function.
+
+        .. seealso:: :func:`evaluate`
+
         '''
         return self._get_numeric_function(matrix, c_optimized)
 
 
+
     def get_numeric_function_c_optimized(self, matrix):
+        '''
+        This is an alias of ``get_numeric_function(matrix, c_optimized=True)``
+
+        .. seealso:: :func:`get_numeric_function`
+
+        '''
         return self.get_numeric_function(matrix, c_optimized=True)
 
 
