@@ -360,7 +360,7 @@ cpdef sqrt(x):
 
 
 def evaluate(func):
-    '''
+    '''evaluate(func: NumericFunction) -> np.ndarray
     Evaluate the given numeric function.
 
         :Example:
