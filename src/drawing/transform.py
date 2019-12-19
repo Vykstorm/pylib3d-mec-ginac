@@ -32,10 +32,9 @@ class Transform:
 
         if isinstance(matrix, np.ndarray):
             matrix = np.array(matrix, copy=False, dtype=np.float64, order='C')
-            self._evaluate = lambda system: matrix
         else:
-            numeric_func = matrix.get_numeric_function()
-            self._evaluate = lambda system: system.evaluate(numeric_func)
+            self._system, self._numeric_func = None, None
+
         self._matrix = matrix
 
 
@@ -44,7 +43,13 @@ class Transform:
         '''evaluate(system: System) -> ndarray
         Evaluate this transformation numerically. Return a numpy array of size 4x4
         '''
-        return self._evaluate(system)
+        if isinstance(self._matrix, np.ndarray):
+            return self._matrix.view()
+        else:
+            if self._numeric_func is None or self._system is not system:
+                self._system, self._numeric_func = system, system.get_numeric_function(self._matrix)
+            return self._numeric_func.evaluate()
+
 
 
     @property
@@ -397,15 +402,17 @@ class Transform:
 
         # This can be optimized!
         direction = Matrix(m)
-        func = direction.get_numeric_function()
-
 
         class RotationFromDirTransform(Transform):
             def __init__(self):
-                pass
+                self._system, self._numeric_func = None, None
 
             def evaluate(self, system):
-                dx, dy, dz = system.evaluate(func).flat
+                if self._numeric_func is None or self._system is not system:
+                    self._system, self._numeric_func = system, system.get_numeric_function(direction)
+
+
+                dx, dy, dz = self._numeric_func.evaluate().flat
                 m = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
                 if m == 0:
                     # If the direction module has zero module, just return the identity matrix
