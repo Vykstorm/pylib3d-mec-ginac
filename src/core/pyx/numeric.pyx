@@ -102,20 +102,22 @@ class NumericFunction:
 
 
     def _compile_python(self):
+        # This private method is used to compile the internal numeric function (unoptimized version)
         symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
         symbols = self._system.get_symbols()
 
-        # Parse globals
+        # Global variables to be used when evaluating the numeric function
         globals = {'sin': math.sin, 'cos': math.cos, 'tan': math.tan}
         for symbol_type in symbol_types:
             globals[symbol_type] = self._system.get_symbols_values(kind=symbol_type)
-
         self._globals = globals
 
-        # This private method is used to compile the internal numeric function (unoptimized version)
+        # Generate the source code to eval the numeric function
         lines = [f'{name} = {value}' for name, value in self.atoms.items()]
         lines.append(f'__output__.flat = [ {", ".join( map(str, self._outputs.flat) )} ]')
         source = '\n'.join(lines)
+
+        # Compile the code
         self._code = compile(source, '<string>', 'exec', optimize=2)
 
 
@@ -123,39 +125,51 @@ class NumericFunction:
 
     def _compile_cython(self):
         # This private method is used to compile the internal numeric function (optimized version)
+
         symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
 
-        lines = []
+        ## Generate cython source code
         args = tuple(map(partial(add, 'np.ndarray[np.float64_t, ndim=2] '), chain(symbol_types, ['__output__'])))
 
-        header = f"""
-from math import sin, cos, tan
-import numpy as np
-cimport numpy as np
+        # Imports & function signature
+        header = [
+            'cimport cython',
+            'from math import sin, cos, tan',
+            'import numpy as np',
+            'cimport numpy as np',
+            '@cython.boundscheck(False)',
+            '@cython.wraparound(False)',
+            f'cpdef evaluate({", ".join(args)}):'
+        ]
 
-cpdef evaluate({', '.join(args)}):"""
-
+        # Body of the numeric function
         body = [f'cdef np.float64_t {name} = {value}' for name, value in self.atoms.items()]
 
         n, m = self._outputs.shape
         for i, j in product(range(0, n), range(0, m)):
             body.append(f'__output__[{i}, {j}] = {str(self._outputs[i, j])}')
 
-        lines.append(header)
+        # Put all together
+        lines = []
+        lines.extend(header)
         lines.extend(map(partial(add, '\t'), body))
-
         source = '\n'.join(lines)
 
+        # Save the source code in a external file
         with open('_numfunc.pyx', 'w') as file:
             file.write(source)
 
+        # Call a subprocess to generate the cython extension
         environ = os.environ.copy()
         environ['CFLAGS'] = f'-I {np.get_include()}'
         with open(os.devnull, 'w') as devnull:
             subprocess.run(['cythonize', '-i', '-q', '-f', '-3', '_numfunc.pyx'], env=environ, stdout=devnull, stderr=devnull)
 
+        # Import the function from the extension
         import _numfunc
         self._num_func_optimized = partial(_numfunc.evaluate, *map(self._system.get_symbols_values, symbol_types))
+
+
 
 
     ######## Getters ########
