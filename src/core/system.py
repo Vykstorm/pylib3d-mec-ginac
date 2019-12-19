@@ -1597,7 +1597,7 @@ class System(_System):
 
 
     get_numeric_func = get_numeric_function
-    get_numeric_func_c_optimized = get_numeric_func_c_optimized
+    get_numeric_func_c_optimized = get_numeric_function_c_optimized
 
 
 
