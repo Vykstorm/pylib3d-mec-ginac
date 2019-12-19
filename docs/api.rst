@@ -74,7 +74,6 @@ API Reference
         __iter__, __reversed__,
         set,
         transpose, subs,
-        get_numeric_function, get_numeric_func,
         shape, num_rows, num_cols, size, T, transposed, values,
         numeric_function, numeric_func,
         eye, xrot, yrot, zrot

@@ -982,37 +982,6 @@ cdef class Matrix(Object):
 
 
 
-    @property
-    def numeric_function(self):
-        '''
-        Read only property that returns the numeric function to evaluate the items of
-        this matrix numerically.
-
-        :rtype: NumericFunction
-
-        .. note:: It calls internally to ``get_numeric_function``
-
-            .. seealso:: :func:`get_numeric_function`
-
-        '''
-        return self.get_numeric_function()
-
-
-
-    @property
-    def numeric_func(self):
-        '''
-        This is an alias of ``numeric_function`` property
-
-        :rtype: NumericFunction
-
-        .. seealso::
-            :func:`numeric_function`
-            :func:`get_numeric_function`
-
-        '''
-        return self.get_numeric_function()
-
 
 
 
