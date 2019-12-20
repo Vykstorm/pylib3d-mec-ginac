@@ -362,6 +362,25 @@ class Scene(EventProducer):
         return self._simulation.is_stopped()
 
 
+    def is_simulation_looped(self):
+        '''is_simulation_looped() -> bool
+
+        :return: True if the simulation is in loop mode. False otherwise (only relevant
+            when time limit is set)
+        :rtype: bool
+        '''
+        return self._simulation.is_looped()
+
+
+    def get_simulation_time_limit(self):
+        '''get_simulation_time_limit() -> float | None
+        Get the simulation time limit if any. None otherwise
+
+        :rtype: float, None
+        '''
+        return self._simulation.get_time_limit()
+
+
 
     def get_simulation_update_frequency(self):
         '''get_simulation_update_frequency() -> float
@@ -472,6 +491,22 @@ class Scene(EventProducer):
 
 
     ######## Setters ########
+
+
+    def set_simulation_looped(self, looped=True):
+        '''set_simulation_looped(looped: bool)
+        Enable/Disable simulation looping mode (only relevant when time limit is set)
+        '''
+        self._simulation.set_looped(looped)
+
+
+
+    def set_simulation_time_limit(self, limit):
+        '''set_simulation_time_limit(limit: numeric | None)
+        Set simulation time limit.
+        '''
+        self._simulation.set_time_limit(limit)
+
 
 
     def set_simulation_update_frequency(self, frequency):
