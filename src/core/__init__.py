@@ -9,6 +9,7 @@ from re import fullmatch
 from ..drawing.scene import Scene
 import lib3d_mec_ginac_ext as _cython_ext
 from .system import System, get_default_system, set_default_system
+from .integration import IntegrationMethod, KinematicEulerIntegrationMethod
 from ..config import runtime_config
 
 
@@ -56,7 +57,10 @@ __all__.extend(['e', 'E'])
 
 
 # Add classes & functions from core submodule
-__all__.extend(['System', 'get_default_system', 'set_default_system'])
+__all__.extend([
+    'System', 'get_default_system', 'set_default_system',
+    'IntegrationMethod', 'KinematicEulerIntegrationMethod'
+])
 
 
 
@@ -76,7 +80,7 @@ for name in dir(System):
     not any(map(lambda pattern: fullmatch(pattern, name),
         [r'\w+_point_branch', r'rotation_\w+', r'position_\w+', r'angular_\w+',
         r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
-        'diff', 'unatomize', r'\w+_wrench', 'evaluate']
+        'diff', 'unatomize', r'\w+_wrench', 'start_kinematic_euler_simulation']
     )):
         continue
 

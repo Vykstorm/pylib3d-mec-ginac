@@ -22,7 +22,7 @@ from ..config import runtime_config
 class Simulation(EventProducer):
     '''
     This class is responsible of storing & update the simulation state (change the
-    time symbol value periodically and integrate).
+    time symbol value periodically and perform temporal integration).
     Also it updates the scene (which recomputes the drawings affine transformations and
     redraws the vtk scene)
     '''
@@ -48,7 +48,7 @@ class Simulation(EventProducer):
             self._state = 'running'
             self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
-
+            self._system.get_integration_method().init()
             self.fire_event('simulation_started')
 
 
@@ -175,8 +175,7 @@ class Simulation(EventProducer):
             t = system.get_time()
             t.set_value(elapsed_time)
 
-            # Intergrate
-            # TODO
 
             if self._state == 'running':
+                integrator = system.get_integration_method().step(delta_t=0.05)
                 self.fire_event('simulation_step')
