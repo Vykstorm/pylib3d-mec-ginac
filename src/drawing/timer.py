@@ -253,7 +253,7 @@ class Timer(Thread):
                 raise RuntimeError('Timer was not started yet')
             self._state = 'death'
             self._lock.notify()
-        self.join()
+        #self.join()
 
 
 
