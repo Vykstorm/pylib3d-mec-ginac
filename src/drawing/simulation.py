@@ -6,7 +6,7 @@ Description: This file defines the class Simulation
 ######## Import statements ########
 
 # Standard imports
-from time import time
+from time import process_time
 from collections import deque
 from collections.abc import Mapping, Iterable
 
@@ -37,12 +37,13 @@ class Simulation(EventProducer):
         # Initialize internal fields
         self._scene, self._system = scene, system
         self._state = 'stopped'
-        self._time_multiplier = runtime_config.SIMULATION_TIME_MULTIPLIER
         self._update_freq = runtime_config.SIMULATION_UPDATE_FREQUENCY
+        self._time_multiplier = runtime_config.SIMULATION_TIME_MULTIPLIER
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
         self._diff_times = deque(maxlen=10)
         self._integration_method = IntegrationMethod(system)
+
 
 
     ######## Simulation controls ########
@@ -117,14 +118,14 @@ class Simulation(EventProducer):
             return self._elapsed_time
 
 
-    def get_time_multiplier(self):
-        with self:
-            return self._time_multiplier
-
-
     def get_update_frequency(self):
         with self:
             return self._update_freq
+
+
+    def get_time_multiplier(self):
+        with self:
+            return self._time_multiplier
 
 
     def get_real_update_frequency(self):
@@ -146,19 +147,6 @@ class Simulation(EventProducer):
 
     ######## Setters ########
 
-    def set_time_multiplier(self, multiplier):
-        try:
-            multiplier = float(multiplier)
-            if multiplier <= 0:
-                raise TypeError
-        except TypeError:
-            raise TypeError('Input argument must be a number greater than zero')
-        with self:
-            self._time_multiplier = multiplier
-
-            self.fire_event('time_multiplier_changed')
-
-
 
     def set_update_frequency(self, frequency):
         try:
@@ -173,6 +161,21 @@ class Simulation(EventProducer):
                 self._timer.set_time_interval(1 / self._update_freq)
 
             self.fire_event('update_frequency_changed')
+
+
+
+    def set_time_multiplier(self, multiplier):
+        try:
+            multiplier = float(multiplier)
+            if multiplier <= 0:
+                raise TypeError
+        except TypeError:
+            raise TypeError('Input argument must be a number greater than zero')
+        with self:
+            self._time_multiplier = multiplier
+
+            self.fire_event('time_multiplier_changed')
+
 
 
 
@@ -208,7 +211,9 @@ class Simulation(EventProducer):
         except Exception as e:
             raise TypeError('constraints must be a mapping like object where keys are constraint names and values are Matrix or NumericFunction instances')
 
-        self._integration_method = method(system, constraints, parameters)
+        with self:
+            self._integration_method = method(system, constraints, parameters)
+            self.fire_event('integration_method_changed')
 
 
 
@@ -246,23 +251,22 @@ class Simulation(EventProducer):
         with self:
             if self._state == 'running':
                 # Update elapsed time
-                current_time = time()
+                current_time = process_time()
                 if self._last_update_time is None:
+                    delta_t = 0
                     self._last_update_time = current_time
                 else:
-                    diff_time = current_time - self._last_update_time
-                    self._elapsed_time += diff_time
-                    self._diff_times.appendleft(diff_time)
+                    delta_t = current_time - self._last_update_time
+                    self._elapsed_time += delta_t
+                    self._diff_times.appendleft(delta_t)
                     self._last_update_time = current_time
 
 
             # Update time variable
-            elapsed_time = self._elapsed_time * self._time_multiplier
+            delta_t *= self._time_multiplier
             system = self._system
-            t = system.get_time()
-            t.set_value(elapsed_time)
-
+            system.get_time().value += delta_t
 
             if self._state == 'running':
-                self.get_integration_method().step(delta_t=0.05)
+                self.get_integration_method().step(delta_t)
                 self.fire_event('simulation_step')

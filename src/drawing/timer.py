@@ -7,7 +7,7 @@ Description: This file defines the classes Timer and OneShotTimer
 ######## Import statements ########
 
 from threading import Thread, Condition
-from time import sleep
+from time import sleep, time, process_time
 from collections.abc import Iterable, Mapping
 
 
@@ -72,6 +72,8 @@ class Timer(Thread):
         callback, interval = self._callback, self._interval
         args, kwargs = self._args, self._kwargs
         cv = self._lock
+        last_exec_time = 0
+
 
         while True:
             with cv:
@@ -82,15 +84,16 @@ class Timer(Thread):
                     # If the timer was killed, finish the execution
                     if self._state == 'death':
                         return
-                    # Go to sleep before the next callback execution or
-                    # until the timer state changes
-                    cv.wait(timeout=self._interval)
+                    # Go to sleep before the next callback execution
+                    cv.wait(timeout=max(self._interval-last_exec_time, 0))
                     if self._state == 'running':
                         # Break this loop if the timer is running
                         break
 
             # Trigger the callback
+            t = process_time()
             callback(*args, **kwargs)
+            last_exec_time = process_time() - t
 
             if self._one_shot:
                 # Only trigger the callback once
