@@ -8,12 +8,14 @@ Description: This file defines the class Simulation
 # Standard imports
 from time import time
 from collections import deque
+from collections.abc import Mapping, Iterable
 
 # Imports from other modules
 from .events import EventProducer
 from .timer import Timer
 from ..config import runtime_config
-
+from ..core.integration import IntegrationMethod, KinematicEulerIntegrationMethod
+from lib3d_mec_ginac_ext import Matrix, NumericFunction
 
 
 
@@ -27,6 +29,8 @@ class Simulation(EventProducer):
     redraws the vtk scene)
     '''
 
+    ######## Constructor ########
+
     def __init__(self, scene, system):
         super().__init__()
 
@@ -38,8 +42,10 @@ class Simulation(EventProducer):
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
         self._diff_times = deque(maxlen=10)
+        self._integration_method = IntegrationMethod(system)
 
 
+    ######## Simulation controls ########
 
     def start(self):
         with self:
@@ -48,7 +54,7 @@ class Simulation(EventProducer):
             self._state = 'running'
             self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
-            self._system.get_integration_method().init()
+            self.get_integration_method().init()
             self.fire_event('simulation_started')
 
 
@@ -88,6 +94,9 @@ class Simulation(EventProducer):
 
 
 
+
+    ######## Getters ########
+
     def is_running(self):
         with self:
             return self._state == 'running'
@@ -113,6 +122,30 @@ class Simulation(EventProducer):
             return self._time_multiplier
 
 
+    def get_update_frequency(self):
+        with self:
+            return self._update_freq
+
+
+    def get_real_update_frequency(self):
+        with self:
+            if not self._diff_times:
+                return 0
+            return len(self._diff_times) / sum(self._diff_times)
+
+
+    def get_integration_method(self):
+        '''get_integrator() -> IntegrationMethod
+        Get the current integration method to adjust system's symbol values while
+        the simulation is running
+        '''
+        return self._integration_method
+
+
+
+
+    ######## Setters ########
+
     def set_time_multiplier(self, multiplier):
         try:
             multiplier = float(multiplier)
@@ -125,18 +158,6 @@ class Simulation(EventProducer):
 
             self.fire_event('time_multiplier_changed')
 
-
-
-    def get_update_frequency(self):
-        with self:
-            return self._update_freq
-
-
-    def get_real_update_frequency(self):
-        with self:
-            if not self._diff_times:
-                return 0
-            return len(self._diff_times) / sum(self._diff_times)
 
 
     def set_update_frequency(self, frequency):
@@ -152,6 +173,72 @@ class Simulation(EventProducer):
                 self._timer.set_time_interval(1 / self._update_freq)
 
             self.fire_event('update_frequency_changed')
+
+
+
+    def set_integration_method(self, method, constraints, parameters):
+        '''set_integrator(method: IntegrationMethod)
+        Change integration method to adjust system's symbol values while the
+        simulation is running
+        '''
+        if not issubclass(method, IntegrationMethod) and not isinstance(method, str):
+            raise TypeError('Integration method must be a subclass of IntegrationMethod or a string')
+
+        if isinstance(method, str):
+            methods = {
+                'kinematic_euler': KinematicEulerIntegrationMethod
+            }
+            if method not in methods:
+                raise ValueError(f'Invalid integration method name ("{method}")')
+            method = methods[method]
+
+
+        system = self._system
+
+        try:
+            if not isinstance(constraints, Mapping):
+                raise Exception
+            for name, value in constraints.items():
+                if not isinstance(name, str) or not isinstance(value, (Matrix, NumericFunction)):
+                    raise Exception
+            constraints = dict(zip(
+                constraints.keys(),
+                [value if isinstance(value, NumericFunction) else system.get_numeric_function(value) for value in constraints.values()]
+            ))
+        except Exception as e:
+            raise TypeError('constraints must be a mapping like object where keys are constraint names and values are Matrix or NumericFunction instances')
+
+        self._integration_method = method(system, constraints, parameters)
+
+
+
+    def set_kinematic_euler_integration(self,
+        Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q, dPhi_dq, beta,
+        geom_eq_init_tol=1e-10, geom_eq_init_relax=.1,
+        geom_eq_tol=.05 * 10**-3, geom_eq_relax=.1):
+        '''start_kinematic_euler_simulation()
+        This method will start a simulation on this system adjusting the values of
+        symbols over time to met the equation constraints defined by the input matrices:
+        Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q dPhi_dq, beta
+        '''
+        self.set_integration_method(KinematicEulerIntegrationMethod,
+            constraints={
+                'Phi_init': Phi_init,
+                'Phi_init_q': Phi_init_q,
+                'dPhi_init': dPhi_init,
+                'dPhi_init_dq': dPhi_init_dq,
+                'beta_init': beta_init,
+                'Phi': Phi,
+                'Phi_q': Phi_q,
+                'dPhi_dq': dPhi_dq,
+                'beta': beta
+            },
+            parameters={
+                'geom_eq_init_tol': geom_eq_init_tol,
+                'geom_eq_init_relax': geom_eq_init_relax,
+                'geom_eq_tol': geom_eq_tol,
+                'geom_eq_relax': geom_eq_relax
+            })
 
 
 
@@ -177,5 +264,5 @@ class Simulation(EventProducer):
 
 
             if self._state == 'running':
-                integrator = system.get_integration_method().step(delta_t=0.05)
+                self.get_integration_method().step(delta_t=0.05)
                 self.fire_event('simulation_step')

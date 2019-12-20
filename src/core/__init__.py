@@ -80,7 +80,7 @@ for name in dir(System):
     not any(map(lambda pattern: fullmatch(pattern, name),
         [r'\w+_point_branch', r'rotation_\w+', r'position_\w+', r'angular_\w+',
         r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
-        'diff', 'unatomize', r'\w+_wrench', 'start_kinematic_euler_simulation']
+        'diff', 'unatomize', r'\w+_wrench']
     )):
         continue
 
@@ -100,7 +100,7 @@ def _create_scene_global_func(method):
 for name in dir(Scene):
     if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
         name not in (
-            'start_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation', 'purge_drawings'
+            'start_simulation', 'start_kinematic_euler_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation', 'purge_drawings'
             ):
         continue
     __all__.append(name)

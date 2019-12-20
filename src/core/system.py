@@ -13,7 +13,6 @@ from lib3d_mec_ginac_ext import *
 
 # From other modules
 from ..drawing.scene import Scene
-from .integration import IntegrationMethod, KinematicEulerIntegrationMethod
 
 
 # Standard imports
@@ -45,9 +44,6 @@ class System(_System):
     def __init__(self):
         super().__init__()
 
-        # Create scene visualizer (to show drawings)
-        self._scene = Scene(self)
-
         # This will store the symbol numeric values (1 vector per symbol type)
         symbols_values = {}
         for symbol_type in map(methodcaller('decode'), _symbol_types):
@@ -61,8 +57,8 @@ class System(_System):
                 continue
             symbols_values[symbol.get_type()][symbol.get_name()] = symbol._get_value()
 
-        # Additional internal fields to be initialized
-        self._integrator = IntegrationMethod()
+        # Create scene visualizer (to show drawings)
+        self._scene = Scene(self)
 
 
 
@@ -593,29 +589,6 @@ class System(_System):
 
         '''
         return self._scene
-
-
-
-    def get_integration_method(self):
-        '''get_integrator() -> IntegrationMethod
-        Get the current integration method
-        '''
-        return self._integration_method
-
-
-
-    ######## Setters ########
-
-
-
-    def set_integration_method(self, method):
-        '''set_integrator(method: IntegrationMethod)
-        Change the integration method for this system
-        '''
-        if not isinstance(method, IntegrationMethod):
-            raise TypeError('Input argument must be a IntegrationMethod instance')
-        self._integration_method = method
-        method._set_system(self)
 
 
 
@@ -1593,20 +1566,6 @@ class System(_System):
         '''
         return self._inertia_wrench(solid)
 
-
-
-
-    ######## Kinematic euler simulation ########
-
-
-    def start_kinematic_euler_simulation(self, *args, **kwargs):
-        '''start_kinematic_euler_simulation()
-        This method will start a simulation on this system adjusting the values of
-        symbols over time to met the equation constraints defined by the input matrices:
-        Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q_ dPhi_dq, beta
-        '''
-        self.set_integration_method(KinematicEulerIntegrationMethod(*args, **kwargs))
-        self.scene.start_simulation()
 
 
 

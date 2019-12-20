@@ -541,6 +541,12 @@ class Scene(EventProducer):
 
 
 
+    def start_kinematic_euler_simulation(self, *args, **kwargs):
+        self._simulation.set_kinematic_euler_integration(*args, **kwargs)
+        self._simulation.start()
+
+
+
     def stop_simulation(self):
         '''stop_simulation()
         Stops the simulation

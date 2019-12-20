@@ -7,7 +7,8 @@ Description: This script defines the class IntegrationMethod and its subclasses
 ######## Import statements ########
 
 from numpy.linalg import norm, pinv
-
+from functools import partial
+from lib3d_mec_ginac_ext import evaluate
 
 
 
@@ -23,44 +24,31 @@ class IntegrationMethod:
     '''
     ######## Constructor ########
 
-    def __init__(self):
-        self._funcs_cache = {}
-        self._system = None
+    def __init__(self, system, constraints={}, parameters={}):
+        self._system = system
+        self._constraints, self._parameters = constraints, parameters
+        args = [
+            system.get_coords_values(), system.get_velocities_values(), system.get_accelerations_values(),
+            system.get_params_values(), constraints, parameters
+        ]
+        self.init, self.step = partial(self.init, *args), partial(self.step, *args)
 
 
     ######## Operations ########
 
-    def init(self):
+    def init(self, q_values, dq_values, ddq_values, p_values, constraints, parameters):
         '''init()
         This method will be called to initialize the values of the symbols. This is invoked normally
         when the system simulation begins.
         '''
         pass
 
-    def step(self, delta_t):
+    def step(self, q_values, dq_values, ddq_values, p_values, constraints, parameters, delta_t):
         '''step(delta_t: float)
         This is called to update the values of the symbols so that the equation constraints
             are still met. This usually happen at each time step.
         '''
         pass
-
-
-
-
-    def _set_system(self, system):
-        self._system = system
-        self._funcs_cache.clear()
-
-
-
-
-    ######## Helper methods ########
-
-    def evaluate(self, matrix):
-        if id(matrix) not in self._funcs_cache:
-            self._funcs_cache[id(matrix)] = self._system.get_numeric_function(matrix)
-        func = self._funcs_cache[id(matrix)]
-        return func.evaluate()
 
 
 
@@ -104,37 +92,11 @@ class KinematicEulerIntegrationMethod(IntegrationMethod):
     * It also has the next parameters:
         geom_eq_init_tol, geom_eq_init_relax, geom_eq_tol, geom_eq_relax
     '''
-    def __init__(self,
-        Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init,
-        Phi, Phi_q, dPhi_dq, beta,
-        geom_eq_init_tol=1e-10,
-        geom_eq_init_relax=.1,
-        geom_eq_tol = 0.05 * 10**-3,
-        geom_eq_relax = .1
-        ):
-        super().__init__()
-        self.Phi_init = Phi_init
-        self.Phi_init_q = Phi_init_q
-        self.dPhi_init = dPhi_init
-        self.dPhi_init_dq = dPhi_init_dq
-        self.beta_init = beta_init
-        self.Phi = Phi
-        self.Phi_q = Phi_q
-        self.dPhi_dq = dPhi_dq
-        self.beta = beta
-        self.geom_eq_init_tol = geom_eq_init_tol
-        self.geom_eq_init_relax = geom_eq_init_relax
-        self.geom_eq_tol = geom_eq_tol
-        self.geom_eq_relax = geom_eq_relax
 
+    def init(self, q_values, dq_values, ddq_values, p_values, constraints, parameters):
+        Phi_init, Phi_init_q, dPhi_init_dq, beta_init = map(constraints.__getitem__, ('Phi_init', 'Phi_init_q', 'dPhi_init_dq', 'beta_init'))
+        geom_eq_init_tol, geom_eq_init_relax = map(parameters.__getitem__, ('geom_eq_init_tol', 'geom_eq_init_relax'))
 
-
-    def init(self):
-        q_values, dq_values, ddq_values = self.q_values, self.dq_values, self.ddq_values
-        Phi_init, Phi_init_q, dPhi_init_dq, beta_init = self.Phi_init, self.Phi_init_q, self.dPhi_init_dq, self.beta_init
-        geom_eq_init_tol, geom_eq_init_relax = self.geom_eq_init_tol, self.geom_eq_init_relax
-
-        evaluate = self.evaluate
 
         # Assembly problem (Coordinate level)
         Phi_init_num = evaluate(Phi_init)
@@ -152,11 +114,9 @@ class KinematicEulerIntegrationMethod(IntegrationMethod):
 
 
 
-    def step(self, delta_t=.05):
-        q_values, dq_values, ddq_values = self.q_values, self.dq_values, self.ddq_values
-        Phi, Phi_q, dPhi_dq, beta = self.Phi, self.Phi_q, self.dPhi_dq, self.beta
-        geom_eq_tol, geom_eq_relax = self.geom_eq_tol, self.geom_eq_relax
-        evaluate = self.evaluate
+    def step(self, q_values, dq_values, ddq_values, p_values, constraints, parameters, delta_t):
+        Phi, Phi_q, dPhi_dq, beta = map(constraints.__getitem__, ('Phi', 'Phi_q', 'dPhi_dq', 'beta'))
+        geom_eq_tol, geom_eq_relax = map(parameters.__getitem__, ('geom_eq_tol', 'geom_eq_relax'))
 
         # Euler improved integration
         q_values += delta_t * (dq_values + 0.5 * delta_t * ddq_values)
