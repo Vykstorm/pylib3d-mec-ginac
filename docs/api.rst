@@ -43,6 +43,7 @@ API Reference
         angular_acceleration, acceleration_vector,
         twist, derivative, jacobian, diff,
         gravity_wrench, inertia_wrench,
+        start_kinematic_euler_simulation,
         symbols,
         time,
         coordinates, velocities, accelerations,
