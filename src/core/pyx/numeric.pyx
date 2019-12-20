@@ -110,7 +110,7 @@ class NumericFunction:
 
     def _compile_python(self):
         # This private method is used to compile the internal numeric function (unoptimized version)
-        symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
+        symbol_types = tuple(map(methodcaller('decode'), chain(_symbol_types, _derivable_symbol_types)))
         symbols = self._system.get_symbols()
 
         # Global variables to be used when evaluating the numeric function
@@ -133,7 +133,7 @@ class NumericFunction:
     def _compile_cython(self):
         # This private method is used to compile the internal numeric function (optimized version)
 
-        symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
+        symbol_types = tuple(map(methodcaller('decode'), chain(_symbol_types, _derivable_symbol_types)))
 
         ## Generate cython source code
         args = tuple(map(partial(add, 'np.ndarray[np.float64_t, ndim=2] '), chain(symbol_types, ['__output__'])))
