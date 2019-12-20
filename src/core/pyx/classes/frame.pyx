@@ -17,13 +17,15 @@ cdef class Frame(Object):
 
 
     cdef c_Frame* _c_handler
+    cdef object _owner
 
 
 
     ######## Constructor ########
 
-    def __cinit__(self, Py_ssize_t handler):
+    def __cinit__(self, Py_ssize_t handler, _System owner=None):
         self._c_handler = <c_Frame*>handler
+        self._owner = owner
 
 
 

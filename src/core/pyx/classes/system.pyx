@@ -377,10 +377,10 @@ cdef class _System:
         name = _parse_name(name)
         cdef c_Frame* c_frame = <c_Frame*>self._get_c_object(name, b'frame')
         if c_frame != NULL:
-            return Frame(<Py_ssize_t>c_frame)
+            return Frame(<Py_ssize_t>c_frame, self)
         c_frame = <c_Solid*>self._get_c_object(name, b'solid')
         if c_frame != NULL:
-            return Solid(<Py_ssize_t>c_frame)
+            return Solid(<Py_ssize_t>c_frame, self)
         raise IndexError(f'Frame "{name.decode()}" doesnt exist')
 
 
@@ -389,7 +389,7 @@ cdef class _System:
         cdef c_Solid* c_solid = <c_Solid*>self._get_c_object(name, b'solid')
         if c_solid == NULL:
             raise IndexError(f'Solid "{name.decode()}" doesnt exist')
-        return Solid(<Py_ssize_t>c_solid)
+        return Solid(<Py_ssize_t>c_solid, self)
 
 
     cpdef _get_wrench(self, name):
@@ -489,11 +489,11 @@ cdef class _System:
 
     cpdef _get_frames(self):
         cdef c_vector[c_Frame*] c_frames = self._c_handler.get_Frames()
-        return [Frame(<Py_ssize_t>c_frame) for c_frame in c_frames] + self._get_solids()
+        return [Frame(<Py_ssize_t>c_frame, self) for c_frame in c_frames] + self._get_solids()
 
     cpdef _get_solids(self):
         cdef c_vector[c_Solid*] c_solids = self._c_handler.get_Solids()
-        return [Solid(<Py_ssize_t>c_solid) for c_solid in c_solids]
+        return [Solid(<Py_ssize_t>c_solid, self) for c_solid in c_solids]
 
     cpdef _get_wrenches(self):
         cdef c_vector[c_Wrench3D*] c_wrenches = self._c_handler.get_Wrenches()
@@ -891,7 +891,7 @@ cdef class _System:
         else:
             base = self._get_base('xyz')
 
-        return Frame(<Py_ssize_t>self._c_handler.new_Frame(name, (<Point>point)._c_handler, (<Base>base)._c_handler))
+        return Frame(<Py_ssize_t>self._c_handler.new_Frame(name, (<Point>point)._c_handler, (<Base>base)._c_handler), self)
 
 
 
@@ -945,7 +945,7 @@ cdef class _System:
             (<SymbolNumeric>mass)._c_handler,
             <c_Vector3D*>(<Vector3D>CM)._get_c_handler(),
             <c_Tensor3D*>(<Tensor3D>IT)._get_c_handler()
-        ))
+        ), self)
 
 
 

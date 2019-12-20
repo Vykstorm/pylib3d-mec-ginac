@@ -48,7 +48,7 @@ cdef class Solid(Frame):
         :rtype: SymbolNumeric
 
         '''
-        return SymbolNumeric(<Py_ssize_t>(<c_Solid*>self._c_handler).get_mass())
+        return SymbolNumeric(<Py_ssize_t>(<c_Solid*>self._c_handler).get_mass(), self._owner)
 
 
 
