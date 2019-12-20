@@ -41,6 +41,7 @@ class Simulation(EventProducer):
         self._time_multiplier = runtime_config.SIMULATION_TIME_MULTIPLIER
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
+        self._looped, self._time_limit = True, None
         self._diff_times = deque(maxlen=10)
         self._integration_method = IntegrationMethod(system)
 
@@ -56,6 +57,7 @@ class Simulation(EventProducer):
             self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
             self.get_integration_method().init()
+            self._system.get_time().value = 0
             self.fire_event('simulation_started')
 
 
@@ -135,6 +137,16 @@ class Simulation(EventProducer):
             return len(self._diff_times) / sum(self._diff_times)
 
 
+    def is_looped(self):
+        with self:
+            return self._looped
+
+
+    def get_time_limit(self):
+        with self:
+            return self._time_limit
+
+
     def get_integration_method(self):
         '''get_integrator() -> IntegrationMethod
         Get the current integration method to adjust system's symbol values while
@@ -176,6 +188,37 @@ class Simulation(EventProducer):
 
             self.fire_event('time_multiplier_changed')
 
+
+    def set_looped(self, looped=True):
+        '''set_looped(looped: bool)
+        If the argument is set to True, repeat the simulation indefinitely (only if time duration
+        is set). By default is set to True
+        If set to False, stop the simulation automatically when reaching the time limit (if any, otherwise
+        it runs indefinitely)
+        '''
+        if not isinstance(looped, bool):
+            raise Type('Input argument must be bool')
+
+        with self:
+            self._looped = looped
+            self.fire_event('looped_mode_changed')
+
+
+    def set_time_limit(self, limit):
+        '''set_time_limit(limit: numeric | None)
+        Set the simulation time limit
+        '''
+        if limit is not None:
+            try:
+                limit = float(limit)
+                if limit <= 0:
+                    raise TypeError
+            except:
+                raise TypeError('Input argument must be a number greater than zero or None')
+
+        with self:
+            self._time_limit = limit
+            self.fire_event('time_limit_changed')
 
 
 
@@ -249,24 +292,34 @@ class Simulation(EventProducer):
 
     def _update(self):
         with self:
-            if self._state == 'running':
-                # Update elapsed time
-                current_time = process_time()
-                if self._last_update_time is None:
-                    delta_t = 0
-                    self._last_update_time = current_time
-                else:
-                    delta_t = current_time - self._last_update_time
-                    self._elapsed_time += delta_t
-                    self._diff_times.appendleft(delta_t)
-                    self._last_update_time = current_time
-
+            if self._state != 'running':
+                return
+            # Update elapsed time
+            current_time = process_time()
+            if self._last_update_time is None:
+                delta_t = 0
+                self._last_update_time = current_time
+            else:
+                delta_t = current_time - self._last_update_time
+                self._elapsed_time += delta_t
+                self._diff_times.appendleft(delta_t)
+                self._last_update_time = current_time
 
             # Update time variable
             delta_t *= self._time_multiplier
-            system = self._system
-            system.get_time().value += delta_t
 
-            if self._state == 'running':
-                self.get_integration_method().step(delta_t)
-                self.fire_event('simulation_step')
+            t = self._system.get_time()
+            t.value += delta_t
+
+            self.get_integration_method().step(delta_t)
+            self.fire_event('simulation_step')
+
+            t_limit = self._time_limit
+            if t_limit is not None and t.value >= t_limit:
+                if self._looped:
+                    delta_t = t.value - t_limit
+                    t.value -= t_limit
+                    self.get_integration_method().step(delta_t)
+                    self.fire_event('simulation_step')
+                else:
+                    self.stop()
