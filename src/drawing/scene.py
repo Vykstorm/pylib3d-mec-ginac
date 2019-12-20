@@ -86,7 +86,7 @@ class Scene(EventProducer):
 
 
         # Add simulation info text display
-        display = TextDrawing('', position=(0.01, -0.02), font_size=15, color=(0, 0, 0, 0.8), italic=True)
+        display = TextDrawing('', position=(0.01, -0.02), font_size=15, color='black', italic=False)
         display.set_position_relative_to_top_left()
         display.vertical_justification = 'top'
         display.hide()
@@ -96,7 +96,7 @@ class Scene(EventProducer):
 
 
         # Add drawings info text display
-        display = TextDrawing('', position=(-0.01, -0.02), font_size=15, color=(0, 0, 0, 0.8), italic=True)
+        display = TextDrawing('', position=(-0.01, -0.02), font_size=15, color='black', italic=False)
         display.set_position_relative_to_top_right()
         display.vertical_justification = 'top'
         display.horizontal_justification = 'right'
