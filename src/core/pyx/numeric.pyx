@@ -166,7 +166,11 @@ class NumericFunction:
             subprocess.run(['cythonize', '-i', '-q', '-f', '-3', '_numfunc.pyx'], env=environ, stdout=devnull, stderr=devnull)
 
         # Import the function from the extension
-        import _numfunc
+        if '_numfunc' in sys.modules:
+            _numfunc = sys.modules['_numfunc']
+            importlib.reload(_numfunc)
+        else:
+            import _numfunc
         self._num_func_optimized = partial(_numfunc.evaluate, *map(self._system.get_symbols_values, symbol_types))
 
 
