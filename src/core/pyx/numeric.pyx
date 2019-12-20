@@ -53,15 +53,22 @@ class NumericFunction:
             try:
                 if not op.isidentifier():
                     raise Exception
-                if not system.has_symbol(op):
-                    raise Exception
-                symbol = system.get_symbol(op)
-                if symbol == system.get_time():
-                    raise Exception
 
-                symbol_name, symbol_type = symbol.get_name(), symbol.get_type()
-                index = system._symbols_values[symbol_type].index(symbol_name)
-                return f'{symbol_type}[{index}, 0]'
+                if system.has_symbol(op):
+                    # Replace symbol names with vector items e.g: a -> params[1]
+                    symbol = system.get_symbol(op)
+                    if symbol == system.get_time():
+                        raise Exception
+
+                    symbol_name, symbol_type = symbol.get_name(), symbol.get_type()
+                    index = system._symbols_values[symbol_type].index(symbol_name)
+                    return f'{symbol_type}[{index}, 0]'
+
+                # Replace constant names with their numeric values
+                if op in ('Euler', 'Pi', 'Tau'):
+                    return op.lower()
+
+                raise Exception
 
             except:
                 return op
@@ -107,7 +114,7 @@ class NumericFunction:
         symbols = self._system.get_symbols()
 
         # Global variables to be used when evaluating the numeric function
-        globals = {'sin': math.sin, 'cos': math.cos, 'tan': math.tan}
+        globals = {'sin': math.sin, 'cos': math.cos, 'tan': math.tan, 'euler': math.e, 'tau': math.tau, 'pi': math.pi}
         for symbol_type in symbol_types:
             globals[symbol_type] = self._system.get_symbols_values(kind=symbol_type)
         self._globals = globals
@@ -134,7 +141,7 @@ class NumericFunction:
         # Imports & function signature
         header = [
             'cimport cython',
-            'from math import sin, cos, tan',
+            'from math import sin, cos, tan, pi, tau, e as euler',
             'import numpy as np',
             'cimport numpy as np',
             '@cython.boundscheck(False)',
