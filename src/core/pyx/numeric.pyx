@@ -6,6 +6,70 @@ This module defines the class NumericFunction
 
 
 
+######## class CythonNumericFunctionExtensionsCompiler  ########
+
+class CythonNumericFunctionExtensionsCompiler:
+    '''
+    Helper class to compile numeric functions as cython extensions
+    '''
+    _singleton = None
+    _numfuncs_dir = '_numfuncs'
+    _stdout_logfile = '.stdout.log.txt'
+    _stderr_logfile = '.stderr.log.txt'
+
+
+    def __init__(self):
+        self._numfuncs_count = 0
+        self._initialized = False
+
+
+    def compile(self, source, funcname):
+        if not self._initialized:
+            self._initialized = True
+            numfuncs_dir = self._numfuncs_dir
+            try:
+                if os.path.exists(numfuncs_dir) and not os.path.isdir(numfuncs_dir):
+                    raise RuntimeError
+                if not os.path.exists(numfuncs_dir):
+                    os.mkdir(numfuncs_dir)
+                with open(os.path.join(numfuncs_dir, '__init__.py'), 'w') as file:
+                    pass
+
+                for filename in filter(methodcaller('startswith', '_numfunc_'), os.listdir(numfuncs_dir)):
+                    os.remove(os.path.join(numfuncs_dir, filename))
+
+            except FileExistsError:
+                raise RuntimeError
+
+
+        # Save the source code in a external file
+        self._numfuncs_count += 1
+        module_name = f'_numfunc_{self._numfuncs_count}'
+
+        filename = f'{module_name}.pyx'
+        filepath_name = os.path.join(self._numfuncs_dir, filename)
+
+        with open(filepath_name, 'w') as file:
+            file.write(source)
+
+        # Call a subprocess to generate the cython extension
+        environ = os.environ.copy()
+        environ['CFLAGS'] = f'-I {np.get_include()}'
+
+        stdout, stderr = open(os.path.join(self._numfuncs_dir, self._stdout_logfile), 'a'), open(os.path.join(self._numfuncs_dir, self._stderr_logfile), 'a')
+        try:
+            subprocess.run(['cythonize', '-i', '-q', '-f', '-3', filepath_name], env=environ, stdout=stdout, stderr=stderr)
+        finally:
+            stdout.close()
+            stderr.close()
+
+        # Import the function from the extension
+        return getattr(importlib.__import__('.'.join([self._numfuncs_dir, module_name]), globals(), locals(), [funcname]), funcname)
+
+
+_numfuncs_extension_compiler = CythonNumericFunctionExtensionsCompiler()
+
+
 
 
 
@@ -110,7 +174,7 @@ class NumericFunction:
 
     def _compile_python(self):
         # This private method is used to compile the internal numeric function (unoptimized version)
-        symbol_types = tuple(map(methodcaller('decode'), chain(_symbol_types, _derivable_symbol_types)))
+        symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
         symbols = self._system.get_symbols()
 
         # Global variables to be used when evaluating the numeric function
@@ -133,7 +197,7 @@ class NumericFunction:
     def _compile_cython(self):
         # This private method is used to compile the internal numeric function (optimized version)
 
-        symbol_types = tuple(map(methodcaller('decode'), chain(_symbol_types, _derivable_symbol_types)))
+        symbol_types = tuple(map(methodcaller('decode'), _symbol_types))
 
         ## Generate cython source code
         args = tuple(map(partial(add, 'np.ndarray[np.float64_t, ndim=2] '), chain(symbol_types, ['__output__'])))
@@ -156,29 +220,16 @@ class NumericFunction:
         for i, j in product(range(0, n), range(0, m)):
             body.append(f'__output__[{i}, {j}] = {str(self._outputs[i, j])}')
 
-        # Put all together
+        # Put all source code together
         lines = []
         lines.extend(header)
         lines.extend(map(partial(add, '\t'), body))
         source = '\n'.join(lines)
 
-        # Save the source code in a external file
-        with open('_numfunc.pyx', 'w') as file:
-            file.write(source)
+        # Compile cython extension
+        func = _numfuncs_extension_compiler.compile( source, 'evaluate' )
+        self._num_func_optimized = partial(func, *map(self._system.get_symbols_values, symbol_types))
 
-        # Call a subprocess to generate the cython extension
-        environ = os.environ.copy()
-        environ['CFLAGS'] = f'-I {np.get_include()}'
-        with open(os.devnull, 'w') as devnull:
-            subprocess.run(['cythonize', '-i', '-q', '-f', '-3', '_numfunc.pyx'], env=environ, stdout=devnull, stderr=devnull)
-
-        # Import the function from the extension
-        if '_numfunc' in sys.modules:
-            _numfunc = sys.modules['_numfunc']
-            importlib.reload(_numfunc)
-        else:
-            import _numfunc
-        self._num_func_optimized = partial(_numfunc.evaluate, *map(self._system.get_symbols_values, symbol_types))
 
 
 
