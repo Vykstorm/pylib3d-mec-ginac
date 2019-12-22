@@ -67,7 +67,6 @@ class VtkViewer(EventProducer):
     ######## Event handlers ########
 
 
-
     def _on_resized(self, *args, **kwargs):
         # This function is called when the window is resized
         scene = self.get_scene()
@@ -99,6 +98,7 @@ class VtkViewer(EventProducer):
 
 
 
+
     def _wait_until_open_request(self):
         # Wait until the open request is sent
         while not self._open_request:
@@ -108,6 +108,60 @@ class VtkViewer(EventProducer):
 
 
     def _initialize(self):
+        # Initialize viewer
+
+        # Repeating timer which redraws the scene and sleeps the event loop thread half
+        # of the time to release the GIL
+        def timer_event_handler(*args, **kwargs):
+            def update():
+                self._update()
+            update()
+            # Sleep the main thread to free the GIL for a while
+            sleep(0.03)
+
+
+        # Event handler which is invoked when the window is modified. This will trigger the event
+        # 'resized' when the viewport size is changed
+        def modified_event_handler(*args, **kwargs):
+            renderer = self.get_scene()._renderer
+            current_size = renderer.GetSize()
+            prev_size = self._prev_viewport_size
+            if prev_size is None or current_size != prev_size:
+                self.fire_event('resized')
+            self._prev_viewport_size = current_size
+
+        # Event handler which is invoked when the user clicks on the screen. This will manage
+        # 3D object selection
+        def click_event_handler(*args, **kwargs):
+            scene = self.get_scene()
+            renderer = scene._renderer
+
+            # Get mouse click position
+            x, y = interactor.GetEventPosition()
+            picker = vtkPropPicker()
+            # Get the 3D model which is clicked
+            picker.Pick(x, y, 0, renderer)
+            # Get the drawing attached to the 3D model clicked
+            drawing = scene._get_3D_drawing_by_handler(picker.GetActor())
+
+            # Select the drawing clicked (and unselect the previous selected drawing if any)
+            with self:
+                prev_selected_drawing = self._selected_drawing
+                self._selected_drawing = drawing
+
+            if drawing is None:
+                if prev_selected_drawing is not None:
+                    prev_selected_drawing.unselect()
+            else:
+                if drawing is not prev_selected_drawing:
+                    if prev_selected_drawing is not None:
+                        prev_selected_drawing.unselect()
+                    drawing.select()
+
+
+
+
+
         # Create interactor & window
         window, interactor = vtkRenderWindow(), vtkRenderWindowInteractor()
         self._window, self._interactor = window, interactor
@@ -124,59 +178,9 @@ class VtkViewer(EventProducer):
         # Initialize interactor
         interactor.Initialize()
 
-        # Create a repeating timer which redraws the scene and sleeps the event loop thread half
-        # of the time to release the GIL
-        def timer_event_handler(*args, **kwargs):
-            self._update()
-            # Sleep the main thread to free the GIL for a while
-            sleep(0.02)
-
-
         interactor.CreateRepeatingTimer(10)
         interactor.AddObserver(vtkCommand.TimerEvent, timer_event_handler)
-
-        # Add an event handler which is invoked when the window is modified. This will trigger the event
-        # 'resized' when the viewport size is changed
-        def modified_event_handler(*args, **kwargs):
-            renderer = self.get_scene()._renderer
-            current_size = renderer.GetSize()
-            prev_size = self._prev_viewport_size
-            if prev_size is None or current_size != prev_size:
-                self.fire_event('resized')
-            self._prev_viewport_size = current_size
-
         interactor.AddObserver(vtkCommand.ModifiedEvent, modified_event_handler)
-
-        # Add an event handler which is invoked when the user clicks on the screen. This will manage
-        # 3D object selection
-        def click_event_handler(*args, **kwargs):
-            scene = self.get_scene()
-            renderer = scene._renderer
-
-            # Get mouse click position
-            x, y = interactor.GetEventPosition()
-            picker = vtkPropPicker()
-            # Get the 3D model which is clicked
-            picker.Pick(x, y, 0, renderer)
-            # Get the drawing attached to the 3D model clicked
-            drawing = scene._get_3D_drawing_by_handler(picker.GetActor())
-            # Select the drawing clicked (and unselect the previous selected drawing if any)
-            with self:
-                prev_selected_drawing = self._selected_drawing
-
-                if drawing is not None:
-                    if self._selected_drawing != drawing:
-                        self._selected_drawing = None
-                        if prev_selected_drawing is not None:
-                            prev_selected_drawing.unselect()
-                        self._selected_drawing = drawing
-                        drawing.select()
-                else:
-                    # User clicker to the screen but it didnt select anything
-                    if prev_selected_drawing is not None:
-                        self._selected_drawing = None
-                        prev_selected_drawing.unselect()
-
 
         interactor.AddObserver(vtkCommand.LeftButtonPressEvent, click_event_handler)
 
@@ -190,7 +194,6 @@ class VtkViewer(EventProducer):
         # Set interaction style
         interaction_style = vtkInteractorStyleTrackballCamera()
         interactor.SetInteractorStyle(interaction_style)
-
 
 
 
