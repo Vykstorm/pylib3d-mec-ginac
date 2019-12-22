@@ -244,7 +244,11 @@ class EventProducer:
     def __exit__(self, exc_type, exc_value, tb):
         self._lock.release()
 
+    def acquire(self, *args, **kwargs):
+        return self._lock.acquire(*args, **kwargs)
 
+    def release(self):
+        self._lock.release()
 
 
 
