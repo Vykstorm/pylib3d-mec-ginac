@@ -43,16 +43,20 @@ DESCRIPTION = 'Python extension for the library lib3d_mec_ginac'
 with open(join(root_dir, 'README.md'), 'r') as f:
     LONG_DESCRIPTION = f.read()
 
+
 # License
-with open(join(root_dir, 'LICENSE.txt'), 'r') as f:
-    LICENSE = f.read()
+LICENSE = 'GPLv3'
+
 
 # Classifiers
 CLASSIFIERS = [
-    'Development Status :: 1 - Planning',
+    'Development Status :: 4 - Beta',
     'Framework :: Buildout :: Extension',
+    'Programming Language :: Python :: 3.7',
     'Programming Language :: Cython',
-    'Programming Language :: C++'
+    'Programming Language :: C++',
+    'Operating System :: POSIX :: Linux',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)'
 ]
 
 # Keywords
@@ -296,6 +300,7 @@ if __name__ == '__main__':
 
             description=DESCRIPTION,
             long_description=LONG_DESCRIPTION,
+            long_description_content_type = 'text/markdown',
             license=LICENSE,
 
             keywords=KEYWORDS,
