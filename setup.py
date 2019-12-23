@@ -238,21 +238,11 @@ if __name__ == '__main__':
 
     try:
         from Cython.Build import cythonize
-        import asciitree
-        import tabulate
-        import numpy
-        import vtk
     except ImportError as e:
         # Generate error message if missing dependencies
-        print(f'Failed to import "{e.name}" module')
-        print('Make sure to install dependencies with "pip install -r requirements.txt"')
+        print(f'Failed to import Cython')
+        print('Make sure to install Cython before you run the installation process')
         exit(-1)
-
-    from vtk import vtkVersion
-    if vtkVersion.GetVTKMajorVersion() < 8 or vtkVersion.GetVTKMinorVersion() < 1 or vtkVersion.GetVTKBuildVersion() < 2:
-        print('version of the vtk library must be >= 8.1.2')
-        exit(-1)
-
     print(" [done]")
 
 
@@ -310,6 +300,16 @@ if __name__ == '__main__':
 
             keywords=KEYWORDS,
             classifiers=CLASSIFIERS,
+
+            python_requires='>=3.7',
+            install_requires=[
+                'Cython>=0.29.13',
+                'asciitree>=0.3.3',
+                'tabulate>=0.8.5',
+                'numpy>=1.17.2',
+                'vtk>=8.1.2',
+                'jupyter>=1.0.0'
+            ],
 
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
