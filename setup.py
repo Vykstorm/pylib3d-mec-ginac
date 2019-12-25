@@ -5,19 +5,29 @@ Setup script to install pylib3d-mec-ginac library.
 '''
 
 # Import statements
+
+
+# setuptools & distutils
 from setuptools.command.build_ext import build_ext
 from distutils.core import setup
 from distutils.extension import Extension
+from sysconfig import get_path
+
+# system, os & file managing
+import os, sys
 from os import listdir
-from os.path import join, abspath, dirname
-from functools import reduce, partial
+from os.path import join, abspath, dirname, relpath
+from shutil import copyfile
+
+# other imports
+from functools import partial
+from operator import methodcaller
 from re import sub, DOTALL
 from itertools import chain
 import json
 from contextlib import contextmanager
-import sys
-from io import StringIO
 import builtins
+from io import StringIO
 
 
 
@@ -84,36 +94,25 @@ PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.draw
 
 ######## C COMPILER CONFIGURATION ########
 
-# Directory that contains all lib3d-mec-ginac headers
-LIB3D_MEC_GINAC_INCLUDE_DIR = abspath('../lib_3d_mec_ginac/include/lib_3d_mec_ginac')
+# Directory containing header files used to build the extensions
+INCLUDE_DIR = 'include'
 
-# Directory where lib3d-mec-ginac libraries are located
-LIB3D_MEC_GINAC_LIBRARY_DIR = abspath('../lib_3d_mec_ginac/lib')
+# Directory where to search for dynamic libraries
+LIBRARIES_DIR = 'lib/linux/x86_64'
 
-# Directories containing header files used to build the extensions
-INCLUDE_DIRS = [
-    '/usr/local/include',
-    '/usr/include',
-    LIB3D_MEC_GINAC_INCLUDE_DIR
-]
-
-# Directories to search for libraries at link time
-LIBRARY_DIRS = [
-    LIB3D_MEC_GINAC_LIBRARY_DIR,
-    '/usr/local/lib'
-]
-
-# Directories to search for dynamic libraries at runtime
-RUNTIME_LIBRARY_DIRS = [
-    LIB3D_MEC_GINAC_LIBRARY_DIR
-]
-
-# Name of the libraries for the extensions to link against
+# Name of the dynamic libraries to use
 LIBRARIES = [
     'cln',
     'ginac',
-    '_3d_mec_ginac-2.0'
+    '_3d_mec_ginac'
 ]
+
+# Directory where to search for dynamic libraries at runtime
+RUNTIME_LIBRARIES_DIR = get_path('platlib')
+
+
+
+
 
 
 ######## EXTENSION SETUP ########
@@ -159,14 +158,34 @@ EXTENSIONS = [
     Extension(
         name=EXTENSION_NAME,
         sources=EXTENSION_SOURCES,
-        include_dirs=INCLUDE_DIRS,
-        library_dirs=LIBRARY_DIRS,
-        runtime_library_dirs=RUNTIME_LIBRARY_DIRS,
+        include_dirs=[INCLUDE_DIR],
+        library_dirs=[abspath(LIBRARIES_DIR)],
+        runtime_library_dirs=[RUNTIME_LIBRARIES_DIR],
         libraries=LIBRARIES,
         language='c++',
         extra_compile_args=['-w']
     )
 ]
+
+
+
+######## PACKAGE DEPENDENCIES ########
+
+# Compatible python version
+PYTHON_VERSION = '>=3.7'
+
+# Package dependencies
+DEPENDENCIES = [
+    'Cython>=0.29.13',
+    'asciitree>=0.3.3',
+    'tabulate>=0.8.5',
+    'numpy>=1.17.2',
+    'vtk>=8.1.2',
+    'jupyter>=1.0.0'
+]
+
+
+
 
 
 
@@ -280,6 +299,16 @@ if __name__ == '__main__':
 
 
 
+    ## Finally install runtime dependency libraries
+    print('\u2022 Installing runtime dependency libraries', end='')
+    with output_suppressed():
+        for lib in listdir(LIBRARIES_DIR):
+            src, dst = join(LIBRARIES_DIR, lib), join(RUNTIME_LIBRARIES_DIR, lib)
+            print(f'Copying file {src} to {dst}')
+            copyfile(src, dst)
+    print(' [done]')
+
+
     ## Generate C-Python extension
     print('\u2022 Generating cpython extension', end='')
     with output_suppressed():
@@ -306,24 +335,20 @@ if __name__ == '__main__':
             keywords=KEYWORDS,
             classifiers=CLASSIFIERS,
 
-            python_requires='>=3.7',
-            install_requires=[
-                'Cython>=0.29.13',
-                'asciitree>=0.3.3',
-                'tabulate>=0.8.5',
-                'numpy>=1.17.2',
-                'vtk>=8.1.2',
-                'jupyter>=1.0.0'
-            ],
-
+            python_requires=PYTHON_VERSION,
+            install_requires=DEPENDENCIES,
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
             package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]},
             ext_modules=extensions,
-            cmdclass={'build_ext': BuildExt},
+            cmdclass={'build_ext': BuildExt}
         )
     print(' [done]')
 
 
     # Helper tip
-    print(f'Type python -i -c "from {ROOT_PACKAGE} import *" to open a console with this library imported')
+    print(f'\u2192 Type python -c "import lib3d_mec_ginac" to verify the installation')
+    print(f'\u2192 Type python -m lib3d_mec_ginac to start using the library in interactive mode')
+
+
+    #print(f'Type python -i -c "from {ROOT_PACKAGE} import *" to open a console with this library imported')
