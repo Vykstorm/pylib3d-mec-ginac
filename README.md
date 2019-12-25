@@ -13,14 +13,12 @@ pylib3d_mec_ginac brings all the features of this library to a high level interp
 
 ## Installation
 
-Install it via pip
+Install it with setuptools:
 ```bash
-pip install lib3d_mec_ginac
+git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git
+cd pylib3d-mec-ginac
+python setup.py install
 ```
-
-
-
-If you wish to use lib3d-mec-ginac in your jupyter notebooks, you can install the jupyter kernel for this library:
 
 ```bash
 git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git

@@ -28,6 +28,7 @@ import json
 from contextlib import contextmanager
 import builtins
 from io import StringIO
+import subprocess
 
 
 
@@ -345,7 +346,12 @@ if __name__ == '__main__':
         )
     print(' [done]')
 
+    ## Install jupyter kernel
+    print("\u2022 Installing jupyter custom kernel", end='')
+    with output_suppressed():
+        subprocess.run(['jupyter', 'kernelspec', 'install', 'src/jupyter', '--replace', '--user', '--name=lib3d-mec-ginac'], stdout=sys.stdout, stderr=sys.stderr)
+    print(' [done]')
 
     # Helper tip
-    print(f'\u2192 Type \u201cpython -c "import lib3d_mec_ginac"\u201d to verify the installation')
-    print(f'\u2192 Type \u201cpython -m lib3d_mec_ginac\u201d to start using the library in interactive mode')
+    print(f'\u2192 Type \u00abpython -c "import lib3d_mec_ginac"\u00bb to verify the installation')
+    print(f'\u2192 Type \u00abpython -m lib3d_mec_ginac\u00bb to start using the library in interactive mode')
