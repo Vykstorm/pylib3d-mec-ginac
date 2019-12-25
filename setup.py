@@ -347,8 +347,5 @@ if __name__ == '__main__':
 
 
     # Helper tip
-    print(f'\u2192 Type python -c "import lib3d_mec_ginac" to verify the installation')
-    print(f'\u2192 Type python -m lib3d_mec_ginac to start using the library in interactive mode')
-
-
-    #print(f'Type python -i -c "from {ROOT_PACKAGE} import *" to open a console with this library imported')
+    print(f'\u2192 Type \u201cpython -c "import lib3d_mec_ginac"\u201d to verify the installation')
+    print(f'\u2192 Type \u201cpython -m lib3d_mec_ginac\u201d to start using the library in interactive mode')
