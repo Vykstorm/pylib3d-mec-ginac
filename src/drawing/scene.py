@@ -94,7 +94,6 @@ class Scene(EventProducer):
         self._simulation_display_info = display
         self.add_drawing(display)
 
-
         # Add drawings info text display
         display = TextDrawing('', position=(-0.01, -0.02), font_size=15, color='black', italic=False)
         display.set_position_relative_to_top_right()
@@ -105,6 +104,9 @@ class Scene(EventProducer):
         self.add_drawing(display)
         self._update_drawings_display_info()
 
+
+        # Draw the abs frame by default
+        self.draw_frame(system.abs)
 
 
 
