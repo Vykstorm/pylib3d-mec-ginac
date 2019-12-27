@@ -262,9 +262,9 @@ if __name__ == '__main__':
 
     try:
         from Cython.Build import cythonize
-    except ImportError as e:
+    except ImportError:
         # Generate error message if missing dependencies
-        print(f'Failed to import Cython')
+        print('Failed to import Cython')
         print('Make sure to install Cython before you run the installation process')
         exit(-1)
     print(" [done]")
