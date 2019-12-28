@@ -105,9 +105,6 @@ class Scene(EventProducer):
         self._update_drawings_display_info()
 
 
-        # Draw the abs frame by default
-        self.draw_frame(system.abs)
-
 
 
     ######## Event handlers ########
