@@ -21,11 +21,11 @@ library avaliable.
 
     devnull = open(os.devnull, 'w')
     try:
-        server = subprocess.Popen(['python', '-m', 'lib3d_mec_ginac', '--no-console'], stdout=devnull)
+        server = subprocess.Popen(['python', '-m', 'lib3d_mec_ginac', '--no-console'], stdout=devnull, stderr=devnull)
         jupyter_process_args = ['jupyter', 'notebook', '--KernelManager.kernel_name=lib3d-mec-ginac']
         if file is not None:
             jupyter_process_args.insert(2, file)
-        jupyter_server = subprocess.Popen(jupyter_process_args, stdout=devnull)
+        jupyter_server = subprocess.Popen(jupyter_process_args, stdout=devnull, stderr=devnull)
     finally:
         devnull.close()
     try:
