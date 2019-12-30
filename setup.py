@@ -260,7 +260,7 @@ if __name__ == '__main__':
 
 
     ## Check library dependencies
-    print("\u2022 Checking library dependencies", end='')
+    print("- Checking library dependencies", end='')
 
     try:
         from Cython.Build import cythonize
@@ -273,14 +273,14 @@ if __name__ == '__main__':
 
 
     ## Create config.json (this is used to configure the library at runtime)
-    print(f"\u2022 Generating runtime settings file", end='')
+    print(f"- Generating runtime settings file", end='')
     with open(join(ROOT_PACKAGE_DIR, RUNTIME_CONFIG_FILE), 'w') as file:
         json.dump(RUNTIME_CONFIG, file)
     print(' [done]')
 
 
     ## Merge .pyx definition files into one
-    print(f"\u2022 Generating {PYX_MAIN} file", end='')
+    print(f"- Generating {PYX_MAIN} file", end='')
     with open(PYX_MAIN, 'w') as f_out: # All source code will be merged to this file
         # Insert a header comment in the output file
         f_out.write('\n'.join([
@@ -303,7 +303,7 @@ if __name__ == '__main__':
 
 
     ## Finally install runtime dependency libraries
-    print('\u2022 Installing runtime dependency libraries', end='')
+    print('- Installing runtime dependency libraries', end='')
     with output_suppressed():
         for lib in listdir(LIBRARIES_DIR):
             src, dst = join(LIBRARIES_DIR, lib), join(RUNTIME_LIBRARIES_DIR, lib)
@@ -313,7 +313,7 @@ if __name__ == '__main__':
 
 
     ## Generate C-Python extension
-    print('\u2022 Generating cpython extension', end='')
+    print('- Generating cpython extension', end='')
     with output_suppressed():
         extensions = cythonize(EXTENSIONS,
             compiler_directives={'language_level': 3}, nthreads=2, force=True)
@@ -321,7 +321,7 @@ if __name__ == '__main__':
 
 
     ## Invoke distutils setup
-    print("\u2022 Compiling extension and installing package", end='')
+    print("- Compiling extension and installing package", end='')
     with output_suppressed():
         setup(
             name=NAME,
@@ -349,11 +349,11 @@ if __name__ == '__main__':
     print(' [done]')
 
     ## Install jupyter kernel
-    print("\u2022 Installing jupyter custom kernel", end='')
+    print("- Installing jupyter custom kernel", end='')
     with output_suppressed():
         subprocess.run(['jupyter', 'kernelspec', 'install', 'src/jupyter', '--replace', '--user', '--name=lib3d-mec-ginac'], stdout=sys.stdout, stderr=sys.stderr)
     print(' [done]')
 
     # Helper tip
-    print(f'\u2192 Type \u00abpython -c "import lib3d_mec_ginac"\u00bb to verify the installation')
-    print(f'\u2192 Type \u00abpython -m lib3d_mec_ginac\u00bb to start using the library in interactive mode')
+    print(f'Type -> python -c "import lib3d_mec_ginac <- to verify the installation')
+    print(f'Type -> python -m lib3d_mec_ginac <- to start using the library in interactive mode')
