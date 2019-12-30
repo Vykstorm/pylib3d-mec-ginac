@@ -43,7 +43,6 @@ API Reference
         angular_acceleration, acceleration_vector,
         twist, derivative, jacobian, diff,
         gravity_wrench, inertia_wrench,
-        start_kinematic_euler_simulation,
         symbols,
         time,
         coordinates, velocities, accelerations,
@@ -76,7 +75,6 @@ API Reference
         set,
         transpose, subs,
         shape, num_rows, num_cols, size, T, transposed, values,
-        numeric_function, numeric_func,
         eye, xrot, yrot, zrot
 
 
@@ -141,7 +139,8 @@ API Reference
         draw_point, draw_frame, draw_vector, draw_stl, draw_scad, draw_solid,
         draw_position_vector, draw_velocity_vector,
         draw_text,
-        background_color, render_mode
+        background_color, render_mode,
+        start_kinematic_euler_simulation
 
 
 
