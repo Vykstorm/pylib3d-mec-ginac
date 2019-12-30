@@ -764,12 +764,12 @@ class Scene(EventProducer):
 
         # Setup drawing transformation
         drawing.scale(scale)
-        #self._apply_point_transform(drawing, frame.get_point())
         point = frame.get_point()
-        OC = self._system.position_vector(self._system.O, point)
-        base = OC.get_base()
-        R = self._system.rotation_matrix(self._system.xyz, base)
-        T = OC.in_base(self._system.xyz)
+        pv = self._system.position_vector(self._system.O, point)
+
+        R = self._system.rotation_matrix(self._system.xyz, frame.get_base())
+        T = pv.in_base(self._system.xyz)
+
         drawing.rotate(R)
         drawing.translate(T)
 
@@ -991,12 +991,12 @@ class Scene(EventProducer):
         drawing = self._draw_stl(SolidDrawing, solid.get_name() + '.stl', color, scale, solid)
 
         # Setup drawing transformation
-        #self._apply_point_transform(drawing, solid.get_point())
         point = solid.get_point()
-        OC = self._system.position_vector(self._system.O, point)
-        base = OC.get_base()
-        R = self._system.rotation_matrix(self._system.xyz, base)
-        T = OC.in_base(self._system.xyz)
+        pv = self._system.position_vector(self._system.O, point)
+
+        R = self._system.rotation_matrix(self._system.xyz, solid.get_base())
+        T = pv.in_base(self._system.xyz)
+
         drawing.rotate(R)
         drawing.translate(T)
 
