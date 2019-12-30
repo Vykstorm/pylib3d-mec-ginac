@@ -16,7 +16,7 @@ from sysconfig import get_path
 # system, os & file managing
 import os, sys
 from os import listdir
-from os.path import join, abspath, dirname, relpath
+from os.path import join, abspath, dirname, relpath, exists
 from shutil import copyfile
 
 # other imports
@@ -109,8 +109,10 @@ LIBRARIES = [
 ]
 
 # Directory where to search for dynamic libraries at runtime
-RUNTIME_LIBRARIES_DIR = get_path('platlib')
-
+if exists(get_path('platlib')):
+    RUNTIME_LIBRARIES_DIR = get_path('platlib')
+else:
+    RUNTIME_LIBRARIES_DIR = get_path('platstdlib')
 
 
 
