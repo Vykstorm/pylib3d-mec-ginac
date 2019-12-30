@@ -13,7 +13,23 @@ pylib3d_mec_ginac brings all the features of this library to a high level interp
 
 ## Installation
 
-Install it with setuptools:
+First you need g++, openGL, libSM and git ( to download this project source code ):
+```bash
+sudo apt update
+sudo apt install -y g++ mesa-utils libsm6 libxrender1 libfontconfig git
+```
+
+Then install python3 & pip:
+```bash
+sudo apt install python3 python3-pip
+```
+If you are using anaconda, you can create a new virtual environment with python3
+```bash
+conda create -n myenv python=3.7
+```
+
+
+Now install this library with setuptools:
 ```bash
 git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git
 cd pylib3d-mec-ginac
