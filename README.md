@@ -20,12 +20,6 @@ cd pylib3d-mec-ginac
 python setup.py install
 ```
 
-```bash
-git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git
-cd pylib3d-mec-ginac
-jupyter kernelspec install src/jupyter --replace --user --name=lib3d_mec_ginac
-```
-
 
 ## Usage
 
