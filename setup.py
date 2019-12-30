@@ -355,5 +355,5 @@ if __name__ == '__main__':
     print(' [done]')
 
     # Helper tip
-    print(f'Type -> python -c "import lib3d_mec_ginac <- to verify the installation')
+    print(f'Type -> python -c "import lib3d_mec_ginac" <- to verify the installation')
     print(f'Type -> python -m lib3d_mec_ginac <- to start using the library in interactive mode')
