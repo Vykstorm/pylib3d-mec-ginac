@@ -3,7 +3,7 @@
 
 #include "Base.h"
 #include "Point.h"
-#include "GL/gl.h"
+/*#include "GL/gl.h"*/
 #include "symbol_numeric.h"
 class System;
 
@@ -17,7 +17,7 @@ using std::string;
 		Point * point;
 		Base * base;
 		numeric scale;
-		GLdouble OpenGLTransformMatrix[16];
+		double OpenGLTransformMatrix[16];
 
 		//Private methods
 		void init (string name , Point * point , Base * base, numeric scale );
@@ -27,7 +27,7 @@ using std::string;
 		//Constructors
 
 		Frame ( void );
-		Frame ( Point * point , Base * base);		
+		Frame ( Point * point , Base * base);
 		Frame ( string name , Point * point , Base * base);
 		Frame ( string name , Point * point , Base * base, numeric scale);
 		//Access methods
@@ -42,7 +42,7 @@ using std::string;
 
 		//Utility methods
 
-		GLdouble * get_absOpenGLTransformMatrix ();
+		double * get_absOpenGLTransformMatrix ();
 
 		//Destructor
 

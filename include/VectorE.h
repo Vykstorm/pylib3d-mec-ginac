@@ -2,7 +2,7 @@
 #define VectorE_H
 
 //#include "Vector3D.H"
-#include "GL/gl.h"
+/*#include "GL/gl.h"*/
 //#include "symbol_numeric.h"
 #include <iostream>
 #include <vector>
@@ -18,12 +18,12 @@ class System;
 using std::ostream;
 using std::string;
 
-    //template <class T>  
+    //template <class T>
     class VectorE{
 
         //Atributes
         string name;
-        list <Vector3D> VectorsList; 
+        list <Vector3D> VectorsList;
 
         private:
         void init ( string name );
@@ -37,14 +37,14 @@ using std::string;
 
         VectorE ( void );
         VectorE ( string name);
- 
+
 
         //Access methods
-        //void push(T const&);  // push element 
+        //void push(T const&);  // push element
         string get_name ( void );
-        void push (Vector3D vector);    
+        void push (Vector3D vector);
         friend ostream& operator << ( ostream& os , const VectorE & vector );
-    
+
 
         //Destructor
         ~VectorE ( void );
@@ -55,5 +55,3 @@ using std::string;
 
 
 #endif // VectorE_H
-
-

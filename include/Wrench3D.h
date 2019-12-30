@@ -3,7 +3,7 @@
 
 #include "Base.h"
 #include "Point.h"
-#include "GL/gl.h"
+/*#include "GL/gl.h"*/
 #include "symbol_numeric.h"
 #include "Solid.h"
 
@@ -35,9 +35,9 @@ using std::string;
 
 		//Constructors
 
-		Wrench3D ( void );		
+		Wrench3D ( void );
 		Wrench3D (string name, Vector3D F, Vector3D M , Point * P, Solid * Sol, string type);
- 
+
 
 		//Access methods
 		string get_name ( void );
@@ -47,7 +47,7 @@ using std::string;
 		Solid * get_Solid ( void );
 		string get_Type ( void );
         void set_System ( System * new_system );
-        
+
 		//Utility methods
         Wrench3D unatomize ( void );
         //Operations
@@ -69,5 +69,3 @@ using std::string;
 
 
 #endif // TORSOR3D_H
-
-

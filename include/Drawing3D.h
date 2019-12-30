@@ -3,7 +3,7 @@
 
 #include "Base.h"
 #include "Point.h"
-#include "GL/gl.h"
+/*#include "GL/gl.h"*/
 #include "symbol_numeric.h"
 #include "Solid.h"
 class System;
@@ -26,7 +26,7 @@ using std::string;
         numeric scale;
         lst color;
                 //ex module;//EZABATU
-                
+
 
         private:
         //Private methods
@@ -38,7 +38,7 @@ using std::string;
 
         Drawing3D ( void );
         Drawing3D ( string name, string type, Point * P , Base * B);
- 
+
 
         //Access methods
           string get_name ( void );
@@ -64,5 +64,3 @@ using std::string;
 
 
 #endif // Drawing3D_H
-
-
