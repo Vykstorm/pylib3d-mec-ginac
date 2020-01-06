@@ -1,6 +1,8 @@
 
 # Build base docker image
-sudo docker build . -t pylib3d-mec-ginac:latest
+cd base \
+&& sudo docker build . -t pylib3d-mec-ginac:latest \
+&& cd ..
 
 # Build docker with jupyter server
 cd jupyter \
