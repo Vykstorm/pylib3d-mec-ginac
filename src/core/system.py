@@ -1151,7 +1151,7 @@ class System(_System):
 
 
     def new_wrench(self, name, force, moment, point, solid, type):
-        '''new_wrench(name: str, force: Vector3D, moment: Vector3D, point: Point, base: Base, mass: SymbolNumeric, type: str) -> Wrench3D
+        '''new_wrench(name: str, force: Vector3D, moment: Vector3D, point: Point, solid: Solid, type: str) -> Wrench3D
         Create a new wrench with the given name, force and moment vectors, point, solid object
         and with the given type.
 
