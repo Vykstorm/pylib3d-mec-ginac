@@ -1,5 +1,6 @@
 ARG BASE=pylib3d-mec-ginac:latest
 FROM $BASE
+ENV PORT=7000
 # Install sphinx & generate docs
 RUN pip install -U sphinx \
     && cd pylib3d-mec-ginac/docs \
