@@ -1,6 +1,6 @@
 ARG BASE=pylib3d-mec-ginac:latest
 FROM $BASE
-ARG PORT=8000
+ENV PORT=8000
 # Install additional packages
 RUN pip install matplotlib pandas
 # Copy empty notebook
