@@ -78,7 +78,7 @@ You can run jupyter notebooks to define your mechanical system while you simulat
 
 Execute the next line:
 ```bash
-python -m lib3d_mec_ginac.jupyter --no-console
+python -m lib3d_mec_ginac.jupyter
 ```
 
 ### Try it online
