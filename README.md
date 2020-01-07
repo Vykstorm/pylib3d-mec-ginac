@@ -74,18 +74,36 @@ Beware that if you call ``show_viewer()`` to open the 3D viewer, your script (or
 
 ### Jupyer notebook + 3D viewer
 
-Finally, you can run jupyter notebooks to define your mechanical system and visualize it in the 3D viewer.
+You can run jupyter notebooks to define your mechanical system while you simulate it in the 3D viewer.
 
-First write:
+Execute the next line:
 ```bash
-python -m lib3d_mec_ginac --no-console
+python -m lib3d_mec_ginac.jupyter --no-console
 ```
 
-In another console type to run jupyer:
+### Try it online
+
+Finally you can run a jupyter notebook and use this library. No installation needed, but features are limited ( 3D viewer is not avaliable ).
+
+[Try it now!](https://pylib3d-mec-ginac.herokuapp.com/notebooks/Untitled.ipynb)
+
+
+
+
+## Docker integration
+
+You can build a docker image with ubuntu 18.04 + python 3.7 + this library ( and all its dependencies ) installed.
+
+The next bash lines will pull & run the image from this repository. An interactive Python console will be open with all the functions & classes of the API already imported.
+
 ```bash
-jupyter notebook
+IMAGE=docker.pkg.github.com/vykstorm/pylib3d-mec-ginac/pylib3d-mec-ginac:1.0.0
+sudo docker pull $IMAGE
+sudo docker run -it $IMAGE
+>>> ...
 ```
-Create a new python notebook and change the kernel to ``lib3d_mec_ginac``
+
+There are also other useful docker images you can try. Go to the [Github packages](https://github.com/Vykstorm/pylib3d-mec-ginac/packages) section of this repo.
 
 
 
@@ -99,17 +117,8 @@ from lib3d_mec_ginac import System
 help(System)
 ```
 
-Also, ```docs/``` directory contains documentation pages formatted with reStructuredText syntax. They can be rendered to html/pdf with sphinx (You need to install this library first or build the extension locally with ```python setup.py build_ext --inplace```)
+Also [this page](https://pylib3d-mec-ginac-docs.herokuapp.com/) contains the reference of the API and a quick start tutorial.
 
-Use the Makefile in ```docs/``` for that task. To build html pages, you can do:
-```bash
-cd docs
-make html
-```
-The HTML index page will be in ```docs/_build/html/index.html```
-
-
-If you dont want to generate documentation by hand, you can view it on [this page](http://vykstorm.pythonanywhere.com/).
 
 
 
@@ -124,7 +133,6 @@ You can test the ``four_bar`` example easily by typing the next line in your ter
 ```bash
 python -m lib3d_mec_ginac examples/four_bar
 ```
-
 
 
 
