@@ -55,6 +55,12 @@ cdef class Matrix(Object):
             self._c_handler = NULL
             return
 
+        if shape is None and isinstance(values, Matrix):
+            # Matrix as a copy of another one
+            self._c_handler = new c_Matrix((<Matrix>values)._get_c_handler().get_matrix())
+            self._owns_c_handler = True
+            return
+
 
         if shape is None and values is not None and not isinstance(values, (range, list, tuple, set, frozenset)):
             # Check if values is a numpy array
