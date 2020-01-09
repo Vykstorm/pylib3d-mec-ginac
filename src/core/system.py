@@ -1609,6 +1609,19 @@ class System(_System):
 
 
 
+    ######## Export ########
+
+
+    def export_function_MATLAB(self, matrix, func_name, func_out_name=None):
+        '''export_function_MATLAB(matrix: Matrix, func_name: str[, func_out_name: str])
+        Build a MATLAB script which defines a function that evaluates the given symbolic
+        matrix numerically.
+        '''
+        self._export_function_MATLAB(matrix, func_name, func_out_name)
+
+
+
+
 
     ######## Properties ########
 

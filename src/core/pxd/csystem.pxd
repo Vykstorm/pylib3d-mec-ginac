@@ -18,6 +18,7 @@ from libcpp.string cimport string
 from src.core.pxd.ginac.cnumeric  cimport numeric
 from src.core.pxd.ginac.cexpr     cimport ex
 from src.core.pxd.ginac.csymbol   cimport symbol
+from src.core.pxd.ginac.clst      cimport lst
 
 # lib3d-mec-ginac classes
 from src.core.pxd.csymbol_numeric cimport symbol_numeric
@@ -158,3 +159,7 @@ cdef extern from "System.h":
         # Solid methods
         Wrench3D* Gravity_Wrench(Solid*)
         Wrench3D* Inertia_Wrench(Solid*)
+
+
+        # Export functions
+        void export_function_MATLAB(string, string, Matrix, lst, lst)
