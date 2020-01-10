@@ -1061,10 +1061,11 @@ class Scene(EventProducer):
         filter.Update()
 
         writer = vtkPNGWriter()
+        writer.SetCompressionLevel(0)
         writer.SetWriteToMemory(1)
         writer.SetInputConnection(filter.GetOutputPort())
         writer.Write()
-        return Image(writer.GetResult())
+        return Image(memoryview(writer.GetResult()).tobytes())
 
 
 
