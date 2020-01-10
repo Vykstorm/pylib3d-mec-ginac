@@ -110,8 +110,8 @@ dPhi_init = Matrix([dtheta1 + pi / 2])
 
 # Now we create the numeric function to measure its evaluation performance (optimized and unoptimized version)
 print("Generating numeric functions...")
-func = get_numeric_function(gamma, c_optimized=False)
-func_optimized = get_numeric_function(gamma, c_optimized=True)
+func = compile_numeric_function(gamma, c_optimized=False)
+func_optimized = compile_numeric_function(gamma, c_optimized=True)
 
 
 

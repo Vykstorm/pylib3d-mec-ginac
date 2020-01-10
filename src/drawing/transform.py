@@ -47,7 +47,7 @@ class Transform:
             return self._matrix.view()
         else:
             if self._numeric_func is None or self._system is not system:
-                self._system, self._numeric_func = system, system.get_numeric_function(self._matrix)
+                self._system, self._numeric_func = system, system.compile_numeric_function(self._matrix)
             return self._numeric_func.evaluate()
 
 
@@ -409,7 +409,7 @@ class Transform:
 
             def evaluate(self, system):
                 if self._numeric_func is None or self._system is not system:
-                    self._system, self._numeric_func = system, system.get_numeric_function(direction)
+                    self._system, self._numeric_func = system, system.compile_numeric_function(direction)
 
 
                 dx, dy, dz = self._numeric_func.evaluate().flat

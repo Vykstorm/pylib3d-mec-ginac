@@ -1413,7 +1413,7 @@ cdef class _System:
     ######## Numeric evaluation ########
 
 
-    cpdef _get_numeric_function(self, matrix, c_optimized):
+    cpdef _compile_numeric_function(self, matrix, c_optimized):
         if not isinstance(matrix, Matrix):
             raise TypeError('Input argument must be a Matrix')
 
@@ -1438,7 +1438,7 @@ cdef class _System:
 
 
 
-    ######## Mixin ########
+    ######## Export ########
 
 
     cpdef _export_function_MATLAB(self, matrix, func_name, func_out_name=None):
@@ -1469,6 +1469,8 @@ cdef class _System:
         )
 
 
+    cpdef _export_numeric_init_function_MATLAB(self):
+        self._c_handler.export_init_function_MATLAB()
 
 
 

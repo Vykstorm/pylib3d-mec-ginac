@@ -249,7 +249,7 @@ class Simulation(EventProducer):
                     raise Exception
             constraints = dict(zip(
                 constraints.keys(),
-                [value if isinstance(value, NumericFunction) else system.get_numeric_function(value) for value in constraints.values()]
+                [value if isinstance(value, NumericFunction) else system.comple_numeric_function(value) for value in constraints.values()]
             ))
         except Exception as e:
             raise TypeError('constraints must be a mapping like object where keys are constraint names and values are Matrix or NumericFunction instances')

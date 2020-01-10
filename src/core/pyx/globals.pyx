@@ -375,7 +375,7 @@ def evaluate(func):
         │  c*(b**2+a**2+c**2)**(1/2)                           0  -(b**2+a**2+c**2)**(1/2)*a │
         │ -b*(b**2+a**2+c**2)**(1/2)   (b**2+a**2+c**2)**(1/2)*a                           0 │
         ╰                                                                                    ╯
-        >>> func = get_numeric_function(m)
+        >>> func = compile_numeric_function(m)
         >>> evaluate(func)
         array([[  0.        , -11.22497216,   7.48331477],
                [ 11.22497216,   0.        ,  -3.74165739],

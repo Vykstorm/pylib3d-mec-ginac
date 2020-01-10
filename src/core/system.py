@@ -1576,7 +1576,7 @@ class System(_System):
     ######## Numeric evaluation ########
 
 
-    def get_numeric_function(self, matrix, c_optimized=False):
+    def compile_numeric_function(self, matrix, c_optimized=False):
         '''
         Get a function that can be used to evaluate the given matrix numerically.
 
@@ -1589,22 +1589,22 @@ class System(_System):
         .. seealso:: :func:`evaluate`
 
         '''
-        return self._get_numeric_function(matrix, c_optimized)
+        return self._compile_numeric_function(matrix, c_optimized)
 
 
 
-    def get_numeric_function_c_optimized(self, matrix):
+    def compile_numeric_function_c_optimized(self, matrix):
         '''
-        This is an alias of ``get_numeric_function(matrix, c_optimized=True)``
+        This is an alias of ``compile_numeric_function(matrix, c_optimized=True)``
 
-        .. seealso:: :func:`get_numeric_function`
+        .. seealso:: :func:`compile_numeric_function`
 
         '''
-        return self.get_numeric_function(matrix, c_optimized=True)
+        return self.compile_numeric_function(matrix, c_optimized=True)
 
 
-    get_numeric_func = get_numeric_function
-    get_numeric_func_c_optimized = get_numeric_function_c_optimized
+    compile_numeric_func = compile_numeric_function
+    compile_numeric_func_c_optimized  = compile_numeric_function_c_optimized
 
 
 
@@ -1612,13 +1612,25 @@ class System(_System):
     ######## Export ########
 
 
-    def export_function_MATLAB(self, matrix, func_name, func_out_name=None):
-        '''export_function_MATLAB(matrix: Matrix, func_name: str[, func_out_name: str])
+    def export_numeric_function_MATLAB(self, matrix, func_name, func_out_name=None):
+        '''export_numeric_function_MATLAB(matrix: Matrix, func_name: str[, func_out_name: str])
         Build a MATLAB script which defines a function that evaluates the given symbolic
         matrix numerically.
         '''
         self._export_function_MATLAB(matrix, func_name, func_out_name)
 
+
+    def export_numeric_init_function_MATLAB(self):
+        '''export_numeric_init_function_MATLAB()
+        Build a MATLAB script which defines a function that initializes the numeric values of the
+        symbols of the system.
+        '''
+        self._export_numeric_init_function_MATLAB()
+
+
+
+    export_numeric_func_MATLAB = export_numeric_function_MATLAB
+    export_numeric_init_func_MATLAB = export_numeric_init_function_MATLAB
 
 
 

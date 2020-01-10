@@ -78,9 +78,9 @@ _numfuncs_extension_compiler = CythonNumericFunctionExtensionsCompiler()
 class NumericFunction:
     '''
     Instances of this class represents numerical functions and
-    are returned by the method ``get_numeric_function``
+    are returned by the method ``compile_numeric_function`` in the class ``System``
 
-    .. seealso:: :func:`get_numeric_function`
+    .. seealso:: :class:`System`
 
     '''
 

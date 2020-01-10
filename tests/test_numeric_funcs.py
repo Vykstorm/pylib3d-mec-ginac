@@ -38,7 +38,7 @@ def test_numeric_funcs_evaluation_return_type():
         Matrix([[1, Pi, Euler, a, Tau]])
     ]
 
-    funcs = tuple(chain([s.get_numeric_function(matrices[0])], map(s.get_numeric_function, matrices[1:])))
+    funcs = tuple(chain([s.compile_numeric_function(matrices[0])], map(s.get_numeric_function, matrices[1:])))
 
     for func, matrix in zip(funcs, matrices):
         # Test that numeric function evaluation result is a numpy ndarray with float64 values (a view)
