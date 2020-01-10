@@ -19,7 +19,10 @@ from .transform import Transform
 from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
 # vtk imports
-from vtk import vtkRenderer
+from vtk import vtkRenderer, vtkRenderWindow, vtkWindowToImageFilter, vtkPNGWriter
+
+# IPython imports
+from IPython.display import Image
 
 # third party imports
 from tabulate import tabulate
@@ -1029,6 +1032,39 @@ class Scene(EventProducer):
         self.add_drawing(drawing)
         return drawing
 
+
+
+
+    def get_screenshot(self, width=640, height=480):
+        '''get_screenshot() -> IPython.Image
+        Take a screenshot of the scene and return it as IPython image (displayable on
+        jupyter notebooks)
+
+        :rtype: IPython.Image
+        '''
+        if not isinstance(width, int) or width <= 0:
+            raise TypeError('width must be an integer greater than zero')
+
+        if not isinstance(height, int) or height <= 0:
+            raise TypeError('height must be an integer greater than zero')
+
+
+
+        window = vtkRenderWindow()
+        window.SetOffScreenRendering(1)
+        window.AddRenderer(self._renderer)
+        window.SetSize(width, height)
+        window.Render()
+
+        filter = vtkWindowToImageFilter()
+        filter.SetInput(window)
+        filter.Update()
+
+        writer = vtkPNGWriter()
+        writer.SetWriteToMemory(1)
+        writer.SetInputConnection(filter.GetOutputPort())
+        writer.Write()
+        return Image(writer.GetResult())
 
 
 
