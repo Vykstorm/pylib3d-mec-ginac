@@ -485,7 +485,16 @@ class Scene(EventProducer):
         Get the current position of the camera to view this scene
         :rtype: Vector3
         '''
-        return self._camera.position
+        return self._camera.get_position()
+
+
+    def get_camera_focal_point(self):
+        '''get_camera_focal_point() -> Vector3
+        Get the current camera focal point
+        :rtype: Vector3
+        '''
+        return self._camera.get_focal_point()
+
 
 
 
@@ -586,6 +595,16 @@ class Scene(EventProducer):
         Changes the position of the camera used to view this scene.
         '''
         self._camera.set_position(*args)
+
+
+
+    def set_camera_focal_point(self, *args):
+        '''set_camera_focal_point(...)
+        Changes the focal point of the camera used to view this scene.
+        '''
+        self._camera.set_focal_point(*args)
+
+
 
 
 
