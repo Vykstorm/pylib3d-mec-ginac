@@ -66,6 +66,8 @@ class Scene(EventProducer):
         self._render_mode = 'solid'
         self._camera = Camera(renderer.GetActiveCamera())
 
+        self.add_child(self._camera)
+
         # Initialize background color
         self.add_child(self._background_color)
         self._update_background_color()
