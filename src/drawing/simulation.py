@@ -39,6 +39,7 @@ class Simulation(EventProducer):
         self._state = 'stopped'
         self._update_freq = runtime_config.SIMULATION_UPDATE_FREQUENCY
         self._time_multiplier = runtime_config.SIMULATION_TIME_MULTIPLIER
+        self._delta_t = None
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
         self._looped, self._time_limit = True, None
@@ -221,6 +222,23 @@ class Simulation(EventProducer):
             self.fire_event('time_limit_changed')
 
 
+    def set_delta_time(self, delta_t):
+        '''set_delta_time(delta_t: numeric | None)
+        Change the simulation delta time. If a number is specified, delta time will
+        have a fixed numeric value. If set to None ( by default ) it is updated on each
+        simulation step ( calculated is the time elapsed between two simulaton updates )
+        '''
+        if delta_t is not None:
+            try:
+                delta_t = float(delta_t)
+                if delta_t <= 0:
+                    raise TypeError
+            except:
+                raise TypeError('Input argument must be a number greater than zero or None')
+        with self:
+            self._delta_t = delta_t
+
+
 
     def set_integration_method(self, method, constraints, parameters):
         '''set_integrator(method: IntegrationMethod)
@@ -294,16 +312,22 @@ class Simulation(EventProducer):
         with self:
             if self._state != 'running':
                 return
-            # Update elapsed time
-            current_time = time_ns()
-            if self._last_update_time is None:
-                delta_t = 0
-                self._last_update_time = current_time
+
+            if self._delta_t is None:
+                # Compute delta time
+                current_time = time_ns()
+                if self._last_update_time is None:
+                    delta_t = 0
+                    self._last_update_time = current_time
+                else:
+                    delta_t = (current_time - self._last_update_time) / 1e9
+                    self._diff_times.appendleft(delta_t)
+                    self._last_update_time = current_time
             else:
-                delta_t = (current_time - self._last_update_time) / 1e9
-                self._elapsed_time += delta_t
-                self._diff_times.appendleft(delta_t)
-                self._last_update_time = current_time
+                delta_t = self._delta_t
+
+            # Update elapsed time
+            self._elapsed_time += delta_t
 
             # Update time variable
             delta_t *= self._time_multiplier

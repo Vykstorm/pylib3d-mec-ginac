@@ -538,6 +538,12 @@ class Scene(EventProducer):
         self._simulation.set_time_limit(limit)
 
 
+    def set_simulation_delta_time(self, delta_t):
+        '''set_simulation_delta_time(delta_t: numeric | None)
+        Set simulation delta time
+        '''
+        self._simulation.set_delta_time(delta_t)
+
 
     def set_simulation_update_frequency(self, frequency):
         '''set_simulation_update_frequency(frequency: numeric)
