@@ -192,7 +192,7 @@ class EventProducer:
         assert event_type is None or isinstance(event_type, str)
 
         with self:
-            self._event_handler = list(filterfalse(
+            self._event_handlers = list(filterfalse(
                 lambda handler: handler.callback == callback and (event_type is None or handler.event_type == event_type),
                 self._event_handlers
             ))
