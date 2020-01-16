@@ -142,7 +142,8 @@ API Reference
         draw_position_vector, draw_velocity_vector,
         draw_text,
         background_color, render_mode,
-        start_kinematic_euler_simulation
+        start_kinematic_euler_simulation,
+        get_screenshot, record_simulation
 
 
 
