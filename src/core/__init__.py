@@ -100,7 +100,8 @@ def _create_scene_global_func(method):
 for name in dir(Scene):
     if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
         name not in (
-            'start_simulation', 'start_kinematic_euler_simulation', 'stop_simulation', 'resume_simulation', 'pause_simulation', 'purge_drawings'
+            'start_simulation', 'start_kinematic_euler_simulation', 'stop_simulation',
+            'resume_simulation', 'pause_simulation', 'purge_drawings', 'record_simulation'
             ):
         continue
     __all__.append(name)
