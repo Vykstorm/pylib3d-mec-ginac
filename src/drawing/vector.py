@@ -40,6 +40,10 @@ class Vector(EventProducer):
     def __setitem__(self, index, value):
         if not isinstance(index, (int, slice)):
             raise TypeError('Index must be an integer or slice')
+
+        if isinstance(index, slice) and not isinstance(value, Iterable):
+            raise ValueError('Invalid number of values passed')
+
         if isinstance(value, Iterable):
             value = array('f', value)
 

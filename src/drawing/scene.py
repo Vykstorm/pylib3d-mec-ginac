@@ -16,6 +16,8 @@ from .simulation import Simulation
 from .scad import scad_to_stl
 from .color import Color
 from .transform import Transform
+from .vector import Vector2
+from .camera import Camera
 from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
 # vtk imports
@@ -52,9 +54,6 @@ class Scene(EventProducer):
         # Create vtk renderer
         renderer = vtkRenderer()
 
-        # Set default camera position
-        renderer.GetActiveCamera().SetPosition(7, 7, 7)
-
         # Create simulation
         simulation = Simulation(self, system)
         self.add_child(simulation)
@@ -65,6 +64,7 @@ class Scene(EventProducer):
         self._simulation = simulation
         self._background_color = Color('white')
         self._render_mode = 'solid'
+        self._camera = Camera(renderer.GetActiveCamera())
 
         # Initialize background color
         self.add_child(self._background_color)
@@ -470,6 +470,23 @@ class Scene(EventProducer):
             return self._render_mode
 
 
+    def get_camera(self):
+        '''get_camera() -> Camera
+        Get the camera to view this scene.
+        :rtype Camera
+        '''
+        return self._camera
+
+
+    def get_camera_position(self):
+        '''get_camera_position() -> Vector3
+        Get the current position of the camera to view this scene
+        :rtype: Vector3
+        '''
+        return self._camera.position
+
+
+
 
     def _get_drawing_by_handler(self, handler):
         for drawing in self.get_drawings():
@@ -561,6 +578,12 @@ class Scene(EventProducer):
             self.fire_event('render_mode_changed')
 
 
+
+    def set_camera_position(self, *args):
+        '''set_camera_position(...)
+        Changes the position of the camera used to view this scene.
+        '''
+        self._camera.set_position(*args)
 
 
 
