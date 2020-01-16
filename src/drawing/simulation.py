@@ -6,7 +6,7 @@ Description: This file defines the class Simulation
 ######## Import statements ########
 
 # Standard imports
-from time import process_time
+from time import time_ns
 from collections import deque
 from collections.abc import Mapping, Iterable
 
@@ -295,12 +295,12 @@ class Simulation(EventProducer):
             if self._state != 'running':
                 return
             # Update elapsed time
-            current_time = process_time()
+            current_time = time_ns()
             if self._last_update_time is None:
                 delta_t = 0
                 self._last_update_time = current_time
             else:
-                delta_t = current_time - self._last_update_time
+                delta_t = (current_time - self._last_update_time) / 1e9
                 self._elapsed_time += delta_t
                 self._diff_times.appendleft(delta_t)
                 self._last_update_time = current_time
@@ -310,6 +310,7 @@ class Simulation(EventProducer):
 
             t = self._system.get_time()
             t.value += delta_t
+
 
             self.get_integration_method().step(delta_t)
             self.fire_event('simulation_step')
