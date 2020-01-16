@@ -9,6 +9,7 @@ Description: This file defines the class Scene
 from operator import methodcaller, eq, add, itemgetter
 from functools import partial
 from itertools import chain, starmap
+from threading import Event
 
 # imports from other modules
 from .events import EventProducer
@@ -22,9 +23,10 @@ from lib3d_mec_ginac_ext import Vector3D, Point, Frame, Matrix, Solid
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkWindowToImageFilter, vtkPNGWriter
+from vtk import vtkOggTheoraWriter
 
 # IPython imports
-from IPython.display import Image
+from IPython.display import Image, Video
 
 # third party imports
 from tabulate import tabulate
@@ -94,8 +96,6 @@ class Scene(EventProducer):
         display = TextDrawing('', position=(0.01, -0.02), font_size=15, color='black', italic=False)
         display.set_position_relative_to_top_left()
         display.vertical_justification = 'top'
-        display.hide()
-
         self._simulation_display_info = display
         self.add_drawing(display)
 
@@ -170,12 +170,11 @@ class Scene(EventProducer):
 
 
     def _on_simulation_started(self, *args, **kwargs):
-        self._simulation_display_info.show()
         self._update_simulation_display_info()
 
 
     def _on_simulation_stopped(self, *args, **kwargs):
-        self._simulation_display_info.hide()
+        self._simulation_display_info.text = ''
 
 
     def _on_simulation_paused(self, *args, **kwargs):
@@ -1086,7 +1085,7 @@ class Scene(EventProducer):
 
 
     def get_screenshot(self, width=640, height=480):
-        '''get_screenshot() -> IPython.Image
+        '''get_screenshot() -> IPython.display.Image
         Take a screenshot of the scene and return it as IPython image (displayable on
         jupyter notebooks)
 
@@ -1117,6 +1116,73 @@ class Scene(EventProducer):
         writer.Write()
         return Image(memoryview(writer.GetResult()).tobytes())
 
+
+
+    def record_simulation(self, width=640, height=480, file='simulation.ogg', step_callback=None):
+        '''record_simulation() -> Ipython.display.Video
+        Record the simulation of this scene and save the results in a video ( ogg format ).
+        The video is stored in a file with the given name as argument ( by default simulation.ogg )
+        '''
+        if not isinstance(width, int) or width <= 0:
+            raise TypeError('width must be an integer greater than zero')
+
+        if not isinstance(height, int) or height <= 0:
+            raise TypeError('height must be an integer greater than zero')
+
+        if step_callback is not None and not callable(step_callback):
+            raise TypeError('step_callback must be a callable object')
+
+        if self.is_simulation_looped():
+            raise RuntimeError('Simulation cannot be looped in order to be recorded')
+        if self.get_simulation_time_limit() is None:
+            raise RuntimeError('Simulation must have a time limit in order to be recorded')
+
+
+
+        window = vtkRenderWindow()
+        window.SetOffScreenRendering(1)
+        window.AddRenderer(self._renderer)
+        window.SetSize(640, 480)
+        window.Render()
+
+        filter = vtkWindowToImageFilter()
+        filter.SetInput(window)
+        filter.Update()
+
+        writer = vtkOggTheoraWriter()
+        writer.SetFileName(file)
+        writer.SetInputConnection(filter.GetOutputPort())
+        writer.Start()
+
+        if not self.is_simulation_stopped():
+            self.stop_simulation()
+
+        def on_step(*args, **kwargs):
+            if step_callback is not None:
+                step_callback()
+            window.Render()
+            filter.Modified()
+            writer.Write()
+
+        finished = Event()
+
+        def on_finished(*args, **kwargs):
+            finished.set()
+
+        self.add_event_handler(on_step, 'simulation_step')
+        self.add_event_handler(on_finished, 'simulation_stopped')
+        self._simulation_display_info.hide()
+        self._drawings_display_info.hide()
+        self.start_simulation()
+
+        finished.wait()
+        self.remove_event_handler(on_step)
+        self.remove_event_handler(on_finished)
+        self._simulation_display_info.show()
+        self._drawings_display_info.show()
+        writer.End()
+
+        return Video(file)
 
 
     @property

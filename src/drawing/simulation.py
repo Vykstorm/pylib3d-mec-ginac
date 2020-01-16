@@ -321,10 +321,10 @@ class Simulation(EventProducer):
                     self._last_update_time = current_time
                 else:
                     delta_t = (current_time - self._last_update_time) / 1e9
-                    self._diff_times.appendleft(delta_t)
                     self._last_update_time = current_time
             else:
                 delta_t = self._delta_t
+            self._diff_times.appendleft(delta_t)
 
             # Update elapsed time
             self._elapsed_time += delta_t
