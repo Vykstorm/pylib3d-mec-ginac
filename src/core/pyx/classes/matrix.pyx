@@ -703,6 +703,9 @@ cdef class Matrix(Object):
             and a expression.
         '''
         if isinstance(left_op, Matrix) and isinstance(right_op, Matrix):
+            # number of columns of the first operand must match the number of rows of the second one
+            if left_op.num_cols != right_op.num_rows:
+                raise TypeError(f'Matrices with shapes {left_op.shape} and {right_op.shape} cant be multiplied')
             return _matrix_from_c_value(
                 c_deref((<Matrix>left_op)._get_c_handler()) * c_deref((<Matrix>right_op)._get_c_handler())
             )
