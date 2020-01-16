@@ -6,6 +6,8 @@ Description: This file defines the class Vector, Vector2
 
 ######## Imports ########
 
+from functools import partialmethod
+
 from .vtkobjectwrapper import VtkObjectWrapper
 from .vector import Vector3
 
@@ -70,6 +72,28 @@ class Camera( VtkObjectWrapper ):
     def set_focal_point(self, *args):
         self._focal_point.set(*args)
 
+
+
+    ######## Camera Rotations ########
+
+    def rotate(self, amount, mode='roll'):
+        try:
+            amount = float(amount)
+        except:
+            raise TypeError('amount argument must be a number')
+        if mode not in ('roll', 'azimuth', 'yaw', 'elevation', 'pitch'):
+            raise TypeError('invalid rotation mode')
+        with self:
+            getattr(self.get_handler(), mode.title())(amount)
+            self.fire_event('camera_rotation_changed')
+
+
+
+    roll = partialmethod(rotate, mode='roll')
+    azimuth = partialmethod(rotate, mode='azimuth')
+    yaw = partialmethod(rotate, mode='yaw')
+    elevation = partialmethod(rotate, mode='elevation')
+    pitch = partialmethod(rotate, mode='pitch')
 
 
 
