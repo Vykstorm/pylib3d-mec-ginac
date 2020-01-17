@@ -1192,7 +1192,7 @@ class Scene(EventProducer):
         self._drawings_display_info.show()
         writer.End()
 
-        return Video(file)
+        return Video(file, mimetype='video/ogg')
 
 
     @property
