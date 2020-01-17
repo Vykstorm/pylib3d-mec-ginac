@@ -11,6 +11,7 @@ from functools import partial
 from itertools import chain, starmap
 from threading import Event
 import tempfile
+from math import floor
 
 # imports from other modules
 from .events import EventProducer
@@ -1153,14 +1154,12 @@ class Scene(EventProducer):
 
         filepath = file
 
+
         # If file is not specified, save the video in a temporal file
         if filepath is None:
             file = tempfile.NamedTemporaryFile()
             filepath = file.name
             file.close()
-
-        num_steps = self.get_simulation_time_limit() / self.get_simulation_delta_time()
-        
 
         window = vtkRenderWindow()
         window.SetOffScreenRendering(1)
@@ -1181,6 +1180,10 @@ class Scene(EventProducer):
             self.stop_simulation()
 
         def on_step(*args, **kwargs):
+            progress = floor((self._simulation.get_elapsed_time() / self._simulation.get_time_limit()) * 100)
+
+            print('\r'*15 + 'progress:  ' + str(progress).ljust(3) + '%', end='', flush=True)
+
             if step_callback is not None:
                 step_callback()
             window.Render()
@@ -1190,6 +1193,7 @@ class Scene(EventProducer):
         finished = Event()
 
         def on_finished(*args, **kwargs):
+            print('\r'*15 + 'completed      ', flush=True)
             finished.set()
 
         self.add_event_handler(on_step, 'simulation_step')
