@@ -39,7 +39,7 @@ import subprocess
 NAME = 'pylib3d-mec-ginac'
 
 # Version of the library
-VERSION = '1.1.0'
+VERSION = '1.0.0'
 
 # Author details
 AUTHOR = 'Victor Ruiz Gomez'
