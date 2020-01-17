@@ -1142,11 +1142,13 @@ class Scene(EventProducer):
         if self.get_simulation_time_limit() is None:
             raise RuntimeError('Simulation must have a time limit in order to be recorded')
 
+        filepath = file
+
         # If file is not specified, save the video in a temporal file
-        if file is None:
-            handler = tempfile.NamedTemporaryFile()
-            file = handler.name
-            handler.close()
+        if filepath is None:
+            file = tempfile.NamedTemporaryFile()
+            filepath = file.name
+            file.close()
 
 
         window = vtkRenderWindow()
@@ -1160,7 +1162,7 @@ class Scene(EventProducer):
         filter.Update()
 
         writer = vtkOggTheoraWriter()
-        writer.SetFileName(file)
+        writer.SetFileName(filepath)
         writer.SetInputConnection(filter.GetOutputPort())
         writer.Start()
 
@@ -1192,7 +1194,8 @@ class Scene(EventProducer):
         self._drawings_display_info.show()
         writer.End()
 
-        return Video(file, mimetype='video/ogg')
+        return Video(filepath, embed=True, mimetype='video/ogg')
+
 
 
     @property
