@@ -42,7 +42,7 @@ class Simulation(EventProducer):
         self._delta_t = None
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
-        self._looped, self._time_limit = True, None
+        self._looped, self._time_limit = False, None
         self._diff_times = deque(maxlen=10)
         self._integration_method = IntegrationMethod(system)
 
