@@ -140,6 +140,12 @@ class Simulation(EventProducer):
             except ZeroDivisionError:
                 return 0
 
+
+    def get_delta_time(self):
+        with self:
+            return self._delta_t
+
+
     def is_looped(self):
         with self:
             return self._looped

@@ -418,6 +418,15 @@ class Scene(EventProducer):
         return self._simulation.get_time_multiplier()
 
 
+    def get_simulation_delta_time(self):
+        '''get_simulation_delta_time() -> float | None
+        :return: The current simulation delta time if it has a fixed value. None otherwise
+        :rtype: float
+        '''
+        return self._simulation.get_delta_time()
+
+
+
 
     def get_drawings(self):
         '''get_drawings() -> List[Drawing]
@@ -1150,6 +1159,8 @@ class Scene(EventProducer):
             filepath = file.name
             file.close()
 
+        num_steps = self.get_simulation_time_limit() / self.get_simulation_delta_time()
+        
 
         window = vtkRenderWindow()
         window.SetOffScreenRendering(1)
