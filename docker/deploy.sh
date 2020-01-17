@@ -4,7 +4,7 @@ VERSION=1.0.0
 BASE=pylib3d-mec-ginac:$VERSION
 
 cd base \
-&& sudo docker build . -t $BASE_IMAGE --build-arg PYTHON_VERSION=$PYTHON_VERSION \
+&& sudo docker build . -t $BASE --build-arg PYTHON_VERSION=$PYTHON_VERSION \
 && cd ..
 
 cd jupyter \
@@ -14,3 +14,7 @@ cd jupyter \
 cd docs \
 && sudo docker build . -t pylib3d-mec-ginac-docs:$VERSION --build-arg BASE=$BASE \
 && cd ..
+
+# Deploy on github & heroku image registries
+./github-deploy.sh
+./heroku-deploy.sh
