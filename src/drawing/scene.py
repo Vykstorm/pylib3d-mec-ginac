@@ -10,6 +10,7 @@ from operator import methodcaller, eq, add, itemgetter
 from functools import partial
 from itertools import chain, starmap
 from threading import Event
+import tempfile
 
 # imports from other modules
 from .events import EventProducer
@@ -1118,10 +1119,14 @@ class Scene(EventProducer):
 
 
 
-    def record_simulation(self, width=640, height=480, file='simulation.ogg', step_callback=None):
+    def record_simulation(self, width=640, height=480, file=None, step_callback=None):
         '''record_simulation() -> Ipython.display.Video
         Record the simulation of this scene and save the results in a video ( ogg format ).
-        The video is stored in a file with the given name as argument ( by default simulation.ogg )
+        The video is stored in a file with the given name as argument ( by default its stored
+        in a temporal file ).
+        If you set this to a specific file and you embed the video in notebook jupyter cell,
+        you will experience problems when trying to record the simulation a second time ( the video will
+        not be updated because jupyter inserts the video in its cache )
         '''
         if not isinstance(width, int) or width <= 0:
             raise TypeError('width must be an integer greater than zero')
@@ -1137,6 +1142,11 @@ class Scene(EventProducer):
         if self.get_simulation_time_limit() is None:
             raise RuntimeError('Simulation must have a time limit in order to be recorded')
 
+        # If file is not specified, save the video in a temporal file
+        if file is None:
+            handler = tempfile.NamedTemporaryFile()
+            file = handler.name
+            handler.close()
 
 
         window = vtkRenderWindow()
