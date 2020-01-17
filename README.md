@@ -31,7 +31,7 @@ conda create -n myenv python=3.7
 
 Now install this library with setuptools:
 ```bash
-git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git
+git clone -b stable https://github.com/Vykstorm/pylib3d-mec-ginac.git
 cd pylib3d-mec-ginac
 python setup.py install
 ```
