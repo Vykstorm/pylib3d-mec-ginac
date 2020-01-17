@@ -135,8 +135,10 @@ class Simulation(EventProducer):
         with self:
             if not self._diff_times:
                 return 0
-            return len(self._diff_times) / sum(self._diff_times)
-
+            try:
+                return len(self._diff_times) / sum(self._diff_times)
+            except ZeroDivisionError:
+                return 0
 
     def is_looped(self):
         with self:
@@ -267,7 +269,7 @@ class Simulation(EventProducer):
                     raise Exception
             constraints = dict(zip(
                 constraints.keys(),
-                [value if isinstance(value, NumericFunction) else system.comple_numeric_function(value) for value in constraints.values()]
+                [value if isinstance(value, NumericFunction) else system.compile_numeric_function(value) for value in constraints.values()]
             ))
         except Exception as e:
             raise TypeError('constraints must be a mapping like object where keys are constraint names and values are Matrix or NumericFunction instances')
