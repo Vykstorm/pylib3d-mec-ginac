@@ -184,7 +184,7 @@ def test_get_solid(non_strings):
     sys.new_param('m', 1)
     sys.new_vector('v', 0, 0, 1)
     sys.new_tensor('q')
-    sys.new_solid('s', 'O', 'abs', 'm', 'v', 'q')
+    sys.new_solid('s', 'O', 'xyz', 'm', 'v', 'q')
 
     solid = sys.get_solid('s')
     assert isinstance(solid, Solid)
@@ -214,7 +214,7 @@ def test_get_wrench(non_strings):
     sys.new_wrench('w', 'f', 'mt', 'p', 'arm', 'Constraint')
 
     wrench = sys.get_wrench('w')
-    assert isinstance(wrench, Wrench)
+    assert isinstance(wrench, Wrench3D)
 
     with pytest.raises(IndexError):
         sys.get_wrench('foo')
@@ -301,3 +301,80 @@ def test_new_wrench():
 
 def test_new_frame():
     pass
+
+
+
+######## Tests for symbolic computation methods ########
+
+
+
+def test_derivative():
+    '''
+    Test to check the function ``derivative`` in the class System
+    '''
+    sys = System()
+
+    # We can pass an expression, matrix or vector as the first argument
+    # The type of result will be the same as the input type.
+    v = sys.new_vector('v')
+    b = sys.get_base('xyz')
+    f = sys.get_frame('abs')
+    m = Matrix(shape=[2, 2])
+    assert isinstance(sys.derivative(Expr(1)), Expr)
+    assert isinstance(sys.derivative(v), Vector3D)
+    assert isinstance(sys.derivative(m), Matrix)
+
+    # base argument can only be specified if the first argument is a vector
+    assert isinstance(sys.derivative(v, base=b), Vector3D)
+    assert isinstance(sys.derivative(v, base='xyz'), Vector3D)
+
+    with pytest.raises(TypeError):
+        sys.derivative(Expr(1), base=b)
+
+    with pytest.raises(TypeError):
+        sys.derivative(m, base=b)
+
+    # frame argument can only be specified if the first argument is a vector
+
+    assert isinstance(sys.derivative(v, frame=f), Vector3D)
+    assert isinstance(sys.derivative(v, frame='abs'), Vector3D)
+
+    with pytest.raises(TypeError):
+        sys.derivative(Expr(1), frame=f)
+
+    with pytest.raises(TypeError):
+        sys.derivative(m, frame=f)
+
+
+    # base & frame arguments cannot be specified at the same time
+    with pytest.raises(TypeError):
+        sys.derivative(v, base=b, frame=f)
+
+
+    # a very basic test
+    # the next derivatives are computed:
+    # x                dx/dt
+    # 5             -> 0
+    # 4*t           -> 4
+    # 4*t**2        -> 8*t
+    # t**3 + t ** 2 -> 3*t**2 + 2*t
+    t = sys.get_time()
+    derivatives = sys.derivative(
+        Matrix([ 5, 4*t, 4*t**2, t**3+t**2 ])
+    )
+    assert derivatives.values == [0, 4, 8*t, 3*t**2 + 2*t]
+
+
+
+
+def test_diff():
+    pass
+
+
+def test_jacobian():
+    pass
+
+
+
+
+######## Tests for wrench methods ########
