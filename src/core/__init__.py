@@ -80,7 +80,7 @@ for name in dir(System):
     not any(map(lambda pattern: fullmatch(pattern, name),
         [r'\w+_point_branch', r'rotation_\w+', r'position_\w+', r'angular_\w+',
         r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
-        'diff', 'unatomize', r'\w+_wrench', r'export_\w+']
+        'diff', 'unatomize', r'\w+_wrench', r'export_\w+', r'compile_\w+']
     )):
         continue
 
