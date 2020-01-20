@@ -95,61 +95,153 @@ def test_has_symbol(non_strings):
 
 
 
-def test_get_base():
+def test_get_base(non_strings):
     '''
     This function is a test for the method ``get_base`` in the class System
     '''
-    pass
+    sys = System()
+
+    base = sys.get_base('xyz')
+    assert isinstance(base, Base)
+
+    with pytest.raises(IndexError):
+        sys.get_base('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_base(x)
 
 
-def test_get_matrix():
-    '''
-    This function is a test for the method ``get_matrix`` in the class System
-    '''
-    pass
 
-
-def test_get_vector():
+def test_get_vector(non_strings):
     '''
     This function is a test for the method ``get_vector`` in the class System
     '''
-    pass
+    sys = System()
+    sys.new_vector('v', 1, 2, 3)
+    sys.new_vector('w', 4, 5, 6)
+
+    v, w = sys.get_vector('v'), sys.get_vector('w')
+    assert isinstance(v, Vector3D) and isinstance(w, Vector3D)
+
+    with pytest.raises(IndexError):
+        sys.get_vector('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_vector(x)
 
 
-def test_get_tensor():
+
+
+def test_get_tensor(non_strings):
     '''
     This function is a test for the method ``get_tensor`` in the class System
     '''
-    pass
+    sys = System()
+    sys.new_tensor('p')
+    sys.new_tensor('q')
+
+    v, w = sys.get_tensor('p'), sys.get_tensor('q')
+    assert isinstance(v, Tensor3D) and isinstance(w, Tensor3D)
+
+    with pytest.raises(IndexError):
+        sys.get_tensor('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_tensor(x)
 
 
-def test_get_point():
+
+
+
+def test_get_point(non_strings):
     '''
     This function is a test for the method ``get_point`` in the class System
     '''
-    pass
+    sys = System()
+
+    point = sys.get_point('O')
+    assert isinstance(point, Point)
+
+    with pytest.raises(IndexError):
+        sys.get_point('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_point(x)
 
 
-def test_get_solid():
+
+
+def test_get_solid(non_strings):
     '''
     This function is a test for the method ``get_solid`` in the class System
     '''
-    pass
+    sys = System()
+    sys.new_base('b', 0, 1, 0)
+    sys.new_param('m', 1)
+    sys.new_vector('v', 0, 0, 1)
+    sys.new_tensor('q')
+    sys.new_solid('s', 'O', 'abs', 'm', 'v', 'q')
+
+    solid = sys.get_solid('s')
+    assert isinstance(solid, Solid)
+
+    with pytest.raises(IndexError):
+        sys.get_solid('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_solid(x)
 
 
-def test_get_wrench():
+
+def test_get_wrench(non_strings):
     '''
     This function is a test for the method ``get_wrench`` in the class System
     '''
-    pass
+    sys = System()
+    sys.new_base('Barm', 0, 1, 0)
+    sys.new_param('m', 1)
+    sys.new_vector('Oarm_Garm', 0, 0, 1, 'Barm')
+    sys.new_tensor('Iarm', base='Barm')
+    sys.new_solid('arm', 'O', 'Barm', 'm', 'Oarm_Garm', 'Iarm')
+    sys.new_vector('f', 0, 1, 0, 'xyz')
+    sys.new_vector('mt', 0, 0, 0, 'xyz')
+    sys.new_point('p', position=new_vector('v', 0, 1, 2, 'xyz'))
+    sys.new_wrench('w', 'f', 'mt', 'p', 'arm', 'Constraint')
+
+    wrench = sys.get_wrench('w')
+    assert isinstance(wrench, Wrench)
+
+    with pytest.raises(IndexError):
+        sys.get_wrench('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_wrench(x)
 
 
-def test_get_frame():
+
+
+
+def test_get_frame(non_strings):
     '''
     This function is a test for the method ``get_frame`` in the class System
     '''
-    pass
+    sys = System()
 
+    frame = sys.get_frame('abs')
+    assert isinstance(frame, Frame)
+
+    with pytest.raises(IndexError):
+        sys.get_wrench('foo')
+
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_wrench(x)
 
 
 
