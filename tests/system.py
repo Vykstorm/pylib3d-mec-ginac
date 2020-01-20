@@ -76,10 +76,23 @@ def test_get_symbol(non_strings):
 
 
 
-def test_has_symbol():
+
+def test_has_symbol(non_strings):
     '''
     This function is a test for the method ``has_symbol`` in the class System
     '''
+    sys = System()
+
+    # has_symbol returns True if a symbol with the given name exists, False otherwise
+    assert sys.has_symbol('t') and sys.has_symbol('g')
+    assert not sys.has_symbol('foo') and not sys.has_symbol('bar')
+
+    # has_symbol raises TypeError if the input argument is not a string
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.has_symbol(x)
+
+
 
 
 def test_get_base():
