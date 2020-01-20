@@ -54,11 +54,26 @@ def test_symbol_value_setget(invalid_numeric_values, non_strings):
 ######## Tests for getter methods ########
 
 
-def test_get_symbol():
+def test_get_symbol(non_strings):
     '''
     This function is a test for the method ``get_symbol`` in the class System
     '''
-    pass
+    sys = System()
+
+    # get_symbol returns SymbolNumeric instances
+    t = sys.get_symbol('t')
+    assert isinstance(t, SymbolNumeric)
+
+    # get_symbol raises TypeError if the input argument is not string
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.get_symbol(x)
+
+    # get_symbol raises IndexError if the input argument is not the name of
+    # an already existing symbol in the system
+    with pytest.raises(IndexError):
+        sys.get_symbol('foo')
+
 
 
 def test_has_symbol():
