@@ -7,25 +7,77 @@ import pytest
 
 
 
+######## Fixtures ########
 
-def test_symbol_value_setget(invalid_numeric_values, non_strings):
+
+@pytest.fixture(scope='session')
+def system():
+    '''
+    This fixture creates a system with a few objects ( vectors, tensors, wrenches, ... )
+    for testing purposes ( it is used in the tests below )
+    The return system instance will have the next objects ( sorted by type ):
+    - symbols:
+        * parameters:      a, b
+        * inputs:          c
+        * joint_unknowns:  d
+        * coordinates:     (x, dx, ddx)
+        * aux_coordinates: (y, dy, ddy)
+
+    - bases:    bs
+    - vectors:  v
+    - points:   p
+    - tensors:  q
+    - solids:   s
+    - wrenches: w
+    - frames:   f
+    '''
+    sys = System()
+
+    # Fill system with symbols
+    sys.new_parameter('a')
+    sys.new_parameter('b')
+    sys.new_input('c')
+    sys.new_joint_unknown('d')
+    sys.new_coordinate('x')
+    sys.new_aux_coordinate('y')
+
+    # Fill system with geometric objects
+    sys.new_base('bs')
+    sys.new_vector('v')
+    sys.new_vector('r')
+    sys.new_point('p', 'O', 'v')
+    sys.new_tensor('q')
+    sys.new_solid('s', 'p', 'bs', 'a', 'v', 'q')
+    sys.new_frame('f', 'p', 'bs')
+    sys.new_wrench('w', 'v', 'r', 'p', 's', 'Constraint')
+
+    return sys
+
+
+
+
+
+######## Tests ########
+
+
+def test_symbol_value_setget(invalid_numeric_values, non_strings, system):
     '''
     This function is a test for the methods ``get_value`` and ``set_value`` in the
     class System
     '''
-    sys = System()
-    t, g = sys.get_symbol('t'), sys.get_symbol('g')
+    sys = system
+    a, b = sys.get_symbol('a'), sys.get_symbol('b')
 
 
     # Set the value of a symbol ( specify the symbol as an instance of the class SymbolNumeric )
-    sys.set_value(t, 2)
-    sys.set_value(g, 3)
-    assert floor(sys.get_value(t)) == 2 and floor(sys.get_value(g)) == 3
+    sys.set_value(a, 2)
+    sys.set_value(b, 3)
+    assert floor(sys.get_value(a)) == 2 and floor(sys.get_value(b)) == 3
 
     # Set the value of a symbol ( specify the symbol with its name )
-    sys.set_value('t', 3)
-    sys.set_value('g', 2)
-    assert floor(sys.get_value('t') == 3) and floor(sys.get_value('g')) == 2
+    sys.set_value('a', 3)
+    sys.set_value('b', 2)
+    assert floor(sys.get_value('a') == 3) and floor(sys.get_value('b')) == 2
 
     # set_value and get_value raises IndexError if the first argument is a string and its
     # not the name of any symbol in the system
@@ -38,7 +90,7 @@ def test_symbol_value_setget(invalid_numeric_values, non_strings):
     # set_value raises TypeError if the numeric value is not float nor int
     for x in invalid_numeric_values:
         with pytest.raises(TypeError):
-            sys.set_value(t, x)
+            sys.set_value(a, x)
 
     # Raises TypeError if the first argument of get_value or set_value is not a SymbolNumeric
     # nor string
@@ -54,15 +106,15 @@ def test_symbol_value_setget(invalid_numeric_values, non_strings):
 ######## Tests for getter methods ########
 
 
-def test_get_symbol(non_strings):
+def test_get_symbol(non_strings, system):
     '''
     This function is a test for the method ``get_symbol`` in the class System
     '''
-    sys = System()
+    sys = system
 
     # get_symbol returns SymbolNumeric instances
-    t = sys.get_symbol('t')
-    assert isinstance(t, SymbolNumeric)
+    for name in ('a', 'b', 'c', 'd'):
+        assert isinstance(sys.get_symbol(name), SymbolNumeric)
 
     # get_symbol raises TypeError if the input argument is not string
     for x in non_strings:
@@ -77,14 +129,14 @@ def test_get_symbol(non_strings):
 
 
 
-def test_has_symbol(non_strings):
+def test_has_symbol(non_strings, system):
     '''
     This function is a test for the method ``has_symbol`` in the class System
     '''
-    sys = System()
+    sys = system
 
     # has_symbol returns True if a symbol with the given name exists, False otherwise
-    assert sys.has_symbol('t') and sys.has_symbol('g')
+    assert sys.has_symbol('a') and sys.has_symbol('b')
     assert not sys.has_symbol('foo') and not sys.has_symbol('bar')
 
     # has_symbol raises TypeError if the input argument is not a string
@@ -95,14 +147,13 @@ def test_has_symbol(non_strings):
 
 
 
-def test_get_base(non_strings):
+def test_get_base(non_strings, system):
     '''
     This function is a test for the method ``get_base`` in the class System
     '''
-    sys = System()
+    sys = system
 
-    base = sys.get_base('xyz')
-    assert isinstance(base, Base)
+    assert isinstance(sys.get_base('bs'), Base)
 
     with pytest.raises(IndexError):
         sys.get_base('foo')
@@ -113,16 +164,12 @@ def test_get_base(non_strings):
 
 
 
-def test_get_vector(non_strings):
+def test_get_vector(non_strings, system):
     '''
     This function is a test for the method ``get_vector`` in the class System
     '''
-    sys = System()
-    sys.new_vector('v', 1, 2, 3)
-    sys.new_vector('w', 4, 5, 6)
-
-    v, w = sys.get_vector('v'), sys.get_vector('w')
-    assert isinstance(v, Vector3D) and isinstance(w, Vector3D)
+    sys = system
+    assert isinstance(sys.get_vector('v'), Vector3D)
 
     with pytest.raises(IndexError):
         sys.get_vector('foo')
@@ -134,16 +181,13 @@ def test_get_vector(non_strings):
 
 
 
-def test_get_tensor(non_strings):
+def test_get_tensor(non_strings, system):
     '''
     This function is a test for the method ``get_tensor`` in the class System
     '''
-    sys = System()
-    sys.new_tensor('p')
-    sys.new_tensor('q')
+    sys = system
 
-    v, w = sys.get_tensor('p'), sys.get_tensor('q')
-    assert isinstance(v, Tensor3D) and isinstance(w, Tensor3D)
+    assert isinstance(sys.get_tensor('q'), Tensor3D)
 
     with pytest.raises(IndexError):
         sys.get_tensor('foo')
@@ -156,14 +200,13 @@ def test_get_tensor(non_strings):
 
 
 
-def test_get_point(non_strings):
+def test_get_point(non_strings, system):
     '''
     This function is a test for the method ``get_point`` in the class System
     '''
-    sys = System()
+    sys = system
 
-    point = sys.get_point('O')
-    assert isinstance(point, Point)
+    assert isinstance(sys.get_point('p'), Point)
 
     with pytest.raises(IndexError):
         sys.get_point('foo')
@@ -175,19 +218,13 @@ def test_get_point(non_strings):
 
 
 
-def test_get_solid(non_strings):
+def test_get_solid(non_strings, system):
     '''
     This function is a test for the method ``get_solid`` in the class System
     '''
-    sys = System()
-    sys.new_base('b', 0, 1, 0)
-    sys.new_param('m', 1)
-    sys.new_vector('v', 0, 0, 1)
-    sys.new_tensor('q')
-    sys.new_solid('s', 'O', 'xyz', 'm', 'v', 'q')
+    sys = system
 
-    solid = sys.get_solid('s')
-    assert isinstance(solid, Solid)
+    assert isinstance(system.get_solid('s'), Solid)
 
     with pytest.raises(IndexError):
         sys.get_solid('foo')
@@ -198,23 +235,13 @@ def test_get_solid(non_strings):
 
 
 
-def test_get_wrench(non_strings):
+def test_get_wrench(non_strings, system):
     '''
     This function is a test for the method ``get_wrench`` in the class System
     '''
-    sys = System()
-    sys.new_base('Barm', 0, 1, 0)
-    sys.new_param('m', 1)
-    sys.new_vector('Oarm_Garm', 0, 0, 1, 'Barm')
-    sys.new_tensor('Iarm', base='Barm')
-    sys.new_solid('arm', 'O', 'Barm', 'm', 'Oarm_Garm', 'Iarm')
-    sys.new_vector('f', 0, 1, 0, 'xyz')
-    sys.new_vector('mt', 0, 0, 0, 'xyz')
-    sys.new_point('p', position=new_vector('v', 0, 1, 2, 'xyz'))
-    sys.new_wrench('w', 'f', 'mt', 'p', 'arm', 'Constraint')
+    sys = system
 
-    wrench = sys.get_wrench('w')
-    assert isinstance(wrench, Wrench3D)
+    assert isinstance(sys.get_wrench('w'), Wrench3D)
 
     with pytest.raises(IndexError):
         sys.get_wrench('foo')
@@ -226,15 +253,13 @@ def test_get_wrench(non_strings):
 
 
 
-
-def test_get_frame(non_strings):
+def test_get_frame(non_strings, system):
     '''
     This function is a test for the method ``get_frame`` in the class System
     '''
-    sys = System()
+    sys = system
 
-    frame = sys.get_frame('abs')
-    assert isinstance(frame, Frame)
+    assert isinstance(sys.get_frame('f'), Frame)
 
     with pytest.raises(IndexError):
         sys.get_wrench('foo')
@@ -242,6 +267,10 @@ def test_get_frame(non_strings):
     for x in non_strings:
         with pytest.raises(TypeError):
             sys.get_wrench(x)
+
+
+
+
 
 
 
@@ -369,25 +398,29 @@ def test_derivative():
 
 
 
-def test_diff():
+def test_diff(system):
     '''
     Test to check the function ``diff`` in the class System
     '''
-    sys = System()
-    g = sys.get_symbol('g')
+    sys = system
+    a, b = sys.get_symbol('a'), sys.get_symbol('b')
+    w = sys.get_wrench('w')
     m = Matrix(shape=[2, 2])
+
+
 
     # diff can take an expressions, matrix or wrenches as first argument
     # the type of the result will be the same as the first argument
     # the second argument must always be a numeric symbol
-    assert isinstance(sys.diff(Expr(1), g), Expr)
-    assert isinstance(sys.diff(m, g), Matrix)
-    assert isinstance(sys.diff(Expr(1), 'g'), Expr)
-    assert isinstance(sys.diff(m, 'g'), Matrix)
+    assert isinstance(sys.diff(Expr(1), a), Expr)
+    assert isinstance(sys.diff(m, a), Matrix)
+    assert isinstance(sys.diff(Expr(1), 'a'), Expr)
+    assert isinstance(sys.diff(m, 'a'), Matrix)
+    assert isinstance(sys.diff(w, a), Wrench3D)
+    assert isinstance(sys.diff(w, 'a'), Wrench3D)
+
 
     # small test to check diff results
-
-    a, b = sys.new_param('a'), sys.new_param('b')
     # x                dx/da
     # 5             -> 0
     # 4*a           -> 4
