@@ -444,11 +444,9 @@ def test_jacobian(system):
     # If the second matrix specified has symbolic expressions which are not convertible
     # to "symbols" ( expressions composed only by one symbol ), ValueError is raised
 
-    '''
     p = Matrix([ a**2, b**2 ]).transpose()
     with pytest.raises(ValueError):
         sys.jacobian(q, p)
-    '''
 
     # Given two matrices with shapes 1xn and mx1, the resulting matrix should be nxm
     q = Matrix([ a ** 2, b ** 2, a + b ])
@@ -460,6 +458,7 @@ def test_jacobian(system):
     # matrix with n items
 
     assert sys.jacobian(q, a).shape == (3, 1)
+
 
 
 
