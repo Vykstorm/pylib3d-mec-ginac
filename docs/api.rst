@@ -32,7 +32,7 @@ API Reference
         get_aux_coordinates_matrix, get_aux_velocities_matrix, get_aux_accelerations_matrix,
         get_parameters_matrix, get_joint_unknowns_matrix, get_inputs_matrix,
         get_scene,
-        get_numeric_function, get_numeric_function_c_optimized,
+        compile_numeric_function, compile_numeric_function_c_optimized,
         new_parameter, new_joint_unknown, new_input,
         new_coordinate, new_aux_coordinate, new_symbol,
         new_base, new_matrix, new_vector, new_tensor,
