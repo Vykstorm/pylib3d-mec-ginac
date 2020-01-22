@@ -1495,6 +1495,11 @@ class System(_System):
             │ 0  2*b │
             ╰        ╯
 
+        :param Expr symmetric: It must be a symbolic expression indicating if the
+            jacobian matrix computation should be symmetric or not. 0 for non symmetric.
+            Otherwise it will be symmetric ( when evaluating the expression numerically )
+            By default it is set to 0
+
         '''
         return self._jacobian(args, kwargs)
 

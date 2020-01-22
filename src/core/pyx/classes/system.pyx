@@ -1304,7 +1304,7 @@ cdef class _System:
                 )
             )
 
-        # Derivative of the matrix with resspect another matrix
+        # Derivative of the matrix with respect another matrix
         if len(args) + len(kwargs) > 1:
             raise TypeError('Invalid number of inputs (expected at most 3 positional or keyword arguments)')
 
