@@ -65,6 +65,49 @@ cdef class Expr(Object):
     ######## Getters ########
 
 
+    cpdef is_symbol(self, _System sys):
+        '''is_symbol(system: System) -> bool
+        This function checks if this expression is equivalent to a numeric symbol
+        defined with the system specified.
+        '''
+        if sys is None:
+            raise TypeError('Input argument must be a System instance')
+
+        if not c_is_a[c_symbol](self._c_handler):
+            return False
+
+        cdef c_symbol c_sym = c_ex_to[c_symbol](self._c_handler)
+        name = (<bytes>c_sym.get_name()).decode()
+        return sys._has_symbol(name)
+
+
+
+
+    cpdef to_symbol(self, _System sys):
+        '''to_symbol(system: System) -> SymbolNumeric
+        This function transforms this instance into a SymbolNumeric object ( a symbol
+        defined within the given system ). This is possible if and only if the function
+        ``is_symbol`` with the same input argument as this function returns True.
+
+        :raises ValueError: If this transformation couldnt be performed
+
+        .. seealso:: :func:`is_symbol`
+        '''
+        if sys is None:
+            raise TypeError('Input argument must be a System instance')
+
+        cdef c_symbol c_sym
+        try:
+            if not c_is_a[c_symbol](self._c_handler):
+                raise Exception
+
+            c_sym = c_ex_to[c_symbol](self._c_handler)
+            name = (<bytes>c_sym.get_name()).decode()
+            return sys._get_symbol(name)
+        except:
+            raise ValueError('Expression couldnt be converted to a numeric symbol')
+
+
 
     ######## Evaluation ########
 
