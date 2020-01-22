@@ -437,11 +437,52 @@ def test_diff(system):
 
 
 
-def test_jacobian():
+def test_jacobian(system):
     '''
     Test to check the function ``jacobian`` in the class System
     '''
-    pass
+    sys = system
+    a, b = sys.get_symbol('a'), sys.get_symbol('b')
+    m, q, r = Matrix([[a, b], [b, a]]), Matrix([a, b]), Matrix([b, a]).transpose()
+
+    # method jacobian takes either two matrices ( a row matrix and a columnd matrix ) or a matrix and a symbol
+    assert isinstance(sys.jacobian(q, r), Matrix)
+    assert isinstance(sys.jacobian(q, a), Matrix)
+
+
+    # ValueError is raised if two matrices are passed but the first one is not a matrix
+    # row or the second one is not a column row
+
+    with pytest.raises(ValueError):
+        sys.jacobian(m, r)
+
+    with pytest.raises(ValueError):
+        sys.jacobian(q, m)
+
+    with pytest.raises(ValueError):
+        sys.jacobian(m, m)
+
+
+    # If the second matrix specified has symbolic expressions which are not convertible
+    # to "symbols" ( expressions composed only by one symbol ), ValueError is raised
+
+    '''
+    p = Matrix([ a**2, b**2 ]).transpose()
+    with pytest.raises(ValueError):
+        sys.jacobian(q, p)
+    '''
+
+    # Given two matrices with shapes 1xn and mx1, the resulting matrix should be nxm
+    q = Matrix([ a ** 2, b ** 2, a + b ])
+    p = Matrix([ a, b ]).transpose()
+
+    assert sys.jacobian(q, p).shape == (3, 2)
+
+    # Given a matrix with shape 1xn and a symbol, the resulting matrix should be a column
+    # matrix with n items
+
+    assert sys.jacobian(q, a).shape == (3, 1)
+
 
 
 
