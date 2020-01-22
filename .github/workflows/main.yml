@@ -1,0 +1,11 @@
+
+on: [push]
+
+jobs:
+    deploy-test:
+        runs-on: ubuntu-latest
+        name: Library deploy test job
+        steps:
+            - name: Library installation
+            - id: installation
+            - uses: ./.github/actions/deploy.yml
