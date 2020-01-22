@@ -356,6 +356,15 @@ cdef class SymbolNumeric(Object):
 
 
 
+    ######## Comparision operations ########
+
+
+    def __eq__(self, other):
+        if isinstance(other, Expr):
+            return NotImplemented
+        return super().__eq__(other)
+
+
 
 
 NamedObject.register(SymbolNumeric)
