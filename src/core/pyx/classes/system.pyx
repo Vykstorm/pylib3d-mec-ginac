@@ -1306,8 +1306,11 @@ cdef class _System:
                     c_deref(<c_symbol*>(<SymbolNumeric>y)._c_handler)
                 )
             )
-        elif y.get_num_cols() != 1:
-            raise ValueError('The second argument must be a column-matrix or a symbol')
+        else:
+            if y.get_num_cols() != 1:
+                raise ValueError('The second argument must be a column-matrix or a symbol')
+            if not y.are_all_values_symbols(self):
+                raise ValueError('All symbolic expressions in the second matrix should be composed only by one symbol')
 
         # Derivative of the matrix with respect another matrix
         if len(args) + len(kwargs) > 1:
@@ -1342,7 +1345,6 @@ cdef class _System:
 
 
     cpdef _diff(self, x, symbol):
-
         if not isinstance(symbol, (str, SymbolNumeric)):
             raise TypeError('symbol must be a SymbolNumeric or str object')
 
