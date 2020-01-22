@@ -1285,6 +1285,9 @@ cdef class _System:
         if not isinstance(x, Matrix):
             raise TypeError('The first argument must be a matrix')
 
+        if x.get_num_rows() != 1:
+            raise ValueError('The first argument must be a row-matrix')
+
         if not isinstance(y, (Matrix, SymbolNumeric)):
             raise TypeError('The second argument after the matrix must be a matrix or a symbol')
 
@@ -1303,6 +1306,8 @@ cdef class _System:
                     c_deref(<c_symbol*>(<SymbolNumeric>y)._c_handler)
                 )
             )
+        elif y.get_num_cols() != 1:
+            raise ValueError('The second argument must be a column-matrix or a symbol')
 
         # Derivative of the matrix with respect another matrix
         if len(args) + len(kwargs) > 1:
