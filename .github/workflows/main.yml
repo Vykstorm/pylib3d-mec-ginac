@@ -7,5 +7,5 @@ jobs:
         name: Library deploy test job
         steps:
             - name: Library installation
-            - id: installation
-            - uses: ./.github/actions/deploy.yml
+              id: installation
+              uses: ./.github/actions/deploy.yml
