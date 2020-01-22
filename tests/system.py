@@ -351,6 +351,8 @@ def test_derivative():
         sys.derivative(v, base=b, frame=f)
 
 
+    t = sys.get_time()
+    a = sys.new_param('a')
     # a very basic test
     # the next derivatives are computed:
     # x                dx/dt
@@ -358,7 +360,7 @@ def test_derivative():
     # 4*t           -> 4
     # 4*t**2        -> 8*t
     # t**3 + t ** 2 -> 3*t**2 + 2*t
-    t = sys.get_time()
+    # t + a         -> 1
     derivatives = sys.derivative(
         Matrix([ 5, 4*t, 4*t**2, t**3+t**2 ])
     )
@@ -368,13 +370,46 @@ def test_derivative():
 
 
 def test_diff():
-    pass
+    '''
+    Test to check the function ``diff`` in the class System
+    '''
+    sys = System()
+    g = sys.get_symbol('g')
+    m = Matrix(shape=[2, 2])
+
+    # diff can take an expressions, matrix or wrenches as first argument
+    # the type of the result will be the same as the first argument
+    # the second argument must always be a numeric symbol
+    assert isinstance(sys.diff(Expr(1), g), Expr)
+    assert isinstance(sys.diff(m, g), Matrix)
+    assert isinstance(sys.diff(Expr(1), 'g'), Expr)
+    assert isinstance(sys.diff(m, 'g'), Matrix)
+
+    # small test to check diff results
+
+    a, b = sys.new_param('a'), sys.new_param('b')
+    # x                dx/da
+    # 5             -> 0
+    # 4*a           -> 4
+    # 4*a**2        -> 8*a
+    # a**3 + a**2   -> 3*a**2 + 2*a
+    # a + b         -> 1
+    t = sys.get_time()
+    derivatives = sys.diff(
+        Matrix([ 5, 4*a, 4*a**2, a**3+a**2, a + b ]),
+        a
+    )
+    assert derivatives.values == [0, 4, 8*a, 3*a**2 + 2*a, 1]
+
+
 
 
 def test_jacobian():
+    '''
+    Test to check the function ``jacobian`` in the class System
+    '''
     pass
 
 
 
-
-######## Tests for wrench methods ########
+######## Tests for cinematic methods ########
