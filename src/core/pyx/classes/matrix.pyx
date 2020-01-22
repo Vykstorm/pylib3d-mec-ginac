@@ -389,6 +389,33 @@ cdef class Matrix(Object):
 
 
 
+    cpdef are_all_values_symbols(self, _System sys):
+        '''are_all_values_symbols(system: System) -> bool
+        This function checks that all items of this matrix are symbolic expressions composed
+        by a single numeric variable defined within the given system.
+        '''
+        for item in self:
+            if not item.is_symbol(sys):
+                return False
+        return True
+
+
+
+    cpdef get_values_as_symbols(self, _System sys):
+        '''get_values_as_symbols() -> List[NumericSymbol]
+        This function returns a list of all the items of this matrix converted to numeric symbols
+        defined within the given system.
+
+        :raises ValueError: If one of the symbolic expressions of this matrix is not composed only
+            by one numeric symbol defined within the given system.
+        '''
+        return list(map(methodcaller('to_symbol'), self))
+
+
+
+
+
+
     def get(self, i, j=None):
         '''get(i: int[, j: int]) -> Expr
         Get an element of this matrix.

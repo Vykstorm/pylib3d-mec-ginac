@@ -108,6 +108,16 @@ cdef class Expr(Object):
             raise ValueError('Expression couldnt be converted to a numeric symbol')
 
 
+    cpdef as_symbol(self, _System sys):
+        '''as_symbol(system: System) -> SymbolNumeric
+        This is an alias of ``to_symbol``
+
+        .. seealso:: :func:`to_symbol`
+
+        '''
+        return self.to_symbol(sys)
+
+
 
     ######## Evaluation ########
 
