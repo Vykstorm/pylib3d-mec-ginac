@@ -65,12 +65,18 @@ API Reference
         __float__, __int__, __complex__
 
 
+.. autoclass:: Expr
+    :members:
+        is_symbol, to_symbol, as_symbol
+
+
 
 .. autoclass:: Matrix
     :members:
         block,
         get_shape, get_num_rows, get_num_cols, get_size, __len__,
         get_values, get, __getitem__,
+        get_values_as_symbols, are_all_values_symbols,
         __iter__, __reversed__,
         set,
         transpose, subs,
