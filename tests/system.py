@@ -379,21 +379,9 @@ def test_derivative():
     with pytest.raises(TypeError):
         sys.derivative(v, base=b, frame=f)
 
+    # If the first argument is a matrix, the resulting matrix should have the same size
+    assert m.shape == sys.derivative(m).shape
 
-    t = sys.get_time()
-    a = sys.new_param('a')
-    # a very basic test
-    # the next derivatives are computed:
-    # x                dx/dt
-    # 5             -> 0
-    # 4*t           -> 4
-    # 4*t**2        -> 8*t
-    # t**3 + t ** 2 -> 3*t**2 + 2*t
-    # t + a         -> 1
-    derivatives = sys.derivative(
-        Matrix([ 5, 4*t, 4*t**2, t**3+t**2 ])
-    )
-    assert derivatives.values == [0, 4, 8*t, 3*t**2 + 2*t]
 
 
 
