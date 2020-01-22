@@ -1472,29 +1472,47 @@ class System(_System):
 
 
     def jacobian(self, *args, **kwargs):
-        '''jacobian(x: ex | Matrix, y: Matrix | SymbolNumeric, symmetric: Expr) -> Matrix
+        '''jacobian(x: Matrix, y: Matrix | SymbolNumeric, symmetric: Expr) -> Matrix
         Compute the jacobian matrix between two matrices or a matrix and a symbol
+
+        The next example shows how to calculate the jacobian of a row matrix with respect
+        a symbol:
 
             :Example:
 
             >>> a, b = new_param('a'), new_param('b')
-            >>> m = new_matrix('m', [a, b, a ** 2, b ** 2], shape=[2, 2])
+            >>> m = new_matrix('m', [a, b, a ** 2, b ** 2])
             >>> m
-            ╭            ╮
-            │    a     b │
-            │ a**2  b**2 │
-            ╰            ╯
+            [ a  b  a**2  b**2 ]
             >>> jacobian(m, a)
-            ╭        ╮
-            │   1  0 │
-            │ 2*a  0 │
-            ╰        ╯
+            [ 1  0  2*a  0 ]
+            >>> jacobian(m, a).shape
+            (4, 1)
             >>> jacobian(m, b)
-            ╭        ╮
-            │ 0    1 │
-            │ 0  2*b │
-            ╰        ╯
+            [ 0  1  0  2*b ]
+            >>> jacobian(m, b).shape
+            (4, 1)
 
+
+        You can also compute the jacobian between a row matrix and a column matrix
+
+            :Example:
+
+            >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
+            >>> m = Matrix([a ** 2 + b, b ** 2 + c, c ** 2 + a, a + b + c])
+            >>> q = Matrix([a, b, c]).transpose()
+            >>> jacobian(m, q)
+            ╭               ╮
+            │ 2*a    1    0 │
+            │   0  2*b    1 │
+            │   1    0  2*c │
+            │   1    1    1 │
+            ╰               ╯
+            >>> jacobian(m, q).shape
+            (4, 3)
+
+        :param Matrix x: Must be a row matrix
+        :param Matrix y: Must be a column matrix
         :param Expr symmetric: It must be a symbolic expression indicating if the
             jacobian matrix computation should be symmetric or not. 0 for non symmetric.
             Otherwise it will be symmetric ( when evaluating the expression numerically )
