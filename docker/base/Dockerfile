@@ -37,6 +37,6 @@ RUN git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable 
     && python -c "import lib3d_mec_ginac" \
     && pip install pytest \
     && pytest tests/* \
-    && pip uninstall pytest
+    && pip uninstall -y pytest
 # Run python interpreter with pylib3d-mec-ginac imported
 CMD python -i -c "from lib3d_mec_ginac import *"
