@@ -6,6 +6,4 @@ jobs:
         runs-on: ubuntu-latest
         name: Library deploy test job
         steps:
-            - name: Checkout
-              uses: actions/checkout@v1
-            - uses: ./.github/actions/deploy.yml
+            - uses: pylib3d-mec-ginac/.github/actions/deploy.yml
