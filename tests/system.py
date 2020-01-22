@@ -420,19 +420,9 @@ def test_diff(system):
     assert isinstance(sys.diff(w, 'a'), Wrench3D)
 
 
-    # small test to check diff results
-    # x                dx/da
-    # 5             -> 0
-    # 4*a           -> 4
-    # 4*a**2        -> 8*a
-    # a**3 + a**2   -> 3*a**2 + 2*a
-    # a + b         -> 1
-    t = sys.get_time()
-    derivatives = sys.diff(
-        Matrix([ 5, 4*a, 4*a**2, a**3+a**2, a + b ]),
-        a
-    )
-    assert derivatives.values == [0, 4, 8*a, 3*a**2 + 2*a, 1]
+    # If the first argument is a matrix, the resulting matrix should have the same size
+    assert m.shape == sys.diff(m, a).shape
+
 
 
 
