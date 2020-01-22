@@ -26,13 +26,15 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8
-# Install pylib3d-mec-ginac
+# Clone repository and install dependencies
 RUN git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable \
     && cd pylib3d-mec-ginac \
-    && pip install -r requirements.txt \
-    && python setup.py install \
+    && pip install -r requirements.txt
+# Install library
+RUN python setup.py install \
+    && cat setup.log.txt
 # Run tests
-    python -c "import lib3d_mec_ginac" \
+RUN python -c "import lib3d_mec_ginac" \
     && pip install pytest \
     && pytest tests/* \
     && pip uninstall pytest
