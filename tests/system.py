@@ -3,6 +3,7 @@
 
 from lib3d_mec_ginac import *
 from math import floor
+from itertools import product
 import pytest
 
 
@@ -277,19 +278,44 @@ def test_get_frame(non_strings, system):
 ######## Tests for construction methods ########
 
 
-def test_new_parameter():
+def test_new_param_unknown_input(non_strings, invalid_object_names, invalid_numeric_values):
     '''
-    This function is a test for the method ``new_parameter`` in the class System
+    This function is a test for the methods ``new_parameter``,
+    ``new_joint_unknown``, ``new_input`` in the class System
     '''
-    pass
+    # We can create a param passing only its name ( param value will be 0 )
+    sys = System()
+    symbols = [sys.new_parameter('a'), sys.new_joint_unknown('b'), sys.new_input('c')]
+    for symbol in symbols:
+        assert isinstance(symbol, SymbolNumeric)
+        assert floor(sys.get_value(symbol)) == 0
+    assert symbols[0].get_type() == 'parameter'
+    assert symbols[1].get_type() == 'joint_unknown'
+    assert symbols[2].get_type() == 'input'
+
+    # We can create a param passing the name & value
+    sys = System()
+    symbols = [sys.new_parameter('a', 1), sys.new_joint_unknown('b', 1), sys.new_input('c', 1)]
+    for symbol in symbols:
+        assert isinstance(symbol, SymbolNumeric)
+        assert floor(sys.get_value(symbol)) == 1
+
+    # name should be a string ( also a valid python identifier )
+    for x in non_strings:
+        with pytest.raises(TypeError):
+            sys.new_parameter(x)
+
+    for x in invalid_object_names:
+        with pytest.raises(ValueError):
+            sys.new_parameter(x)
+
+    # value should be a number ( float or int )
+    for x in invalid_numeric_values:
+        with pytest.raises(TypeError):
+            sys.new_parameter('foo', value=x)
 
 
-def test_new_joint_unknown():
-    pass
 
-
-def test_new_input():
-    pass
 
 
 def test_new_coordinate():
