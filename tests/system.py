@@ -318,6 +318,46 @@ def test_new_param_unknown_input(non_strings, invalid_object_names, invalid_nume
 
 
 def test_new_coordinate():
+    '''
+    Test for the method ``new_coordinate`` in the class System
+    '''
+    # We can create a coordinate by only indicating its name ( numeric values of
+    # the coordinate and its derivatives will be zero )
+    sys = System()
+    a, da, dda = sys.new_aux_coordinate('a')
+    assert isinstance(a, SymbolNumeric) and isinstance(da, SymbolNumeric) and isinstance(dda, SymbolNumeric)
+    assert floor(sys.get_value(a)) == 0 and floor(sys.get_value(da)) == 0 and floor(sys.get_value(dda)) == 0
+    assert a.get_name() == 'a' and da.get_name() == 'da' and dda.get_name() == 'dda'
+
+    # We can create the coordinate by indicating the name + one, two or three numeric values
+    sys = System()
+    a, da, dda = sys.new_aux_coordinate('a', 1)
+    assert floor(sys.get_value(a)) == 1 and floor(sys.get_value(da)) == 0 and floor(sys.get_value(dda)) == 0
+
+    b, db, ddb = sys.new_aux_coordinate('b', 1, 2)
+    assert floor(sys.get_value(b)) == 1 and floor(sys.get_value(db)) == 2 and floor(sys.get_value(ddb)) == 0
+
+    c, dc, ddc = sys.new_aux_coordinate('c', 1, 2, 3)
+    assert floor(sys.get_value(c)) == 1 and floor(sys.get_value(dc)) == 2 and floor(sys.get_value(ddc)) == 3
+
+    # Names can also be specified for the derivative components of the coordiante
+    sys = System()
+    a, da, dda = sys.new_aux_coordinate('a', 'b', 'c')
+    assert a.get_name() == 'a' and da.get_name() == 'b' and dda.get_name() == 'c'
+
+    # Names of the derivatives & numeric values can also be specified
+    sys = System()
+    a, da, dda = sys.new_aux_coordinate('a', 'b', 'c', 1, 2, 3)
+    assert a.get_name() == 'a' and da.get_name() == 'b' and dda.get_name() == 'c'
+    assert floor(sys.get_value(a)) == 1 and floor(sys.get_value(da)) == 2 and floor(sys.get_value(dda)) == 3
+
+
+
+
+def test_new_aux_coordinate():
+    '''
+    Test for the method ``new_aux_coordinate`` in the class System
+    '''
     # We can create a coordinate by only indicating its name ( numeric values of
     # the coordinate and its derivatives will be zero )
     sys = System()
@@ -350,8 +390,6 @@ def test_new_coordinate():
 
 
 
-def test_new_aux_coordinate():
-    pass
 
 
 def test_new_base():
