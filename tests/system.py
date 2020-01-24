@@ -457,12 +457,47 @@ def test_new_base():
     assert base.get_rotation_angle() == g**2
 
 
-def test_new_matrix():
-    pass
 
 
 def test_new_vector():
-    pass
+    '''
+    Test to check the function ``new_vector`` in the class System
+    '''
+    # We can create a vector by indicating only its name
+    sys = System()
+    v = sys.new_vector('v')
+    assert isinstance(v, Vector3D)
+    assert v.get_name() == 'v'
+    assert v.values == [0, 0, 0]
+
+    # We can create a vector by indicating its values as positional arguments after
+    # the name
+    sys = System()
+    v = sys.new_vector('v', 1, 2, 3)
+    assert isinstance(v, Vector3D)
+    assert v.values == [1, 2, 3]
+
+    # Or as a keyword argument
+    w = sys.new_vector('w', values=[4, 5, 6])
+    assert w.values == [4, 5, 6]
+
+    # We can indicate also the base of the vector after the components values
+    sys = System()
+    base = sys.new_base('b')
+    v = sys.new_vector('v', 1, 2, 3, base)
+    w = sys.new_vector('w', 1, 2, 3, 'xyz')
+    assert v.get_base() == base
+    assert w.get_base() == sys.get_base('xyz')
+
+    # Or as a keyword argument
+    sys = System()
+    base = sys.new_base('b')
+    v = sys.new_vector('v', base=base)
+    w = sys.new_vector('w', base='xyz')
+    assert v.get_base() == base
+    assert w.get_base() == sys.get_base('xyz')
+
+
 
 
 def test_new_tensor():
