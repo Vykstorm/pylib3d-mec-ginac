@@ -645,11 +645,33 @@ def test_new_frame(system):
     '''
     Test to check the method ``new_frame`` in the class System
     '''
-    solid = system.get_solid('s')
-    force = system.get_vector('v')
+    sys = system
 
+    # We can create a frame by indicating its name and a point
+    point = sys.get_point('p')
+    frame = sys.new_frame('ff', point)
+    assert isinstance(frame, Frame)
+    assert frame.get_name() == 'ff'
+    assert frame.get_point() == point
+    assert frame.get_base() == sys.get_base('xyz')
+    frame = sys.new_frame('ff2', 'p')
+    assert isinstance(frame, Frame)
+    assert frame.get_name() == 'ff2'
+    assert frame.get_point() == point
+    assert frame.get_base() == sys.get_base('xyz')
 
+    # We can also indicate the base of frame with a positional argument after the point
+    base = sys.get_base('bs')
+    frame = sys.new_frame('ff3', point, base)
+    assert frame.get_base() == base
+    frame = sys.new_frame('ff4', point, 'bs')
+    assert frame.get_base() == base
 
+    # We can also pass it as a keyword argument
+    frame = sys.new_frame('ff5', point, base=base)
+    assert frame.get_base() == base
+    frame = sys.new_frame('ff6', point, base='bs')
+    assert frame.get_base() == base
 
 
 
