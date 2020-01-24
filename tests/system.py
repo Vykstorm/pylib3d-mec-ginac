@@ -608,18 +608,48 @@ def test_new_solid(system):
 
 
 
-def test_new_wrench():
+def test_new_wrench(system):
     '''
     Test to check the method ``new_wrench`` in the class System
     '''
-    pass
+    sys = system
+
+    force = sys.new_vector('fv')
+    moment = sys.new_vector('mv')
+    solid = sys.get_solid('s')
+    point = sys.new_point('k', 'v')
+
+    # We can create the wrench by indicating the force, momentum vectors, solid and its
+    # force applied point. Also type must be indicated
+    wrench = sys.new_wrench('wr', force, moment, point, solid, 'Constraint')
+    assert isinstance(wrench, Wrench3D)
+    assert wrench.get_moment() == moment
+    assert wrench.get_force() == force
+    assert wrench.get_solid() == solid
+    assert wrench.get_point() == point
+    assert wrench.get_type() == 'Constraint'
 
 
-def test_new_frame():
+    wrench = sys.new_wrench('wr2', 'fv', 'mv', 'k', 's', 'Constraint')
+    assert isinstance(wrench, Wrench3D)
+    assert wrench.get_moment() == moment
+    assert wrench.get_force() == force
+    assert wrench.get_solid() == solid
+    assert wrench.get_point() == point
+    assert wrench.get_type() == 'Constraint'
+
+
+
+
+def test_new_frame(system):
     '''
     Test to check the method ``new_frame`` in the class System
     '''
-    pass
+    solid = system.get_solid('s')
+    force = system.get_vector('v')
+
+
+
 
 
 
