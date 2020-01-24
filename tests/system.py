@@ -826,3 +826,116 @@ def test_compile_numeric_func():
 
 
 ######## Tests for cinematic methods ########
+
+
+def test_reduced_base():
+    '''
+    Test for the method ``reduced_base`` in the class System
+    '''
+    sys = System()
+
+    a, b = sys.new_base('a'), sys.new_base('b')
+    assert isinstance(sys.reduced_base(a, b), Base)
+    assert isinstance(sys.reduced_base('a', 'b'), Base)
+
+
+def test_reduced_point():
+    '''
+    Test for the method ``reduced_point`` in the class System
+    '''
+    sys = System()
+
+    v, w = sys.new_vector('v'), sys.new_vector('w')
+    p, q = sys.new_point('p', v), sys.new_point('q', w)
+    assert isinstance(sys.reduced_point(p, q), Point)
+    assert isinstance(sys.reduced_point('p', 'q'), Point)
+
+
+def test_pre_point_branch():
+    '''
+    Test for the method ``pre_point_branch`` in the class System
+    '''
+    sys = System()
+
+    v, w = sys.new_vector('v'), sys.new_vector('w')
+    p, q = sys.new_point('p', v), sys.new_point('q', w)
+    assert isinstance(sys.pre_point_branch(p, q), Point)
+    assert isinstance(sys.pre_point_branch('p', 'q'), Point)
+
+
+def test_rotation_matrix():
+    '''
+    Test for the method ``rotation_matrix`` in the class System
+    '''
+    sys = System()
+
+    a, b = sys.new_base('a'), sys.new_base('b')
+    assert isinstance(sys.rotation_matrix(a, b), Matrix)
+    assert isinstance(sys.rotation_matrix('a', 'b'), Matrix)
+
+
+def test_position_vector():
+    '''
+    Test for the method ``position_vector`` in the class System
+    '''
+    sys = System()
+
+    v, w = sys.new_vector('v'), sys.new_vector('w')
+    p, q = sys.new_point('p', v), sys.new_point('q', w)
+    assert isinstance(sys.position_vector(p, q), Vector3D)
+    assert isinstance(sys.position_vector('p', 'q'), Vector3D)
+
+
+def test_angular_velocity():
+    '''
+    Test for the method ``angular_velocity`` in the class System
+    '''
+    sys = System()
+    a, b = sys.new_base('a'), sys.new_base('b')
+    assert isinstance(sys.angular_velocity(a, b), Vector3D)
+    assert isinstance(sys.angular_velocity('a', 'b'), Vector3D)
+
+
+def test_angular_velocity_tensor():
+    '''
+    Test for the method ``angular_velocity_tensor`` in the class System
+    '''
+    sys = System()
+    a, b = sys.new_base('a'), sys.new_base('b')
+    assert isinstance(sys.angular_velocity_tensor(a, b), Tensor3D)
+    assert isinstance(sys.angular_velocity_tensor('a', 'b'), Tensor3D)
+
+
+
+def test_angular_acceleration():
+    '''
+    Test for the method ``angular_acceleration`` in the class System
+    '''
+    sys = System()
+    a, b = sys.new_base('a'), sys.new_base('b')
+    assert isinstance(sys.angular_acceleration(a, b), Vector3D)
+    assert isinstance(sys.angular_acceleration('a', 'b'), Vector3D)
+
+
+
+def test_acceleration_vector(system):
+    '''
+    Test for the method ``acceleration_vector`` in the class System
+    '''
+    sys = system
+
+    frame = sys.get_frame('f')
+    point = sys.get_point('p')
+    solid = sys.get_solid('s')
+    # assert isinstance(sys.acceleration_vector(frame, point, solid), Vector3D)
+
+
+def test_twist(system):
+    '''
+    Test for the method `twist` in the class System
+    '''
+    sys = system
+
+    solid = sys.get_solid('s')
+    assert isinstance(sys.twist(solid), Wrench3D)
+    assert isinstance(sys.twist('s'), Wrench3D)
