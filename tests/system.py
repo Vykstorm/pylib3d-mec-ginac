@@ -3,7 +3,7 @@
 
 from lib3d_mec_ginac import *
 from math import floor
-from itertools import product
+from itertools import product, repeat
 import pytest
 
 
@@ -391,9 +391,70 @@ def test_new_aux_coordinate():
 
 
 
-
 def test_new_base():
-    pass
+    '''
+    This is a test for the method ``new_base`` in the class System.
+    '''
+    # It can be called by indicating only the name of the base
+    sys = System()
+    base = sys.new_base('b')
+    assert isinstance(base, Base)
+    assert base.get_name() == 'b'
+    assert base.get_rotation_tupla() == Matrix(shape=[1, 3])
+    assert base.get_rotation_angle() == 0
+    assert base.get_previous() == sys.get_base('xyz')
+
+    # It can be called by indicating the previous base
+    # If none is passed to indicate the base, it will be the same as specifying the xyz base.
+    sys = System()
+    a = sys.new_base('a', previous=None)
+    assert a.get_previous() == sys.get_base('xyz')
+    b = sys.new_base('b', a)
+    assert b.get_previous() == a
+    c = sys.new_base('c', 'a')
+    assert c.get_previous() == a
+
+    # We can indicate the rotation tupla as as list of three numbers ( or expressions )
+    # As positional arguments before the name and the previous base
+    sys = System()
+    g = sys.get_param('g')
+    base = sys.new_base('a', 1, 2, 3)
+    assert base.get_rotation_tupla() == Matrix([1, 2, 3])
+    base = sys.new_base('b', 1, g, g ** 2)
+    assert base.get_rotation_tupla() == Matrix([1, g, g**2])
+    base = sys.new_base('c', None, 1, g, g ** 2)
+    assert base.get_rotation_tupla() == Matrix([1, g, g**2])
+    base = sys.new_base('d', 'xyz', 1, g, g ** 2)
+    assert base.get_rotation_tupla() == Matrix([1, g, g**2])
+    base = sys.new_base('f', 'a', 1, g, g ** 2)
+    assert base.get_rotation_tupla() == Matrix([1, g, g**2])
+
+    # Or as a keyword argument
+    sys = System()
+    base = sys.new_base('a', rotation_tupla=[1, 2, 3])
+    assert base.get_rotation_tupla() == Matrix([1, 2, 3])
+    base = sys.new_base('b', rotation_tupla=[1, g, g**2])
+    assert base.get_rotation_tupla() == Matrix([1, g, g**2])
+
+    # We can pass the value for the rotation angle ( as a positional argument after the rotation tupla )
+    sys = System()
+    g = sys.get_param('g')
+    base = sys.new_base('a', 1, 2, 3, 4)
+    assert base.get_rotation_angle() == 4
+    base = sys.new_base('b', 1, 2, 3, g)
+    assert base.get_rotation_angle() == g
+    base = sys.new_base('c', 1, 2, 3, g**2)
+    assert base.get_rotation_angle() == g**2
+
+    # We can also pass it as a keyword argument
+    sys = System()
+    g = sys.get_param('g')
+    base = sys.new_base('a', rotation_angle=1)
+    assert base.get_rotation_angle() == 1
+    base = sys.new_base('b', rotation_angle=g)
+    assert base.get_rotation_angle() == g
+    base = sys.new_base('c', rotation_angle=g**2)
+    assert base.get_rotation_angle() == g**2
 
 
 def test_new_matrix():
