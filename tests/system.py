@@ -504,7 +504,42 @@ def test_new_tensor():
     '''
     Test to check the method ``new_tensor`` in the class System
     '''
-    pass
+    # We can create a tensor by indicating only its name
+    sys = System()
+    v = sys.new_tensor('v')
+    assert isinstance(v, Tensor3D)
+    assert v.get_name() == 'v'
+    assert v.values == [0] * 9
+
+    # We can create a tensor by indicating its values as positional arguments after
+    # the name
+    sys = System()
+    v = sys.new_tensor('v', *range(0, 9))
+    assert isinstance(v, Tensor3D)
+    assert v.values == list(range(0, 9))
+
+    # Or as a keyword argument
+    w = sys.new_tensor('w', values=range(0, 9))
+    assert w.values == list(range(0, 9))
+
+    # We can indicate also the base of the vector after the components values
+    sys = System()
+    base = sys.new_base('b')
+    v = sys.new_tensor('v', 1, 2, 3, 4, 5, 6, 7, 8, 9, base)
+    w = sys.new_tensor('w', 1, 2, 3, 4, 5, 6, 7, 8, 9, 'xyz')
+    assert v.get_base() == base
+    assert w.get_base() == sys.get_base('xyz')
+
+    # Or as a keyword argument
+    sys = System()
+    base = sys.new_base('b')
+    v = sys.new_tensor('v', base=base)
+    w = sys.new_tensor('w', base='xyz')
+    assert v.get_base() == base
+    assert w.get_base() == sys.get_base('xyz')
+
+
+
 
 
 
@@ -666,7 +701,9 @@ def test_jacobian(system):
 
 
 
+
 ######## Tests for numeric function compilation methods ########
+
 
 @pytest.mark.filterwarnings("ignore")
 def test_compile_numeric_func():
@@ -679,6 +716,8 @@ def test_compile_numeric_func():
     m = Matrix([a, a ** 2, a + g])
     assert isinstance(sys.compile_numeric_func(m), NumericFunction)
     assert isinstance(sys.compile_numeric_func(m, c_optimized=True), NumericFunction)
+
+
 
 
 
