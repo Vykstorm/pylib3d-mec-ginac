@@ -570,11 +570,42 @@ def test_new_point():
     assert z.get_position() == w
 
 
-def test_new_solid():
+
+
+def test_new_solid(system):
     '''
     Test to check the method ``new_solid`` in the class System
     '''
-    pass
+    sys = system
+    base = sys.get_base('bs')
+    point = sys.get_point('p')
+    CM = sys.get_vector('v')
+    IT = sys.get_tensor('q')
+    mass = sys.get_symbol('a')
+
+    # We can create a solid giving its name, base, point, mass center, inertia tensor & mass
+    solid = sys.new_solid('z1', point, base, mass, CM, IT)
+    assert isinstance(solid, Solid)
+    assert solid.get_IT() == IT
+    assert solid.get_mass() == mass
+    assert solid.get_CM() == CM
+    assert solid.get_base() == base
+    assert solid.get_point() == point
+
+    solid = sys.new_solid('z2', 'p', 'bs', 'a', 'v', 'q')
+    assert isinstance(solid, Solid)
+    assert solid.get_IT() == IT
+    assert solid.get_mass() == mass
+    assert solid.get_CM() == CM
+    assert solid.get_base() == base
+    assert solid.get_point() == point
+
+    # mass symbol must be a parameter
+    mass = sys.get_symbol('c')
+    with pytest.raises(TypeError):
+        sys.new_solid('z3', 'p', 'bs', mass, 'v', 'q')
+
+
 
 
 def test_new_wrench():
@@ -589,6 +620,7 @@ def test_new_frame():
     Test to check the method ``new_frame`` in the class System
     '''
     pass
+
 
 
 
