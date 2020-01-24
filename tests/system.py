@@ -541,13 +541,33 @@ def test_new_tensor():
 
 
 
-
-
 def test_new_point():
     '''
     Test to check the method ``new_point`` in the class System
     '''
-    pass
+    # We can create a point by only indicating its positional vector and name
+    sys = System()
+    v = sys.new_vector('v')
+    p = sys.new_point('p', v)
+    assert p.get_name() == 'p' and p.get_position() == v
+    assert p.get_previous() == sys.get_point('O')
+    q = sys.new_point('q', 'v')
+    assert q.get_name() == 'q' and q.get_position() == v
+    assert q.get_previous() == sys.get_point('O')
+
+    # We can indicate the previous point as a positional argument after the name
+    # and then the positional vector
+    w = sys.new_vector('w')
+    s = sys.new_point('s', p, w)
+    assert s.get_previous() == p
+    r = sys.new_point('r', 'q', w)
+    assert r.get_previous() == q
+
+    # We can indicate the positional vector with a keyword argument
+    u = sys.new_point('u', position=v)
+    assert u.get_position() == v
+    z = sys.new_point('z', position='w')
+    assert z.get_position() == w
 
 
 def test_new_solid():
