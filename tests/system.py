@@ -501,22 +501,38 @@ def test_new_vector():
 
 
 def test_new_tensor():
+    '''
+    Test to check the method ``new_tensor`` in the class System
+    '''
     pass
 
 
+
 def test_new_point():
+    '''
+    Test to check the method ``new_point`` in the class System
+    '''
     pass
 
 
 def test_new_solid():
+    '''
+    Test to check the method ``new_solid`` in the class System
+    '''
     pass
 
 
 def test_new_wrench():
+    '''
+    Test to check the method ``new_wrench`` in the class System
+    '''
     pass
 
 
 def test_new_frame():
+    '''
+    Test to check the method ``new_frame`` in the class System
+    '''
     pass
 
 
@@ -648,6 +664,21 @@ def test_jacobian(system):
     assert sys.jacobian(q, a).shape == (3, 1)
 
 
+
+
+######## Tests for numeric function compilation methods ########
+
+@pytest.mark.filterwarnings("ignore")
+def test_compile_numeric_func():
+    '''
+    Test for the method ``compile_numeric_func`` in the class System
+    '''
+    sys = System()
+    a = sys.new_input('a')
+    g = sys.get_parameter('g')
+    m = Matrix([a, a ** 2, a + g])
+    assert isinstance(sys.compile_numeric_func(m), NumericFunction)
+    assert isinstance(sys.compile_numeric_func(m, c_optimized=True), NumericFunction)
 
 
 
