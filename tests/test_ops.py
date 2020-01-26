@@ -166,4 +166,14 @@ def test_pow(operands):
     This is a test for the power binary operation between numbers, symbols,
     expressions, matrices, vectors, tensors and wrenches
     '''
-    pass
+    results = np.array([
+        # cte        symbol     expr      matrix      vector,     tensor,     wrench
+        [ ...,       Expr,      Expr,     None,       None,       None,       None     ],  # cte
+        [ Expr,      Expr,      Expr,     None,       None,       None,       None     ],  # symbol
+        [ Expr,      Expr,      Expr,     None,       None,       None,       None     ],  # expr
+        [ None,      None,      None,     None,       None,       None,       None     ],  # matrix
+        [ None,      None,      None,     None,       None,       None,       None     ],  # vector
+        [ None,      None,      None,     None,       None,       None,       None     ],  # tensor
+        [ None,      None,      None,     None,       None,       None,       None     ]   # wrench
+    ])
+    check_binary_op(operator.pow, operands, results)
