@@ -93,6 +93,10 @@ def check_binary_op(op, operands, results):
 
 
 def test_sum_subtract(operands):
+    '''
+    This is a test for the add & sub binary operations between numbers, symbols,
+    expressions, matrices, vectors, tensors, wrenches.
+    '''
     results = np.array([
         # cte      symbol     expr      matrix      vector,     tensor,     wrench
         [ ...,     Expr,      Expr,     None,       None,       None,       None     ],  # cte
@@ -105,3 +109,32 @@ def test_sum_subtract(operands):
     ])
     check_binary_op(operator.add, operands, results)
     check_binary_op(operator.sub, operands, results)
+
+
+
+def test_mult(operands):
+    '''
+    This is a test for the mult binary operations between numbers, symbols,
+    expressions, matrices, vectors, tensors, wrenches.
+    '''
+    results = np.array([
+        # cte        symbol     expr      matrix      vector,     tensor,     wrench
+        [ ...,       Expr,      Expr,     Matrix,     Vector3D,   Tensor3D,   Wrench3D ],  # cte
+        [ Expr,      Expr,      Expr,     Matrix,     Vector3D,   Tensor3D,   Wrench3D ],  # symbol
+        [ Expr,      Expr,      Expr,     Matrix,     Vector3D,   Tensor3D,   Wrench3D ],  # expr
+        [ Matrix,    Matrix,    Matrix,   ...,        None,       None,       None     ],  # matrix
+        [ Vector3D,  Vector3D,  Vector3D, None,       Expr,       None,       None     ],  # vector
+        [ Tensor3D,  Tensor3D,  Tensor3D, None,       Vector3D,   Tensor3D,   None     ],  # tensor
+        [ Wrench3D,  Wrench3D,  Wrench3D, None,       None,       None,       Wrench3D ]   # wrench
+    ])
+    check_binary_op(operator.mul, operands, results)
+
+
+    # Product between matrices are also supported, but shapes of the input operands must match
+    a, b, c = Matrix(shape=[3,4]), Matrix(shape=[4, 5]), Matrix(shape=[5, 6])
+    d = a * b
+    assert isinstance(d, Matrix) and d.get_shape() == (3, 5)
+    d = b * c
+    assert isinstance(d, Matrix) and d.get_shape() == (4, 6)
+    with pytest.raises(TypeError):
+        a * c
