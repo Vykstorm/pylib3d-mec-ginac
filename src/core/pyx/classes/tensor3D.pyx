@@ -226,11 +226,11 @@ cdef class Tensor3D(Matrix):
         The result is another expression.
         '''
         if not isinstance(other, Expr):
-            expr = Expr(other)
-        inverted_expr = 1 / expr
+            other = Expr(other)
+        other = 1 / other
 
         return _tensor_from_c_value(
-            (<Expr>inverted_expr)._c_handler *\
+            (<Expr>other)._c_handler *\
             c_deref(<c_Tensor3D*>(self._get_c_handler()))
         )
 
