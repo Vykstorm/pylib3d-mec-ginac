@@ -114,7 +114,7 @@ def test_sum_subtract(operands):
 
 def test_mult(operands):
     '''
-    This is a test for the mult binary operations between numbers, symbols,
+    This is a test for the mult binary operation between numbers, symbols,
     expressions, matrices, vectors, tensors, wrenches.
     '''
     results = np.array([
@@ -138,3 +138,32 @@ def test_mult(operands):
     assert isinstance(d, Matrix) and d.get_shape() == (4, 6)
     with pytest.raises(TypeError):
         a * c
+
+
+
+
+def test_div(operands):
+    '''
+    This is a test for the div binary operation between numbers, symbols,
+    expressions, matrices, vectors, tensors, wrenches.
+    '''
+    results = np.array([
+        # cte        symbol     expr      matrix      vector,     tensor,     wrench
+        [ ...,       Expr,      Expr,     None,       None,       None,       None     ],  # cte
+        [ Expr,      Expr,      Expr,     None,       None,       None,       None     ],  # symbol
+        [ Expr,      Expr,      Expr,     None,       None,       None,       None     ],  # expr
+        [ Matrix,    Matrix,    Matrix,   None,       None,       None,       None     ],  # matrix
+        [ Vector3D,  Vector3D,  Vector3D, None,       None,       None,       None     ],  # vector
+        [ Tensor3D,  Tensor3D,  Tensor3D, None,       None,       None,       None     ],  # tensor
+        [ Wrench3D,  Wrench3D,  Wrench3D, None,       None,       None,       None     ]   # wrench
+    ])
+    check_binary_op(operator.truediv, operands, results)
+
+
+
+def test_pow(operands):
+    '''
+    This is a test for the power binary operation between numbers, symbols,
+    expressions, matrices, vectors, tensors and wrenches
+    '''
+    pass
