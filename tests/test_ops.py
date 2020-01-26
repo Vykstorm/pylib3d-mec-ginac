@@ -177,3 +177,26 @@ def test_pow(operands):
         [ None,      None,      None,     None,       None,       None,       None     ]   # wrench
     ])
     check_binary_op(operator.pow, operands, results)
+
+
+
+
+
+def test_unary_ops(system):
+    '''
+    This is a test to check unary operations with symbols, expressions,
+    matrices, vectors, tensors and wrenches
+    '''
+    sys = system
+    vector = sys.get_vector('v')
+    tensor = sys.get_tensor('q')
+    wrench = sys.get_wrench('w')
+    symbol = sys.get_symbol('a')
+    expr = (symbol ** 2) + 1
+    matrix = Matrix([1, symbol, expr])
+
+    assert -symbol == -1*symbol
+    assert -expr == -1*expr
+    assert (-matrix).values == (-1*matrix).values
+    assert (-vector).values == (-1*vector).values
+    assert (-tensor).values == (-1*tensor).values
