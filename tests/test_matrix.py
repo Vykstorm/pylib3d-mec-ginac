@@ -8,6 +8,7 @@ Description: Unitary test for the class Matrix
 
 import pytest
 from lib3d_mec_ginac import *
+import numpy as np
 
 
 
@@ -15,11 +16,74 @@ from lib3d_mec_ginac import *
 ######## Tests ########
 
 
-def test_constructor():
+def test_constructor(invalid_numeric_values):
     '''
     This is a test for the Matrix class constructor
     '''
-    pass
+    # Construct a matrix only specifying its values ( it guesses the shape, like numpy )
+    # with a list of sublists
+    m = Matrix([
+        [2, 3, 5],
+        [4, 5, 6]
+    ])
+    assert m.get_shape() == (2, 3)
+    assert m.get_values() == [2, 3, 5, 4, 5, 6]
+
+    # Number of items on each row must match
+    with pytest.raises(ValueError):
+        m = Matrix([
+            [1, 2],
+            [3, 4, 5]
+        ])
+
+    # A matrix with one single row can be constructed by indicating only one list
+    m = Matrix([ 1, 2, 3 ])
+    assert m.get_shape() == (1, 3)
+    assert m.get_values() == [1, 2, 3]
+
+    # Number of items specified in the list must be greater or equal than one
+    with pytest.raises(ValueError):
+        Matrix([])
+
+    # We can specify the values and the shape of the matrix
+    m = Matrix(values=[1, 2, 3, 4, 5, 6], shape=(2, 3))
+    assert m.get_shape() == (2, 3)
+    assert m.get_values() == [1, 2, 3, 4, 5, 6]
+    m = Matrix(values=[[1, 2], [3, 4], [5, 6]], shape=(2, 3))
+    assert m.get_shape() == (2, 3)
+    assert m.get_values() == [1, 2, 3, 4, 5, 6]
+
+
+    # The shape of the matrix must match with the number of values indicated
+    with pytest.raises(ValueError):
+        Matrix(values=[1, 2, 3], shape=(1, 4))
+
+    with pytest.raises(ValueError):
+        Matrix(values=[[1, 2], [3, 4], [5, 6]], shape=(2, 2))
+
+
+    # All values passed must be convertible to expressions
+    for x in invalid_numeric_values:
+        with pytest.raises(TypeError):
+            Matrix(values=[[x]])
+
+
+    # A matrix with ceros can also be created by passing only its shape
+    m = Matrix(shape=[2, 2])
+    assert m.get_shape() == (2, 2)
+    assert m.get_values() == [0] * 4
+
+    # Numpy arrays can be also passed ( it will presserve the shape and its values )
+    # unless the shape argument is specified
+    m = Matrix(np.eye(3))
+    assert m.get_shape() == (3, 3)
+    assert m.get_values() == [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+    m = Matrix(np.eye(3), shape=[1, 9])
+    assert m.get_shape() == (1, 9)
+    assert m.get_values() == [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+
 
 
 def test_block():
