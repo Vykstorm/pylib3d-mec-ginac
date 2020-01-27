@@ -17,7 +17,7 @@ from itertools import filterfalse, product
 
 ######## Fixture ########
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def operands(system):
     sys = system
     cte = 2

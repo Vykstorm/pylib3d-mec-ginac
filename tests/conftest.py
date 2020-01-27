@@ -65,7 +65,7 @@ def invalid_numeric_values():
 
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def system():
     '''
     This fixture creates a system with a few objects ( vectors, tensors, wrenches, ... )
