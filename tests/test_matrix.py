@@ -46,7 +46,10 @@ def test_iterator():
     '''
     This is a test for the __iter__ metamethod in the class Matrix
     '''
-    pass
+    sys = System()
+    m = Matrix(shape=[3, 3], values=range(0, 9))
+    assert list(m) == list(range(0, 9))
+
 
 
 
