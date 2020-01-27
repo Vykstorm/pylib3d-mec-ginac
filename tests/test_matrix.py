@@ -26,7 +26,48 @@ def test_block():
     '''
     This is a test for the static method ``block`` in the class Matrix.
     '''
-    pass
+    a = Matrix([
+        [1, 2],
+        [3, 4]
+    ])
+    b = Matrix([
+        [5, 6],
+        [7, 8]
+    ])
+    c = Matrix.block(1, 2, a, b)
+    assert c.get_shape() == (2, 4)
+    assert c.get_values() == [1, 2, 5, 6, 3, 4, 7, 8]
+    c = Matrix.block(2, 1, a, b)
+    assert c.get_shape() == (4, 2)
+    assert c.get_values() == [1, 2, 3, 4, 5, 6, 7, 8]
+    c = Matrix.block(2, 2, a, b, a, b)
+    assert c.get_shape() == (4, 4)
+    assert c.get_values() == [1, 2, 5, 6, 3, 4, 7, 8] * 2
+
+    # The number of varadic arguments ( matrices ) may be equal to n*m
+    with pytest.raises(ValueError):
+        Matrix.block(1, 1, a, b)
+    with pytest.raises(ValueError):
+        Matrix.block(1, 2, a)
+    with pytest.raises(ValueError):
+        Matrix.block(2, 2, a, b, a)
+
+    # All matrices in the same row block may have the same number of rows
+    a, b = Matrix(shape=[2, 2]), Matrix(shape=[3, 2])
+    with pytest.raises(TypeError):
+        Matrix.block(1, 2, a, b)
+    with pytest.raises(TypeError):
+        Matrix.block(2, 2, a, b, a, b)
+
+    # All matrices in the same column block may have the same number of columns
+    a, b = Matrix(shape=[2, 2]), Matrix(shape=[2, 3])
+    with pytest.raises(TypeError):
+        Matrix.block(2, 1, a, b)
+    with pytest.raises(TypeError):
+        Matrix.block(2, 2, a, a, b, b)
+
+
+
 
 
 def test_getset_methods(invalid_numeric_values):
@@ -211,10 +252,6 @@ def test_getset_operator(invalid_numeric_values):
     for x in invalid_numeric_values:
         with pytest.raises(TypeError):
             m[0, 0] = x
-
-
-
-
 
 
 
