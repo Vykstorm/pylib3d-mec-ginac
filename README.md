@@ -138,4 +138,4 @@ python -m lib3d_mec_ginac examples/four_bar
 
 ## License
 
-This project is under [GPLv3 license](LICENSE.txt)
+This project is under [GPLv2 license](LICENSE.txt)
