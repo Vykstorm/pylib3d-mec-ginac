@@ -33,7 +33,8 @@ release, version = VERSION, VERSION
 
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx"
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autosectionlabel"
 ]
 templates_path = ['templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -57,3 +58,8 @@ if 'sphinx.ext.intersphinx' in extensions:
 
 html_theme = 'classic'
 html_static_path = ['static']
+
+
+######## MORE OPTIONS ########
+
+autosectionlabel_prefix_document = True
