@@ -30,5 +30,28 @@ classes & functions in the API of pylib3d-mec-ginac already imported::
     sudo docker run -it $IMAGE
     >>> ...
 
-The version of the library installed on the docker image is the latest stable version.
+The library installed on the docker image is the latest stable version.
 Other versions are avaliable at the `Github packages <https://github.com/Vykstorm/pylib3d-mec-ginac/packages>`_
+
+
+The 3D viewer
+===============================
+
+The mechanical system that you create programatically in the python interpreter, can
+be shown in a interactive graphical environment.
+The next line opens the Python prompt and the 3D viewer::
+
+    python -m lib3d_mec_ginac
+
+This code::
+
+    >>> draw_frame('abs')
+    >>> v = new_vector('v', 1, 1, 1)
+    >>> p = new_point('p', v)
+    >>> draw_point(p)
+    >>> draw_vector('O', v)
+
+will be shown in the viewer like this ( it draws the absolute frame reference, a point and a
+vector ):
+
+.. image:: images/3D_viewer.png
