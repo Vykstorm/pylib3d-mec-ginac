@@ -34,7 +34,19 @@ You need the next packages:
 :libfontconfig1>=2.12.6: Generic font configuration library
 
 
-Also python version 3.6 or later and pip are required. Python 3.6 and 3.7 versions were
+Also the next libraries are needed, but their binary files are distributed within this software.
+You dont need to install any of them.
+
+:lib_3d_mec_ginac>=1.0.0: This is the C++ framework that this library aims to extend to the Python language.
+:GiNaC: C++ library for symbolic computation
+
+:ginac>=1.7.7: Framework for symbolic computation implemented in C++
+
+:cln>=1.3.4: Library for numeric computation also in C++
+
+
+
+Python version 3.6 or later and pip are required. Python 3.6 and 3.7 versions were
 succesfully tested with this library.
 
 All of this dependencies can be installed with:
@@ -63,6 +75,9 @@ Make sure that your default python and pip points to the 3.7 version
     To check their default versions, execute::
 
         python --version && pip --version
+
+
+
 
 
 
