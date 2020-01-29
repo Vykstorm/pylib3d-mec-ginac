@@ -114,7 +114,7 @@ for name in dir(Scene):
 def _create_simulation_global_func(method):
     @wraps(method)
     def func(*args, **kwargs):
-        return method(get_default_system()._scene, *args, **kwargs)
+        return method(get_default_system()._scene._simulation, *args, **kwargs)
     return func
 
 for name in dir(Simulation):
