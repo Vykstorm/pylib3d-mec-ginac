@@ -57,6 +57,7 @@ class Simulation(EventProducer):
             self._state = 'running'
             self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
+            self._system.save_state()
             self.get_integration_method().init()
             self._system.get_time().value = 0
             self.fire_event('simulation_started')
@@ -92,8 +93,8 @@ class Simulation(EventProducer):
             self._timer = None
             self._elapsed_time = 0.0
             self._last_update_time = None
+            self._system.restore_previous_state()
             self._update()
-
             self.fire_event('simulation_stopped')
 
 
@@ -352,7 +353,10 @@ class Simulation(EventProducer):
                 if self._looped:
                     delta_t = t.value - t_limit
                     t.value -= t_limit
-                    self.get_integration_method().step(delta_t)
+                    self._system.restore_previous_state()
+                    integrator = self.get_integration_method()
+                    integrator.init()
+                    integrator.step(delta_t)
                     self.fire_event('simulation_step')
                 else:
                     self.stop()
