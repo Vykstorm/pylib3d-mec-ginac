@@ -156,9 +156,6 @@ Twist_Arm1, Twist_Arm2, Twist_Arm3 = twist('Arm1'), twist('Arm2'), twist('Arm3')
 q,   q_aux   = get_coords_matrix(),        get_aux_coords_matrix()
 dq,  dq_aux  = get_velocities_matrix(),    get_aux_velocities_matrix()
 ddq, ddq_aux = get_accelerations_matrix(), get_aux_accelerations_matrix()
-epsilon      = get_unknowns_matrix()
-param        = get_params_matrix()
-input        = get_inputs_matrix()
 
 
 ######## Kinematic equations ########
@@ -171,95 +168,57 @@ e_z = new_vector('e_z', 0, 0, 1, 'xyz')
 Phi = Matrix(shape=[2, 1])
 Phi[0] = O2C * e_x
 Phi[1] = O2C * e_z
-
 dPhi = derivative(Phi)
 ddPhi = derivative(dPhi)
+
+# Phi_q
+Phi_q = jacobian(Phi.transpose(), Matrix.block(2, 1, q, q_aux))
+dPhi_dq = jacobian(dPhi.transpose(), Matrix.block(2, 1, dq, dq_aux))
 
 # Beta
 beta = -dPhi
 beta = subs(beta, dq, 0)
 beta = subs(beta, dq_aux, 0)
 
-# Phi_q
-Phi_q = jacobian(Phi.transpose(), Matrix.block(2, 1, q, q_aux))
-dPhi_dq = jacobian(dPhi.transpose(), Matrix.block(2, 1, dq, dq_aux))
-
-
-# Gamma
-gamma = -ddPhi
-gamma = subs(gamma, ddq, 0)
-gamma = subs(gamma, ddq_aux, 0)
-
-
 # Phi_init
-Phi_init = Matrix([theta1 + pi / 2])
-dPhi_init = Matrix([dtheta1 + pi / 2])
+Phi_init = Matrix.block(2, 1, Phi, Matrix([theta1 + pi / 2]))
+dPhi_init = Matrix.block(2, 1, dPhi, Matrix([dtheta1 + pi / 2]))
 
-
-
-######## Dynamic equations ########
-
-Dyn_eq_VP = Matrix(shape=[3, 1], values=[
-    Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta1) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta1) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta1),
-    Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta2) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta2) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta2),
-    Sum_Wrenches_Arm1*diff(Twist_Arm1, dtheta3) + Sum_Wrenches_Arm2*diff(Twist_Arm2,dtheta3) + Sum_Wrenches_Arm3*diff(Twist_Arm3,dtheta3)
-])
-
-
-######## Output vector ########
-
-
-Output = new_matrix('Output', shape=[1, 1])
-
-
-
-######## Energy equations ########
-
-
-Energy = new_matrix('Energy', shape=[1, 1])
-
-Dyn_eq_VP_open = Dyn_eq_VP
-Dyn_eq_VP_open = subs(Dyn_eq_VP_open, epsilon, 0)
-
-
-Dyn_eq_L = Dyn_eq_VP
-M_qq = jacobian(Dyn_eq_VP_open.transpose(), ddq, True)
-
-delta_q = -Dyn_eq_VP_open
-delta_q = subs(delta_q, ddq, 0)
-delta_q = subs(delta_q, ddq_aux, 0)
-
-Phi_init = Matrix.block(2, 1, Phi, Phi_init)
-dPhi_init = Matrix.block(2, 1, dPhi, dPhi_init)
-
-
+# Phi_init_q
 Phi_init_q = jacobian(Phi_init.transpose(), Matrix.block(2, 1, q, q_aux))
 dPhi_init_dq = jacobian(dPhi_init.transpose(), Matrix.block(2, 1, dq, dq_aux))
 
+# beta_init
 beta_init = -dPhi_init
 beta_init = subs(beta_init, dq, 0)
 beta_init = subs(beta_init, ddq_aux, 0)
-
-Extra_Dyn_Eq_eq = Matrix([dtheta1, ddtheta1]).transpose()
-Dyn_Eq_eq_VP = Matrix.block(5, 1, Dyn_eq_L, ddPhi, dPhi, Phi, Extra_Dyn_Eq_eq)
 
 
 
 ######## Drawings ########
 
+# Draw the pivot points
 draw_point('O', color='cyan')
 draw_point('A', color='red')
 draw_point('B', color='green')
 draw_point('C', color='blue')
+
+# Draw the vectors connecting the pivots
 draw_position_vector('O', 'A')
 draw_position_vector('A', 'B')
 draw_position_vector('B', 'C')
 draw_position_vector('C', 'O')
 
-
+# Change camera position & focal point
 camera = get_camera()
 camera.position = 0.8, 4, 0.5
 camera.focal_point = 0.8, 0, -0.2
 
 
+
+
+######## Simulation ########
+
+
+# Start simulation
 start_kinematic_euler_simulation(Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q, dPhi_dq, beta)
