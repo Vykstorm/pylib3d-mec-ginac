@@ -28,6 +28,7 @@ from tabulate import tabulate
 
 
 
+
 ######## System class ########
 
 
@@ -56,6 +57,9 @@ class System(_System):
             if symbol == self.get_time():
                 continue
             symbols_values[symbol.get_type()][symbol.get_name()] = symbol._get_value()
+
+        # This variable is used to store the init symbols values ( as a numpy array )
+        self._state = None
 
         # Create scene visualizer (to show drawings)
         self._scene = Scene(self)
@@ -1658,6 +1662,24 @@ class System(_System):
 
 
 
+    ######## Restoring/Saving state ########
+
+
+    def save_state(self):
+        self._state = dict([(key, value.as_array().copy()) for key, value in self._symbols_values.items()])
+
+
+    def restore_previous_state(self):
+        if self._state is None:
+            raise RuntimeError('You must call first to save_state')
+        for key, arr in self._state.items():
+            np.copyto(self._symbols_values[key].as_array(), arr)
+
+
+
+
+
+
     ######## Properties ########
 
 
@@ -1921,15 +1943,15 @@ class SymbolsValuesMapping(MutableMapping):
         self._values = np.array(np.zeros(shape=(0,1), dtype=np.float64), copy=False, order='C', subok=True)
 
 
-
     ######## Getters ########
 
 
     def as_array(self):
-        return self._values.view()
+        return self._values
 
     def index(self, name):
         return self._names.index(name)
+
 
 
 
