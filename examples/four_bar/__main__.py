@@ -41,114 +41,12 @@ new_point('C',  'B', 'BC')
 new_point('O2', 'O', 'OO2')
 
 
-
-######## Dynamical parameters ########
-
-m1, m2, m3 = new_param('m1', 1), new_param('m2', 1), new_param('m3', 1)
-
-
-cg1x, cg1z = new_param('cg1x', 0.2), new_param('cg1z', 0.1)
-cg2x, cg2z = new_param('cg2x', 1),   new_param('cg2z', 0.1)
-cg3x, cg3z = new_param('cg3x', 0.6), new_param('cg3z', 0.1)
-
-
-new_vector('OArm1_GArm1', cg1x, 0, cg1z, 'Barm1')
-new_vector('OArm2_GArm2', cg2x, 0, cg2z, 'Barm2')
-new_vector('OArm3_GArm3', cg3x, 0, cg3z, 'Barm3')
-
-
-I1yy, I2yy, I3yy = [new_param(name, 1) for name in ('I1yy', 'I2yy', 'I3yy')]
-
-I_Arm1 = new_tensor('Iarm1', base='Barm1')
-I_Arm2 = new_tensor('Iarm2', base='Barm2')
-I_Arm3 = new_tensor('Iarm3', base='Barm3')
-I_Arm1[1, 1], I_Arm2[1, 1], I_Arm3[1, 1] = I1yy, I2yy, I3yy
-
-
 ######## Frames ########
 
 new_frame('FArm1',    'O',  'Barm1')
 new_frame('FArm2',    'A',  'Barm2')
 new_frame('FArm3',    'B',  'Barm3')
 new_frame('Fra_ABS2', 'O2', 'xyz')
-
-
-
-######## Solids ########
-
-new_solid('Arm1', 'O', 'Barm1', 'm1', 'OArm1_GArm1', 'Iarm1')
-new_solid('Arm2', 'A', 'Barm2', 'm2', 'OArm2_GArm2', 'Iarm2')
-new_solid('Arm3', 'B', 'Barm3', 'm3', 'OArm3_GArm3', 'Iarm3')
-
-
-
-######## Joint unknowns ########
-
-new_unknown('lambda1')
-new_unknown('lambda2')
-
-
-
-######## Inputs ########
-
-Fx2, Fz2 = new_input('Fx2'), new_input('Fz2')
-Fx3, Fz3 = new_input('Fx3'), new_input('Fz3')
-My2, My3 = new_input('My2'), new_input('My3')
-
-new_vector('Fext2', Fx2, 0,   Fz2, 'xyz')
-new_vector('Fext3', Fx3, 0,   Fz3, 'xyz')
-new_vector('Mext2', 0,   My2, 0,   'xyz')
-new_vector('Mext3', 0,   My3, 0,   'xyz')
-
-
-
-######## Force and momentum ########
-
-K   = new_param('k',     50)
-l2x = new_param('l2x',    1)
-l3x = new_param('l3x',  0.5)
-l3z = new_param('l3z',  0.1)
-
-new_vector('OArm2_L2',  l2x, 0, 0,   'Barm2')
-new_vector('OArm3_L3',  l3x, 0, l3z, 'Barm3')
-
-new_point('OL2', 'A', 'OArm2_L2')
-new_point('OL3', 'B', 'OArm3_L3')
-
-OL2_OL3 = position_vector('OL2', 'OL3')
-FK = K * OL2_OL3
-MK = new_vector('MK_GroundPend1', 0, 0, 0, 'xyz')
-
-
-######## Wrenches ########
-
-# Gravity
-Gravity_Arm1 = gravity_wrench('Arm1')
-Gravity_Arm2 = gravity_wrench('Arm2')
-Gravity_Arm3 = gravity_wrench('Arm3')
-
-# Inertia
-Inertia_Arm1 = inertia_wrench('Arm1')
-Inertia_Arm2 = inertia_wrench('Arm2')
-Inertia_Arm3 = inertia_wrench('Arm3')
-
-# Constitutive
-SpringA = new_wrench('SpringA', FK,   MK, 'OL2', 'Arm2', 'Constitutive')
-SpringR = new_wrench('SpringR', -FK, -MK, 'OL3', 'Arm3', 'Constitutive')
-
-# External
-FMext2 = new_wrench('FMext2', 'Fext2', 'Mext2', 'A', 'Arm2', 'External')
-FMext3 = new_wrench('FMext3', 'Fext3', 'Mext3', 'B', 'Arm3', 'External')
-
-# Wrenches sums
-Sum_Wrenches_Arm1 = Inertia_Arm1 + Gravity_Arm1
-Sum_Wrenches_Arm2 = Inertia_Arm2 + Gravity_Arm2 + SpringA - FMext2
-Sum_Wrenches_Arm3 = Inertia_Arm3 + Gravity_Arm3 - SpringA + FMext3
-
-
-# Twists
-Twist_Arm1, Twist_Arm2, Twist_Arm3 = twist('Arm1'), twist('Arm2'), twist('Arm3')
-
 
 
 ######## Matrices of symbols ########
