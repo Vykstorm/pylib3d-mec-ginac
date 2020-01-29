@@ -10,6 +10,7 @@ from ..drawing.scene import Scene
 import lib3d_mec_ginac_ext as _cython_ext
 from .system import System, get_default_system, set_default_system
 from .integration import IntegrationMethod, KinematicEulerIntegrationMethod
+from ..drawing.simulation import Simulation
 from ..config import runtime_config
 
 
@@ -90,7 +91,6 @@ for name in dir(System):
 
 
 
-
 # Expose methods of the 3d scene manager associated to the default system object (add them as global functions)
 def _create_scene_global_func(method):
     @wraps(method)
@@ -107,3 +107,21 @@ for name in dir(Scene):
         continue
     __all__.append(name)
     globals()[name] = _create_scene_global_func(getattr(Scene, name))
+
+
+
+# Expose methods of the simulation attached the scene instance associated to the default system object
+def _create_simulation_global_func(method):
+    @wraps(method)
+    def func(*args, **kwargs):
+        return method(get_default_system()._scene, *args, **kwargs)
+    return func
+
+for name in dir(Simulation):
+    if not any(map(lambda pattern: fullmatch(pattern, name),
+        [r'\w*integration\w*']
+    )):
+        continue
+
+    __all__.append(name)
+    globals()[name] = _create_simulation_global_func(getattr(Simulation, name))
