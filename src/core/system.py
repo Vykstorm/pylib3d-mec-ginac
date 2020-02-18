@@ -13,6 +13,7 @@ from lib3d_mec_ginac_ext import *
 
 # From other modules
 from ..drawing.scene import Scene
+from ..drawing.events import EventProducer
 
 
 # Standard imports
@@ -32,7 +33,7 @@ from tabulate import tabulate
 ######## System class ########
 
 
-class System(_System):
+class System(_System, EventProducer):
     '''
     Its the main class of the library. It represents a mechanical system defined with different variables:
     coordinates, parameters, inputs, tensors, ...
@@ -43,7 +44,8 @@ class System(_System):
 
 
     def __init__(self):
-        super().__init__()
+        _System.__init__(self)
+        EventProducer.__init__(self)
 
         # This will store the symbol numeric values (1 vector per symbol type)
         symbols_values = {}
@@ -59,6 +61,7 @@ class System(_System):
             symbols_values[symbol.get_type()][symbol.get_name()] = symbol._get_value()
 
         # This variable is used to store the init symbols values ( as a numpy array )
+        # to restore them when the simulation is restarted.
         self._state = None
 
         # Create scene visualizer (to show drawings)
@@ -110,7 +113,7 @@ class System(_System):
         else:
             values = self._symbols_values[symbol.get_type()]
             values[symbol.get_name()] = value
-
+        self.fire_event('symbol_value_changed', symbol)
 
 
 

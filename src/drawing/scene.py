@@ -55,6 +55,8 @@ class Scene(EventProducer):
         # Initialize super instance
         super().__init__()
 
+        self.add_child(system)
+
         # Create vtk renderer
         renderer = vtkRenderer()
 
@@ -83,6 +85,9 @@ class Scene(EventProducer):
         self._simulation.add_event_handler(self._on_simulation_stopped, 'simulation_stopped')
         self._simulation.add_event_handler(self._on_simulation_resumed, 'simulation_resumed')
         self._simulation.add_event_handler(self._on_simulation_paused, 'simulation_paused')
+
+        # Listen for manual changes on the symbols values
+        self.add_event_handler(self._on_symbol_value_changed, 'symbol_value_changed')
 
         # Refresh background color when changed
         self._background_color.add_event_handler(self._on_background_color_changed, 'changed')
@@ -202,6 +207,12 @@ class Scene(EventProducer):
     def _on_drawing_unselected(self, event_type, source, *args, **kwargs):
         # This is invoked when a 3D drawing is unselected
         self._update_drawings_display_info()
+
+
+
+    def _on_symbol_value_changed(self, event_type, source, symbol):
+        if not self.is_simulation_running():
+            self._update_3D_drawings()
 
 
 
