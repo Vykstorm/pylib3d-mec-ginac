@@ -291,7 +291,7 @@ class Simulation(EventProducer):
         Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q, dPhi_dq, beta,
         geom_eq_init_tol=1e-10, geom_eq_init_relax=.1,
         geom_eq_tol=.05 * 10**-3, geom_eq_relax=.1):
-        '''start_kinematic_euler_simulation()
+        '''set_kinematic_euler_simulation()
         This method will start a simulation on this system adjusting the values of
         symbols over time to met the equation constraints defined by the input matrices:
         Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q dPhi_dq, beta
