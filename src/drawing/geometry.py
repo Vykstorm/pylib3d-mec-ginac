@@ -211,7 +211,6 @@ class Sphere(Geometry):
     def __init__(self, radius=1, center=(0, 0, 0), resolution=15):
         super().__init__(vtkSphereSource())
         self.set_radius(radius)
-        #self.set_resolution(resolution)
         self.set_center(center)
         self.set_resolution(resolution)
 

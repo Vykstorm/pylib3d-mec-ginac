@@ -128,7 +128,6 @@ class JupyterClient(ipykernel.kernelbase.Kernel, Client):
             if code is None:
                 # Code is incomplete
                 response['status'] = 'incomplete'
-                #response['indent'] = 1
             else:
                 # Code is ready to be executed
                 response['status'] = 'complete'
