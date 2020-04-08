@@ -56,7 +56,8 @@ if 'sphinx.ext.intersphinx' in extensions:
 
 ######## OPTIONS FOR HTML OUTPUT ########
 
-html_theme = 'classic'
+html_theme = 'python_docs_theme'
+#html_theme = 'classic'
 html_static_path = ['static']
 
 
