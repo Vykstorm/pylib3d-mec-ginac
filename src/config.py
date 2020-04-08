@@ -44,7 +44,6 @@ try:
                 raise RuntimeError(f'Invalid value for "{key}" setting')
         return default
 
-    #get_env_value = lambda key, default: json.loads(os.environ.get(key, default=None))
     runtime_config = dict(zip(runtime_config.keys(), starmap(get_env_value, runtime_config.items())))
 
     runtime_config = SimpleNamespace(**runtime_config)

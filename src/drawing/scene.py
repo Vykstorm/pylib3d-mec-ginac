@@ -785,7 +785,6 @@ class Scene(EventProducer):
 
         # Setup drawing transformation
         drawing.scale(scale)
-        #self._apply_point_transform(drawing, point)
         OC = self._system.position_vector(self._system.O, point).in_base(self._system.xyz)
         drawing.translate(OC)
         # Add the drawing to the scene
@@ -871,7 +870,6 @@ class Scene(EventProducer):
 
         # Setup drawing transformation
         self._apply_vector_transform(drawing, vector)
-        #self._apply_point_transform(drawing, point)
         v = self._system.position_vector(self._system.O, point).in_base(self._system.xyz)
         drawing.translate(v)
 
