@@ -178,17 +178,13 @@ EXTENSIONS = [
 PYTHON_VERSION = '>=3.7'
 
 # Package dependencies
-DEPENDENCIES = [
-    'Cython>=0.29.13',
-    'asciitree>=0.3.3',
-    'tabulate>=0.8.5',
-    'numpy>=1.17.2',
-    'vtk>=8.1.2',
-    'jupyter>=1.0.0'
+with open('requirements.txt', 'r') as file:
+    DEPENDENCIES = file.readlines()
+
+# Extra dependency links
+DEPENDENCY_LINKS = [
+    'https://vtk-tk-support.herokuapp.com/'
 ]
-
-
-
 
 
 
@@ -260,8 +256,6 @@ if __name__ == '__main__':
 
 
     ## Check library dependencies
-    print("- Checking library dependencies", end='')
-
     try:
         from Cython.Build import cythonize
     except ImportError:
@@ -340,6 +334,7 @@ if __name__ == '__main__':
 
             python_requires=PYTHON_VERSION,
             install_requires=DEPENDENCIES,
+            dependency_links=DEPENDENCY_LINKS,
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
             package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]},
