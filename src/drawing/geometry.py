@@ -11,9 +11,11 @@ from itertools import repeat
 from collections.abc import Iterable
 from operator import gt
 from functools import partial
+import os
 
 # imports from other modules
 from .vtkobjectwrapper import VtkObjectWrapper
+from .scad import ScadToStlManager
 
 # vtk imports
 from vtk import vtkPolyDataMapper, vtkActor, vtkMapper, vtkAlgorithm
@@ -167,11 +169,41 @@ class Geometry(VtkObjectWrapper, metaclass=GeometryMeta):
 
     @classmethod
     def from_stl(self, filename):
+        # Parse filename
         filename = _parse_filename(filename)
-        reader = vtkSTLReader()
-        reader.SetFileName(filename)
-        reader.Update()
-        return Geometry(reader)
+
+        stl_reader = vtkSTLReader()
+        scad_to_stl_manager = ScadToStlManager()
+        if os.path.isfile(filename):
+            # The stl model is already in the file system
+            stl_reader.SetFileName(filename)
+            stl_reader.Update()
+            return Geometry(stl_reader)
+
+        elif filename in scad_to_stl_manager.get_loading_stls():
+            geometry = Geometry(vtkPolyData())
+
+            # model is being generated with openscad asynchronously
+            def callback(event_type, source, _filename, *args, **kwargs):
+                if _filename != filename:
+                    return
+                if event_type == "stl_model_loaded":
+                    # stl was generated succesfully
+                    stl_reader.SetFileName(filename)
+                    stl_reader.Update()
+                    with geometry:
+                        geometry.get_handler().SetInputConnection(stl_reader.GetOutputPort())
+                elif event_type == "stl_model_loading_failed":
+                    # stl generation failed
+                    # TODO
+                    pass
+
+            scad_to_stl_manager.add_event_handler(callback)
+            return geometry
+
+        else:
+            # stl file couldnt be found
+            raise OSError(f'"{filename}" stl model couldnt be found')
 
 
     def to_stl(self, filename):
