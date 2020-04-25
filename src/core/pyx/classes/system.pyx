@@ -700,7 +700,7 @@ cdef class _System:
 
         if args:
             new_args = []
-            if not isinstance(args[0], (str, bytes, Base)):
+            if not isinstance(args[0], (str, bytes, Base)) and args[0] is not None:
                 new_args.append(None)
             else:
                 new_args.append(args.pop(0))
