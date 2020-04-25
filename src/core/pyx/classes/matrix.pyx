@@ -1166,7 +1166,10 @@ cdef class Matrix(Object):
     def __eq__(self, other):
         if not isinstance(other, Matrix):
             return False
-        if self.shape != other.shape:
+        if (self.num_rows == 1 or self.num_cols == 1) and (other.num_rows == 1 or other.num_cols == 1):
+            if len(self) != len(other):
+                return False
+        elif self.shape != other.shape:
             return False
         for a, b in zip(self, other):
             if a != b:
