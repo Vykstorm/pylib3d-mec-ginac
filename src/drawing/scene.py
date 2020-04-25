@@ -551,7 +551,6 @@ class Scene(EventProducer):
         self._simulation.set_looped(looped)
 
 
-
     def set_simulation_time_limit(self, limit):
         '''set_simulation_time_limit(limit: numeric | None)
         Set simulation time limit.
@@ -564,31 +563,6 @@ class Scene(EventProducer):
         Set simulation delta time
         '''
         self._simulation.set_delta_time(delta_t)
-
-
-    def set_simulation_update_frequency(self, frequency):
-        '''set_simulation_update_frequency(frequency: numeric)
-        Change the simulation update frequency.
-
-        :param frequency: The new simulation update frequency (in number of updates per second)
-        :type frequency: numeric
-
-        '''
-        self._simulation.set_update_frequency(frequency)
-
-
-
-
-    def set_simulation_time_multiplier(self, multiplier):
-        '''set_simulation_time_multiplier(multiplier: numeric)
-        Change the simulation time multiplier
-
-        :param multiplier: The new simulation time multiplier
-        :type multiplier: numeric
-
-        '''
-        self._simulation.set_time_multiplier(multiplier)
-
 
 
     def set_background_color(self, *args):
@@ -638,14 +612,14 @@ class Scene(EventProducer):
     ######## Simulation controls ########
 
 
-    def start_simulation(self):
+    def start_simulation(self, *args, **kwargs):
         '''start_simulation()
         Starts the simulation
 
         :raises RuntimeError: If the simulation already started
 
         '''
-        self._simulation.start()
+        self._simulation.start(*args, **kwargs)
 
 
     def stop_simulation(self):

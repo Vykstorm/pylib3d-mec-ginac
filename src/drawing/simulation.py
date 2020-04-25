@@ -39,9 +39,7 @@ class Simulation(EventProducer):
         # Initialize internal fields
         self._scene, self._system = scene, system
         self._state = 'stopped'
-        self._update_freq = runtime_config.SIMULATION_UPDATE_FREQUENCY
-        self._time_multiplier = runtime_config.SIMULATION_TIME_MULTIPLIER
-        self._delta_t = None
+        self._delta_t = 1 / 30
         self._timer = None
         self._elapsed_time, self._last_update_time = 0.0, None
         self._looped, self._time_limit = False, None
@@ -54,12 +52,19 @@ class Simulation(EventProducer):
 
     ######## Simulation controls ########
 
-    def start(self):
+    def start(self, delta_t=None, time_limit=None, looped=None):
+        if delta_t is not None:
+            self.set_delta_time(delta_t)
+        if time_limit is not None:
+            self.set_time_limit(time_limit)
+        if looped is not None:
+            self.set_looped(looped)
+
         with self:
             if self._state != 'stopped':
                 raise RuntimeError('Simulation already started')
             self._state = 'running'
-            self._timer = Timer(self._update, interval=1 / self._update_freq)
+            self._timer = Timer(self._update, interval=self._delta_t)
             self._timer.start(resumed=True)
             self._system.save_state()
             self._assembly_problem_init()
@@ -128,12 +133,7 @@ class Simulation(EventProducer):
 
     def get_update_frequency(self):
         with self:
-            return self._update_freq
-
-
-    def get_time_multiplier(self):
-        with self:
-            return self._time_multiplier
+            return 1 / self._delta_t
 
 
     def get_real_update_frequency(self):
@@ -174,35 +174,6 @@ class Simulation(EventProducer):
     ######## Setters ########
 
 
-    def set_update_frequency(self, frequency):
-        try:
-            frequency = float(frequency)
-            if frequency <= 0:
-                raise TypeError
-        except TypeError:
-            raise TypeError('Input argument must be a number greater than zero')
-        with self:
-            self._update_freq = frequency
-            if self._state != 'stopped':
-                self._timer.set_time_interval(1 / self._update_freq)
-
-            self.fire_event('update_frequency_changed')
-
-
-
-    def set_time_multiplier(self, multiplier):
-        try:
-            multiplier = float(multiplier)
-            if multiplier <= 0:
-                raise TypeError
-        except TypeError:
-            raise TypeError('Input argument must be a number greater than zero')
-        with self:
-            self._time_multiplier = multiplier
-
-            self.fire_event('time_multiplier_changed')
-
-
     def set_looped(self, looped=True):
         '''set_looped(looped: bool)
         If the argument is set to True, repeat the simulation indefinitely (only if time duration
@@ -237,9 +208,10 @@ class Simulation(EventProducer):
 
     def set_delta_time(self, delta_t):
         '''set_delta_time(delta_t: numeric | None)
-        Change the simulation delta time. If a number is specified, delta time will
+        Change the simulation integration time (Amount of time to integrate with on each
+        simulation step). If a number is specified, it will
         have a fixed numeric value. If set to None ( by default ) it is updated on each
-        simulation step ( calculated is the time elapsed between two simulaton updates )
+        simulation step ( calculated as the time elapsed between two simulaton updates )
         '''
         if delta_t is not None:
             try:
@@ -250,6 +222,9 @@ class Simulation(EventProducer):
                 raise TypeError('Input argument must be a number greater than zero or None')
         with self:
             self._delta_t = delta_t
+            if self._state != 'stopped':
+                self._timer.set_time_interval(delta_t)
+            self.fire_event('delta_time_changed')
 
 
 
@@ -303,27 +278,25 @@ class Simulation(EventProducer):
             if self._state != 'running':
                 return
 
-            if self._delta_t is None:
-                # Compute delta time
-                current_time = time_ns()
-                if self._last_update_time is None:
-                    delta_t = 0
-                    self._last_update_time = current_time
-                else:
-                    delta_t = (current_time - self._last_update_time) / 1e9
-                    self._last_update_time = current_time
+            # Compute real delta time
+            current_time = time_ns()
+            if self._last_update_time is None:
+                delta_t = 0
+                self._last_update_time = current_time
             else:
-                delta_t = self._delta_t
+                delta_t = (current_time - self._last_update_time) / 1e9
+                self._last_update_time = current_time
             self._diff_times.appendleft(delta_t)
 
             # Update elapsed time
             self._elapsed_time += delta_t
 
-            # Update time variable
-            delta_t *= self._time_multiplier
-
+            # Update time
             t = self._system.get_time()
             t.value += delta_t
+
+            if self._delta_t is not None:
+                delta_t = self._delta_t
 
             self._integration_method(delta_t)
             self._assembly_problem_step(delta_t)
