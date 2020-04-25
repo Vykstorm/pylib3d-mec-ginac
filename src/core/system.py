@@ -20,7 +20,7 @@ from ..drawing.events import EventProducer
 import math
 from collections.abc import MutableMapping
 from types import SimpleNamespace
-from functools import partial
+from functools import partial, lru_cache
 from operator import methodcaller
 import numpy as np
 from tabulate import tabulate
@@ -1605,6 +1605,10 @@ class System(_System, EventProducer):
 
     ######## Numeric evaluation ########
 
+    @lru_cache(maxsize=256)
+    def _compile_numeric_function_cached(self, matrix, c_optimized=False):
+        return self._compile_numeric_function(matrix.wrapped, c_optimized)
+
 
     def compile_numeric_function(self, matrix, c_optimized=False):
         '''
@@ -1619,7 +1623,7 @@ class System(_System, EventProducer):
         .. seealso:: :func:`evaluate`
 
         '''
-        return self._compile_numeric_function(matrix, c_optimized)
+        return self._compile_numeric_function_cached(HashObjectWrapper(matrix), c_optimized)
 
 
 
@@ -1636,6 +1640,34 @@ class System(_System, EventProducer):
     compile_numeric_func = compile_numeric_function
     compile_numeric_func_c_optimized  = compile_numeric_function_c_optimized
 
+
+
+    def evaluate(self, x):
+        '''evaluate(func: NumericFunction | Matrix) -> np.ndarray
+        Evaluate the given numeric function.
+
+            :Example:
+
+            >>> disable_atomization()
+            >>> a, b, c = new_param('a', 1), new_input('b', 2), new_joint_unknown('c', 3)
+            >>> v = new_vector('v', a, b, c)
+            >>> m = v.skew * v.module
+            >>> m
+            ╭                                                                                    ╮
+            │                          0  -c*(b**2+a**2+c**2)**(1/2)   b*(b**2+a**2+c**2)**(1/2) │
+            │  c*(b**2+a**2+c**2)**(1/2)                           0  -(b**2+a**2+c**2)**(1/2)*a │
+            │ -b*(b**2+a**2+c**2)**(1/2)   (b**2+a**2+c**2)**(1/2)*a                           0 │
+            ╰                                                                                    ╯
+            >>> evaluate(m)
+            array([[  0.        , -11.22497216,   7.48331477],
+                   [ 11.22497216,   0.        ,  -3.74165739],
+                   [ -7.48331477,   3.74165739,   0.        ]])
+        '''
+        if not isinstance(x, (NumericFunction, Matrix)):
+            raise TypeError('Input argument must be a numeric function or a matrix')
+        if isinstance(x, Matrix):
+            x = self.compile_numeric_func(x)
+        return x.evaluate()
 
 
 
@@ -1901,6 +1933,24 @@ class System(_System, EventProducer):
 
 
 
+
+
+class HashObjectWrapper:
+    '''
+    This is a class that can be used to wrap an unhasable object in order to be passed to
+    a function which is decorated with lru_cache. The id of the object is used as
+    the hash.
+    '''
+    def __init__(self, obj):
+        self.wrapped = obj
+
+    def __eq__(self, other):
+        if not isinstance(other, HashObjectWrapper):
+            return False
+        return self.wrapped == other.wrapped
+
+    def __hash__(self):
+        return hash((HashObjectWrapper, id(self.wrapped)))
 
 
 

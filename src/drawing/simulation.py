@@ -9,12 +9,14 @@ Description: This file defines the class Simulation
 from time import time_ns
 from collections import deque
 from collections.abc import Mapping, Iterable
+from functools import partial
 
 # Imports from other modules
 from .events import EventProducer
 from .timer import Timer
 from ..config import runtime_config
-from ..core.integration import IntegrationMethod, KinematicEulerIntegrationMethod
+from ..core.integration import NumericIntegration
+from ..core.assembly import AssemblyProblemSolver
 from lib3d_mec_ginac_ext import Matrix, NumericFunction
 
 
@@ -44,7 +46,9 @@ class Simulation(EventProducer):
         self._elapsed_time, self._last_update_time = 0.0, None
         self._looped, self._time_limit = False, None
         self._diff_times = deque(maxlen=10)
-        self._integration_method = IntegrationMethod(system)
+        self._integration_method = NumericIntegration.get_method('euler')
+        self._assembly_problem_init = lambda *args, **kwargs: None
+        self._assembly_problem_step = lambda *args, **kwargs: None
 
 
 
@@ -58,7 +62,7 @@ class Simulation(EventProducer):
             self._timer = Timer(self._update, interval=1 / self._update_freq)
             self._timer.start(resumed=True)
             self._system.save_state()
-            self.get_integration_method().init()
+            self._assembly_problem_init()
             self._system.get_time().value = 0
             self.fire_event('simulation_started')
 
@@ -158,7 +162,7 @@ class Simulation(EventProducer):
 
 
     def get_integration_method(self):
-        '''get_integrator() -> IntegrationMethod
+        '''get_integrator() -> Callable
         Get the current integration method to adjust system's symbol values while
         the simulation is running
         '''
@@ -249,71 +253,48 @@ class Simulation(EventProducer):
 
 
 
-    def set_integration_method(self, method, constraints, parameters):
+    def set_integration_method(self, method):
         '''set_integrator(method: IntegrationMethod)
         Change integration method to adjust system's symbol values while the
         simulation is running
+        :param method: Must be a callable for a custom integration method or
+            the name of a predefined integrator like 'euler', 'rk4'
         '''
-        if not issubclass(method, IntegrationMethod) and not isinstance(method, str):
-            raise TypeError('Integration method must be a subclass of IntegrationMethod or a string')
+        if not isinstance(method, str) and not callable(method):
+            raise TypeError('Integration method must be a callable or a string')
 
         if isinstance(method, str):
-            methods = {
-                'kinematic_euler': KinematicEulerIntegrationMethod
-            }
-            if method not in methods:
-                raise ValueError(f'Invalid integration method name ("{method}")')
-            method = methods[method]
-
-
-        system = self._system
-
-        try:
-            if not isinstance(constraints, Mapping):
-                raise Exception
-            for name, value in constraints.items():
-                if not isinstance(name, str) or not isinstance(value, (Matrix, NumericFunction)):
-                    raise Exception
-            constraints = dict(zip(
-                constraints.keys(),
-                [value if isinstance(value, NumericFunction) else system.compile_numeric_function(value) for value in constraints.values()]
-            ))
-        except Exception as e:
-            raise TypeError('constraints must be a mapping like object where keys are constraint names and values are Matrix or NumericFunction instances')
+            method = NumericIntegration.get_method(method)
 
         with self:
-            self._integration_method = method(system, constraints, parameters)
+            system = self._system
+            q_values   = system.get_coords_values()
+            dq_values  = system.get_velocities_values()
+            ddq_values = system.get_accelerations_values()
+
+            self._integration_method = partial(method, q_values, dq_values, ddq_values)
             self.fire_event('integration_method_changed')
 
 
 
-    def set_kinematic_euler_integration(self,
-        Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q, dPhi_dq, beta,
-        geom_eq_init_tol=1e-10, geom_eq_init_relax=.1,
-        geom_eq_tol=.05 * 10**-3, geom_eq_relax=.1):
-        '''set_kinematic_euler_simulation()
-        This method will start a simulation on this system adjusting the values of
-        symbols over time to met the equation constraints defined by the input matrices:
-        Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q dPhi_dq, beta
+    def assembly_problem(self, *args, **kwargs):
+        '''assembly_problem(...)
+        Setup assembly problem constraints and parameters
+
+        You must pass first the next constraints as positional arguments:
+        Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq
+
+        and then you can specify additional parameters (this is optional):
+        geom_eq_tol, geom_eq_relax, geom_eq_init_tol, geom_eq_init_relax
         '''
-        self.set_integration_method(KinematicEulerIntegrationMethod,
-            constraints={
-                'Phi_init': Phi_init,
-                'Phi_init_q': Phi_init_q,
-                'dPhi_init': dPhi_init,
-                'dPhi_init_dq': dPhi_init_dq,
-                'beta_init': beta_init,
-                'Phi': Phi,
-                'Phi_q': Phi_q,
-                'dPhi_dq': dPhi_dq,
-                'beta': beta
-            },
-            parameters={
-                'geom_eq_init_tol': geom_eq_init_tol,
-                'geom_eq_init_relax': geom_eq_init_relax,
-                'geom_eq_tol': geom_eq_tol,
-                'geom_eq_relax': geom_eq_relax
-            })
+        solver = AssemblyProblemSolver(self._system, *args, **kwargs)
+        with self:
+            system = self._system
+            q_values   = system.get_coords_values()
+            dq_values  = system.get_velocities_values()
+            ddq_values = system.get_accelerations_values()
+            self._assembly_problem_init = partial(solver.init, q_values, dq_values, ddq_values)
+            self._assembly_problem_step = partial(solver.step, q_values, dq_values, ddq_values)
 
 
 
@@ -344,8 +325,8 @@ class Simulation(EventProducer):
             t = self._system.get_time()
             t.value += delta_t
 
-
-            self.get_integration_method().step(delta_t)
+            self._integration_method(delta_t)
+            self._assembly_problem_step(delta_t)
             self.fire_event('simulation_step')
 
             t_limit = self._time_limit
@@ -354,9 +335,8 @@ class Simulation(EventProducer):
                     delta_t = t.value - t_limit
                     t.value -= t_limit
                     self._system.restore_previous_state()
-                    integrator = self.get_integration_method()
-                    integrator.init()
-                    integrator.step(delta_t)
+                    self._assembly_problem_init()
+                    self._integration_method(delta_t)
                     self.fire_event('simulation_step')
                 else:
                     self.stop()

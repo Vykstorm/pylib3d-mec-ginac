@@ -3,13 +3,20 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the public API of the core submodule
 '''
 
-# Internal imports (to execute this script)
+## Internal imports (to execute this script)
+
+# Standard imports
 from functools import wraps
 from re import fullmatch
 from ..drawing.scene import Scene
+
+# Extension imports
 import lib3d_mec_ginac_ext as _cython_ext
+
+# Module imports
 from .system import System, get_default_system, set_default_system
-from .integration import IntegrationMethod, KinematicEulerIntegrationMethod
+from .integration import NumericIntegration
+from .assembly import AssemblyProblemSolver
 from ..drawing.simulation import Simulation
 from ..config import runtime_config
 
@@ -60,7 +67,7 @@ __all__.extend(['e', 'E'])
 # Add classes & functions from core submodule
 __all__.extend([
     'System', 'get_default_system', 'set_default_system',
-    'IntegrationMethod', 'KinematicEulerIntegrationMethod'
+    'NumericIntegration', 'AssemblyProblemSolver'
 ])
 
 
@@ -82,7 +89,7 @@ for name in dir(System):
         [r'\w+_point_branch', r'rotation_\w+', r'position_\w+', r'angular_\w+',
         r'velocity_\w+', r'acceleration_\w+', 'twist', 'derivative', 'dt', 'jacobian',
         'diff', 'unatomize', r'\w+_wrench', r'export_\w+', r'compile_\w+',
-        'save_state', 'restore_previous_state']
+        'save_state', 'restore_previous_state', 'evaluate']
     )):
         continue
 
@@ -101,7 +108,7 @@ def _create_scene_global_func(method):
 for name in dir(Scene):
     if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
         name not in (
-            'start_simulation', 'start_kinematic_euler_simulation', 'stop_simulation',
+            'start_simulation', 'stop_simulation',
             'resume_simulation', 'pause_simulation', 'purge_drawings', 'record_simulation'
             ):
         continue
@@ -119,7 +126,7 @@ def _create_simulation_global_func(method):
 
 for name in dir(Simulation):
     if not any(map(lambda pattern: fullmatch(pattern, name),
-        [r'\w*integration\w*']
+        [r'\w*integration\w*', 'assembly_problem']
     )):
         continue
 

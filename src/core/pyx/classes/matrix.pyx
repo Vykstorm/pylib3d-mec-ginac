@@ -1161,6 +1161,18 @@ cdef class Matrix(Object):
 
 
 
+    ######## Misc ########
+
+    def __eq__(self, other):
+        if not isinstance(other, Matrix):
+            return False
+        if self.shape != other.shape:
+            return False
+        for a, b in zip(self, other):
+            if a != b:
+                return False
+        return True
+
 
 
 
