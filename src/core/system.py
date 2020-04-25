@@ -1644,7 +1644,7 @@ class System(_System, EventProducer):
 
     def evaluate(self, x):
         '''evaluate(func: NumericFunction | Matrix) -> np.ndarray
-        Evaluate the given numeric function.
+        Evaluate the given numeric function, symbolic matrix or expression
 
             :Example:
 
@@ -1662,9 +1662,15 @@ class System(_System, EventProducer):
             array([[  0.        , -11.22497216,   7.48331477],
                    [ 11.22497216,   0.        ,  -3.74165739],
                    [ -7.48331477,   3.74165739,   0.        ]])
+            >>> evaluate(a ** 2 + b ** 2)
+            5
         '''
-        if not isinstance(x, (NumericFunction, Matrix)):
-            raise TypeError('Input argument must be a numeric function or a matrix')
+        if not isinstance(x, (NumericFunction, Matrix, Expr, SymbolNumeric)):
+            raise TypeError('Input argument must be a numeric function, matrix, symbol or expression')
+        if isinstance(x, SymbolNumeric):
+            return x.get_value()
+        if isinstance(x, Expr):
+            return next(iter(self.evaluate(Matrix([x])).flat)).item()
         if isinstance(x, Matrix):
             x = self.compile_numeric_func(x)
         return x.evaluate()
