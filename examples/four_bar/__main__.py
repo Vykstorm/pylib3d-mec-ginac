@@ -4,7 +4,6 @@
 from lib3d_mec_ginac import *
 
 
-
 ######## Generalized coordinates, velocities and accelerations ########
 
 theta1, dtheta1, ddtheta1 = new_coord('theta1', -pi/6, 0)
@@ -80,7 +79,8 @@ beta = subs(beta, dq_aux, 0)
 
 # Phi_init
 Phi_init = Matrix.block(2, 1, Phi, Matrix([theta1 + pi / 2]))
-dPhi_init = Matrix.block(2, 1, dPhi, Matrix([dtheta1 + pi / 2]))
+dPhi_init = Matrix.block(2, 1, dPhi, Matrix([dtheta1 + pi / 3]))
+
 
 # Phi_init_q
 Phi_init_q = jacobian(Phi_init.transpose(), Matrix.block(2, 1, q, q_aux))
@@ -113,10 +113,8 @@ camera.position = 0.8, 4, 0.5
 camera.focal_point = 0.8, 0, -0.2
 
 
-
-
 ######## Simulation ########
 
-
-# Start simulation
-start_kinematic_euler_simulation(Phi_init, Phi_init_q, dPhi_init, dPhi_init_dq, beta_init, Phi, Phi_q, dPhi_dq, beta)
+set_integration_method('euler')
+assembly_problem(Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq)
+start_simulation(delta_t=0.05)
