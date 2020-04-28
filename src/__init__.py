@@ -26,11 +26,6 @@ from .ui import *
 __all__.extend(_ui_api)
 
 
-# Add extra classes & methods (utils submodule)
-from .utils import __all__ as _utils_api
-from .utils import *
-__all__.extend(_utils_api)
-
 
 # Apply default runtime configuration
 from .config import runtime_config
