@@ -44,10 +44,9 @@ class Simulation(EventProducer):
         self._elapsed_time, self._last_update_time = 0.0, None
         self._looped, self._time_limit = False, None
         self._diff_times = deque(maxlen=10)
-        self._integration_method = NumericIntegration.get_method('euler')
         self._assembly_problem_init = lambda *args, **kwargs: None
         self._assembly_problem_step = lambda *args, **kwargs: None
-
+        self.set_integration_method('euler')
 
 
     ######## Simulation controls ########
