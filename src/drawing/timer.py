@@ -239,12 +239,12 @@ class Timer(EventProducer):
             interval = self._interval
             self._last_time = current_time
             self._elapsed_time += diff_time
-            while self._elapsed_time >= interval:
-                self._elapsed_time -= interval
+            #while self._elapsed_time >= interval:
+            if self._elapsed_time >= interval:
+                self._elapsed_time %= interval
                 self.fire_event('tick', *self._args, **self._kwargs)
                 if self._one_shot:
                     self.stop()
-                    break
 
 
 
