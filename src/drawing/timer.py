@@ -9,6 +9,7 @@ Description: This file defines the classes Timer and OneShotTimer
 from time import time
 from .events import EventProducer
 from collections.abc import Iterable, Mapping
+import warnings
 
 
 
@@ -34,12 +35,6 @@ class Timer(EventProducer):
 
         '''
         # Validate & parse input arguments
-        try:
-            interval = float(interval)
-            if interval <= 0:
-                raise TypeError
-        except TypeError:
-            raise TypeError('interval must be a float or int value greater than zero')
 
         if not isinstance(one_shot, bool):
             raise TypeError('one_shot must be a bool value')
@@ -58,11 +53,11 @@ class Timer(EventProducer):
         super().__init__()
 
         # Initialize internal fields
-        self._interval, self._one_shot = interval, one_shot
+        self._one_shot = one_shot
         self._args, self._kwargs = args, kwargs
         self._state = 'stopped'
         self._elapsed_time, self._last_time = 0.0, None
-
+        self.set_time_interval(interval)
 
 
 
@@ -163,6 +158,9 @@ class Timer(EventProducer):
             interval = float(interval)
             if interval <= 0:
                 raise TypeError
+            if interval < 1e-3:
+                warnings.warn('A value less than 1 millisecond is not recommended '+\
+                    'to be set as the time interval')
             self._interval = interval
         except TypeError:
             raise TypeError('interval must be a float or int value greater than zero')
@@ -269,7 +267,7 @@ class OneShotTimer(Timer):
 def main():
     from time import sleep
 
-    timer = OneShotTimer(args=(1, 2, 3), kwargs={'a':4})
+    timer = OneShotTimer(0.0005, args=(1, 2, 3), kwargs={'a':4})
     timer.add_event_handler(lambda *args, **kwargs: print(args, kwargs))
     timer.start()
 
