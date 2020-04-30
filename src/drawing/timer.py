@@ -6,36 +6,34 @@ Description: This file defines the classes Timer and OneShotTimer
 
 ######## Import statements ########
 
-from threading import Thread, Condition
-from time import sleep, time, process_time
+from time import time
+from .events import EventProducer
 from collections.abc import Iterable, Mapping
 
 
 
 ######## class Timer ########
 
-class Timer(Thread):
+class Timer(EventProducer):
     '''
-    Instances of this class can be used to trigger an arbitrary callback repeatedly
-    over time
+    Instances of this class can be used to create objects that generate ticks
+    periodically over time.
     '''
 
-    def __init__(self, callback, interval=1, one_shot=False, args=(), kwargs={}):
+    ######## Constructor ########
+
+    def __init__(self, interval=1, one_shot=False, args=(), kwargs={}):
         '''
         Create a new timer object that will invoke the given callback repeatedly.
 
-        :param callback: Is the callback that should be executed by this timer periodically
-        :param interval: The callback will be executed on each time interval (in seconds)
+        :param interval: This object will generate a 'tick' event on each time interval (in seconds)
         :param one_shot: If True, the timer will invoke the callback only once. After that,
             it will be automatically destroyed.
-        :param args: Additional positional arguments to be passed to the callback
-        :param kwargs: Additional keyword arguments to be passed to the callback
+        :param args: Additional positional arguments to be passed when the 'tick' event is raised
+        :param kwargs: Additional keyword arguments to be passed when the 'tick' event is raised
 
         '''
         # Validate & parse input arguments
-        if not callable(callback):
-            raise TypeError('callback must be callable')
-
         try:
             interval = float(interval)
             if interval <= 0:
@@ -56,49 +54,19 @@ class Timer(Thread):
 
 
 
-        # Initialize super instance and set the thread as daemon
+        # Initialize super instance
         super().__init__()
-        self.daemon = True
 
         # Initialize internal fields
-        self._callback, self._interval = callback, interval
-        self._one_shot = one_shot
+        self._interval, self._one_shot = interval, one_shot
         self._args, self._kwargs = args, kwargs
-        self._state = 'inactive'
-        self._lock = Condition()
+        self._state = 'stopped'
+        self._elapsed_time, self._last_time = 0.0, None
 
 
-    def run(self):
-        callback, interval = self._callback, self._interval
-        args, kwargs = self._args, self._kwargs
-        cv = self._lock
-        last_exec_time = 0
 
 
-        while True:
-            with cv:
-                while True:
-                    # Wait until the timer is not paused
-                    while self._state == 'paused':
-                        cv.wait()
-                    # If the timer was killed, finish the execution
-                    if self._state == 'death':
-                        return
-                    # Go to sleep before the next callback execution
-                    cv.wait(timeout=max(self._interval-last_exec_time, 0))
-                    if self._state == 'running':
-                        # Break this loop if the timer is running
-                        break
-
-            # Trigger the callback
-            t = process_time()
-            callback(*args, **kwargs)
-            last_exec_time = process_time() - t
-
-            if self._one_shot:
-                # Only trigger the callback once
-                return
-
+    ######## Getters ########
 
 
     def get_callback(self):
@@ -119,8 +87,7 @@ class Timer(Thread):
         :rtype: float
 
         '''
-        with self._lock:
-            return self._interval
+        return self._interval
 
 
 
@@ -142,33 +109,18 @@ class Timer(Thread):
         :rtype: bool
 
         '''
-        with self._lock:
-            return self._state in ('running', 'paused')
+        return not self.is_stopped()
 
 
 
-    def is_alive(self):
-        '''is_alive() -> bool
-        Returns True if this timer is not death (not started, running or paused).
-        False otherwise.
+    def is_stopped(self):
+        '''is_stopped() -> bool
+        Returns True if this time is stopped. False Otherwise
 
         :rtype: bool
 
         '''
-        with self._lock:
-            return self._state != 'death'
-
-
-
-    def is_death(self):
-        '''is_death() -> bool
-        Returns True if this timer is death. False otherwise.
-
-        :rtype: bool
-
-        '''
-        with self._lock:
-            return self._state == 'death'
+        return self._state == 'stopped'
 
 
 
@@ -195,66 +147,9 @@ class Timer(Thread):
             return self._state == 'paused'
 
 
-    def start(self, resumed=True):
-        '''start(resumed: bool)
-        Start this timer.
-
-        :param resumed: If True, the timer will be running after this method execution.
-            Otherwise, it will be paused. By default is True
-
-        '''
-        with self._lock:
-            if self._state != 'inactive':
-                raise RuntimeError('Timer already started')
-            self._state = 'running' if resumed else 'paused'
-        super().start()
 
 
-
-    def resume(self):
-        '''resume()
-        Resume this timer.
-
-        :raises RuntimeError: If the timer was not paused
-
-        '''
-        with self._lock:
-            if self._state != 'paused':
-                raise RuntimeError('Timer is not paused')
-            self._state = 'running'
-            self._lock.notify()
-
-
-
-    def pause(self):
-        '''resume()
-        Pause this timer.
-
-        :raises RuntimeError: If the timer was not running
-
-        '''
-        with self._lock:
-            if self._state != 'running':
-                raise RuntimeError('Timer is not running')
-            self._state = 'paused'
-            self._lock.notify()
-
-
-
-    def kill(self):
-        '''kill()
-        Kill this timer.
-
-        :raises RuntimeError: If the timer was not running nor paused
-
-        '''
-        with self._lock:
-            if self._state == 'inactive':
-                raise RuntimeError('Timer was not started yet')
-            self._state = 'death'
-            self._lock.notify()
-
-
+    ######## Setters ########
 
 
     def set_time_interval(self, interval):
@@ -268,10 +163,91 @@ class Timer(Thread):
             interval = float(interval)
             if interval <= 0:
                 raise TypeError
-            with self._lock:
-                self._interval = interval
+            self._interval = interval
         except TypeError:
             raise TypeError('interval must be a float or int value greater than zero')
+
+
+
+
+
+
+    ######## Controls ########
+
+
+    def start(self, resumed=True):
+        '''start(resumed: bool)
+        Start this timer.
+
+        :param resumed: If True, the timer will be running after this method execution.
+            Otherwise, it will be paused. By default is True
+
+        '''
+        if self._state != 'stopped':
+            raise RuntimeError('Timer already started')
+
+        self._state = 'running' if resumed else 'paused'
+
+
+
+    def resume(self):
+        '''resume()
+        Resume this timer.
+
+        :raises RuntimeError: If the timer was not paused
+
+        '''
+        if self._state != 'paused':
+            raise RuntimeError('Timer is not paused')
+        self._state = 'running'
+        self._last_time = None
+
+
+
+    def pause(self):
+        '''resume()
+        Pause this timer.
+
+        :raises RuntimeError: If the timer was not running
+
+        '''
+        if self._state != 'running':
+            raise RuntimeError('Timer is not running')
+        self._state = 'paused'
+
+
+    def stop(self):
+        '''stop()
+        Stop this timer.
+
+        :raises RuntimeError: If the timer was not active (running or paused)
+        '''
+        if self._state == 'stopped':
+            raise RuntimeError('Timer is already stopped')
+        self._state = 'stopped'
+        self._last_time, self._elapsed_time = None, 0.0
+
+
+
+    def _update(self):
+        # This is called internally to update the state of the timer
+        if self._state != 'running':
+            return
+        current_time = time()
+        if self._last_time is None:
+            self._last_time = current_time
+        else:
+            diff_time = current_time - self._last_time
+            interval = self._interval
+            self._last_time = current_time
+            self._elapsed_time += diff_time
+            while self._elapsed_time >= interval:
+                self._elapsed_time -= interval
+                self.fire_event('tick', *self._args, **self._kwargs)
+                if self._one_shot:
+                    self.stop()
+                    break
+
 
 
 
@@ -284,36 +260,25 @@ class OneShotTimer(Timer):
     Instances of this class can be used to trigger a callback after an specific
     amount of time elapsed.
     '''
-    def __init__(self, callback, interval=1, *args, **kwargs):
-        super().__init__(callback, interval, True, *args, **kwargs)
+    def __init__(self, interval=1, *args, **kwargs):
+        super().__init__(interval, True, *args, **kwargs)
 
 
 
 
+def main():
+    from time import sleep
 
-if __name__ == '__main__':
-    bar = 0
-    def foo():
-        global bar
-        bar += 1
-        print(bar)
-
-    timer = Timer(foo, interval=1)
+    timer = OneShotTimer(args=(1, 2, 3), kwargs={'a':4})
+    timer.add_event_handler(lambda *args, **kwargs: print(args, kwargs))
     timer.start()
-    sleep(2)
+
+    timer._update()
+    sleep(0.5)
+    timer._update()
     timer.pause()
-    sleep(2)
+    sleep(0.6)
     timer.resume()
-    sleep(2)
-    timer.set_time_interval(0.5)
-    sleep(2)
-    timer.pause()
-    sleep(1)
-    timer.kill()
-
-    def foo():
-        print("Hello world")
-
-    timer = OneShotTimer(foo, interval=2)
-    timer.start()
-    timer.join()
+    timer._update()
+    sleep(0.6)
+    timer._update()
