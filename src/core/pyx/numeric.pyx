@@ -334,6 +334,9 @@ class NumericFunction:
         output_array = self._output_arrays.popleft()
         self._output_arrays.append(output_array)
 
+        # Add also the current time value as a global variable
+        self._globals['t'] = self._system.get_time().get_value()
+
         if self._c_optimized:
             # Evaluate numeric function optimized
             self._num_func_optimized(output_array)
