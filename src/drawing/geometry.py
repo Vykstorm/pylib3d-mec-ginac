@@ -124,8 +124,7 @@ class GeometryMeta(type):
             def fget(self):
                 assert self._source is not None
                 func = getattr(self._source, vtk_getter)
-                with self:
-                    return func()
+                return func()
 
             setattr(cls, getter, fget)
 
@@ -133,9 +132,8 @@ class GeometryMeta(type):
             def fset(self, value):
                 assert self._source is not None
                 func = getattr(self._source, vtk_setter)
-                with self:
-                    func(parse(value))
-                    self.fire_event(property_changed_event)
+                func(parse(value))
+                self.fire_event(property_changed_event)
 
             setattr(cls, setter, fset)
 
@@ -248,16 +246,14 @@ class Sphere(Geometry):
 
 
     def get_resolution(self):
-        with self:
-            return self._source.GetThetaResolution()
+        return self._source.GetThetaResolution()
 
 
     def set_resolution(self, resolution):
         resolution = _parse_resolution(resolution)
-        with self:
-            self._source.SetThetaResolution(resolution)
-            self._source.SetPhiResolution(resolution)
-            self.fire_event('resolution_changed')
+        self._source.SetThetaResolution(resolution)
+        self._source.SetPhiResolution(resolution)
+        self.fire_event('resolution_changed')
 
 
 Sphere._register_property('radius')
@@ -281,8 +277,7 @@ class Cube(Geometry):
 
     def get_size(self):
         source = self._source
-        with self:
-            return source.GetXLength(), source.GetYLength(), source.GetZLength()
+        return source.GetXLength(), source.GetYLength(), source.GetZLength()
 
 
     def set_size(self, *args):
@@ -312,11 +307,10 @@ class Cube(Geometry):
 
         sx, sy, sz = size
         source = self._source
-        with self:
-            source.SetXLength(sx)
-            source.SetYLength(sy)
-            source.SetZLength(sz)
-            self.fire_event('size_changed')
+        source.SetXLength(sx)
+        source.SetYLength(sy)
+        source.SetZLength(sz)
+        self.fire_event('size_changed')
 
 
     size = property(fget=get_size, fset=set_size)
@@ -385,24 +379,23 @@ class Line(Geometry):
 
 
     def get_start(self):
-        with self:
-            return self._source.GetPoint1()
+        return self._source.GetPoint1()
+
 
     def get_end(self):
-        with self:
-            return self._source.GetPoint2()
+        return self._source.GetPoint2()
+
 
     def set_start(self, *args):
         point = _parse_vector3(args, 'start')
-        with self:
-            self._source.SetPoint1(*point)
-            self.fire_event('start_point_changed')
+        self._source.SetPoint1(*point)
+        self.fire_event('start_point_changed')
+
 
     def set_end(self, *args):
         point = _parse_vector3(args, 'start')
-        with self:
-            self._source.SetPoint2(*point)
-            self.fire_event('end_point_changed')
+        self._source.SetPoint2(*point)
+        self.fire_event('end_point_changed')
 
     start = property(fget=get_start, fset=set_start)
     end = property(fget=get_end, fset=set_end)

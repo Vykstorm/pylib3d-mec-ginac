@@ -34,8 +34,7 @@ class ScadToStlManager(EventProducer):
 
 
     def get_loading_stls(self):
-        with self:
-            return self._loading_stls
+        return self._loading_stls
 
 
     def scad_to_stl(self, scad_filename, stl_filename, **kwargs):
@@ -75,8 +74,7 @@ class ScadToStlManager(EventProducer):
         args = list(chain([program], var_options, options))
 
         # Add the stl to the loading list
-        with self:
-            self._loading_stls.append(stl_filename)
+        self._loading_stls.append(stl_filename)
 
         manager = self
         class Worker(Thread):

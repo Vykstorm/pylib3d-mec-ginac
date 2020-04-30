@@ -47,17 +47,16 @@ class ScreenPoint(Vector2):
         assert isinstance(scene, Scene)
         renderer = scene._renderer
 
-        with self:
-            x, y = self._values
-            x_ref, y_ref = self._x_coord_screen_ref, self._y_coord_screen_ref
-            coord = self._coord
-            if x_ref != 'left':
-                x += 0.5 if x_ref == 'center' else 1
-            if y_ref != 'bottom':
-                y += 0.5 if y_ref == 'center' else 1
+        x, y = self._values
+        x_ref, y_ref = self._x_coord_screen_ref, self._y_coord_screen_ref
+        coord = self._coord
+        if x_ref != 'left':
+            x += 0.5 if x_ref == 'center' else 1
+        if y_ref != 'bottom':
+            y += 0.5 if y_ref == 'center' else 1
 
-            coord.SetValue(x, y)
-            return coord.GetComputedDisplayValue(renderer)
+        coord.SetValue(x, y)
+        return coord.GetComputedDisplayValue(renderer)
 
 
 
@@ -79,8 +78,7 @@ class ScreenPoint(Vector2):
         except ValueError:
             raise ValueError(f'Invalid argument value: "{s}"')
 
-        with self:
-            self._x_coord_screen_ref, self._y_coord_screen_ref = x, y
+        self._x_coord_screen_ref, self._y_coord_screen_ref = x, y
 
 
 
@@ -130,12 +128,11 @@ class Drawing2D(Drawing):
 
     def _update_position(self):
         # This is called when the position of this 2D drawing must be updated on VTK
-        with self:
-            handler = self.get_handler()
-            scene = self.get_ancestor(Scene)
-            if scene is None:
-                return
-            handler.SetPosition(*self._position._get_absolute_screen_coords(scene))
+        handler = self.get_handler()
+        scene = self.get_ancestor(Scene)
+        if scene is None:
+            return
+        handler.SetPosition(*self._position._get_absolute_screen_coords(scene))
 
 
 
@@ -265,8 +262,7 @@ class TextDrawing(Drawing2D):
         :rtype: int
 
         '''
-        with self:
-            return self.get_handler().GetTextProperty().GetFontSize()
+        return self.get_handler().GetTextProperty().GetFontSize()
 
 
     def get_text(self):
@@ -276,8 +272,7 @@ class TextDrawing(Drawing2D):
         :rtype: str
 
         '''
-        with self:
-            return self.get_handler().GetInput()
+        return self.get_handler().GetInput()
 
 
     def get_horizontal_justification(self):
@@ -287,8 +282,7 @@ class TextDrawing(Drawing2D):
         :return: 'left', 'center' or 'right'
 
         '''
-        with self:
-            return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
+        return {VTK_TEXT_LEFT: 'left', VTK_TEXT_CENTERED: 'center', VTK_TEXT_RIGHT: 'right'}.get(self.get_handler().GetTextProperty().GetJustification())
 
 
 
@@ -298,8 +292,7 @@ class TextDrawing(Drawing2D):
 
         :return: 'bottom', 'center', 'top'
         '''
-        with self:
-            return {VTK_TEXT_BOTTOM: 'bottom', VTK_TEXT_CENTERED: 'center', VTK_TEXT_TOP: 'top'}.get(self.get_handler().GetTextProperty().GetVerticalJustification())
+        return {VTK_TEXT_BOTTOM: 'bottom', VTK_TEXT_CENTERED: 'center', VTK_TEXT_TOP: 'top'}.get(self.get_handler().GetTextProperty().GetVerticalJustification())
 
 
 
@@ -312,8 +305,7 @@ class TextDrawing(Drawing2D):
         :return: 'arial', 'courier' or 'times'
 
         '''
-        with self:
-            return {VTK_ARIAL: 'arial', VTK_COURIER: 'courier', VTK_TIMES: 'times'}.get(self.get_handler().GetTextProperty().GetFontFamily())
+        return {VTK_ARIAL: 'arial', VTK_COURIER: 'courier', VTK_TIMES: 'times'}.get(self.get_handler().GetTextProperty().GetFontFamily())
 
 
 
@@ -333,9 +325,8 @@ class TextDrawing(Drawing2D):
             raise TypeError('font size must be an integer greater than zero')
 
         actor = self.get_handler()
-        with self:
-            actor.GetTextProperty().SetFontSize(value)
-            self.fire_event('font_size_changed')
+        actor.GetTextProperty().SetFontSize(value)
+        self.fire_event('font_size_changed')
 
 
 
@@ -346,27 +337,24 @@ class TextDrawing(Drawing2D):
         '''
         if not isinstance(text, str):
             raise TypeError('Text must be a string')
-        with self:
-            self.get_handler().SetInput(text)
-            self.fire_event('text_changed')
+        self.get_handler().SetInput(text)
+        self.fire_event('text_changed')
 
 
 
     def set_italic(self, enabled):
         if not isinstance(enabled, bool):
             raise TypeError('Input argument must be bool')
-        with self:
-            self.get_handler().GetTextProperty().SetItalic(enabled)
-            self.fire_event('italic_changed')
+        self.get_handler().GetTextProperty().SetItalic(enabled)
+        self.fire_event('italic_changed')
 
 
 
     def set_bold(self, enabled):
         if not isinstance(enabled, bool):
             raise TypeError('Input argument must be bool')
-        with self:
-            self.get_handler().GetTextProperty().SetBold(enabled)
-            self.fire_event('bold_changed')
+        self.get_handler().GetTextProperty().SetBold(enabled)
+        self.fire_event('bold_changed')
 
 
     italic_on = partialmethod(set_italic, True)
@@ -380,9 +368,9 @@ class TextDrawing(Drawing2D):
             raise TypeError('Input argument must be string')
         if mode not in ('left', 'center', 'right'):
             raise ValueError('horizontal justification must be "left", "center" or "right"')
-        with self:
-            self.get_handler().GetTextProperty().SetJustification({'left': VTK_TEXT_LEFT, 'center': VTK_TEXT_CENTERED, 'right': VTK_TEXT_RIGHT}.get(mode))
-            self.fire_event('horizontal_justification_changed')
+
+        self.get_handler().GetTextProperty().SetJustification({'left': VTK_TEXT_LEFT, 'center': VTK_TEXT_CENTERED, 'right': VTK_TEXT_RIGHT}.get(mode))
+        self.fire_event('horizontal_justification_changed')
 
 
     set_horizontal_justification_to_left = partialmethod(set_horizontal_justification, 'left')
@@ -396,9 +384,9 @@ class TextDrawing(Drawing2D):
             raise TypeError('Input argument must be string')
         if mode not in ('bottom', 'center', 'top'):
             raise ValueError('vertical justification must be "left", "center" or "right"')
-        with self:
-            self.get_handler().GetTextProperty().SetVerticalJustification({'bottom': VTK_TEXT_BOTTOM, 'center': VTK_TEXT_CENTERED, 'top': VTK_TEXT_TOP}.get(mode))
-            self.fire_event('vertical_justification_changed')
+
+        self.get_handler().GetTextProperty().SetVerticalJustification({'bottom': VTK_TEXT_BOTTOM, 'center': VTK_TEXT_CENTERED, 'top': VTK_TEXT_TOP}.get(mode))
+        self.fire_event('vertical_justification_changed')
 
 
     set_vertical_justification_to_bottom = partialmethod(set_vertical_justification, 'bottom')
@@ -414,9 +402,9 @@ class TextDrawing(Drawing2D):
             raise TypeError('Input argument must be string')
         if family not in ('arial', 'courier', 'times'):
             raise ValueError('font family must be "arial", "courier" or "times"')
-        with self:
-            self.get_handler().GetTextProperty().SetFontFamily({'arial': VTK_ARIAL, 'courier': VTK_COURIER, 'times': VTK_TIMES}.get(family))
-            self.fire_event('font_family_changed')
+
+        self.get_handler().GetTextProperty().SetFontFamily({'arial': VTK_ARIAL, 'courier': VTK_COURIER, 'times': VTK_TIMES}.get(family))
+        self.fire_event('font_family_changed')
 
 
 

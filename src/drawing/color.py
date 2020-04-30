@@ -106,8 +106,7 @@ class Color(Vector):
 
     @property
     def rgba(self):
-        with self:
-            return tuple(self._values)
+        return tuple(self._values)
 
     @rgba.setter
     def rgba(self, values):

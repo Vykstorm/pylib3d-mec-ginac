@@ -73,9 +73,8 @@ class Drawing(VtkObjectWrapper):
 
     def _update_subdrawings(self):
         # This method is invoked to update subdrawings
-        with self:
-            for child in self.get_children(kind=Drawing):
-                child._update()
+        for child in self.get_children(kind=Drawing):
+            child._update()
 
 
     def _update(self):
@@ -120,10 +119,9 @@ class Drawing(VtkObjectWrapper):
         '''show()
         Toogle visibility on for this drawing object
         '''
-        with self:
-            self.get_handler().VisibilityOn()
-            # Fire 'visibility_changed' event
-            self.fire_event('visibility_changed')
+        self.get_handler().VisibilityOn()
+        # Fire 'visibility_changed' event
+        self.fire_event('visibility_changed')
 
 
 
@@ -131,10 +129,9 @@ class Drawing(VtkObjectWrapper):
         '''hide()
         Toggle visibility off for this drawing object
         '''
-        with self:
-            self.get_handler().VisibilityOff()
-            # Fire 'visibility_changed' event
-            self.fire_event('visibility_changed')
+        self.get_handler().VisibilityOff()
+        # Fire 'visibility_changed' event
+        self.fire_event('visibility_changed')
 
 
 

@@ -489,8 +489,7 @@ class Scene(EventProducer):
         :rtype: str
 
         '''
-        with self:
-            return self._render_mode
+        return self._render_mode
 
 
     def get_camera(self):
@@ -585,9 +584,9 @@ class Scene(EventProducer):
             raise TypeError('Input argument must be string')
         if mode not in _render_modes:
             raise TypeError(f'Invalid render mode. Possible values are: {", ".join(_render_modes)}')
-        with self:
-            self._render_mode = mode
-            self.fire_event('render_mode_changed')
+
+        self._render_mode = mode
+        self.fire_event('render_mode_changed')
 
 
 
@@ -663,10 +662,9 @@ class Scene(EventProducer):
         '''purge_drawings()
         Remove all the drawing objects created previously
         '''
-        with self:
-            drawings = self.get_drawings()
-            for drawing in drawings:
-                self.remove_child(drawing)
+        drawings = self.get_drawings()
+        for drawing in drawings:
+            self.remove_child(drawing)
 
 
 

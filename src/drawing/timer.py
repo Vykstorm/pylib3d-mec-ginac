@@ -126,8 +126,7 @@ class Timer(EventProducer):
         :rtype: bool
 
         '''
-        with self._lock:
-            return self._state == 'running'
+        return self._state == 'running'
 
 
 
@@ -138,8 +137,7 @@ class Timer(EventProducer):
         :rtype: bool
 
         '''
-        with self._lock:
-            return self._state == 'paused'
+        return self._state == 'paused'
 
 
 

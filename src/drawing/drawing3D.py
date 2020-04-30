@@ -92,7 +92,6 @@ class Drawing3D(Drawing):
 
 
     def _update(self):
-        with self:
             # Update this drawing transformation matrix
             self._update_transform()
             super()._update()
@@ -111,23 +110,22 @@ class Drawing3D(Drawing):
 
     def _update_transform(self):
         # Update transformation
-        with self:
-            scene = self.get_scene()
-            if scene is None:
-                # This drawing object is not attached to any scene yet
-                return
+        scene = self.get_scene()
+        if scene is None:
+            # This drawing object is not attached to any scene yet
+            return
 
-            # Compute transformation numerically for this drawing
-            matrix = self._transform.evaluate(scene._system)
+        # Compute transformation numerically for this drawing
+        matrix = self._transform.evaluate(scene._system)
 
-            # Concatenate transformation of the parent drawing if any
-            if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
-                matrix = self.get_parent()._transform_evaluated @ matrix
+        # Concatenate transformation of the parent drawing if any
+        if self.has_parent() and isinstance(self.get_parent(), Drawing3D):
+            matrix = self.get_parent()._transform_evaluated @ matrix
 
-            self._transform_evaluated = matrix
+        self._transform_evaluated = matrix
 
-            # Change the vtk user matrix of the actor associated to this drawing
-            self.get_handler().GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
+        # Change the vtk user matrix of the actor associated to this drawing
+        self.get_handler().GetUserMatrix().DeepCopy(tuple(map(float, matrix.flat)))
 
 
 
@@ -144,8 +142,7 @@ class Drawing3D(Drawing):
         :rtype: Geometry
 
         '''
-        with self:
-            return self._geometry
+        return self._geometry
 
 
     def get_transform(self):
@@ -155,8 +152,7 @@ class Drawing3D(Drawing):
         :rtype: Transform
 
         '''
-        with self:
-            return self._transform
+        return self._transform
 
 
     def is_selected(self):
@@ -165,8 +161,7 @@ class Drawing3D(Drawing):
 
         :rtype: bool
         '''
-        with self:
-            return self._selected
+        return self._selected
 
 
     def get_selected_color(self):
@@ -186,11 +181,11 @@ class Drawing3D(Drawing):
         '''set_geometry(geometry: Geometry)
         Change the geometry associated to this drawing object
         '''
-        with self:
-            if self._geometry is not None:
-                self.remove_child(self._geometry)
-            self._geometry = geometry
-            self.add_child(geometry)
+        if self._geometry is not None:
+            self.remove_child(self._geometry)
+        self._geometry = geometry
+        self.add_child(geometry)
+
 
 
     def set_selected_color(self, *args):
@@ -210,13 +205,13 @@ class Drawing3D(Drawing):
         '''
         if not isinstance(transform, Transform):
             raise TypeError('Input argument must be a Transform object')
-        with self:
-            # Change drawing transformation
-            self._transform = transform
-            # Update drawing
-            self._update()
-            # Fire 'transform_changed' event
-            self.fire_event('transform_changed')
+
+        # Change drawing transformation
+        self._transform = transform
+        # Update drawing
+        self._update()
+        # Fire 'transform_changed' event
+        self.fire_event('transform_changed')
 
 
 
@@ -234,8 +229,8 @@ class Drawing3D(Drawing):
         '''
         if not isinstance(transform, Transform):
             raise TypeError('Input argument must be a Transform instance')
-        with self:
-            self.set_transform(transform.concatenate(self._transform))
+
+        self.set_transform(transform.concatenate(self._transform))
 
 
 
@@ -308,30 +303,27 @@ class Drawing3D(Drawing):
         '''show()
         Toogle visibility on for this drawing object (and all child drawings)
         '''
-        with self:
-            for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
-                actor.VisibilityOn()
-            super().show()
+        for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
+            actor.VisibilityOn()
+        super().show()
 
 
     def hide(self):
         '''hide()
         Toggle visibility off for this drawing object (and all child drawings)
         '''
-        with self:
-            for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
-                actor.VisibilityOff()
-            super().show()
+        for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
+            actor.VisibilityOff()
+        super().show()
 
 
     def select(self):
         '''select()
         Select this drawing
         '''
-        with self:
-            if not self._selected:
-                self._selected = True
-                self.fire_event('selected')
+        if not self._selected:
+            self._selected = True
+            self.fire_event('selected')
 
 
 
@@ -339,10 +331,10 @@ class Drawing3D(Drawing):
         '''unselect()
         Unselect this drawing
         '''
-        with self:
-            if self._selected:
-                self._selected = False
-                self.fire_event('unselected')
+        if self._selected:
+            self._selected = False
+            self.fire_event('unselected')
+
 
 
     @property

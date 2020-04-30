@@ -7,7 +7,6 @@ Description: This file defines the class Object
 ######## Import statements ########
 
 # Standard imports
-from threading import RLock
 from types import SimpleNamespace
 from collections.abc import Iterable, Mapping
 from operator import attrgetter, methodcaller
@@ -30,19 +29,13 @@ class EventProducer:
     - Objects can trigger events. Events are propagated from bottom to the top of the object
     hierachy.
 
-    - All methods on this class are thread safe (You can also use the internal threading
-    lock of the object to perform synchronization for a custom task on the given object)
-    This class implements the "with" protocol with the metamethods __enter__ and __exit__
-    to provide a scope where the internal lock of the object is locked
-
+    - Arbitrary functions can be linked to specific events on this object. When this object,
+    or a child raises an event, all the handlers listening to that event are triggered.
     '''
-    def __init__(self, lock=None):
-        super().__init__()
+    def __init__(self):
         self._children, self._parent = [], None
         self._event_handlers = []
-        if lock is None:
-            lock = RLock()
-        self._lock = lock
+
 
 
     def get_parent(self):
@@ -52,8 +45,7 @@ class EventProducer:
         :rtype: Object | None
 
         '''
-        with self:
-            return self._parent
+        return self._parent
 
 
     def has_parent(self):
@@ -63,8 +55,8 @@ class EventProducer:
         :rtype: bool
 
         '''
-        with self:
-            return self._parent is not None
+        return self._parent is not None
+
 
 
     def get_ancestor(self, kind):
@@ -76,11 +68,11 @@ class EventProducer:
         :rtype: Object | None
 
         '''
-        with self:
-            parent = self._parent
-            if parent is None:
-                return None
-            return parent if isinstance(parent, kind) else parent.get_ancestor(kind)
+        parent = self._parent
+        if parent is None:
+            return None
+        return parent if isinstance(parent, kind) else parent.get_ancestor(kind)
+
 
 
     def get_children(self, kind=None):
@@ -88,10 +80,10 @@ class EventProducer:
         Get all the child objects of this one with the given type. If kind is None
         returns all the childs.
         '''
-        with self:
-            if kind is None:
-                return tuple(self._children)
-            return tuple(filter(lambda child: isinstance(child, kind), self._children))
+        if kind is None:
+            return tuple(self._children)
+        return tuple(filter(lambda child: isinstance(child, kind), self._children))
+
 
 
     def add_child(self, child):
@@ -105,11 +97,11 @@ class EventProducer:
 
         '''
         assert isinstance(child, EventProducer)
-        with self:
-            self._children.append(child)
-            with child._lock:
-                child._parent = self
-            child.fire_event('object_entered')
+
+        self._children.append(child)
+        child._parent = self
+        child.fire_event('object_entered')
+
 
 
     def remove_child(self, child):
@@ -123,13 +115,12 @@ class EventProducer:
 
         '''
         assert isinstance(child, EventProducer)
-        with self:
-            if child not in self._children:
-                return
-            self._children.remove(child)
-            with child._lock:
-                child.fire_event('object_exit')
-                child._parent = None
+
+        if child not in self._children:
+            return
+        self._children.remove(child)
+        child.fire_event('object_exit')
+        child._parent = None
 
 
 
@@ -148,9 +139,7 @@ class EventProducer:
             for child in self._children:
                 yield from child.get_predecessors(kind)
 
-        with self:
-            return tuple(predecessors())
-
+        return tuple(predecessors())
 
 
 
@@ -175,8 +164,7 @@ class EventProducer:
             callback=callback,
             event_type=event_type
         )
-        with self:
-            self._event_handlers.append(event_handler)
+        self._event_handlers.append(event_handler)
 
 
 
@@ -191,27 +179,25 @@ class EventProducer:
         assert callable(callback)
         assert event_type is None or isinstance(event_type, str)
 
-        with self:
-            self._event_handlers = list(filterfalse(
-                lambda handler: handler.callback == callback and (event_type is None or handler.event_type == event_type),
-                self._event_handlers
-            ))
+        self._event_handlers = list(filterfalse(
+            lambda handler: handler.callback == callback and (event_type is None or handler.event_type == event_type),
+            self._event_handlers
+        ))
 
 
 
     def _fire_event(self, source, event_type, *args, **kwargs):
-        with self:
-            for handler in self._event_handlers:
-                if handler.event_type is not None and handler.event_type != event_type:
-                    continue
-                callback = handler.callback
-                if callback(event_type, source, *args, **kwargs):
-                    # Event handler cancelled the event
-                    return
+        for handler in self._event_handlers:
+            if handler.event_type is not None and handler.event_type != event_type:
+                continue
+            callback = handler.callback
+            if callback(event_type, source, *args, **kwargs):
+                # Event handler cancelled the event
+                return
 
-            # Propagate the event from bottom to top
-            if self._parent is not None:
-                self._parent._fire_event(source, event_type, *args, **kwargs)
+        # Propagate the event from bottom to top
+        if self._parent is not None:
+            self._parent._fire_event(source, event_type, *args, **kwargs)
 
 
     def fire_event(self, event_type, *args, **kwargs):
@@ -236,19 +222,6 @@ class EventProducer:
         self._fire_event(self, event_type, *args, **kwargs)
 
 
-
-    def __enter__(self):
-        self._lock.acquire()
-        return self
-
-    def __exit__(self, exc_type, exc_value, tb):
-        self._lock.release()
-
-    def acquire(self, *args, **kwargs):
-        return self._lock.acquire(*args, **kwargs)
-
-    def release(self):
-        self._lock.release()
 
 
 

@@ -83,9 +83,9 @@ class Camera( VtkObjectWrapper ):
             raise TypeError('amount argument must be a number')
         if mode not in ('roll', 'azimuth', 'yaw', 'elevation', 'pitch'):
             raise TypeError('invalid rotation mode')
-        with self:
-            getattr(self.get_handler(), mode.title())(amount)
-            self.fire_event('camera_rotation_changed')
+            
+        getattr(self.get_handler(), mode.title())(amount)
+        self.fire_event('camera_rotation_changed')
 
 
 

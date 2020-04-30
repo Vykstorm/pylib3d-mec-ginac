@@ -26,13 +26,13 @@ class Vector(EventProducer):
 
 
     def __iter__(self):
-        with self:
-            values = tuple(self._values)
-            return iter(values)
+        values = tuple(self._values)
+        return iter(values)
+
 
     def __getitem__(self, index):
-        with self:
-            return self._values.__getitem__(index)
+        return self._values.__getitem__(index)
+
 
     def __len__(self):
         return len(self._values)
@@ -47,13 +47,13 @@ class Vector(EventProducer):
         if isinstance(value, Iterable):
             value = array('f', value)
 
-        with self:
-            x = copy(self._values)
-            x.__setitem__(index, value)
-            if len(x) != len(self):
-                raise ValueError('Invalid number of values passed')
-            self._values = x
-            self.fire_event('changed')
+        x = copy(self._values)
+        x.__setitem__(index, value)
+        if len(x) != len(self):
+            raise ValueError('Invalid number of values passed')
+        self._values = x
+        self.fire_event('changed')
+
 
     def __repr__(self):
         return repr(list(map(partial(round, ndigits=3), self._values)))
