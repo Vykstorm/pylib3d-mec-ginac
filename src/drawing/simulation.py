@@ -266,6 +266,8 @@ class Simulation(EventProducer):
 
     def _on_timer_tick(self, *args, **kwargs):
         self._update()
+        return True
+
 
 
     def _update(self):
