@@ -169,11 +169,9 @@ class Scene(EventProducer):
 
     def _on_simulation_step(self, *args, **kwargs):
         # This method is called when the simulation executes the next step
-
         self._update_simulation_display_info()
 
-        # Update drawings
-        self._update()
+
 
 
     def _on_simulation_started(self, *args, **kwargs):
@@ -305,13 +303,6 @@ class Scene(EventProducer):
 
 
 
-
-
-    def _update(self):
-        # This method is called whenever the scene should be updated
-
-        # Update drawings
-        self._update_drawings()
 
 
     def _update_drawings(self):

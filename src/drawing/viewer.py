@@ -51,7 +51,7 @@ class VtkViewer(EventProducer):
         self.add_event_handler(self._on_object_entered, 'object_entered')
         self.add_event_handler(self._on_object_exit, 'object_exit')
         self.add_event_handler(self._on_any_event)
-        timer.add_event_handler(lambda *args, **kwargs: self._redraw())
+        timer.add_event_handler(lambda *args, **kwargs: self._refresh())
 
 
     def _init(self, iren):
@@ -119,6 +119,7 @@ class VtkViewer(EventProducer):
 
     ######## Event handlers ########
 
+
     def _on_object_entered(self, event_type, source, *args, **kwargs):
         # This handler is called when a child object is added to this instance
         if isinstance(source, Scene) and self._rw is not None:
@@ -148,6 +149,12 @@ class VtkViewer(EventProducer):
     def _update_timers(self):
         for timer in self.get_predecessors(kind=Timer):
             timer._update()
+
+
+    def _refresh(self):
+        # Refresh the scene
+        self.get_scene()._update_drawings()
+        self._redraw()
 
 
 
