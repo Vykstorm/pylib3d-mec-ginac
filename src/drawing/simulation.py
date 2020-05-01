@@ -81,6 +81,7 @@ class Simulation(EventProducer):
         if not self.is_paused():
             raise RuntimeError('Simulation is not paused')
 
+        self._last_update_time = None
         self._timer.resume()
         self.fire_event('simulation_resumed')
 
