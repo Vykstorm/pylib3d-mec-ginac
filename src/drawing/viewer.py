@@ -6,7 +6,7 @@ Description: This file defines the class VtkViewer
 ######## Import statements ########
 
 # standard imports
-
+from functools import wraps
 
 # imports from other modules
 from .events import EventProducer
@@ -37,6 +37,7 @@ class VtkViewer(EventProducer):
     def __init__(self):
         super().__init__()
         self._iren, self._rw = None, None
+        self._selected_drawing = None
 
 
         # Add the scene associated to the default system as the active scene
@@ -52,6 +53,7 @@ class VtkViewer(EventProducer):
         self.add_event_handler(self._on_object_exit, 'object_exit')
         self.add_event_handler(self._on_any_event)
         timer.add_event_handler(lambda *args, **kwargs: self._refresh())
+
 
 
     def _init(self, iren):
@@ -73,7 +75,7 @@ class VtkViewer(EventProducer):
 
         iren.CreateRepeatingTimer(1)
         iren.AddObserver(vtkCommand.TimerEvent, self._timer_event)
-
+        iren.AddObserver(vtkCommand.LeftButtonPressEvent, self._click_event)
 
 
 
@@ -96,6 +98,13 @@ class VtkViewer(EventProducer):
         Get the current 3D scene associated to the viewer if any. None otherwise.
         '''
         return next(iter(self.get_children(Scene)), None)
+
+
+    def get_selected_drawing(self):
+        '''get_selected_drawing() -> Drawing3D | None
+        Get the current 3D drawing selected by the user if any. None otherwise
+        '''
+        return self._selected_drawing
 
 
 
@@ -157,6 +166,35 @@ class VtkViewer(EventProducer):
         self._redraw()
 
 
+    def _click_event(self, *args, **kwargs):
+        # This handler is invoked when the user clicks inside the viewport
+        scene = self.get_scene()
+        renderer = scene._renderer
+
+        # Get mouse click position
+        x, y = self._iren.GetEventPosition()
+        picker = vtkPropPicker()
+        # Get the 3D model which is clicked
+        picker.Pick(x, y, 0, renderer)
+        # Get the drawing attached to the 3D model clicked
+        drawing = scene._get_3D_drawing_by_handler(picker.GetActor())
+        # Get the previous selected object and store current selection
+        prev_selected_drawing = self._selected_drawing
+        self._selected_drawing = drawing
+
+        if drawing is None:
+            # Nothing is selected currently
+            if prev_selected_drawing is not None:
+                prev_selected_drawing.unselect()
+        else:
+            # A 3D object was selected
+            if drawing is not prev_selected_drawing:
+                if prev_selected_drawing is not None:
+                    prev_selected_drawing.unselect()
+                drawing.select()
+
+
+
 
 
 def get_viewer():
@@ -186,10 +224,4 @@ def close_viewer():
 
 
 def get_selected_drawing():
-    '''get_selected_drawing() -> Drawing3D | None
-    Get the current 3D drawing selected by the user
-
-    :rtype: Drawing3D | None
-
-    '''
-    return None
+    return get_viewer().get_selected_drawing()

@@ -114,7 +114,6 @@ class Scene(EventProducer):
 
         self._drawings_display_info = display
         self.add_drawing(display)
-        self._update_drawings_display_info()
 
 
 
@@ -170,8 +169,6 @@ class Scene(EventProducer):
     def _on_simulation_step(self, *args, **kwargs):
         # This method is called when the simulation executes the next step
         self._update_simulation_display_info()
-
-
 
 
     def _on_simulation_started(self, *args, **kwargs):
