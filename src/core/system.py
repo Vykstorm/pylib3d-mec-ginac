@@ -611,6 +611,9 @@ class System(_System, EventProducer):
         for symbol in result:
             values = self._symbols_values[symbol.get_type()]
             values[symbol.get_name()] = symbol._get_value()
+
+        # Invalidate previous stored state for now ( to be developed later )
+        self._state = None
         return result[0] if len(result) == 1 else result
 
 
@@ -1712,7 +1715,8 @@ class System(_System, EventProducer):
 
     def restore_previous_state(self):
         if self._state is None:
-            raise RuntimeError('You must call first to save_state')
+            return
+            #raise RuntimeError('You must call first to save_state')
         for key, arr in self._state.items():
             np.copyto(self._symbols_values[key].as_array(), arr)
 
