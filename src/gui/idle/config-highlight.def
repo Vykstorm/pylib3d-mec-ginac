@@ -97,3 +97,36 @@ comment-background = #002240
 break-foreground = #FFFFFF
 context-foreground= #ffffff
 context-background= #454545
+
+[Ubuntu console]
+normal-foreground= #ffffff
+normal-background= #2d0922
+keyword-foreground= #ff7700
+keyword-background= #2d0922
+builtin-foreground= #900090
+builtin-background= #2d0922
+comment-foreground= #dd0000
+comment-background= #2d0922
+string-foreground= #00aa00
+string-background= #2d0922
+definition-foreground= #0000ff
+definition-background= #2d0922
+hilite-foreground= #2d0922
+hilite-background= #ffffff
+break-foreground= black
+break-background= #2d0922
+hit-foreground= #ffffff
+hit-background= #2d0922
+error-foreground= #000000
+error-background= #2d0922
+#cursor (only foreground can be set, restart IDLE)
+cursor-foreground= #ffffff
+#shell window
+stdout-foreground= #ffffff
+stdout-background= #2d0922
+stderr-foreground= red
+stderr-background= #2d0922
+console-foreground= #ffffff
+console-background= #2d0922
+context-foreground= #ffffff
+context-background= #2d0922
