@@ -16,7 +16,6 @@ from math import floor
 # imports from other modules
 from .events import EventProducer
 from .simulation import Simulation
-from .scad import scad_to_stl
 from .color import Color
 from .transform import Transform
 from .vector import Vector2
@@ -1217,3 +1216,4 @@ from .drawing2D import *
 from .drawing3D import *
 from .geometry import Geometry, read_stl
 from .viewer import get_selected_drawing
+from .scad import scad_to_stl

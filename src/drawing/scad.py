@@ -3,6 +3,7 @@ Author: Víctor Ruiz Gómez
 Description: This file defines the function scad_to_stl function.
 '''
 
+import warnings
 # filepath & os utilities
 from os import devnull
 from os.path import dirname, join, exists, normpath
@@ -20,6 +21,10 @@ from functools import reduce
 from ..config import runtime_config
 from .events import EventProducer
 from ..utils.singleton import singleton
+from ..core.system import get_default_system
+from lib3d_mec_ginac_ext import Expr, SymbolNumeric
+
+
 
 @singleton
 class ScadToStlManager(EventProducer):
@@ -66,7 +71,11 @@ class ScadToStlManager(EventProducer):
         stl_filename, scad_filename = normpath(stl_filename), normpath(scad_filename)
 
         # Parse additional key-value options
-        var_options = reduce(add, zip(repeat('-D'), map('='.join, zip(kwargs.keys(), map(str, kwargs.values())))), ())
+        def parse_value(x):
+            if isinstance(x, (Expr, SymbolNumeric)):
+                x = get_default_system().evaluate(x)
+            return str(x)
+        var_options = reduce(add, zip(repeat('-D'), map('='.join, zip(kwargs.keys(), map(parse_value, kwargs.values() )))), ())
 
         # Spawn subprocess to call openscad command line
         program = runtime_config.OPENSCADCMD
@@ -89,6 +98,7 @@ class ScadToStlManager(EventProducer):
                         result = subprocess.run(args, check=True, stderr=stderr, stdout=stdout)
                         manager.fire_event('stl_model_loaded', stl_filename)
                     except CalledProcessError as e:
+                        warnings.warn(f'"{stl_filename}" 3d model couldnt be generated: {str(e)}')
                         manager.fire_event('stl_model_loading_failed', stl_filename)
 
         worker = Worker()
