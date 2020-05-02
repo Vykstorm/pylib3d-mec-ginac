@@ -189,8 +189,7 @@ class Geometry(VtkObjectWrapper, metaclass=GeometryMeta):
                     # stl was generated succesfully
                     stl_reader.SetFileName(filename)
                     stl_reader.Update()
-                    with geometry:
-                        geometry.get_handler().SetInputConnection(stl_reader.GetOutputPort())
+                    geometry.get_handler().SetInputConnection(stl_reader.GetOutputPort())
                 elif event_type == "stl_model_loading_failed":
                     # stl generation failed
                     # TODO
