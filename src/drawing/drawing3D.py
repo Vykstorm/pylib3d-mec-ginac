@@ -314,7 +314,7 @@ class Drawing3D(Drawing):
         '''
         for actor in map(methodcaller('get_handler'), self.get_predecessors(Drawing3D)):
             actor.VisibilityOff()
-        super().show()
+        super().hide()
 
 
     def select(self):
