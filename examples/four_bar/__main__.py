@@ -1,8 +1,8 @@
 
 
 ######## Imports ########
-from lib3d_mec_ginac import *
-
+#from lib3d_mec_ginac import *
+from src import *
 
 ######## Generalized coordinates, velocities and accelerations ########
 
@@ -17,19 +17,34 @@ l1, l2 = new_param('l1', 0.4), new_param('l2', 2.0)
 l3, l4 = new_param('l3', 1.2), new_param('l4', 1.6)
 
 
+######## Dynamical parameters ########
+
+m1, m2, m3 = new_param('m1', 1), new_param('m2', 1), new_param('m3', 1)
+
+
+
 ######## Bases ########
 
-new_base('Barm1', 'xyz', [0, 1, 0], theta1)
-new_base('Barm2', 'Barm1', 0, 1, 0, theta2)
-new_base('Barm3', 'Barm2', rotation_tupla=[0, 1, 0], rotation_angle=theta3)
+new_base('BArm1', 'xyz', [0, 1, 0], theta1)
+new_base('BArm2', 'BArm1', 0, 1, 0, theta2)
+new_base('BArm3', 'BArm2', rotation_tupla=[0, 1, 0], rotation_angle=theta3)
 
 
 ######## Vectors ########
 
-new_vector('OA', l1, 0, 0, 'Barm1')
-new_vector('AB', l2, 0, 0, 'Barm2')
-new_vector('BC', [l3, 0, 0], 'Barm3')
+new_vector('OA', l1, 0, 0, 'BArm1')
+new_vector('AB', l2, 0, 0, 'BArm2')
+new_vector('BC', [l3, 0, 0], 'BArm3')
 new_vector('OO2', values=[l4, 0, 0], base='xyz')
+
+
+# Gravity center vectors
+cg1x, cg1z = new_param("cg1x",0.2), new_param("cg1z",0.1)
+cg2x, cg2z = new_param("cg2x",1.0), new_param("cg2z",0.1)
+cg3x, cg3z = new_param("cg3x",0.6), new_param("cg3z",0.1)
+new_vector("OArm1_GArm1",cg1x,0,cg1z,"BArm1")
+new_vector("OArm2_GArm2",cg2x,0,cg2z,"BArm2")
+new_vector("OArm3_GArm3",cg3x,0,cg3z,"BArm3")
 
 
 ######## Points ########
@@ -42,10 +57,28 @@ new_point('O2', 'O', 'OO2')
 
 ######## Frames ########
 
-new_frame('FArm1',    'O',  'Barm1')
-new_frame('FArm2',    'A',  'Barm2')
-new_frame('FArm3',    'B',  'Barm3')
+new_frame('FArm1',    'O',  'BArm1')
+new_frame('FArm2',    'A',  'BArm2')
+new_frame('FArm3',    'B',  'BArm3')
 new_frame('Fra_ABS2', 'O2', 'xyz')
+
+
+######## Inertia tensors ########
+
+I1yy, I2yy, I3yy = new_param("I1yy",1), new_param("I2yy",1), new_param("I3yy",1)
+I_Arm1 = new_tensor('I_Arm1', base='BArm1')
+I_Arm2 = new_tensor('I_Arm2', base='BArm2')
+I_Arm3 = new_tensor('I_Arm3', base='BArm3')
+I_Arm1[1, 1], I_Arm2[1, 1], I_Arm3[1, 1] = I1yy, I2yy, I3yy
+
+
+
+######## Solids ########
+
+new_solid("Arm1", "O"  ,"BArm1" ,"m1","OArm1_GArm1","I_Arm1")
+new_solid("Arm2", "A" , "BArm2" ,"m2","OArm2_GArm2","I_Arm2")
+new_solid("Arm3", "B" , "BArm3" ,"m3","OArm3_GArm3","I_Arm3")
+
 
 
 ######## Matrices of symbols ########
@@ -107,6 +140,20 @@ draw_position_vector('A', 'B')
 draw_position_vector('B', 'C')
 draw_position_vector('C', 'O')
 
+
+
+# Load STL objects
+scad2stl('Arm','Arm1', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l1);
+scad2stl('Arm','Arm2', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l2);
+scad2stl('Arm','Arm3', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l3);
+
+# Draw STL objects
+draw_solid('Arm1', scale=1)
+draw_solid('Arm2', scale=1)
+draw_solid('Arm3', scale=1)
+
+
+
 # Change camera position & focal point
 camera = get_camera()
 camera.position = 0.8, 4, 0.5
@@ -117,4 +164,4 @@ camera.focal_point = 0.8, 0, -0.2
 
 set_integration_method('euler')
 assembly_problem(Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq)
-start_simulation(delta_t=0.05)
+start_simulation(delta_t=0.01)
