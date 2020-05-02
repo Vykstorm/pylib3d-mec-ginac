@@ -1174,6 +1174,28 @@ class Scene(EventProducer):
 
 
 
+    ######## Show / hide geometry ########
+
+
+    def toogle_drawings(self, points=True, vectors=True, frames=True, solids=True):
+        classes = (
+            PointDrawing,
+            VectorDrawing,
+            FrameDrawing,
+            SolidDrawing
+        )
+        f = (points, vectors, frames, solids)
+        classes = tuple(map(classes.__getitem__, filter(f.__getitem__, range(len(f)))))
+
+        for drawing in self.get_3D_drawings():
+            if any(map(partial(isinstance, drawing), classes)):
+                drawing.show()
+            else:
+                drawing.hide()
+
+
+
+
     @property
     def background_color(self):
         '''
