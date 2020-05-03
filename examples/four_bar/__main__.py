@@ -141,23 +141,28 @@ draw_position_vector('B', 'C')
 draw_position_vector('C', 'O')
 
 
-
 # Load STL objects
 scad2stl('Arm','Arm1', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l1);
 scad2stl('Arm','Arm2', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l2);
 scad2stl('Arm','Arm3', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l3);
+scad2stl('Slider', r_in=0.05*l1, r_out=0.1*l1, height=0.1)
+
 
 # Draw STL objects
-draw_solid('Arm1', scale=1)
-draw_solid('Arm2', scale=1)
-draw_solid('Arm3', scale=1)
+arms = [draw_solid(f'Arm{i}', scale=1) for i in range(1, 4)]
+sliders = [draw_stl('Slider.stl', scale=1, color=(0.6, 0.6, 0)) for i in range(0, 3)]
 
+for slider, arm in zip(sliders, arms):
+    slider.transform = arm.transform & Transform.xrotation(pi/2) & Transform.translation(0, 0, 0.1)
 
 
 # Change camera position & focal point
 camera = get_camera()
 camera.position = 0.8, 4, 0.5
 camera.focal_point = 0.8, 0, -0.2
+
+# Setup what object are being shown in the viewer
+toogle_drawings(solids=True, vectors=False, points=False, frames=False, others=True)
 
 
 ######## Simulation ########

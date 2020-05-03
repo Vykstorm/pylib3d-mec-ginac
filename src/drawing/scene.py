@@ -1177,7 +1177,7 @@ class Scene(EventProducer):
     ######## Show / hide geometry ########
 
 
-    def toogle_drawings(self, points=True, vectors=True, frames=True, solids=True):
+    def toogle_drawings(self, points=True, vectors=True, frames=True, solids=True, others=True):
         classes = (
             PointDrawing,
             VectorDrawing,
@@ -1185,10 +1185,10 @@ class Scene(EventProducer):
             SolidDrawing
         )
         f = (points, vectors, frames, solids)
-        classes = tuple(map(classes.__getitem__, filter(f.__getitem__, range(len(f)))))
+        _classes = tuple(map(classes.__getitem__, filter(f.__getitem__, range(len(f)))))
 
         for drawing in self.get_3D_drawings():
-            if any(map(partial(isinstance, drawing), classes)):
+            if any(map(partial(isinstance, drawing), _classes)) or not isinstance(drawing, classes) and others:
                 drawing.show()
             else:
                 drawing.hide()
