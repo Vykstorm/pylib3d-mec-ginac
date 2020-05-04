@@ -145,15 +145,27 @@ draw_position_vector('C', 'O')
 scad2stl('Arm','Arm1', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l1);
 scad2stl('Arm','Arm2', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l2);
 scad2stl('Arm','Arm3', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l3);
-scad2stl('Slider', r_in=0.05*l1, r_out=0.1*l1, height=0.1)
+scad2stl('Slider', 'Slider1', r_in=0.05*l1, r_out=0.1*l1, height=0.1)
+scad2stl('Slider', 'Slider2', r_in=0.05*l1, r_out=0.1*l1, height=0.25)
 
+# Draw solids
+arms = [
+    draw_solid('Arm1', scale=1),
+    draw_solid('Arm2', scale=1),
+    draw_solid('Arm3', scale=1)
+]
+arms[0].transform &= Transform.translation(0, 0.35*l1, 0)
 
-# Draw STL objects
-arms = [draw_solid(f'Arm{i}', scale=1) for i in range(1, 4)]
-sliders = [draw_stl('Slider.stl', scale=1, color=(0.6, 0.6, 0)) for i in range(0, 3)]
-
-for slider, arm in zip(sliders, arms):
-    slider.transform = arm.transform & Transform.xrotation(pi/2) & Transform.translation(0, 0, 0.1)
+# Draw sliders
+sliders = [
+    draw_stl('Slider1.stl', color=(0.6, 0.6, 0)),
+    draw_stl('Slider2.stl', color=(0.6, 0.6, 0)),
+    draw_stl('Slider1.stl', color=(0.6, 0.6, 0))
+]
+xrot = Transform.xrotation(pi/2)
+sliders[0].transform = arms[0].transform & xrot & Transform.translation(0, 0, 0.1)
+sliders[1].transform = arms[1].transform & xrot & Transform.translation(0, 0, -0.05)
+sliders[2].transform = arms[2].transform & xrot & Transform.translation(0, 0, 0.1)
 
 
 # Change camera position & focal point
