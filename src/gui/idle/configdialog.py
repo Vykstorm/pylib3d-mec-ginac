@@ -599,6 +599,7 @@ class FontPage(Frame):
 
         # Set editor font selection list and font_name.
         fonts = list(tkFont.families(self))
+        fonts.append('Lucida Monospace Regular')
         fonts.sort()
         for font in fonts:
             self.fontlist.insert(END, font)

@@ -34,6 +34,7 @@ from code import InteractiveInterpreter
 import linecache
 import os
 import os.path
+from os.path import join, dirname
 from platform import python_version
 import re
 import socket
@@ -42,6 +43,7 @@ import threading
 import time
 import tokenize
 import warnings
+import pyglet
 
 from idlelib.colorizer import ColorDelegator
 from idlelib.config import idleConf
@@ -1563,11 +1565,15 @@ def main(callback):
     top_level = root.children['!listedtoplevel']
     frame = top_level.children['!frame']
     bar = top_level.children['!multistatusbar']
+    console = frame.children['text']
 
     col_number_label = bar.children['!label']
     line_number_label = bar.children['!label2']
     line_number_label.pack(side='left')
     col_number_label.pack(side='left')
+
+    # Load custom fonts
+    pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
 
     # Create window renderer
     rw = vtkRenderWindow()

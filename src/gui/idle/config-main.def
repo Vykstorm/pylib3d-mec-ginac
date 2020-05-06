@@ -59,10 +59,10 @@ delete-exitfunc= 1
 [EditorWindow]
 width= 60
 height= 40
-font= monospace
+font= Lucida Monospace Regular
 # For TkFixedFont, the actual size and boldness are obtained from tk
 # and override 10 and 0.  See idlelib.config.IdleConf.GetFont
-font-size= 12
+font-size= 11
 font-bold= 0
 encoding= none
 
@@ -75,7 +75,7 @@ num-spaces= 4
 
 [Theme]
 default= 1
-name=Ubuntu Console
+name= Ubuntu Console
 name2=
 # name2 set in user config-main.cfg for themes added after 2015 Oct 1
 

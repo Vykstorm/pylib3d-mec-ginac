@@ -98,7 +98,7 @@ break-foreground = #FFFFFF
 context-foreground= #ffffff
 context-background= #454545
 
-[Ubuntu console]
+[Ubuntu Console]
 normal-foreground= #ffffff
 normal-background= #2d0922
 keyword-foreground= #ff7700
