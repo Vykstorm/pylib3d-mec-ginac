@@ -114,6 +114,8 @@ class Scene(EventProducer):
         self._drawings_display_info = display
         self.add_drawing(display)
 
+        self._grid = GridDrawing()
+        self.add_drawing(self._grid)
 
 
 
@@ -135,6 +137,9 @@ class Scene(EventProducer):
             # A new 2D drawing entered the scene
             self._renderer.AddActor2D(source.get_handler())
 
+        elif isinstance(source, GridDrawing):
+            # A grid was added to the scene
+            self._renderer.AddActor(source.get_handler())
 
 
 
@@ -151,6 +156,9 @@ class Scene(EventProducer):
             # A 2D drawing object exit the scene
             self._renderer.RemoveActor2D(source.get_handler())
 
+        elif isinstance(source, GridDrawing):
+            # A grid was removed from the scene
+            self._renderer.RemoveActor(source.get_handler())
 
 
     def _on_render_mode_changed(self, *args, **kwargs):
@@ -504,6 +512,14 @@ class Scene(EventProducer):
 
 
 
+    def get_grid(self):
+        '''get_grid() -> Grid
+        Get the grid of the scene
+        :rtype: Grid
+        '''
+        return self._grid
+
+
 
 
     def _get_drawing_by_handler(self, handler):
@@ -651,6 +667,8 @@ class Scene(EventProducer):
         '''
         drawings = self.get_drawings()
         for drawing in drawings:
+            if drawing == self._grid:
+                continue
             self.remove_child(drawing)
 
 
@@ -1194,6 +1212,20 @@ class Scene(EventProducer):
                 drawing.hide()
 
 
+    def show_grid(self):
+        '''show_grid()
+        Shows the grid of the scene
+        '''
+        self.grid.show()
+
+
+    def hide_grid(self):
+        '''hide_grid()
+        Hides the grid of the scene
+        '''
+        self.grid.hide()
+
+
 
 
     @property
@@ -1231,11 +1263,25 @@ class Scene(EventProducer):
 
 
 
+    @property
+    def grid(self):
+        '''
+        Property that can be used to get the grid of the scene
+
+        .. seealso::
+            :func:`get_grid`
+
+        '''
+        return self.get_grid()
+
+
+
 
 # This imports are moved here to avoid circular dependencies
 from .drawing import Drawing
 from .drawing2D import *
 from .drawing3D import *
+from .grid import GridDrawing
 from .geometry import Geometry, read_stl
 from .viewer import get_selected_drawing
 from .scad import scad_to_stl

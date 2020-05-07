@@ -110,7 +110,7 @@ for name in dir(Scene):
         name not in (
             'start_simulation', 'stop_simulation',
             'resume_simulation', 'pause_simulation', 'purge_drawings', 'record_simulation',
-            'toogle_drawings'
+            'toogle_drawings', 'show_grid', 'hide_grid'
             ):
         continue
     __all__.append(name)
