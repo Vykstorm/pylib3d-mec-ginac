@@ -47,6 +47,7 @@ class VtkViewer(EventProducer):
         timer = Timer(interval=1/30)
         self.add_child(timer)
         timer.start()
+        self._update_timer = timer
 
         # Add event handlers
         self.add_event_handler(self._on_object_entered, 'object_entered')
@@ -107,6 +108,13 @@ class VtkViewer(EventProducer):
         return self._selected_drawing
 
 
+    def get_drawing_refresh_rate(self):
+        '''get_drawing_refresh_rate() -> float
+        Get the refresh rate
+        '''
+        return 1/self._update_timer.get_time_interval()
+
+
 
     ######## Setters ########
 
@@ -129,8 +137,14 @@ class VtkViewer(EventProducer):
         '''set_refresh_rate(freq: float)
         Change the current refresh rate of the viewer
         '''
-        # TODO
-        pass
+        try:
+            freq = float(freq)
+            if freq <= 0:
+                raise ValueError('Drawing refresh rate must be a number greater than zero')
+        except TypeError:
+            raise TypeError('Argument should be a number')
+        self._update_timer.set_time_interval(1/freq)
+
 
 
 
@@ -233,6 +247,10 @@ def close_viewer():
 
 def get_selected_drawing():
     return get_viewer().get_selected_drawing()
+
+
+def get_drawing_refresh_rate():
+    return get_viewer().get_drawing_refresh_rate()
 
 
 def set_drawing_refresh_rate(*args, **kwargs):
