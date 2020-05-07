@@ -125,6 +125,14 @@ class VtkViewer(EventProducer):
         self.add_child(scene)
 
 
+    def set_drawing_refresh_rate(self, freq):
+        '''set_refresh_rate(freq: float)
+        Change the current refresh rate of the viewer
+        '''
+        # TODO
+        pass
+
+
 
     ######## Event handlers ########
 
@@ -225,3 +233,7 @@ def close_viewer():
 
 def get_selected_drawing():
     return get_viewer().get_selected_drawing()
+
+
+def set_drawing_refresh_rate(*args, **kwargs):
+    return get_viewer().set_drawing_refresh_rate(*args, **kwargs)

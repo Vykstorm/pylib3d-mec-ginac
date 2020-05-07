@@ -24,15 +24,10 @@ menudefs = [
  ('file', [
    ('_New File', '<<open-new-window>>'),
    ('_Open...', '<<open-window-from-file>>'),
-   ('Open _Module...', '<<open-module>>'),
-   ('Module _Browser', '<<open-class-browser>>'),
-   ('_Path Browser', '<<open-path-browser>>'),
    None,
    ('_Save', '<<save-window>>'),
    ('Save _As...', '<<save-window-as-file>>'),
    ('Save Cop_y As...', '<<save-copy-of-window-as-file>>'),
-   None,
-   ('Prin_t Window', '<<print-window>>'),
    None,
    ('_Close', '<<close-window>>'),
    ('E_xit', '<<close-all-windows>>'),
@@ -55,7 +50,6 @@ menudefs = [
    ('Go to _Line', '<<goto-line>>'),
    ('S_how Completions', '<<force-open-completions>>'),
    ('E_xpand Word', '<<expand-word>>'),
-   ('Show C_all Tip', '<<force-open-calltip>>'),
    ('Show Surrounding P_arens', '<<flash-paren>>'),
    ]),
 
@@ -73,9 +67,9 @@ menudefs = [
    ]),
 
  ('run', [
-   ('Python Shell', '<<open-python-shell>>'),
-   ('C_heck Module', '<<check-module>>'),
-   ('R_un Module', '<<run-module>>'),
+   ('Python console', '<<open-python-shell>>'),
+   ('C_heck file', '<<check-module>>'),
+   ('R_un file', '<<run-module>>'),
    ]),
 
  ('shell', [
@@ -84,17 +78,14 @@ menudefs = [
    None,
    ('_Interrupt Execution', '<<interrupt-execution>>'),
    ]),
+ ('scene', [
+ 
+ ]),
+ ('simulation', [
 
- ('debug', [
-   ('_Go to File/Line', '<<goto-file-line>>'),
-   ('!_Debugger', '<<toggle-debugger>>'),
-   ('_Stack Viewer', '<<open-stack-viewer>>'),
-   ('!_Auto-open Stack Viewer', '<<toggle-jit-stack-viewer>>'),
-   ]),
-
+ ]),
  ('options', [
-   ('Configure _IDLE', '<<open-config-dialog>>'),
-   ('_Code Context', '<<toggle-code-context>>'),
+   ('Configure editor', '<<open-config-dialog>>')
    ]),
 
  ('window', [
@@ -102,15 +93,13 @@ menudefs = [
    ]),
 
  ('help', [
-   ('_About IDLE', '<<about-idle>>'),
+   ('_About', '<<about-idle>>'),
    None,
-   ('_IDLE Help', '<<help>>'),
    ('Python _Docs', '<<python-docs>>'),
+   ('pylib3d-mec-ginac Docs', '<<python-docs>>')
    ]),
 ]
 
-if find_spec('turtledemo'):
-    menudefs[-1][1].append(('Turtle Demo', '<<open-turtle-demo>>'))
 
 default_keydefs = idleConf.GetCurrentKeySet()
 

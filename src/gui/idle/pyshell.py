@@ -9,6 +9,7 @@ except ImportError:
           "Your Python may not be configured for Tk. **", file=sys.__stderr__)
     raise SystemExit(1)
 
+
 # Valid arguments for the ...Awareness call below are defined in the following.
 # https://msdn.microsoft.com/en-us/library/windows/desktop/dn280512(v=vs.85).aspx
 if sys.platform == 'win32':
@@ -44,6 +45,8 @@ import time
 import tokenize
 import warnings
 import pyglet
+from itertools import islice
+from functools import partial
 
 from idlelib.colorizer import ColorDelegator
 from idlelib.config import idleConf
@@ -55,6 +58,11 @@ from idlelib.outwin import OutputWindow
 from idlelib import rpc
 from idlelib.run import idle_formatwarning, PseudoInputFile, PseudoOutputFile
 from idlelib.undo import UndoDelegator
+
+from lib3d_mec_ginac.core.integration import NumericIntegration
+from lib3d_mec_ginac import (is_simulation_stopped, is_simulation_running,
+    start_simulation, stop_simulation, resume_simulation, pause_simulation,
+    set_integration_method, set_simulation_delta_time, set_drawing_refresh_rate)
 
 from vtk import vtkRenderWindow, vtkRenderer
 from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
@@ -858,7 +866,8 @@ class PyShell(OutputWindow):
     menu_specs = [
         ("file", "_File"),
         ("edit", "_Edit"),
-        ("debug", "_Debug"),
+        ("scene", "_Scene"),
+        ("simulation", "_Simulation"),
         ("options", "_Options"),
         ("window", "_Window"),
         ("help", "_Help"),
@@ -965,7 +974,8 @@ class PyShell(OutputWindow):
 
     def set_debugger_indicator(self):
         db = self.interp.getdebugger()
-        self.setvar("<<toggle-debugger>>", not not db)
+        # self.setvar("<<toggle-debugger>>", not not db)
+
 
     def toggle_jit_stack_viewer(self, event=None):
         pass # All we need is the variable
@@ -1531,6 +1541,119 @@ def main(callback):
     else:
         shell = flist.pyshell
 
+
+
+    # Auxiliar methods
+    create_boolean_var = lambda value=False: BooleanVar(master=root, value=value)
+    create_string_var = lambda value=False: StringVar(master=root, value=value)
+    create_int_var = lambda value=0: IntVar(master=root, value=value)
+
+    def gen_boolean_vars(value=False):
+        # Generator to create boolean vars
+        while True:
+            yield create_boolean_var(value)
+
+
+    # Callbacks
+    def start_stop_simulation():
+        if is_simulation_stopped():
+            start_simulation()
+        else:
+            stop_simulation()
+
+    def pause_resume_simulation():
+        if is_simulation_stopped():
+            tkMessageBox.showwarning('Warning', 'Simulation was not started yet', parent=root)
+            return
+        if is_simulation_running():
+            pause_simulation()
+        else:
+            resume_simulation()
+
+
+    # Adjust GUI
+    top_level = root.children['!listedtoplevel']
+    frame = top_level.children['!frame']
+    bar = top_level.children['!multistatusbar']
+    console = frame.children['text']
+    menubar = root.children['!menu']
+
+    col_number_label = bar.children['!label']
+    line_number_label = bar.children['!label2']
+    line_number_label.pack(side='left')
+    col_number_label.pack(side='left')
+
+
+    # Add extra menu items
+    simulation_menu = menubar.children['simulation']
+    scene_menu = menubar.children['scene']
+
+    integration_menu = Menu(simulation_menu, tearoff=False)
+    for method in NumericIntegration.get_methods():
+        integration_menu.add_radiobutton(
+            label=method.__name__,
+            value=method.__name__,
+            command=partial(set_integration_method, method)
+        )
+
+    delta_time_menu = Menu(simulation_menu, tearoff=False)
+    for value in (0.1, 0.05, 0.02, 0.01):
+        delta_time_menu.add_radiobutton(
+            label=str(value),
+            value=value,
+            command=partial(set_simulation_delta_time, value)
+        )
+
+
+    refresh_rate_menu = Menu(simulation_menu, tearoff=False)
+    for value in (30, 20, 10):
+        refresh_rate_menu.add_radiobutton(
+            label=str(value),
+            value=value,
+            command=partial(set_drawing_refresh_rate, value)
+        )
+
+
+
+    display_simulation_info = create_boolean_var(True)
+    option = simulation_menu.add_command(label='Start/Stop', command=start_stop_simulation)
+    simulation_menu.add_command(label='Pause/Resume', command=pause_resume_simulation)
+    simulation_menu.add_cascade(label="Set integration method", menu=integration_menu)
+    simulation_menu.add_cascade(label='Set delta time', menu=delta_time_menu)
+    simulation_menu.add_cascade(label='Set refresh rate', menu=refresh_rate_menu)
+    simulation_menu.add_checkbutton(label='Display simulation info', var=display_simulation_info)
+
+
+    draw_points, draw_vectors, draw_frames, draw_solids, draw_grid = islice(gen_boolean_vars(True), 5)
+    scene_menu.add_checkbutton(label='Draw points', var=draw_points)
+    scene_menu.add_checkbutton(label='Draw vectors', var=draw_vectors)
+    scene_menu.add_checkbutton(label='Draw frames', var=draw_frames)
+    scene_menu.add_checkbutton(label='Draw solids', var=draw_solids)
+    scene_menu.add_checkbutton(label='Draw grid', var=draw_grid)
+
+
+
+    # Load custom fonts
+    pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
+
+    # Update GUI
+    root.update()
+
+    # Create window renderer
+    rw = vtkRenderWindow()
+
+    # Create interactor ( VTK widget )
+    iren = vtkTkRenderWindowInteractor(top_level, width=600, height=600, rw=rw)
+    iren.pack(expand=True, side='right', fill='both')
+
+    # Initialize interactor
+    iren.Initialize()
+    iren.Start()
+
+    # Invoke the callback and pass the interactor as argument
+    callback(iren)
+
+
     # Handle remaining options. If any of these are set, enable_shell
     # was set also, so shell must be true to reach here.
     if debug:
@@ -1561,33 +1684,6 @@ def main(callback):
             shell.interp.runcommand("print('%s')" % tkversionwarning)
 
 
-    # Adjust GUI
-    top_level = root.children['!listedtoplevel']
-    frame = top_level.children['!frame']
-    bar = top_level.children['!multistatusbar']
-    console = frame.children['text']
-
-    col_number_label = bar.children['!label']
-    line_number_label = bar.children['!label2']
-    line_number_label.pack(side='left')
-    col_number_label.pack(side='left')
-
-    # Load custom fonts
-    pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
-
-    # Create window renderer
-    rw = vtkRenderWindow()
-
-    # Create interactor ( VTK widget )
-    iren = vtkTkRenderWindowInteractor(top_level, width=600, height=600, rw=rw)
-    iren.pack(expand=True, side='right', fill='both')
-
-    # Initialize interactor
-    iren.Initialize()
-    iren.Start()
-
-    # Invoke the callback and pass the interactor as argument
-    callback(iren)
 
     # Mainloop, keep IDLE alive while there is still at least 1 window open
     while flist.inversedict:
