@@ -47,6 +47,7 @@ import warnings
 import pyglet
 from itertools import islice
 from functools import partial
+import inspect
 
 from idlelib.colorizer import ColorDelegator
 from idlelib.config import idleConf
@@ -62,7 +63,8 @@ from idlelib.undo import UndoDelegator
 from lib3d_mec_ginac.core.integration import NumericIntegration
 from lib3d_mec_ginac import (is_simulation_stopped, is_simulation_running,
     start_simulation, stop_simulation, resume_simulation, pause_simulation,
-    set_integration_method, set_simulation_delta_time, set_drawing_refresh_rate)
+    set_integration_method, set_simulation_delta_time, set_drawing_refresh_rate,
+    toogle_drawings)
 
 from vtk import vtkRenderWindow, vtkRenderer
 from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
@@ -1621,16 +1623,24 @@ def main(callback):
     simulation_menu.add_cascade(label="Set integration method", menu=integration_menu)
     simulation_menu.add_cascade(label='Set delta time', menu=delta_time_menu)
     simulation_menu.add_cascade(label='Set refresh rate', menu=refresh_rate_menu)
-    simulation_menu.add_checkbutton(label='Display simulation info', var=display_simulation_info)
+    simulation_menu.add_checkbutton(
+        label='Display simulation info',
+        var=display_simulation_info,
+        command=lambda: toogle_drawings(simulation_info=display_simulation_info.get())
+    )
 
 
-    draw_points, draw_vectors, draw_frames, draw_solids, draw_grid = islice(gen_boolean_vars(True), 5)
-    scene_menu.add_checkbutton(label='Draw points', var=draw_points)
-    scene_menu.add_checkbutton(label='Draw vectors', var=draw_vectors)
-    scene_menu.add_checkbutton(label='Draw frames', var=draw_frames)
-    scene_menu.add_checkbutton(label='Draw solids', var=draw_solids)
-    scene_menu.add_checkbutton(label='Draw grid', var=draw_grid)
+    drawing_types = list(inspect.signature(toogle_drawings).parameters.keys())[1:]
+    states = list(islice(gen_boolean_vars(True), len(drawing_types)))
 
+    def drawing_visibility_changed(drawing_type, state):
+        toogle_drawings(**{drawing_type: state.get()})
+    for drawing_type, state in zip(drawing_types, states):
+        scene_menu.add_checkbutton(
+            label=f'Draw {drawing_type}',
+            var=state,
+            command=partial(drawing_visibility_changed, drawing_type, state)
+        )
 
 
     # Load custom fonts
