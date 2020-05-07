@@ -1630,10 +1630,12 @@ def main(callback):
     )
 
 
-    drawing_types = list(inspect.signature(toogle_drawings).parameters.keys())[1:]
+    drawing_types = ('points', 'vectors', 'frames', 'solids', 'grid', 'decorations')
     states = list(islice(gen_boolean_vars(True), len(drawing_types)))
 
     def drawing_visibility_changed(drawing_type, state):
+        if drawing_type == 'decorations':
+            drawing_type = 'others'
         toogle_drawings(**{drawing_type: state.get()})
     for drawing_type, state in zip(drawing_types, states):
         scene_menu.add_checkbutton(
