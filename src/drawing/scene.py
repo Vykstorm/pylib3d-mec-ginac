@@ -1201,9 +1201,8 @@ class Scene(EventProducer):
             VectorDrawing,
             FrameDrawing,
             SolidDrawing,
-            GridDrawing
         )
-        f = (points, vectors, frames, solids, grid)
+        f = (points, vectors, frames, solids)
         _classes = tuple(map(classes.__getitem__, filter(f.__getitem__, range(len(f)))))
         for drawing in self.get_3D_drawings():
             if any(map(partial(isinstance, drawing), _classes)) or not isinstance(drawing, classes) and others:
@@ -1219,6 +1218,11 @@ class Scene(EventProducer):
             self.hide_simulation_display_info()
         elif simulation_info is True:
             self.show_simulation_display_info()
+
+        if grid is False:
+            self.hide_grid()
+        elif grid is True:
+            self.show_grid()
 
 
 
