@@ -51,3 +51,11 @@ class NumericIntegration:
             return value
         except:
             raise IndexError(f'No integration method called "{name}"')
+
+
+    @classmethod
+    def get_methods(cls):
+        '''
+        Returns a list of all the integration methods
+        '''
+        return (cls.euler, cls.rk4)
