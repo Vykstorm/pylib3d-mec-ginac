@@ -755,8 +755,11 @@ class ModifiedInterpreter(InteractiveInterpreter):
         self.tkconsole.resetoutput()
         self.checklinecache()
         InteractiveInterpreter.showtraceback(self)
-        if self.tkconsole.getvar("<<toggle-jit-stack-viewer>>"):
-            self.tkconsole.open_stack_viewer()
+        try:
+            if self.tkconsole.getvar("<<toggle-jit-stack-viewer>>"):
+                self.tkconsole.open_stack_viewer()
+        except NameError:
+            pass
 
     def checklinecache(self):
         c = linecache.cache
@@ -976,7 +979,7 @@ class PyShell(OutputWindow):
 
     def set_debugger_indicator(self):
         db = self.interp.getdebugger()
-        # self.setvar("<<toggle-debugger>>", not not db)
+        #self.setvar("<<toggle-debugger>>", not not db)
 
 
     def toggle_jit_stack_viewer(self, event=None):
