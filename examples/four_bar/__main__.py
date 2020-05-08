@@ -1,8 +1,15 @@
 
 
 ######## Imports ########
-#from lib3d_mec_ginac import *
-from src import *
+from lib3d_mec_ginac import *
+
+
+
+######## Configuration ########
+
+set_gravity_direction('up')
+set_atomization_state(True)
+
 
 ######## Generalized coordinates, velocities and accelerations ########
 
@@ -38,6 +45,16 @@ new_vector('BC', [l3, 0, 0], 'BArm3')
 new_vector('OO2', values=[l4, 0, 0], base='xyz')
 
 
+# Input vector
+Fx2, Fz2 = new_input('Fx2', 0), new_input('Fz2', 0)
+Fx3, Fz3 = new_input('Fx3', 0), new_input('Fz3', 0)
+My2, My3 = new_input('My2', 0), new_input('My3', 0)
+Fext2 = new_vector('Fext2', Fx2, 0,   Fz2, 'xyz')
+Fext3 = new_vector('Fext3', Fx3, 0,   Fz3, 'xyz')
+Mext2 = new_vector('Mext2', 0,   My2, 0,   'xyz')
+Mext3 = new_vector('Mext3', 0,   My3, 0,   'xyz')
+
+
 # Gravity center vectors
 cg1x, cg1z = new_param("cg1x",0.2), new_param("cg1z",0.1)
 cg2x, cg2z = new_param("cg2x",1.0), new_param("cg2z",0.1)
@@ -49,10 +66,10 @@ new_vector("OArm3_GArm3",cg3x,0,cg3z,"BArm3")
 
 ######## Points ########
 
-new_point('A',  'O', 'OA')
-new_point('B',  'A', 'AB')
-new_point('C',  'B', 'BC')
-new_point('O2', 'O', 'OO2')
+A = new_point('A',  'O', 'OA')
+B = new_point('B',  'A', 'AB')
+C = new_point('C',  'B', 'BC')
+O2 = new_point('O2', 'O', 'OO2')
 
 
 ######## Frames ########
@@ -75,9 +92,55 @@ I_Arm1[1, 1], I_Arm2[1, 1], I_Arm3[1, 1] = I1yy, I2yy, I3yy
 
 ######## Solids ########
 
-new_solid("Arm1", "O"  ,"BArm1" ,"m1","OArm1_GArm1","I_Arm1")
-new_solid("Arm2", "A" , "BArm2" ,"m2","OArm2_GArm2","I_Arm2")
-new_solid("Arm3", "B" , "BArm3" ,"m3","OArm3_GArm3","I_Arm3")
+Arm1 = new_solid("Arm1", "O"  ,"BArm1" ,"m1","OArm1_GArm1","I_Arm1")
+Arm2 = new_solid("Arm2", "A" , "BArm2" ,"m2","OArm2_GArm2","I_Arm2")
+Arm3 = new_solid("Arm3", "B" , "BArm3" ,"m3","OArm3_GArm3","I_Arm3")
+
+
+######## Force & Momentum ########
+
+K = new_param('K', 50)
+l2x = new_param('l2x', 1)
+l3x, l3z = new_param('l3x', 0.5), new_param('l3z', 0.1)
+
+OArm2_L2 = new_vector('OArm2_L2', l2x, 0, 0, 'BArm2')
+OArm3_L3 = new_vector('OArm3_L3', l3x, 0, 0, 'BArm3')
+
+OL2 = new_point('OL2', 'A', OArm2_L2)
+OL3 = new_point('OL3', 'B', OArm3_L3)
+
+OL2_OL3 = position_vector(OL2, OL3)
+FK = K * OL2_OL3
+MK = new_vector('MK_GroundPend1', 0, 0, 0, 'xyz')
+
+
+
+######## Wrenches ########
+
+# Gravity wrenches
+Gravity_Arm1 = gravity_wrench('Arm1')
+Gravity_Arm2 = gravity_wrench('Arm2')
+Gravity_Arm3 = gravity_wrench('Arm3')
+
+# Inertia wrenches
+Inertia_Arm1 = inertia_wrench('Arm1')
+Inertia_Arm2 = inertia_wrench('Arm2')
+Inertia_Arm3 = inertia_wrench('Arm3')
+
+# Constitutive wrenches
+SpringA = new_wrench('SpringA', FK,   MK, OL2, Arm2, 'Constitutive')
+SpringB = new_wrench('SpringR', -FK, -MK, OL3, Arm3, 'Constitutive')
+
+# External wrenches
+FMext2 = new_wrench('FMext2', Fext2, Mext2, A, Arm2, 'External')
+FMext3 = new_wrench('FMext3', Fext3, Mext3, B, Arm3, 'External')
+
+Sum_Wrenches_Arm1 = Inertia_Arm1 + Gravity_Arm1
+Sum_Wrenches_Arm2 = Inertia_Arm2 + Gravity_Arm2 + SpringA + FMext2
+Sum_Wrenches_Arm3 = Inertia_Arm3 + Gravity_Arm3 - SpringA + FMext3
+
+Twist_Arm1, Twist_Arm2, Twist_Arm3 = twist('Arm1'), twist('Arm2'), twist('Arm3')
+
 
 
 
@@ -86,6 +149,7 @@ new_solid("Arm3", "B" , "BArm3" ,"m3","OArm3_GArm3","I_Arm3")
 q,   q_aux   = get_coords_matrix(),        get_aux_coords_matrix()
 dq,  dq_aux  = get_velocities_matrix(),    get_aux_velocities_matrix()
 ddq, ddq_aux = get_accelerations_matrix(), get_aux_accelerations_matrix()
+epsilon      = get_joint_unknowns_matrix()
 
 
 ######## Kinematic equations ########
@@ -123,6 +187,31 @@ dPhi_init_dq = jacobian(dPhi_init.transpose(), Matrix.block(2, 1, dq, dq_aux))
 beta_init = -dPhi_init
 beta_init = subs(beta_init, dq, 0)
 beta_init = subs(beta_init, ddq_aux, 0)
+
+# gamma
+gamma = -ddPhi
+gamma = subs(gamma, ddq, 0)
+gamma = subs(gamma, ddq_aux, 0)
+
+# Dyn_eq_VP
+Dyn_eq_VP = Matrix([
+    Sum_Wrenches_Arm1 * diff(Twist_Arm1, to_symbol(dq[k, 0])) + \
+    Sum_Wrenches_Arm2 * diff(Twist_Arm2, to_symbol(dq[k, 0])) + \
+    Sum_Wrenches_Arm3 * diff(Twist_Arm3, to_symbol(dq[k, 0]))   \
+    for k in range(0, 3)
+], shape=[3, 1])
+
+# Dyn_eq_VP_open
+Dyn_eq_VP_open = Dyn_eq_VP
+Dyn_eq_VP_open = subs(Dyn_eq_VP_open, epsilon, 0)
+
+# M_qq
+M_qq = jacobian(Dyn_eq_VP_open.transpose(), ddq, 1)
+
+# delta_q
+delta_q = -Dyn_eq_VP_open
+delta_q = subs(delta_q, ddq, 0)
+delta_q = subs(delta_q, ddq_aux, 0)
 
 
 
@@ -173,7 +262,7 @@ camera = get_camera()
 camera.position = 0.8, 4, 0.5
 camera.focal_point = 0.8, 0, -0.2
 
-# Setup what object are being shown in the viewer
+# Setup what objects are being shown in the viewer
 toogle_drawings(solids=True, vectors=False, points=False, frames=False, others=True)
 
 
@@ -182,3 +271,20 @@ toogle_drawings(solids=True, vectors=False, points=False, frames=False, others=T
 set_integration_method('euler')
 assembly_problem(Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq)
 start_simulation(delta_t=0.01)
+
+
+
+######## MATLAB export ########
+
+export_numeric_init_func_MATLAB()
+export_numeric_func_MATLAB(Phi, 'Phi_', 'Phi_out')
+export_numeric_func_MATLAB(Phi_q, 'Phi_q_', 'Phi_q_out')
+export_numeric_func_MATLAB(dPhi_dq, 'dPhi_dq_', 'dPhi_dq_out')
+export_numeric_func_MATLAB(beta, 'beta_', 'beta_out')
+export_numeric_func_MATLAB(gamma, 'gamma_', 'gamma_out')
+export_numeric_func_MATLAB(Phi_init, 'Phi_init_', 'Phi_init_out')
+export_numeric_func_MATLAB(Phi_init_q, 'Phi_init_q_', 'Phi_init_q_out')
+export_numeric_func_MATLAB(dPhi_init_dq, 'dPhi_init_dq_', 'dPhi_init_dq_out')
+export_numeric_func_MATLAB(beta_init, 'beta_init_', 'beta_init_out')
+export_numeric_func_MATLAB(M_qq, 'M_qq_', 'M_qq_out')
+export_numeric_func_MATLAB(delta_q, 'delta_q_', 'delta_q_out')
