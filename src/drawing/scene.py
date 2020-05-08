@@ -70,6 +70,7 @@ class Scene(EventProducer):
         self._background_color = Color('white')
         self._render_mode = 'solid'
         self._camera = Camera(renderer.GetActiveCamera())
+        self._drawings_default_visibility = {}
 
         self.add_child(self._camera)
 
@@ -679,6 +680,20 @@ class Scene(EventProducer):
         '''
         if not isinstance(drawing, Drawing):
             raise TypeError('Input argument must be a Drawing instance')
+        # Set drawing default visibility
+        hierachy = drawing.__class__.__mro__
+        hierachy = hierachy[:hierachy.index(Drawing)+1]
+        for cls in hierachy:
+            try:
+                if self._drawings_default_visibility[cls]:
+                    drawing.show()
+                else:
+                    drawing.hide()
+                break
+            except KeyError:
+                pass
+
+        # Add the drawing to the scene
         self.add_child(drawing)
 
 
@@ -1204,6 +1219,16 @@ class Scene(EventProducer):
         )
         f = (points, vectors, frames, solids)
         _classes = tuple(map(classes.__getitem__, filter(f.__getitem__, range(len(f)))))
+
+        # Update drawings default visibility ( for new drawings created after this call )
+        self._drawings_default_visibility.update(dict(chain(
+            map(lambda cls: (cls, False), map(classes.__getitem__, filter(lambda i: f[i] is False, range(len(f))))),
+            map(lambda cls: (cls, True), _classes)
+        )))
+        if others is not None:
+            self._drawings_default_visibility[Drawing] = others
+
+        # Update the visibility of the drawings already created before this call
         for drawing in self.get_3D_drawings():
             if any(map(partial(isinstance, drawing), _classes)) or not isinstance(drawing, classes) and others:
                 drawing.show()
