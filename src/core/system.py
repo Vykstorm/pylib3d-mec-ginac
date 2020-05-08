@@ -1576,6 +1576,26 @@ class System(_System, EventProducer):
 
 
 
+    def to_symbol(self, x):
+        '''to_symbol(x: Expr | SymbolNumeric) -> SymbolNumeric
+        This method turns the given symbolic expression into a symbol instance
+        ( is the python version of GiNaC::ex_to C++ function ).
+        The given expression must be composed of one single symbol ( defined within this system )
+
+        :rtype: SymbolNumeric
+        :raises ValueError: If the conversion couldnt be performed
+
+        '''
+        if not isinstance(x, (SymbolNumeric, Expr)):
+            raise TypeError('Input argument must be a numeric symbol or expresion')
+        if isinstance(x, SymbolNumeric):
+            return x
+        return x.to_symbol(self)
+
+
+
+
+
     ######## Solid operations ########
 
 
