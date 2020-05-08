@@ -64,7 +64,7 @@ from lib3d_mec_ginac.core.integration import NumericIntegration
 from lib3d_mec_ginac import (is_simulation_stopped, is_simulation_running,
     start_simulation, stop_simulation, resume_simulation, pause_simulation,
     set_integration_method, set_simulation_delta_time, set_drawing_refresh_rate,
-    toogle_drawings)
+    toogle_drawings, purge_drawings)
 
 from vtk import vtkRenderWindow, vtkRenderer
 from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
@@ -1646,6 +1646,8 @@ def main(callback):
             var=state,
             command=partial(drawing_visibility_changed, drawing_type, state)
         )
+
+    scene_menu.add_command(label='Purge drawings', command=purge_drawings)
 
 
     # Load custom fonts
