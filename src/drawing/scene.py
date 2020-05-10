@@ -9,9 +9,9 @@ Description: This file defines the class Scene
 from operator import methodcaller, eq, add, itemgetter
 from functools import partial
 from itertools import chain, starmap
-from threading import Event
 import tempfile
 from math import floor
+from time import sleep
 
 # imports from other modules
 from .events import EventProducer
@@ -1123,7 +1123,7 @@ class Scene(EventProducer):
 
 
 
-    def record_simulation(self, width=640, height=480, file=None, step_callback=None):
+    def record_simulation(self, width=640, height=480, file=None, step_callback=None, delta_t=None, time_limit=None):
         '''record_simulation() -> Ipython.display.Video
         Record the simulation of this scene and save the results in a video ( ogg format ).
         The video is stored in a file with the given name as argument ( by default its stored
@@ -1132,6 +1132,8 @@ class Scene(EventProducer):
         you will experience problems when trying to record the simulation a second time ( the video will
         not be updated because jupyter inserts the video in its cache )
         '''
+
+        # Validate & parse input arguments
         if not isinstance(width, int) or width <= 0:
             raise TypeError('width must be an integer greater than zero')
 
@@ -1143,11 +1145,19 @@ class Scene(EventProducer):
 
         if self.is_simulation_looped():
             raise RuntimeError('Simulation cannot be looped in order to be recorded')
-        if self.get_simulation_time_limit() is None:
-            raise RuntimeError('Simulation must have a time limit in order to be recorded')
+
+        if time_limit is None:
+            if self.get_simulation_time_limit() is None:
+                raise RuntimeError('Simulation must have a time limit in order to be recorded')
+        else:
+            self.set_simulation_time_limit(time_limit)
+
+        if delta_t is not None:
+            self.set_simulation_delta_time(delta_t)
+
+
 
         filepath = file
-
 
         # If file is not specified, save the video in a temporal file
         if filepath is None:
@@ -1155,6 +1165,7 @@ class Scene(EventProducer):
             filepath = file.name
             file.close()
 
+        # Create a new VTK window for off-screen rendering
         window = vtkRenderWindow()
         window.SetOffScreenRendering(1)
         window.AddRenderer(self._renderer)
@@ -1165,45 +1176,50 @@ class Scene(EventProducer):
         filter.SetInput(window)
         filter.Update()
 
+        # Prepare an OGG file writer
         writer = vtkOggTheoraWriter()
         writer.SetFileName(filepath)
         writer.SetInputConnection(filter.GetOutputPort())
         writer.Start()
 
+        # Stop the simulation if it was already started
         if not self.is_simulation_stopped():
             self.stop_simulation()
 
         def on_step(*args, **kwargs):
+            # This is a callback that will be called on each simulation step
             progress = floor((self._simulation.get_elapsed_time() / self._simulation.get_time_limit()) * 100)
-
             print('\r'*15 + 'progress:  ' + str(progress).ljust(3) + '%', end='', flush=True)
 
             if step_callback is not None:
                 step_callback()
+            # Render a new frame of the simulation
             window.Render()
             filter.Modified()
             writer.Write()
 
-        finished = Event()
-
-        def on_finished(*args, **kwargs):
-            print('\r'*15 + 'completed      ', flush=True)
-            finished.set()
-
         self.add_event_handler(on_step, 'simulation_step')
-        self.add_event_handler(on_finished, 'simulation_stopped')
-        self._simulation_display_info.hide()
         self._drawings_display_info.hide()
+        # Start the simulation
         self.start_simulation()
 
-        finished.wait()
-        self.remove_event_handler(on_step)
-        self.remove_event_handler(on_finished)
-        self._simulation_display_info.show()
-        self._drawings_display_info.show()
-        writer.End()
+        try:
+            # Emulate main event loop to update the simulation repeating timer
+            timer = self._simulation._timer
+            while self.is_simulation_running():
+                timer._update()
+                sleep(0.001)
 
-        return Video(filepath, embed=True, mimetype='video/ogg')
+            writer.End()
+
+            print()
+            print('completed      ', flush=True)
+
+            return Video(filepath, embed=True, mimetype='video/ogg')
+
+        finally:
+            self.remove_event_handler(on_step)
+            self._drawings_display_info.show()
 
 
 
@@ -1331,5 +1347,5 @@ from .drawing2D import *
 from .drawing3D import *
 from .grid import GridDrawing
 from .geometry import Geometry, read_stl
-from .viewer import get_selected_drawing
+from .viewer import get_selected_drawing, get_viewer
 from .scad import scad_to_stl
