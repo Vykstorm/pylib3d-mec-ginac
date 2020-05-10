@@ -98,7 +98,6 @@ class VtkViewer(EventProducer):
         tk.mainloop()
 
         # Clean up resources when finish
-        viewer._destroy()
         rw.Finalize()
         del rw
         del self._iren
@@ -206,7 +205,6 @@ class VtkViewer(EventProducer):
         self._update_timers()
 
 
-
     def _update_timers(self):
         for timer in self.get_predecessors(kind=Timer):
             timer._update()
@@ -214,13 +212,17 @@ class VtkViewer(EventProducer):
 
     def _refresh(self):
         # Refresh the scene
-        self.get_scene()._update_drawings()
+        scene = self.get_scene()
+        if scene is not None:
+            scene._update_drawings()
         self._redraw()
 
 
     def _click_event(self, *args, **kwargs):
         # This handler is invoked when the user clicks inside the viewport
         scene = self.get_scene()
+        if scene is None:
+            return
         renderer = scene._renderer
 
         # Get mouse click position
