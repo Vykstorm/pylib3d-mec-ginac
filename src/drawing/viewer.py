@@ -18,9 +18,9 @@ from ..core.system import get_default_system
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp, vtkRenderWindowInteractor
 from vtk import vtkRenderWindowInteractor, vtkPropPicker, vtkInteractorStyleTrackballCamera
-
-
-
+from vtk import vtkXRenderWindowInteractor
+from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
+from tkinter import Tk
 
 
 ######## class VtkViewer ########
@@ -77,6 +77,35 @@ class VtkViewer(EventProducer):
         iren.CreateRepeatingTimer(1)
         iren.AddObserver(vtkCommand.TimerEvent, self._timer_event)
         iren.AddObserver(vtkCommand.LeftButtonPressEvent, self._click_event)
+
+
+    def open(self):
+        # Create Tk root
+        tk = Tk()
+        tk.title('lib3d-mec-ginac')
+
+        # Create TK window render widget
+        rw = vtkRenderWindow()
+        iren = vtkTkRenderWindowInteractor(tk, rw=rw, width=600, height=600)
+        iren.pack()
+
+        # Initialize render window interactor & viewer
+        iren.Initialize()
+        self._init(iren)
+        iren.Start()
+
+        # Start TK main loop
+        tk.mainloop()
+
+        # Clean up resources when finish
+        viewer._destroy()
+        rw.Finalize()
+        del rw
+        del self._iren
+        del self._rw
+        iren.SetRenderWindow(None)
+        iren.TerminateApp()
+
 
 
 
@@ -177,6 +206,7 @@ class VtkViewer(EventProducer):
         self._update_timers()
 
 
+
     def _update_timers(self):
         for timer in self.get_predecessors(kind=Timer):
             timer._update()
@@ -229,20 +259,15 @@ def get_viewer():
     return VtkViewer()
 
 
-def show_viewer():
-    '''show_viewer()
+def open_viewer():
+    '''open_viewer()
     Open the viewer window
     '''
-    # TODO
-    raise NotImplementedError
+    get_viewer().open()
 
 
-def close_viewer():
-    '''close_viewer()
-    Closes the viewer window
-    '''
-    # TODO
-    raise NotImplementedError
+
+
 
 
 def get_selected_drawing():
