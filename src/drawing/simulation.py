@@ -105,7 +105,6 @@ class Simulation(EventProducer):
         self._system.restore_previous_state()
 
         self._timer.stop()
-        self._update()
         self.fire_event('simulation_stopped')
 
 
