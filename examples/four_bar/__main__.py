@@ -1,8 +1,8 @@
 
 
 ######## Imports ########
-from lib3d_mec_ginac import *
-
+#from lib3d_mec_ginac import *
+from src import *
 
 
 ######## Configuration ########
@@ -193,6 +193,11 @@ gamma = -ddPhi
 gamma = subs(gamma, ddq, 0)
 gamma = subs(gamma, ddq_aux, 0)
 
+
+
+######## Dynamic equations ########
+
+
 # Dyn_eq_VP
 Dyn_eq_VP = Matrix([
     Sum_Wrenches_Arm1 * diff(Twist_Arm1, to_symbol(dq[k, 0])) + \
@@ -231,30 +236,27 @@ draw_position_vector('C', 'O')
 
 
 # Load STL objects
-scad2stl('Arm','Arm1', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l1);
-scad2stl('Arm','Arm2', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l2);
-scad2stl('Arm','Arm3', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l3);
+scad2stl('Arm','Arm1', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l1)
+scad2stl('Arm','Arm2', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l2)
+scad2stl('Arm','Arm3', rod_r=0.05*l1, r_in=0.1*l1, d=0.2*l1, l=l3)
 scad2stl('Slider', 'Slider1', r_in=0.05*l1, r_out=0.1*l1, height=0.1)
 scad2stl('Slider', 'Slider2', r_in=0.05*l1, r_out=0.1*l1, height=0.25)
 
-# Draw solids
-arms = [
-    draw_solid('Arm1', scale=1),
-    draw_solid('Arm2', scale=1),
-    draw_solid('Arm3', scale=1)
-]
-arms[0].transform &= Transform.translation(0, 0.35*l1, 0)
+
+# Draw arms
+arms_drawings = [draw_solid(f'Arm{i}', scale=1) for i in range(1,4)]
+arms_drawings[0].transform &= Transform.translation(0, 0.35*l1, 0)
 
 # Draw sliders
-sliders = [
+sliders_drawings = [
     draw_stl('Slider1.stl', color=(0.6, 0.6, 0)),
     draw_stl('Slider2.stl', color=(0.6, 0.6, 0)),
     draw_stl('Slider1.stl', color=(0.6, 0.6, 0))
 ]
 xrot = Transform.xrotation(pi/2)
-sliders[0].transform = arms[0].transform & xrot & Transform.translation(0, 0, 0.1)
-sliders[1].transform = arms[1].transform & xrot & Transform.translation(0, 0, -0.05)
-sliders[2].transform = arms[2].transform & xrot & Transform.translation(0, 0, 0.1)
+sliders_drawings[0].transform = arms_drawings[0].transform & xrot & Transform.translation(0, 0, 0.1)
+sliders_drawings[1].transform = arms_drawings[1].transform & xrot & Transform.translation(0, 0, -0.05)
+sliders_drawings[2].transform = arms_drawings[2].transform & xrot & Transform.translation(0, 0, 0.1)
 
 
 # Change camera position & focal point
@@ -270,8 +272,7 @@ toogle_drawings(solids=True, vectors=False, points=False, frames=False, others=T
 
 set_integration_method('euler')
 assembly_problem(Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq)
-start_simulation(delta_t=0.01)
-
+start_simulation(delta_t=0.1)
 
 
 ######## MATLAB export ########
@@ -288,3 +289,8 @@ export_numeric_func_MATLAB(dPhi_init_dq, 'dPhi_init_dq_', 'dPhi_init_dq_out')
 export_numeric_func_MATLAB(beta_init, 'beta_init_', 'beta_init_out')
 export_numeric_func_MATLAB(M_qq, 'M_qq_', 'M_qq_out')
 export_numeric_func_MATLAB(delta_q, 'delta_q_', 'delta_q_out')
+
+
+
+# Finally open the viewer to watch the simulation
+open_viewer()
