@@ -264,15 +264,6 @@ camera = get_camera()
 camera.position = 0.8, 4, 0.5
 camera.focal_point = 0.8, 0, -0.2
 
-# Setup what objects are being shown in the viewer
-toogle_drawings(solids=True, vectors=False, points=False, frames=False, others=True)
-
-
-######## Simulation ########
-
-set_integration_method('euler')
-assembly_problem(Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq)
-start_simulation(delta_t=0.1)
 
 
 ######## MATLAB export ########
@@ -291,6 +282,20 @@ export_numeric_func_MATLAB(M_qq, 'M_qq_', 'M_qq_out')
 export_numeric_func_MATLAB(delta_q, 'delta_q_', 'delta_q_out')
 
 
+
+######## Simulation & Viewer ########
+
+# Setup integration method
+set_integration_method('euler')
+
+# Configure assembly problem constraints
+assembly_problem(Phi, Phi_q, beta, Phi_init, Phi_init_q, beta_init, dPhi_dq, dPhi_init_dq)
+
+# Setup what objects are being shown in the viewer
+toogle_drawings(solids=True, vectors=False, points=False, frames=False, grid=False, others=True)
+
+# Start the simulation
+start_simulation(delta_t=0.05)
 
 # Finally open the viewer to watch the simulation
 open_viewer()
