@@ -1211,6 +1211,7 @@ class Scene(EventProducer):
         def on_step(*args, **kwargs):
             # This is a callback that will be called on each simulation step
             progress = floor((simulation.get_elapsed_time() / simulation.get_time_limit()) * 100)
+            progress = min(progress, 100)
             print('\r'*15 + 'progress:  ' + str(progress).ljust(3) + '%', end='', flush=True)
 
             if step_callback is not None:
@@ -1238,7 +1239,7 @@ class Scene(EventProducer):
             print('completed      ', flush=True)
 
             if _is_ipython_avaliable and _is_notebook_environment:
-                return IPython.Video(filepath, embed=True, mimetype='video/ogg')
+                return IPython.display.Video(filepath, embed=True, mimetype='video/ogg')
         finally:
             self.remove_event_handler(on_step)
             self._drawings_display_info.show()
