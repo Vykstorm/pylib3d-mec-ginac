@@ -87,7 +87,7 @@ class VtkViewer(EventProducer):
         # Create TK window render widget
         rw = vtkRenderWindow()
         iren = vtkTkRenderWindowInteractor(tk, rw=rw, width=600, height=600)
-        iren.pack()
+        iren.pack(fill='both')
 
         # Initialize render window interactor & viewer
         iren.Initialize()
