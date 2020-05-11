@@ -12,6 +12,7 @@ from itertools import chain, starmap
 import tempfile
 from math import floor
 from time import sleep
+import sys
 
 # imports from other modules
 from .events import EventProducer
@@ -27,7 +28,19 @@ from vtk import vtkRenderer, vtkRenderWindow, vtkWindowToImageFilter, vtkPNGWrit
 from vtk import vtkOggTheoraWriter
 
 # IPython imports
-from IPython.display import Image, Video
+try:
+    import IPython
+    _is_ipython_avaliable = True
+    _is_notebook_environment = False
+    try:
+        if IPython.get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
+            _is_notebook_environment = True
+    except NameError:
+        pass
+except ImportError:
+    # No problem if IPython is not avaliable
+    _is_ipython_avaliable = False
+
 
 # third party imports
 from tabulate import tabulate
@@ -617,12 +630,13 @@ class Scene(EventProducer):
 
     def start_simulation(self, *args, **kwargs):
         '''start_simulation()
-        Starts the simulation
+        Starts the simulation.
 
         :raises RuntimeError: If the simulation already started
 
         '''
         self._simulation.start(*args, **kwargs)
+
 
 
     def stop_simulation(self):
@@ -1124,13 +1138,19 @@ class Scene(EventProducer):
 
 
     def record_simulation(self, width=640, height=480, file=None, step_callback=None, delta_t=None, time_limit=None):
-        '''record_simulation() -> Ipython.display.Video
+        '''record_simulation() -> Ipython.display.Video | None
         Record the simulation of this scene and save the results in a video ( ogg format ).
         The video is stored in a file with the given name as argument ( by default its stored
         in a temporal file ).
-        If you set this to a specific file and you embed the video in notebook jupyter cell,
-        you will experience problems when trying to record the simulation a second time ( the video will
-        not be updated because jupyter inserts the video in its cache )
+
+        :return: An Ipython display video object which embeds the recorded simulation if working on a jupyter
+        notebook environment or None otherwise.
+
+        .. note::
+
+            If you set this to a specific file and you embed the video in notebook jupyter cell,
+            you will experience problems when trying to record the simulation a second time ( the video will
+            not be updated because jupyter inserts the video in its cache )
         '''
 
         # Validate & parse input arguments
@@ -1182,13 +1202,15 @@ class Scene(EventProducer):
         writer.SetInputConnection(filter.GetOutputPort())
         writer.Start()
 
+        simulation = self._simulation
+
         # Stop the simulation if it was already started
-        if not self.is_simulation_stopped():
-            self.stop_simulation()
+        if not simulation.is_stopped():
+            simulation.stop()
 
         def on_step(*args, **kwargs):
             # This is a callback that will be called on each simulation step
-            progress = floor((self._simulation.get_elapsed_time() / self._simulation.get_time_limit()) * 100)
+            progress = floor((simulation.get_elapsed_time() / simulation.get_time_limit()) * 100)
             print('\r'*15 + 'progress:  ' + str(progress).ljust(3) + '%', end='', flush=True)
 
             if step_callback is not None:
@@ -1215,8 +1237,8 @@ class Scene(EventProducer):
             print()
             print('completed      ', flush=True)
 
-            return Video(filepath, embed=True, mimetype='video/ogg')
-
+            if _is_ipython_avaliable and _is_notebook_environment:
+                return IPython.Video(filepath, embed=True, mimetype='video/ogg')
         finally:
             self.remove_event_handler(on_step)
             self._drawings_display_info.show()
@@ -1347,5 +1369,5 @@ from .drawing2D import *
 from .drawing3D import *
 from .grid import GridDrawing
 from .geometry import Geometry, read_stl
-from .viewer import get_selected_drawing, get_viewer
+from .viewer import get_selected_drawing, get_viewer, open_viewer
 from .scad import scad_to_stl
