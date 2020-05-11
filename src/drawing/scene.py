@@ -1175,6 +1175,9 @@ class Scene(EventProducer):
         if delta_t is not None:
             self.set_simulation_delta_time(delta_t)
 
+        simulation = self._simulation
+        delta_t = simulation.get_delta_time()
+        time_limit = simulation.get_time_limit()
 
 
         filepath = file
@@ -1189,7 +1192,7 @@ class Scene(EventProducer):
         window = vtkRenderWindow()
         window.SetOffScreenRendering(1)
         window.AddRenderer(self._renderer)
-        window.SetSize(640, 480)
+        window.SetSize(width, height)
         window.Render()
 
         filter = vtkWindowToImageFilter()
@@ -1199,27 +1202,29 @@ class Scene(EventProducer):
         # Prepare an OGG file writer
         writer = vtkOggTheoraWriter()
         writer.SetFileName(filepath)
+        writer.SetRate(floor(1/delta_t))
         writer.SetInputConnection(filter.GetOutputPort())
         writer.Start()
-
-        simulation = self._simulation
 
         # Stop the simulation if it was already started
         if not simulation.is_stopped():
             simulation.stop()
+
 
         def on_step(*args, **kwargs):
             # This is a callback that will be called on each simulation step
             progress = floor((simulation.get_elapsed_time() / simulation.get_time_limit()) * 100)
             progress = min(progress, 100)
             print('\r'*15 + 'progress:  ' + str(progress).ljust(3) + '%', end='', flush=True)
-
             if step_callback is not None:
                 step_callback()
+            # Update drawings
+            self._update_drawings()
             # Render a new frame of the simulation
             window.Render()
             filter.Modified()
             writer.Write()
+
 
         self.add_event_handler(on_step, 'simulation_step')
         self._drawings_display_info.hide()
@@ -1227,11 +1232,9 @@ class Scene(EventProducer):
         self.start_simulation()
 
         try:
-            # Emulate main event loop to update the simulation repeating timer
-            timer = self._simulation._timer
-            while self.is_simulation_running():
-                timer._update()
-                sleep(0.001)
+            # Perform the simulation
+            while simulation.is_running():
+                simulation._update(delta_t)
 
             writer.End()
 

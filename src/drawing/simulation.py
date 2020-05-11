@@ -6,7 +6,7 @@ Description: This file defines the class Simulation
 ######## Import statements ########
 
 # Standard imports
-from time import time_ns
+from time import time
 from collections import deque
 from collections.abc import Mapping, Iterable
 from functools import partial
@@ -270,16 +270,16 @@ class Simulation(EventProducer):
 
 
 
-    def _update(self):
-
-        # Compute real delta time
-        current_time = time_ns()
-        if self._last_update_time is None:
-            delta_t = 0
-            self._last_update_time = current_time
-        else:
-            delta_t = (current_time - self._last_update_time) / 1e9
-            self._last_update_time = current_time
+    def _update(self, delta_t=None):
+        if delta_t is None:
+            # Compute real delta time
+            current_time = time()
+            if self._last_update_time is None:
+                delta_t = 0
+                self._last_update_time = current_time
+            else:
+                delta_t = (current_time - self._last_update_time) / 1e9
+                self._last_update_time = current_time
         self._diff_times.appendleft(delta_t)
 
         # Update elapsed time
@@ -290,6 +290,8 @@ class Simulation(EventProducer):
         t.value += delta_t
 
         if self._delta_t is not None:
+            # Use the user delta_t to perform the numerical integration and solve
+            # the assembly problem
             delta_t = self._delta_t
 
         self._integration_method(delta_t)
