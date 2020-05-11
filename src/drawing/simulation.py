@@ -6,7 +6,7 @@ Description: This file defines the class Simulation
 ######## Import statements ########
 
 # Standard imports
-from time import time
+from time import time_ns
 from collections import deque
 from collections.abc import Mapping, Iterable
 from functools import partial
@@ -273,7 +273,7 @@ class Simulation(EventProducer):
     def _update(self, delta_t=None):
         if delta_t is None:
             # Compute real delta time
-            current_time = time()
+            current_time = time_ns()
             if self._last_update_time is None:
                 delta_t = 0
                 self._last_update_time = current_time
