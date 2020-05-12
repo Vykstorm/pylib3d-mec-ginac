@@ -230,6 +230,7 @@ class IDEGUI(DefaultGUI):
 
         menu.add_command(label='Start/Stop', command=self._start_stop_simulation_menu_clicked)
         menu.add_command(label='Pause/Resume', command=self._pause_resume_simulation_menu_clicked)
+        menu.add_separator()
         menu.add_cascade(label='Set integration method', menu=num_integration_menu)
         menu.add_cascade(label='Set delta time', menu=delta_time_menu)
         menu.add_cascade(label='Set refresh rate', menu=refresh_rate_menu)
@@ -259,7 +260,7 @@ class IDEGUI(DefaultGUI):
                 var=state,
                 command=partial(drawing_visibility_changed, drawing_type, state)
             )
-
+        menu.add_separator()
         menu.add_command(label='Purge drawings', command=self._scene.purge_drawings)
 
 
