@@ -93,8 +93,6 @@ menudefs = [
    ]),
 
  ('help', [
-   ('_About', '<<about-idle>>'),
-   None,
    ('Python _Docs', '<<python-docs>>')
    ]),
 ]

@@ -12,6 +12,7 @@ import webbrowser
 
 from lib3d_mec_ginac.core.integration import NumericIntegration
 
+
 # import idle
 from . import idle
 sys.modules['idlelib'] = idle
@@ -174,6 +175,10 @@ class IDEGUI(DefaultGUI):
         webbrowser.open('https://pylib3d-mec-ginac-docs.herokuapp.com/')
 
 
+    def _open_help_about(self):
+        pass
+
+
 
 
 
@@ -272,7 +277,12 @@ class IDEGUI(DefaultGUI):
 
 
     def _build_help_menu(self, menu):
+        # Add submenu to open the docs of lib3d-mec-ginac
         menu.add_command(label='lib3d-mec-ginac docs', command=self._open_api_docs)
+
+        # Add submenu to show license, authors info, ...
+        menu.add_separator()
+        menu.add_command(label='About', command=self._open_help_about)
 
 
 
