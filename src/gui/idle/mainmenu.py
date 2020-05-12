@@ -79,7 +79,7 @@ menudefs = [
    ('_Interrupt Execution', '<<interrupt-execution>>'),
    ]),
  ('scene', [
- 
+
  ]),
  ('simulation', [
 
@@ -95,8 +95,7 @@ menudefs = [
  ('help', [
    ('_About', '<<about-idle>>'),
    None,
-   ('Python _Docs', '<<python-docs>>'),
-   ('pylib3d-mec-ginac Docs', '<<python-docs>>')
+   ('Python _Docs', '<<python-docs>>')
    ]),
 ]
 

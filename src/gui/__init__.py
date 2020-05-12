@@ -8,6 +8,7 @@ from os.path import join, dirname
 import pyglet
 import sys
 from functools import partial, partialmethod
+import webbrowser
 
 from lib3d_mec_ginac.core.integration import NumericIntegration
 
@@ -169,6 +170,11 @@ class IDEGUI(DefaultGUI):
             simulation.resume()
 
 
+    def _open_api_docs(self):
+        webbrowser.open('https://pylib3d-mec-ginac-docs.herokuapp.com/')
+
+
+
 
 
     def _adjust_idle_widgets(self, top_level):
@@ -265,6 +271,9 @@ class IDEGUI(DefaultGUI):
 
 
 
+    def _build_help_menu(self, menu):
+        menu.add_command(label='lib3d-mec-ginac docs', command=self._open_api_docs)
+
 
 
 
@@ -275,6 +284,8 @@ class IDEGUI(DefaultGUI):
         # Add extra submenus for the "scene" menu
         self._build_scene_menu(menu_bar.children['scene'])
 
+        # Add extra submenus for the "help" menu
+        self._build_help_menu(menu_bar.children['help'])
 
 
 
