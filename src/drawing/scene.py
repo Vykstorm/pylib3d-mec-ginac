@@ -1104,11 +1104,13 @@ class Scene(EventProducer):
 
 
     def get_screenshot(self, width=640, height=480):
-        '''get_screenshot() -> IPython.display.Image
-        Take a screenshot of the scene and return it as IPython image (displayable on
-        jupyter notebooks)
+        '''get_screenshot() -> IPython.display.Image | None
+        Take a screenshot of the scene and return it as IPython image if called within
+        a jupyter notebook environment.
 
-        :rtype: IPython.Image
+        To be implemented: A parameter ``file`` to save the image in a file.
+
+        :rtype: IPython.Image | None
         '''
         if not isinstance(width, int) or width <= 0:
             raise TypeError('width must be an integer greater than zero')
@@ -1116,7 +1118,14 @@ class Scene(EventProducer):
         if not isinstance(height, int) or height <= 0:
             raise TypeError('height must be an integer greater than zero')
 
+        simulation = self._simulation
 
+        simulation_stopped = simulation.is_stopped()
+        if simulation_stopped:
+            simulation.start()
+        self._update_drawings()
+        if simulation_stopped:
+            simulation.stop()
 
         window = vtkRenderWindow()
         window.SetOffScreenRendering(1)
@@ -1133,7 +1142,10 @@ class Scene(EventProducer):
         writer.SetWriteToMemory(1)
         writer.SetInputConnection(filter.GetOutputPort())
         writer.Write()
-        return Image(memoryview(writer.GetResult()).tobytes())
+
+        if _is_ipython_avaliable and _is_notebook_environment:
+            return IPython.display.Image(memoryview(writer.GetResult()).tobytes())
+
 
 
 
