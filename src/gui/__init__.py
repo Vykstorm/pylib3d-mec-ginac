@@ -210,7 +210,6 @@ class IDEGUI(DefaultGUI):
 
     def _build_delta_time_menu(self, menu):
         # Create submenu to change the delta time for the simulation
-        #delta_time_menu_values =
         delta_time_menu_var = IntVar(master=self._tk, value=-1)
         try:
             delta_time_menu_var.set(self._delta_time_values.index(self._simulation.get_delta_time()))
