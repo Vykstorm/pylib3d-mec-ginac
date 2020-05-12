@@ -148,6 +148,9 @@ class IDEGUI(DefaultGUI):
     # This is the GUI that integrates the 3D viewer with IDLE
 
 
+    _delta_time_values = (0.1, 0.05, 0.02, 0.01)
+
+
     def _load_fonts(self):
         pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
 
@@ -176,6 +179,7 @@ class IDEGUI(DefaultGUI):
 
 
     def _open_help_about(self):
+        # TODO
         pass
 
 
@@ -206,13 +210,24 @@ class IDEGUI(DefaultGUI):
 
     def _build_delta_time_menu(self, menu):
         # Create submenu to change the delta time for the simulation
+        #delta_time_menu_values =
+        delta_time_menu_var = IntVar(master=self._tk, value=-1)
+        try:
+            delta_time_menu_var.set(self._delta_time_values.index(self._simulation.get_delta_time()))
+        except ValueError:
+            pass
         delta_time_menu = Menu(menu, tearoff=False)
-        for value in (0.1, 0.05, 0.02, 0.01):
+
+        for i, value in enumerate(self._delta_time_values):
             delta_time_menu.add_radiobutton(
                 label=str(value),
-                value=value,
+                value=i,
+                var=delta_time_menu_var,
                 command=partial(self._simulation.set_delta_time, value)
             )
+
+        self._delta_time_menu_var = delta_time_menu_var
+
         return delta_time_menu
 
 
@@ -312,6 +327,9 @@ class IDEGUI(DefaultGUI):
         self._build_menus(menu_bar)
         self._adjust_idle_widgets(top_level)
 
+        # Add event handlers
+        self._add_event_handlers()
+
         # Update GUI
         tk.update()
 
@@ -337,3 +355,36 @@ class IDEGUI(DefaultGUI):
 
         # Execute idle mainloop
         idle_mainloop()
+
+
+    def _destroy(self):
+        self._remove_event_handlers()
+        super()._destroy()
+
+
+
+
+
+
+    def _add_event_handlers(self):
+        # This will add all the handlers that will listen for events in the 3D viewer
+        viewer = self._viewer
+        viewer.add_event_handler(self._on_delta_time_changed, 'delta_time_changed')
+
+
+
+    def _remove_event_handlers(self):
+        # This method will remove all the event handlers previously attached to the 3D viewer
+        viewer = self._viewer
+        viewer.remove_event_handler(self._on_delta_time_changed, 'delta_time_changed')
+
+
+
+    def _on_delta_time_changed(self, *args, **kwargs):
+        # Handler called when delta time changes
+        delta_t = self._simulation.get_delta_time()
+        var = self._delta_time_menu_var
+        try:
+            var.set(self._delta_time_values.index(delta_t))
+        except ValueError:
+            var.set(-1)
