@@ -1411,8 +1411,7 @@ echo "import sys; print(sys.argv)" | idle - "foobar"
         and "foobar" in sys.argv[1].
 """
 
-def main(callback):
-
+def build():
     import getopt
     from platform import system
     from idlelib import testing  # bool value
@@ -1421,75 +1420,14 @@ def main(callback):
     global flist, root, use_subprocess
 
     capture_warnings(True)
-    use_subprocess = True
+    use_subprocess = False
     enable_shell = False
     enable_edit = False
     debug = False
     cmd = None
     script = None
     startup = False
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "c:deihnr:st:")
-    except getopt.error as msg:
-        print("Error: %s\n%s" % (msg, usage_msg), file=sys.stderr)
-        sys.exit(2)
-    for o, a in opts:
-        if o == '-c':
-            cmd = a
-            enable_shell = True
-        if o == '-d':
-            debug = True
-            enable_shell = True
-        if o == '-e':
-            enable_edit = True
-        if o == '-h':
-            sys.stdout.write(usage_msg)
-            sys.exit()
-        if o == '-i':
-            enable_shell = True
-        if o == '-n':
-            print(" Warning: running IDLE without a subprocess is deprecated.",
-                  file=sys.stderr)
-            use_subprocess = False
-        if o == '-r':
-            script = a
-            if os.path.isfile(script):
-                pass
-            else:
-                print("No script file: ", script)
-                sys.exit()
-            enable_shell = True
-        if o == '-s':
-            startup = True
-            enable_shell = True
-        if o == '-t':
-            PyShell.shell_title = a
-            enable_shell = True
-    if args and args[0] == '-':
-        cmd = sys.stdin.read()
-        enable_shell = True
-    # process sys.argv and sys.path:
-    for i in range(len(sys.path)):
-        sys.path[i] = os.path.abspath(sys.path[i])
-    if args and args[0] == '-':
-        sys.argv = [''] + args[1:]
-    elif cmd:
-        sys.argv = ['-c'] + args
-    elif script:
-        sys.argv = [script] + args
-    elif args:
-        enable_edit = True
-        pathx = []
-        for filename in args:
-            pathx.append(os.path.dirname(filename))
-        for dir in pathx:
-            dir = os.path.abspath(dir)
-            if not dir in sys.path:
-                sys.path.insert(0, dir)
-    else:
-        dir = os.getcwd()
-        if dir not in sys.path:
-            sys.path.insert(0, dir)
+
     # check the IDLE settings configuration (but command line overrides)
     edit_start = idleConf.GetOption('main', 'General',
                                     'editor-on-startup', type='bool')
@@ -1548,129 +1486,6 @@ def main(callback):
 
 
 
-    # Auxiliar methods
-    create_boolean_var = lambda value=False: BooleanVar(master=root, value=value)
-    create_string_var = lambda value=False: StringVar(master=root, value=value)
-    create_int_var = lambda value=0: IntVar(master=root, value=value)
-
-    def gen_boolean_vars(value=False):
-        # Generator to create boolean vars
-        while True:
-            yield create_boolean_var(value)
-
-
-    # Callbacks
-    def start_stop_simulation():
-        if is_simulation_stopped():
-            start_simulation()
-        else:
-            stop_simulation()
-
-    def pause_resume_simulation():
-        if is_simulation_stopped():
-            tkMessageBox.showwarning('Warning', 'Simulation was not started yet', parent=root)
-            return
-        if is_simulation_running():
-            pause_simulation()
-        else:
-            resume_simulation()
-
-
-    # Adjust GUI
-    top_level = root.children['!listedtoplevel']
-    frame = top_level.children['!frame']
-    bar = top_level.children['!multistatusbar']
-    console = frame.children['text']
-    menubar = root.children['!menu']
-
-    col_number_label = bar.children['!label']
-    line_number_label = bar.children['!label2']
-    line_number_label.pack(side='left')
-    col_number_label.pack(side='left')
-
-
-    # Add extra menu items
-    simulation_menu = menubar.children['simulation']
-    scene_menu = menubar.children['scene']
-
-    integration_menu = Menu(simulation_menu, tearoff=False)
-    for method in NumericIntegration.get_methods():
-        integration_menu.add_radiobutton(
-            label=method.__name__,
-            value=method.__name__,
-            command=partial(set_integration_method, method)
-        )
-
-    delta_time_menu = Menu(simulation_menu, tearoff=False)
-    for value in (0.1, 0.05, 0.02, 0.01):
-        delta_time_menu.add_radiobutton(
-            label=str(value),
-            value=value,
-            command=partial(set_simulation_delta_time, value)
-        )
-
-
-    refresh_rate_menu = Menu(simulation_menu, tearoff=False)
-    for value in (30, 20, 10):
-        refresh_rate_menu.add_radiobutton(
-            label=str(value),
-            value=value,
-            command=partial(set_drawing_refresh_rate, value)
-        )
-
-
-
-    display_simulation_info = create_boolean_var(True)
-    option = simulation_menu.add_command(label='Start/Stop', command=start_stop_simulation)
-    simulation_menu.add_command(label='Pause/Resume', command=pause_resume_simulation)
-    simulation_menu.add_cascade(label="Set integration method", menu=integration_menu)
-    simulation_menu.add_cascade(label='Set delta time', menu=delta_time_menu)
-    simulation_menu.add_cascade(label='Set refresh rate', menu=refresh_rate_menu)
-    simulation_menu.add_checkbutton(
-        label='Display simulation info',
-        var=display_simulation_info,
-        command=lambda: toogle_drawings(simulation_info=display_simulation_info.get())
-    )
-
-
-    drawing_types = ('points', 'vectors', 'frames', 'solids', 'grid', 'decorations')
-    states = list(islice(gen_boolean_vars(True), len(drawing_types)))
-
-    def drawing_visibility_changed(drawing_type, state):
-        if drawing_type == 'decorations':
-            drawing_type = 'others'
-        toogle_drawings(**{drawing_type: state.get()})
-    for drawing_type, state in zip(drawing_types, states):
-        scene_menu.add_checkbutton(
-            label=f'Draw {drawing_type}',
-            var=state,
-            command=partial(drawing_visibility_changed, drawing_type, state)
-        )
-
-    scene_menu.add_command(label='Purge drawings', command=purge_drawings)
-
-
-    # Load custom fonts
-    pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
-
-    # Update GUI
-    root.update()
-
-    # Create window renderer
-    rw = vtkRenderWindow()
-
-    # Create interactor ( VTK widget )
-    iren = vtkTkRenderWindowInteractor(top_level, width=600, height=600, rw=rw)
-    iren.pack(expand=True, side='right', fill='both')
-
-    # Initialize interactor
-    iren.Initialize()
-    iren.Start()
-
-    # Invoke the callback and pass the interactor as argument
-    callback(iren)
-
-
     # Handle remaining options. If any of these are set, enable_shell
     # was set also, so shell must be true to reach here.
     if debug:
@@ -1700,22 +1515,21 @@ def main(callback):
         if tkversionwarning:
             shell.interp.runcommand("print('%s')" % tkversionwarning)
 
+    capture_warnings(False)
 
+    return root
+
+
+
+
+def main():
+    global root, flist
 
     # Mainloop, keep IDLE alive while there is still at least 1 window open
     while flist.inversedict:
         root.mainloop()
 
-    # TODO: Fix bug TKRenderWidget is removed before vtkRenderWindow
-    # Delete window renderer
-    rw.Finalize()
-    del rw
-    # Delete interactor
-    iren.SetRenderWindow(None)
-    iren.destroy()
-    del iren
 
-    capture_warnings(False)
 
 
 if __name__ == "__main__":

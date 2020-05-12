@@ -14,13 +14,12 @@ from ..utils.singleton import singleton
 from .scene import Scene
 from .timer import Timer
 from ..core.system import get_default_system
+from ..gui import DefaultGUI, IDEGUI
 
 # vtk imports
 from vtk import vtkRenderer, vtkRenderWindow, vtkCommand, vtkProp, vtkRenderWindowInteractor
 from vtk import vtkRenderWindowInteractor, vtkPropPicker, vtkInteractorStyleTrackballCamera
-from vtk import vtkXRenderWindowInteractor
-from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
-from tkinter import Tk
+
 
 
 ######## class VtkViewer ########
@@ -79,31 +78,14 @@ class VtkViewer(EventProducer):
         iren.AddObserver(vtkCommand.LeftButtonPressEvent, self._click_event)
 
 
-    def open(self):
-        # Create Tk root
-        tk = Tk()
-        tk.title('lib3d-mec-ginac')
 
-        # Create TK window render widget
-        rw = vtkRenderWindow()
-        iren = vtkTkRenderWindowInteractor(tk, rw=rw, width=600, height=600)
-        iren.pack(fill='both')
-
-        # Initialize render window interactor & viewer
-        iren.Initialize()
+    def open(self, gui=False):
+        gui_class = IDEGUI if gui else DefaultGUI
+        gui = gui_class(self)
+        iren = gui.build()
         self._init(iren)
-        iren.Start()
+        gui.main()
 
-        # Start TK main loop
-        tk.mainloop()
-
-        # Clean up resources when finish
-        rw.Finalize()
-        del rw
-        del self._iren
-        del self._rw
-        iren.SetRenderWindow(None)
-        iren.TerminateApp()
 
 
 
@@ -261,11 +243,11 @@ def get_viewer():
     return VtkViewer()
 
 
-def open_viewer():
+def open_viewer(*args, **kwargs):
     '''open_viewer()
     Open the viewer window
     '''
-    get_viewer().open()
+    get_viewer().open(*args, **kwargs)
 
 
 
