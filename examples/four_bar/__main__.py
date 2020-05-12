@@ -1,14 +1,16 @@
 
 
 ######## Imports ########
-#from lib3d_mec_ginac import *
-from src import *
+
+from lib3d_mec_ginac import *
+import warnings
 
 
 ######## Configuration ########
 
 set_gravity_direction('up')
 set_atomization_state(True)
+warnings.filterwarnings('ignore')
 
 
 ######## Generalized coordinates, velocities and accelerations ########
