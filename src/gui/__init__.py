@@ -149,6 +149,7 @@ class IDEGUI(DefaultGUI):
 
 
     _delta_time_values = (0.1, 0.05, 0.02, 0.01)
+    _refresh_rate_values = (30, 20, 10)
 
 
     def _load_fonts(self):
@@ -233,13 +234,22 @@ class IDEGUI(DefaultGUI):
 
     def _build_refresh_rate_menu(self, menu):
         # This creates a submenu to change the refresh rate of the graphics
+        refresh_rate_menu_var = IntVar(master=self._tk, value=-1)
+        try:
+            refresh_rate_menu_var.set(self._refresh_rate_values.index(self._viewer.get_drawing_refresh_rate()))
+        except ValueError:
+            pass
+
         refresh_rate_menu = Menu(menu, tearoff=False)
-        for value in (30, 20, 10):
+        for i, value in enumerate(self._refresh_rate_values):
             refresh_rate_menu.add_radiobutton(
                 label=str(value),
-                value=value,
+                value=i,
+                var=refresh_rate_menu_var,
                 command=partial(self._viewer.set_drawing_refresh_rate, value)
             )
+
+        self._refresh_rate_menu_var = refresh_rate_menu_var
 
         return refresh_rate_menu
 
@@ -369,6 +379,7 @@ class IDEGUI(DefaultGUI):
         # This will add all the handlers that will listen for events in the 3D viewer
         viewer = self._viewer
         viewer.add_event_handler(self._on_delta_time_changed, 'delta_time_changed')
+        viewer.add_event_handler(self._on_drawing_refresh_rate_changed, 'drawing_refresh_rate_changed')
 
 
 
@@ -376,6 +387,10 @@ class IDEGUI(DefaultGUI):
         # This method will remove all the event handlers previously attached to the 3D viewer
         viewer = self._viewer
         viewer.remove_event_handler(self._on_delta_time_changed, 'delta_time_changed')
+        viewer.remove_event_handler(self._on_drawing_refresh_rate_changed, 'drawing_refresh_rate_changed')
+
+
+
 
 
 
@@ -385,5 +400,15 @@ class IDEGUI(DefaultGUI):
         var = self._delta_time_menu_var
         try:
             var.set(self._delta_time_values.index(delta_t))
+        except ValueError:
+            var.set(-1)
+
+
+    def _on_drawing_refresh_rate_changed(self, *args, **kwargs):
+        # Handler called when simulation graphics refresh rate
+        rate = self._viewer.get_drawing_refresh_rate()
+        var = self._refresh_rate_menu_var
+        try:
+            var.set(self._refresh_rate_values.index(rate))
         except ValueError:
             var.set(-1)

@@ -154,6 +154,7 @@ class VtkViewer(EventProducer):
         except TypeError:
             raise TypeError('Argument should be a number')
         self._update_timer.set_time_interval(1/freq)
+        self.fire_event('drawing_refresh_rate_changed')
 
 
 
