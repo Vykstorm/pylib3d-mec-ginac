@@ -161,6 +161,17 @@ class Simulation(EventProducer):
         return self._integration_method
 
 
+    def get_integration_method_name(self):
+        '''get_integration_method_name() -> str
+        Get the current integration method`s name to adjust system's symbol values
+        while the simulation is running
+        '''
+        method = self.get_integration_method()
+        if isinstance(method, partial):
+            return method.func.__name__
+        return method.__name__
+
+
 
 
     ######## Setters ########

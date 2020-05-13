@@ -200,12 +200,16 @@ class IDEGUI(DefaultGUI):
     def _build_num_integration_menu(self, menu):
         # Create submenu to change the numeric integration method for the simulation
         num_integration_menu = Menu(menu, tearoff=False)
+        num_integration_menu_var = StringVar(master=self._tk, value=self._simulation.get_integration_method_name())
         for method in NumericIntegration.get_methods():
             num_integration_menu.add_radiobutton(
                 label=method.__name__,
                 value=method.__name__,
+                var=num_integration_menu_var,
                 command=partial(self._simulation.set_integration_method, method)
             )
+
+        self._num_integration_menu_var = num_integration_menu_var
         return num_integration_menu
 
 
@@ -380,6 +384,7 @@ class IDEGUI(DefaultGUI):
         viewer = self._viewer
         viewer.add_event_handler(self._on_delta_time_changed, 'delta_time_changed')
         viewer.add_event_handler(self._on_drawing_refresh_rate_changed, 'drawing_refresh_rate_changed')
+        viewer.add_event_handler(self._on_num_integration_method_changed, 'integration_method_changed')
 
 
 
@@ -388,6 +393,7 @@ class IDEGUI(DefaultGUI):
         viewer = self._viewer
         viewer.remove_event_handler(self._on_delta_time_changed, 'delta_time_changed')
         viewer.remove_event_handler(self._on_drawing_refresh_rate_changed, 'drawing_refresh_rate_changed')
+        viewer.remove_event_handler(self._on_num_integration_method_changed, 'integration_method_changed')
 
 
 
@@ -412,3 +418,7 @@ class IDEGUI(DefaultGUI):
             var.set(self._refresh_rate_values.index(rate))
         except ValueError:
             var.set(-1)
+
+
+    def _on_num_integration_method_changed(self, *args, **kwargs):
+        self._num_integration_menu_var.set(self._simulation.get_integration_method_name())
