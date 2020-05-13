@@ -9,14 +9,18 @@ import pyglet
 import sys
 from functools import partial, partialmethod
 import webbrowser
+from copy import copy
 
-from lib3d_mec_ginac.core.integration import NumericIntegration
-
+from ..core.integration import NumericIntegration
+from ..core.system import set_default_system, System
+from ..drawing.events import EventProducer
 
 # import idle
 from . import idle
 sys.modules['idlelib'] = idle
 from .idle.pyshell import build as build_idle, main as idle_mainloop
+
+
 
 
 
@@ -143,7 +147,7 @@ class DefaultGUI(TkinterGUI):
 
 
 
-class IDEGUI(DefaultGUI):
+class IDEGUI(DefaultGUI, EventProducer):
     # This is the GUI that integrates the 3D viewer with IDLE
 
 
@@ -151,9 +155,11 @@ class IDEGUI(DefaultGUI):
     _refresh_rate_values = (30, 20, 10)
 
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, viewer):
+        DefaultGUI.__init__(self, viewer)
+        EventProducer.__init__(self)
         self._drawings_visibility_groups_menu_vars = {}
+        self.add_child(viewer)
 
 
 
@@ -338,7 +344,7 @@ class IDEGUI(DefaultGUI):
 
     def _build(self):
         # Build IDLE
-        tk = build_idle()
+        tk = build_idle(self)
         self._tk = tk
         top_level = tk.children['!listedtoplevel']
         menu_bar = tk.children['!menu']
@@ -390,13 +396,13 @@ class IDEGUI(DefaultGUI):
 
     def _add_event_handlers(self):
         # This will add all the handlers that will listen for events in the 3D viewer
-        self._viewer.add_event_handler(self._on_event)
+        self.add_event_handler(self._on_event)
 
 
 
     def _remove_event_handlers(self):
         # This method will remove all the event handlers previously attached to the 3D viewer
-        self._viewer.remove_event_handler(self._on_event)
+        self.remove_event_handler(self._on_event)
 
 
     def _on_event(self, event_type, *args, **kwargs):
@@ -438,3 +444,16 @@ class IDEGUI(DefaultGUI):
             self._drawings_visibility_groups_menu_vars[drawing_type].set(visible)
         except KeyError:
             pass
+
+
+    def _on_shell_restart(self, *args, **kwargs):
+        # Change default system
+        sys = System()
+        set_default_system(sys)
+        self._viewer.set_scene(sys.get_scene())
+
+        # Restore default global variables
+        main_module = sys.modules['__main__']
+        if '_default_environment' in globals():
+            main_module.__dict__.clear()
+            main_module.__dict__.update(_default_environment)

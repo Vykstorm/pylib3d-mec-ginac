@@ -871,6 +871,7 @@ class PyShell(OutputWindow):
     menu_specs = [
         ("file", "_File"),
         ("edit", "_Edit"),
+        ("shell", "_Shell"),
         ("scene", "_Scene"),
         ("simulation", "_Simulation"),
         ("options", "_Options"),
@@ -919,7 +920,7 @@ class PyShell(OutputWindow):
         text.bind("<<toggle-jit-stack-viewer>>", self.toggle_jit_stack_viewer)
         if use_subprocess:
             text.bind("<<view-restart>>", self.view_restart_mark)
-            text.bind("<<restart-shell>>", self.restart_shell)
+        text.bind("<<restart-shell>>", self.restart_shell)
 
         self.save_stdout = sys.stdout
         self.save_stderr = sys.stderr
@@ -1290,7 +1291,9 @@ class PyShell(OutputWindow):
 
     def restart_shell(self, event=None):
         "Callback for Run/Restart Shell Cntl-F6"
-        self.interp.restart_subprocess(with_cwd=True)
+        #self.interp.restart_subprocess(with_cwd=True)
+        self._event_listener.fire_event('shell_restart')
+
 
     def showprompt(self):
         self.resetoutput()
@@ -1411,7 +1414,7 @@ echo "import sys; print(sys.argv)" | idle - "foobar"
         and "foobar" in sys.argv[1].
 """
 
-def build():
+def build(event_listener):
     import getopt
     from platform import system
     from idlelib import testing  # bool value
@@ -1484,6 +1487,7 @@ def build():
     else:
         shell = flist.pyshell
 
+    shell._event_listener = event_listener
 
 
     # Handle remaining options. If any of these are set, enable_shell
@@ -1516,7 +1520,6 @@ def build():
             shell.interp.runcommand("print('%s')" % tkversionwarning)
 
     capture_warnings(False)
-
     return root
 
 
