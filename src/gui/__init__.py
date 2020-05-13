@@ -381,22 +381,22 @@ class IDEGUI(DefaultGUI):
 
     def _add_event_handlers(self):
         # This will add all the handlers that will listen for events in the 3D viewer
-        viewer = self._viewer
-        viewer.add_event_handler(self._on_delta_time_changed, 'delta_time_changed')
-        viewer.add_event_handler(self._on_drawing_refresh_rate_changed, 'drawing_refresh_rate_changed')
-        viewer.add_event_handler(self._on_num_integration_method_changed, 'integration_method_changed')
+        self._viewer.add_event_handler(self._on_event)
 
 
 
     def _remove_event_handlers(self):
         # This method will remove all the event handlers previously attached to the 3D viewer
-        viewer = self._viewer
-        viewer.remove_event_handler(self._on_delta_time_changed, 'delta_time_changed')
-        viewer.remove_event_handler(self._on_drawing_refresh_rate_changed, 'drawing_refresh_rate_changed')
-        viewer.remove_event_handler(self._on_num_integration_method_changed, 'integration_method_changed')
+        self._viewer.remove_event_handler(self._on_event)
 
 
-
+    def _on_event(self, event_type, *args, **kwargs):
+        # This method delegates events calling to the correct handler for each kind of event
+        try:
+            handler = getattr(self, f'_on_{event_type}')
+            handler(*args, **kwargs)
+        except AttributeError:
+            pass
 
 
 
@@ -420,5 +420,5 @@ class IDEGUI(DefaultGUI):
             var.set(-1)
 
 
-    def _on_num_integration_method_changed(self, *args, **kwargs):
+    def _on_integration_method_changed(self, *args, **kwargs):
         self._num_integration_menu_var.set(self._simulation.get_integration_method_name())
