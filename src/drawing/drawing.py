@@ -102,6 +102,20 @@ class Drawing(VtkObjectWrapper):
         return self.get_ancestor(Scene)
 
 
+    def is_visible(self):
+        '''is_visible() -> bool
+        Returns True if this drawing is visible, False otherwise
+        '''
+        return self.get_handler().GetVisibility()
+
+
+
+    def is_hidden(self):
+        '''is_hidden() -> bool
+        Returns True if this drawing is hidden, False otherwise
+        '''
+        return not self.is_visible()
+
 
 
     ######## Setters ########

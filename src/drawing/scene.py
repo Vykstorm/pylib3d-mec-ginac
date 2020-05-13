@@ -1293,24 +1293,58 @@ class Scene(EventProducer):
                 elif others is False:
                     drawing.hide()
 
+        # Change simulation info display visibility
         if simulation_info is False:
-            self.hide_simulation_display_info()
+            self._simulation_display_info.hide()
         elif simulation_info is True:
-            self.show_simulation_display_info()
+            self._simulation_display_info.show()
 
+        # Change grid visibility
         if grid is False:
-            self.hide_grid()
+            self.grid.hide()
         elif grid is True:
-            self.show_grid()
+            self.grid.show()
+
+        # Trigger events
+        for group, arg in [('points', points), ('vectors', vectors), ('frames', frames), ('solids', solids), ('grid', grid), ('others', others)]:
+            if arg is None:
+                continue
+            self.fire_event('drawings_group_visibility_changed', group, arg)
+
+
+
+    def get_drawings_group_visibility(self, group):
+        if group not in ('points', 'vectors', 'frames', 'solids', 'grid', 'simulation_info', 'others'):
+            raise ValueError(f'Invalid drawing group name {str(group)}')
+        if group not in ('grid', 'simulation_info'):
+            cls = dict(
+                points=PointDrawing,
+                vectors=VectorDrawing,
+                frames=FrameDrawing,
+                solids=SolidDrawing,
+                others=Drawing
+            )[group]
+            return self._drawings_default_visibility.get(cls, True)
+        elif group == 'grid':
+            return self.grid.is_visible()
+        return self._simulation_display_info.is_visible()
+
+
 
 
 
     def hide_simulation_display_info(self):
-        self._simulation_display_info.hide()
+        '''hide_simulation_display_info()
+        Hides the simulation display info
+        '''
+        self.toogle_drawings(simulation_info=False)
 
 
     def show_simulation_display_info(self):
-        self._simulation_display_info.show()
+        '''hide_simulation_display_info()
+        Shows the simulation display info
+        '''
+        self.toogle_drawings(simulation_info=True)
 
 
 
@@ -1318,14 +1352,14 @@ class Scene(EventProducer):
         '''show_grid()
         Shows the grid of the scene
         '''
-        self.grid.show()
+        self.toogle_drawings(grid=True)
 
 
     def hide_grid(self):
         '''hide_grid()
         Hides the grid of the scene
         '''
-        self.grid.hide()
+        self.toogle_drawings(grid=False)
 
 
 

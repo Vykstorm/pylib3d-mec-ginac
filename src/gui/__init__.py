@@ -152,6 +152,12 @@ class IDEGUI(DefaultGUI):
     _refresh_rate_values = (30, 20, 10)
 
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._drawings_visibility_groups_menu_vars = {}
+
+
+
     def _load_fonts(self):
         pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
 
@@ -273,29 +279,32 @@ class IDEGUI(DefaultGUI):
         menu.add_cascade(label='Set integration method', menu=num_integration_menu)
         menu.add_cascade(label='Set delta time', menu=delta_time_menu)
         menu.add_cascade(label='Set refresh rate', menu=refresh_rate_menu)
-        display_simulation_info_var = BooleanVar(master=self._tk, value=True)
+        display_simulation_info_var = BooleanVar(master=self._tk, value=self._scene.get_drawings_group_visibility('simulation_info'))
         menu.add_checkbutton(
             label='Display simulation info',
             var=display_simulation_info_var,
             command=lambda: self._scene.toogle_drawings(simulation_info=display_simulation_info_var.get())
         )
+        self._drawings_visibility_groups_menu_vars['simulation_info'] = display_simulation_info_var
 
 
 
     def _build_scene_menu(self, menu):
         # Add submenus to the menu "scene"
+        drawing_groups = ('points', 'vectors', 'frames', 'solids', 'grid', 'others')
+        states = dict(zip(
+            drawing_groups,
+            [BooleanVar(master=self._tk, value=self._scene.get_drawings_group_visibility(group)) for group in drawing_groups]
+        ))
+        self._drawings_visibility_groups_menu_vars.update(states)
 
-        drawing_types = ('points', 'vectors', 'frames', 'solids', 'grid', 'decorations')
-        states = [BooleanVar(master=self._tk, value=True) for i in range(len(drawing_types))]
 
         def drawing_visibility_changed(drawing_type, state):
-            if drawing_type == 'decorations':
-                drawing_type = 'others'
             self._scene.toogle_drawings(**{drawing_type: state.get()})
 
-        for drawing_type, state in zip(drawing_types, states):
+        for drawing_type, state in states.items():
             menu.add_checkbutton(
-                label=f'Draw {drawing_type}',
+                label=f'Draw {drawing_type if drawing_type != "others" else "decorations"}',
                 var=state,
                 command=partial(drawing_visibility_changed, drawing_type, state)
             )
@@ -372,6 +381,7 @@ class IDEGUI(DefaultGUI):
 
     def _destroy(self):
         self._remove_event_handlers()
+        self._drawings_visibility_groups_menu_vars.clear()
         super()._destroy()
 
 
@@ -422,3 +432,10 @@ class IDEGUI(DefaultGUI):
 
     def _on_integration_method_changed(self, *args, **kwargs):
         self._num_integration_menu_var.set(self._simulation.get_integration_method_name())
+
+
+    def _on_drawings_group_visibility_changed(self, source, drawing_type, visible):
+        try:
+            self._drawings_visibility_groups_menu_vars[drawing_type].set(visible)
+        except KeyError:
+            pass
