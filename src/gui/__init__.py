@@ -56,10 +56,8 @@ class GUI(ABC):
         '''
         if not self._initialized:
             raise RuntimeError('GUI must be built before executing its main event loop')
-        try:
-            self._main()
-        finally:
-            self.destroy()
+        self._main()
+
 
 
 
@@ -126,13 +124,14 @@ class TkinterGUI(GUI):
 
 
     def _destroy(self):
-        iren, rw = self._iren, self._rw
+        tk, iren, rw = self._tk, self._iren, self._rw
 
         # Clean up resources when finished
         rw.Finalize()
         del self._rw, self._iren, self._tk
         iren.SetRenderWindow(None)
         iren.TerminateApp()
+        #tk.destroy()
 
 
 

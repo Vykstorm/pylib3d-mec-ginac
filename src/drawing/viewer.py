@@ -7,6 +7,7 @@ Description: This file defines the class VtkViewer
 
 # standard imports
 from functools import wraps
+import warnings
 
 # imports from other modules
 from .events import EventProducer
@@ -37,6 +38,7 @@ class VtkViewer(EventProducer):
         super().__init__()
         self._iren, self._rw = None, None
         self._selected_drawing = None
+        self._is_open = False
 
 
         # Add the scene associated to the default system as the active scene
@@ -56,11 +58,16 @@ class VtkViewer(EventProducer):
 
 
 
-    def _init(self, iren):
-        '''
-        This method is used to set up the window renderer interactor which must
-        be passed as argument
-        '''
+    def open(self, gui=False):
+        if self._is_open:
+            warnings.warn('Viewer is already open')
+            return
+
+        # Choose the graphical user interface to use
+        gui_class = IDEGUI if gui else DefaultGUI
+        gui = gui_class(self)
+        iren = gui.build()
+
         rw = iren.GetRenderWindow()
         self._iren, self._rw = iren, rw
 
@@ -77,16 +84,13 @@ class VtkViewer(EventProducer):
         iren.AddObserver(vtkCommand.TimerEvent, self._timer_event)
         iren.AddObserver(vtkCommand.LeftButtonPressEvent, self._click_event)
 
-
-
-    def open(self, gui=False):
-        gui_class = IDEGUI if gui else DefaultGUI
-        gui = gui_class(self)
-        iren = gui.build()
-        self._init(iren)
-        gui.main()
-
-
+        self._is_open = True
+        try:
+            gui.main()
+        finally:
+            del self._iren, self._rw
+            gui.destroy()
+            self._is_open = False
 
 
 
