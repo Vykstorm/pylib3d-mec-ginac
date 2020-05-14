@@ -7,13 +7,14 @@ from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
 from os.path import join, dirname
 import pyglet
 import sys
-from functools import partial, partialmethod
+from functools import partial, partialmethod, lru_cache
 import webbrowser
 from copy import copy
 
 from ..core.integration import NumericIntegration
-from ..core.system import set_default_system, System
+from ..core.system import get_default_system, set_default_system, System
 from ..drawing.events import EventProducer
+from ..drawing.scene import Scene
 
 # import idle
 from . import idle
@@ -208,16 +209,48 @@ class IDEGUI(DefaultGUI, EventProducer):
         col_number_label.pack(side='left')
 
 
+    def _update_menus(self):
+        simulation, scene = self._simulation, self._scene
+
+        # Update numeric integration radiobutton state
+        self._num_integration_menu_var.set(simulation.get_integration_method_name())
+
+        # Update delta time radiobutton menu state
+        try:
+            self._delta_time_menu_var.set(self._delta_time_values.index(simulation.get_delta_time()))
+        except ValueError:
+            self._delta_time_menu_var.set(-1)
+
+        # Update refresh rate radiobutton menu state
+        try:
+            self._refresh_rate_menu_var.set(self._refresh_rate_values.index(self._viewer.get_drawing_refresh_rate()))
+        except ValueError:
+            self._refresh_rate_menu_var.set(-1)
+
+        # Update checkboxes state ( drawings visibility by type )
+        for drawing_type, var in self._drawings_visibility_groups_menu_vars.items():
+            try:
+                var.set(scene.get_drawings_group_visibility(drawing_type))
+            except ValueError:
+                var.set(False)
+
+
+
+
     def _build_num_integration_menu(self, menu):
         # Create submenu to change the numeric integration method for the simulation
         num_integration_menu = Menu(menu, tearoff=False)
-        num_integration_menu_var = StringVar(master=self._tk, value=self._simulation.get_integration_method_name())
+        num_integration_menu_var = StringVar(master=self._tk)
+
+        def update_integration_method(method):
+            self._simulation.set_integration_method(method)
+
         for method in NumericIntegration.get_methods():
             num_integration_menu.add_radiobutton(
                 label=method.__name__,
                 value=method.__name__,
                 var=num_integration_menu_var,
-                command=partial(self._simulation.set_integration_method, method)
+                command=partial(update_integration_method, method)
             )
 
         self._num_integration_menu_var = num_integration_menu_var
@@ -226,19 +259,18 @@ class IDEGUI(DefaultGUI, EventProducer):
 
     def _build_delta_time_menu(self, menu):
         # Create submenu to change the delta time for the simulation
-        delta_time_menu_var = IntVar(master=self._tk, value=-1)
-        try:
-            delta_time_menu_var.set(self._delta_time_values.index(self._simulation.get_delta_time()))
-        except ValueError:
-            pass
+        delta_time_menu_var = IntVar(master=self._tk)
         delta_time_menu = Menu(menu, tearoff=False)
+
+        def update_delta_time(value):
+            self._simulation.set_delta_time(value)
 
         for i, value in enumerate(self._delta_time_values):
             delta_time_menu.add_radiobutton(
                 label=str(value),
                 value=i,
                 var=delta_time_menu_var,
-                command=partial(self._simulation.set_delta_time, value)
+                command=partial(update_delta_time, value)
             )
 
         self._delta_time_menu_var = delta_time_menu_var
@@ -249,13 +281,9 @@ class IDEGUI(DefaultGUI, EventProducer):
 
     def _build_refresh_rate_menu(self, menu):
         # This creates a submenu to change the refresh rate of the graphics
-        refresh_rate_menu_var = IntVar(master=self._tk, value=-1)
-        try:
-            refresh_rate_menu_var.set(self._refresh_rate_values.index(self._viewer.get_drawing_refresh_rate()))
-        except ValueError:
-            pass
-
+        refresh_rate_menu_var = IntVar(master=self._tk)
         refresh_rate_menu = Menu(menu, tearoff=False)
+
         for i, value in enumerate(self._refresh_rate_values):
             refresh_rate_menu.add_radiobutton(
                 label=str(value),
@@ -284,7 +312,7 @@ class IDEGUI(DefaultGUI, EventProducer):
         menu.add_cascade(label='Set integration method', menu=num_integration_menu)
         menu.add_cascade(label='Set delta time', menu=delta_time_menu)
         menu.add_cascade(label='Set refresh rate', menu=refresh_rate_menu)
-        display_simulation_info_var = BooleanVar(master=self._tk, value=self._scene.get_drawings_group_visibility('simulation_info'))
+        display_simulation_info_var = BooleanVar(master=self._tk)
         menu.add_checkbutton(
             label='Display simulation info',
             var=display_simulation_info_var,
@@ -299,7 +327,7 @@ class IDEGUI(DefaultGUI, EventProducer):
         drawing_groups = ('points', 'vectors', 'frames', 'solids', 'grid', 'others')
         states = dict(zip(
             drawing_groups,
-            [BooleanVar(master=self._tk, value=self._scene.get_drawings_group_visibility(group)) for group in drawing_groups]
+            [BooleanVar(master=self._tk) for group in drawing_groups]
         ))
         self._drawings_visibility_groups_menu_vars.update(states)
 
@@ -314,7 +342,7 @@ class IDEGUI(DefaultGUI, EventProducer):
                 command=partial(drawing_visibility_changed, drawing_type, state)
             )
         menu.add_separator()
-        menu.add_command(label='Purge drawings', command=self._scene.purge_drawings)
+        menu.add_command(label='Purge drawings', command=lambda: self._scene.purge_drawings())
 
 
 
@@ -339,6 +367,8 @@ class IDEGUI(DefaultGUI, EventProducer):
         # Add extra submenus for the "help" menu
         self._build_help_menu(menu_bar.children['help'])
 
+        # Update menus
+        self._update_menus()
 
 
 
@@ -448,12 +478,14 @@ class IDEGUI(DefaultGUI, EventProducer):
 
     def _on_shell_restart(self, *args, **kwargs):
         # Change default system
-        sys = System()
-        set_default_system(sys)
-        self._viewer.set_scene(sys.get_scene())
+        set_default_system(System())
+        self._viewer.set_scene(get_default_system().get_scene())
 
         # Restore default global variables
         main_module = sys.modules['__main__']
         if '_default_environment' in globals():
             main_module.__dict__.clear()
             main_module.__dict__.update(_default_environment)
+
+        # Update menu checkboxes & radiobuttons states
+        self._update_menus()
