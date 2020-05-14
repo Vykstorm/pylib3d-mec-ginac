@@ -147,6 +147,15 @@ class PyShellEditorWindow(EditorWindow):
         self.text.bind("<<set-breakpoint-here>>", self.set_breakpoint_here)
         self.text.bind("<<clear-breakpoint-here>>", self.clear_breakpoint_here)
         self.text.bind("<<open-python-shell>>", self.flist.open_shell)
+        def run_selected_code(event):
+            widget = event.widget
+            if not isinstance(widget, Text):
+                return
+            selection = widget.selection_get()
+            self.flist.open_shell().interp.runcode(selection)
+
+
+        self.text.bind("<<run-selection>>", run_selected_code)
 
         self.breakpointPath = os.path.join(
                 idleConf.userdir, 'breakpoints.lst')
@@ -164,9 +173,11 @@ class PyShellEditorWindow(EditorWindow):
         ("Cut", "<<cut>>", "rmenu_check_cut"),
         ("Copy", "<<copy>>", "rmenu_check_copy"),
         ("Paste", "<<paste>>", "rmenu_check_paste"),
-        (None, None, None),
-        ("Set Breakpoint", "<<set-breakpoint-here>>", None),
-        ("Clear Breakpoint", "<<clear-breakpoint-here>>", None)
+        ("Run selection", "<<run-selection>>")
+
+        #(None, None, None),
+        #("Set Breakpoint", "<<set-breakpoint-here>>", None),
+        #("Clear Breakpoint", "<<clear-breakpoint-here>>", None)
     ]
 
     def color_breakpoint_text(self, color=True):
