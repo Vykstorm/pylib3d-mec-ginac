@@ -308,6 +308,14 @@ class EditorWindow(object):
         scriptbinding = ScriptBinding(self)
         text.bind("<<check-module>>", scriptbinding.check_module_event)
         text.bind("<<run-module>>", scriptbinding.run_module_event)
+
+        def restart_shell_and_run_module(*args, **kwargs):
+            self.flist.open_shell().restart_shell()
+            scriptbinding.run_module_event(*args, **kwargs)
+
+
+
+        text.bind("<<restart-shell-and-run-module>>", restart_shell_and_run_module)
         text.bind("<<do-rstrip>>", self.Rstrip(self).do_rstrip)
         ctip = self.Calltip(self)
         text.bind("<<try-open-calltip>>", ctip.try_open_calltip_event)

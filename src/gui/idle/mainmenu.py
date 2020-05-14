@@ -70,11 +70,11 @@ menudefs = [
    ('Python console', '<<open-python-shell>>'),
    ('C_heck file', '<<check-module>>'),
    ('R_un file', '<<run-module>>'),
+   ('Restart console & Run file', '<<restart-shell-and-run-module>>')
    ]),
 
  ('shell', [
-   ('_View Last Restart', '<<view-restart>>'),
-   ('_Restart Shell', '<<restart-shell>>'),
+   ('_Restart', '<<restart-shell>>'),
    None,
    ('_Interrupt Execution', '<<interrupt-execution>>'),
    ]),

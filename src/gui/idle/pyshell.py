@@ -871,7 +871,7 @@ class PyShell(OutputWindow):
     menu_specs = [
         ("file", "_File"),
         ("edit", "_Edit"),
-        ("shell", "_Shell"),
+        ("shell", "_Console"),
         ("scene", "_Scene"),
         ("simulation", "_Simulation"),
         ("options", "_Options"),
