@@ -60,16 +60,6 @@ from idlelib import rpc
 from idlelib.run import idle_formatwarning, PseudoInputFile, PseudoOutputFile
 from idlelib.undo import UndoDelegator
 
-from lib3d_mec_ginac.core.integration import NumericIntegration
-from lib3d_mec_ginac import (is_simulation_stopped, is_simulation_running,
-    start_simulation, stop_simulation, resume_simulation, pause_simulation,
-    set_integration_method, set_simulation_delta_time, set_drawing_refresh_rate,
-    toogle_drawings, purge_drawings)
-
-from vtk import vtkRenderWindow, vtkRenderer
-from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
-
-
 
 
 HOST = '127.0.0.1' # python execution server on localhost loopback
