@@ -29,6 +29,7 @@ RUN apt install -y \
     libxcb-xfixes0 \
     libxcb-randr0 \
     libxrandr-dev \
+    libssl-dev \
     && pip install meson Mako>=0.8.0
 # Get CMake
 RUN git clone https://github.com/Kitware/CMake.git -b release
