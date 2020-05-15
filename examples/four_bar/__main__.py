@@ -9,7 +9,7 @@ import warnings
 ######## Configuration ########
 
 set_gravity_direction('up')
-set_atomization_state(True)
+#set_atomization_state(False)
 warnings.filterwarnings('ignore')
 
 
