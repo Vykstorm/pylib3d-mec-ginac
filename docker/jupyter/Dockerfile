@@ -50,7 +50,7 @@ RUN tar -xf mesa.tar && rm mesa.tar \
     && cd .. \
     && rm -rf mesa
 # Uninstall vtk pip version
-RUN pip uninstall -y vtk
+RUN pip freeze | grep vtk | xargs pip uninstall -y
 # Get VTK source code
 RUN git clone https://gitlab.kitware.com/vtk/vtk.git VTK
 # Configure VTK
