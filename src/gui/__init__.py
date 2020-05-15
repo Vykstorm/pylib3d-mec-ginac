@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from tkinter import *
 import tkinter.messagebox as tkMessageBox
 from vtk import vtkRenderWindow
-from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
 from os.path import join, dirname
 import pyglet
 import sys
@@ -19,7 +18,6 @@ from ..drawing.scene import Scene
 # import idle
 from . import idle
 sys.modules['idlelib'] = idle
-from .idle.pyshell import build as build_idle, main as idle_mainloop
 
 
 
@@ -99,6 +97,9 @@ class GUI(ABC):
 class TkinterGUI(GUI):
 
     def _build(self):
+        from tkinter import Tk
+        from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
+
         # Create Tk root
         tk = Tk()
         tk.title("lib3d-mec-ginac")
@@ -373,6 +374,10 @@ class IDEGUI(DefaultGUI, EventProducer):
 
 
     def _build(self):
+        from vtk.tk.vtkTkRenderWindowInteractor import vtkTkRenderWindowInteractor
+        from .idle.pyshell import build as build_idle, main as idle_mainloop
+
+
         # Build IDLE
         tk = build_idle(self)
         self._tk = tk
