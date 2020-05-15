@@ -97,13 +97,12 @@ RUN cd VTK-build \
 # This will update dynamic libraries and save the lib path directory into a file
 # Needed to adust PYTHONPATH & LD_LIBRARY_PATH on the CMD line
 RUN ldconfig \
-    && rm pyversion \
     && echo ${MESA_INSTALL_PREFIX}/lib/x86_64-linux-gnu > mesalibdir
 # Install additional packages for Python
-RUN pip install matplotlib pandas
+RUN pip install matplotlib pandas jupyter
 # Copy empty notebook
 COPY Untitled.ipynb /pylib3d-mec-ginac/examples/Untitled.ipynb
 # Default entrypoint (jupyter server)
-CMD export PYTHONPATH=/usr/local/lib/python/site-packages \
+CMD export PYTHONPATH=/usr/local/lib/python$(cat pyversion)/site-packages \
     && export LD_LIBRARY_PATH=$(cat mesalibdir) \
     && jupyter notebook --no-browser --port=$PORT --ip=$(hostname) --allow-root -y --notebook-dir=/pylib3d-mec-ginac/examples --NotebookApp.token='' --NotebookApp.password=''
