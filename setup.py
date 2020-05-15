@@ -181,6 +181,15 @@ PYTHON_VERSION = '>=3.7'
 with open('requirements.txt', 'r') as file:
     DEPENDENCIES = file.readlines()
 
+# Extra dependencies to be processed by setup tools
+DEPENDENCIES += [
+    'asciitree>=0.3.3',
+    'tabulate>=0.8.5',
+    'numpy>=1.17.2',
+    'vtk-tk>=9.0.0',
+    'pyglet>=1.5.5'
+]
+
 # Extra dependency links
 DEPENDENCY_LINKS = [
     'https://vtk-tk-support.herokuapp.com/'
