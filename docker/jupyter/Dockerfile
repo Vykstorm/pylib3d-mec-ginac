@@ -7,7 +7,6 @@ RUN python -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.ver
 # Install mesa dependencies
 RUN apt install -y \
     make                \
-    cmake               \
     wget                \
     pkg-config          \
     llvm                \
@@ -31,6 +30,13 @@ RUN apt install -y \
     libxcb-randr0 \
     libxrandr-dev \
     && pip install meson Mako>=0.8.0
+# Get CMake
+RUN git clone https://github.com/Kitware/CMake.git -b release
+# Compile & install CMake
+RUN cd CMake \
+    && ./bootstrap --parallel=4 \
+    && make -j 4 \
+    && make install
 # Install mesa
 RUN wget -nv https://mesa.freedesktop.org/archive/mesa-19.1.0.tar.xz -O mesa.tar -o /dev/null
 #RUN wget -nv https://mesa.freedesktop.org/archive/mesa-19.3.2.tar.xz -O mesa.tar -o /dev/null
