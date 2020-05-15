@@ -15,7 +15,7 @@ RUN apt update && apt install -y \
     python${PYTHON_VERSION} \
     python${PYTHON_VERSION}-dev \
     python3-pip \
-    && python3-tk \
+    python3-tk \
     && apt clean \
     && locale-gen "en_US.UTF-8"
 # Install and configure pip & python
