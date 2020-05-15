@@ -1,8 +1,7 @@
 
 ######## Imports ########
 
-#from lib3d_mec_ginac import *
-from src import *
+from lib3d_mec_ginac import *
 import warnings
 
 
