@@ -87,9 +87,9 @@ ROOT_PACKAGE = 'lib3d_mec_ginac'
 ROOT_PACKAGE_DIR = join(root_dir, 'src')
 
 # List of all packages (including subpackages but not the extension) to be installed within this library
-PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.drawing', '.utils'))))
-
-
+PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.drawing', '.utils', '.gui', '.gui.idle'))))
+GUI, IDLE = f'{ROOT_PACKAGE}.gui', f'{ROOT_PACKAGE}.gui.idle'
+GUI_DATA, IDLE_DATA = ['fonts/*'], [ '*.def', 'Icons/*' ]
 
 
 
@@ -337,7 +337,11 @@ if __name__ == '__main__':
             dependency_links=DEPENDENCY_LINKS,
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
-            package_data={ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]},
+            package_data={
+                ROOT_PACKAGE: [RUNTIME_CONFIG_FILE],
+                GUI: GUI_DATA,
+                IDLE: IDLE_DATA
+            },
             ext_modules=extensions,
             cmdclass={'build_ext': BuildExt}
         )
