@@ -2,6 +2,7 @@ ARG BASE=ubuntu:18.04
 FROM $BASE
 ARG PYTHON_VERSION=3.7
 # Install dependencies
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && apt install -y \
     g++ \
     mesa-utils \
@@ -15,9 +16,9 @@ RUN apt update && apt install -y \
     python${PYTHON_VERSION} \
     python${PYTHON_VERSION}-dev \
     python3-pip \
-    python3-tk \
-    && apt clean \
-    && locale-gen "en_US.UTF-8"
+    && locale-gen "en_US.UTF-8" \
+    && apt install -y python3-tk \
+    && apt clean
 # Install and configure pip & python
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python${PYTHON_VERSION} get-pip.py --prefix=/usr/local/   \
