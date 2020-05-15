@@ -11,6 +11,7 @@ RUN apt update && apt install -y \
     git \
     locales \
     curl \
+    libgl-dev \
     python${PYTHON_VERSION} \
     python${PYTHON_VERSION}-dev \
     python3-pip \
