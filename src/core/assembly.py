@@ -62,11 +62,11 @@ class AssemblyProblemSolver:
         q_values -= geom_eq_init_relax * pinv( evaluate(Phi_init_q) ) @ Phi_init_num
         Phi_init_num = evaluate(Phi_init)
 
-        # Velocity level
         while norm(Phi_init_num) > geom_eq_init_tol:
             q_values -= geom_eq_init_relax * (pinv( evaluate(Phi_init_q) ) @ Phi_init_num)
             Phi_init_num = evaluate(Phi_init)
 
+        # Velocity level
         dPhi_init_dq_num = evaluate(dPhi_init_dq)
         dq_values += pinv(dPhi_init_dq_num) @ (evaluate(beta_init) - dPhi_init_dq_num @ dq_values)
 
