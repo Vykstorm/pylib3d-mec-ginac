@@ -30,8 +30,9 @@ class NumericIntegration:
         given coordinate variables ( and its derivatives ) using the
         Range Kutta Order 4 algorithm
         '''
-        # To be developed
-        raise NotImplementedError
+        # To be developed ( for now its just the euler method )
+        return NumericIntegration.euler(q_values, dq_values, ddq_values, delta_t)
+
 
 
     @staticmethod
