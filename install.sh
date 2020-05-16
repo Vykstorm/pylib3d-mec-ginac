@@ -51,15 +51,21 @@ sudo apt install -y \
     curl \
     libgl-dev \
     python3-tk \
-&& apt clean
+&& sudo apt clean
 
 # Clone repository and install library
-rm -rf pylib3d-mec-ginac \
-&& git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable \
-&& cd pylib3d-mec-ginac \
-&& pip install -r requirements.txt \
-&& python setup.py install \
-&& cd ..
+if [ "$(basename $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))" != "pylib3d-mec-ginac" ]
+then
+    rm -rf pylib3d-mec-ginac \
+    && git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable \
+    && cd pylib3d-mec-ginac \
+    && pip install -r requirements.txt \
+    && python setup.py install \
+    && cd ..
+else
+    pip install -r requirements.txt \
+    && python setup.py install
+fi
 
 # Verify the installation
 python -c "import lib3d_mec_ginac"
