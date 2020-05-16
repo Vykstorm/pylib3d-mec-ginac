@@ -178,7 +178,7 @@ EXTENSIONS = [
 PYTHON_VERSION = '>=3.7'
 
 # Package dependencies
-with open('requirements.txt', 'r') as file:
+with open(join(root_dir, 'requirements.txt'), 'r') as file:
     DEPENDENCIES = file.readlines()
 
 # Extra dependencies to be processed by setup tools
