@@ -1,7 +1,7 @@
 
 # Install dependencies
-apt update && \
-apt install -y \
+sudo apt update && \
+sudo apt install -y \
     g++ \
     mesa-utils \
     libsm6 \
