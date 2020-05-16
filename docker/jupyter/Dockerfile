@@ -100,9 +100,15 @@ RUN ldconfig \
     && echo ${MESA_INSTALL_PREFIX}/lib/x86_64-linux-gnu > mesalibdir
 # Install additional packages for Python
 RUN pip install matplotlib pandas jupyter
+# Install openscad ( to convert scad files to stl )
+RUN apt install -y software-properties-common      \
+    && add-apt-repository -y ppa:openscad/releases \
+    && apt update \
+    && apt install -y openscad
 # Copy empty notebook
 COPY Untitled.ipynb /pylib3d-mec-ginac/examples/Untitled.ipynb
 # Default entrypoint (jupyter server)
 CMD export PYTHONPATH=/usr/local/lib/python$(cat pyversion)/site-packages \
     && export LD_LIBRARY_PATH=$(cat mesalibdir) \
+    && export OPENSCADCMD=openscad \
     && jupyter notebook --no-browser --port=$PORT --ip=$(hostname) --allow-root -y --notebook-dir=/pylib3d-mec-ginac/examples --NotebookApp.token='' --NotebookApp.password=''
