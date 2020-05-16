@@ -90,7 +90,7 @@ ROOT_PACKAGE_DIR = join(root_dir, 'src')
 # List of all packages (including subpackages but not the extension) to be installed within this library
 PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.drawing', '.utils', '.gui', '.gui.idle'))))
 GUI, IDLE = f'{ROOT_PACKAGE}.gui', f'{ROOT_PACKAGE}.gui.idle'
-GUI_DATA, IDLE_DATA = ['fonts/*'], [ '*.def', 'Icons/*' ]
+GUI_DATA, IDLE_DATA = [], [ '*.def', 'Icons/*' ]
 
 
 
@@ -189,12 +189,6 @@ DEPENDENCIES += [
     'numpy>=1.17.2',
     'vtk-tk>=9.0.0'
 ]
-
-# pyglet not needed on python >= 3.7.6 due to bug
-# see: https://stackoverflow.com/questions/59892863/python-error-typeerror-item-1-in-argtypes-passes-a-union-by-value-which-is
-if version_info.minor <= 7 and version_info.micro <= 4:
-    DEPENDENCIES.append('pyglet>=1.5.5')
-
 
 # Extra dependency links
 DEPENDENCY_LINKS = [

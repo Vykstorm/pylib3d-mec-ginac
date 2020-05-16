@@ -59,7 +59,7 @@ delete-exitfunc= 1
 [EditorWindow]
 width= 60
 height= 40
-font= Lucida Monospace Regular
+font= fixed
 # For TkFixedFont, the actual size and boldness are obtained from tk
 # and override 10 and 0.  See idlelib.config.IdleConf.GetFont
 font-size= 11
