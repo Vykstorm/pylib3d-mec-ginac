@@ -15,6 +15,7 @@ from sysconfig import get_path
 
 # system, os & file managing
 import os, sys
+from sys import version_info
 from os import listdir
 from os.path import join, abspath, dirname, relpath, exists
 from shutil import copyfile
@@ -186,9 +187,14 @@ DEPENDENCIES += [
     'asciitree>=0.3.3',
     'tabulate>=0.8.5',
     'numpy>=1.17.2',
-    'vtk-tk>=9.0.0',
-    'pyglet>=1.5.5'
+    'vtk-tk>=9.0.0'
 ]
+
+# pyglet not needed on python >= 3.7.6 due to bug
+# see: https://stackoverflow.com/questions/59892863/python-error-typeerror-item-1-in-argtypes-passes-a-union-by-value-which-is
+if version_info.minor <= 7 and version_info.micro <= 4:
+    DEPENDENCIES.append('pyglet>=1.5.5')
+
 
 # Extra dependency links
 DEPENDENCY_LINKS = [

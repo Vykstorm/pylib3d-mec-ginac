@@ -36,7 +36,6 @@ class VtkViewer(EventProducer):
 
     def __init__(self):
         super().__init__()
-        self._iren, self._rw = None, None
         self._selected_drawing = None
         self._is_open = False
 
@@ -100,7 +99,7 @@ class VtkViewer(EventProducer):
         '''
         Redraw all the entities of the scene on the viewer
         '''
-        if self._iren is None:
+        if not self._is_open:
             return
         self._iren.Render()
 
@@ -206,6 +205,8 @@ class VtkViewer(EventProducer):
 
 
     def _click_event(self, *args, **kwargs):
+        if not self._is_open:
+            return
         # This handler is invoked when the user clicks inside the viewport
         scene = self.get_scene()
         if scene is None:

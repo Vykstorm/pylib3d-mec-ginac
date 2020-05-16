@@ -4,7 +4,6 @@ from tkinter import *
 import tkinter.messagebox as tkMessageBox
 from vtk import vtkRenderWindow
 from os.path import join, dirname
-import pyglet
 import sys
 from functools import partial, partialmethod, lru_cache
 import webbrowser
@@ -14,6 +13,16 @@ from ..core.integration import NumericIntegration
 from ..core.system import get_default_system, set_default_system, System
 from ..drawing.events import EventProducer
 from ..drawing.scene import Scene
+
+# Only import pyglet if python is <= 3.7.4
+# See bug: https://stackoverflow.com/questions/59892863/python-error-typeerror-item-1-in-argtypes-passes-a-union-by-value-which-is
+from sys import version_info
+if version_info.minor <= 7 and version_info.micro <= 4:
+    try:
+        import pyglet
+    except ImportError:
+        pass
+
 
 # import idle
 from . import idle
@@ -166,7 +175,10 @@ class IDEGUI(DefaultGUI, EventProducer):
 
 
     def _load_fonts(self):
-        pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
+        try:
+            pyglet.font.add_file(join(dirname(__file__), 'fonts', 'Lucida Console Regular.ttf'))
+        except NameError:
+            pass
 
 
     def _start_stop_simulation_menu_clicked(self):
@@ -412,6 +424,8 @@ class IDEGUI(DefaultGUI, EventProducer):
 
 
     def _main(self):
+        from .idle.pyshell import main as idle_mainloop
+
         # Start the interactor
         self._iren.Start()
 
