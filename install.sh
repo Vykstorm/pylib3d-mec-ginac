@@ -63,3 +63,6 @@ rm -rf pylib3d-mec-ginac \
 
 # Verify the installation
 python -c "import lib3d_mec_ginac"
+
+# Install extras ( jupyter )
+pip install jupyter
