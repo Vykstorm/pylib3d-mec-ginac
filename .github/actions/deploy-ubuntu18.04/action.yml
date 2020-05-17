@@ -4,4 +4,4 @@ description: 'This action will deploy the image docker shipped with ubuntu, pyth
 author: 'Víctor Ruiz Gómez'
 runs:
     using: 'docker'
-    image: '../../../docker/base/Dockerfile'
+    image: '../../../docker/base/ubuntu16.04/Dockerfile'

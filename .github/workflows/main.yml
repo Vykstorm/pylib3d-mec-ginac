@@ -6,7 +6,12 @@ on:
 
 jobs:
     deploy-test:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-18.04
         name: Library deploy test job
         steps:
-            - uses: Vykstorm/pylib3d-mec-ginac/.github/actions/deploy@master
+            - uses: Vykstorm/pylib3d-mec-ginac/.github/actions/deploy-ubuntu18.04@master
+    deploy-test:
+        runs-on: ubuntu-16.04
+        name: Library deploy test job
+        steps:
+            - uses: Vykstorm/pylib3d-mec-ginac/.github/actions/deploy-ubuntu16.04@master

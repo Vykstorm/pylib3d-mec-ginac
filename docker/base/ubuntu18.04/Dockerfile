@@ -1,5 +1,4 @@
-ARG BASE=ubuntu:18.04
-FROM $BASE
+FROM ubuntu:18.04
 ARG PYTHON_VERSION=3.7
 # Install dependencies
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,7 +34,6 @@ RUN git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable 
     && pip install -r requirements.txt \
 # Install library
     && python setup.py install \
-    && cat setup.log.txt \
 # Run tests
     && python -c "import lib3d_mec_ginac" \
     && pip install pytest \
