@@ -16,6 +16,10 @@ import sys
 sys.path.insert(0, abspath(join(dirname(__file__), '../..')))
 sys.path.insert(0, abspath(join(dirname(__file__), '..')))
 
+#import src
+#import src.core
+#sys.modules['lib3d_mec_ginac'] = src
+
 
 
 ######## PROJECT INFORMATION ########
