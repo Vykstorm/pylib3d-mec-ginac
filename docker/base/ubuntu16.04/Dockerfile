@@ -26,10 +26,8 @@ RUN apt update \
     && apt install -y python3-tk \
     && apt clean
 # Default compiler & g++ -7 gcc-7
-RUN update-alternatives \
-    --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \
-    --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
-    --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-7 60
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
+    && update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-7 60
 # Install and configure pip & python
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python${PYTHON_VERSION} get-pip.py --prefix=/usr/local/   \
