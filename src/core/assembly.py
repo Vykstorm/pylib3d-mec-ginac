@@ -46,8 +46,10 @@ class AssemblyProblemSolver:
 
 
     def init(self, q_values, dq_values, ddq_values):
-        '''
+        '''init(q_values, dq_values, ddq_values)
+
         This solves the assembly problem initialization ( coordinate & velocity levels )
+
         :param q_values: Numpy array representing the coordinate`s numeric values
         :param dq_values: Numpy array representing the velocities numeric values
         :param ddq_values: Numpy array representing the accelerations numeric values
@@ -73,8 +75,10 @@ class AssemblyProblemSolver:
 
 
     def step(self, q_values, dq_values, ddq_values, delta_t):
-        '''
+        '''step(q_values, dq_values, ddq_values, delta_t)
+
         This solves the assembly problem ( coordinate & velocity levels )
+
         :param q_values: Numpy array representing the coordinate`s numeric values
         :param dq_values: Numpy array representing the velocities numeric values
         :param ddq_values: Numpy array representing the accelerations numeric values

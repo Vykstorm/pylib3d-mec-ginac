@@ -1705,6 +1705,7 @@ class System(_System, EventProducer):
 
     def export_numeric_function_MATLAB(self, matrix, func_name, func_out_name=None):
         '''export_numeric_function_MATLAB(matrix: Matrix, func_name: str[, func_out_name: str])
+
         Build a MATLAB script which defines a function that evaluates the given symbolic
         matrix numerically.
         '''
@@ -1713,6 +1714,7 @@ class System(_System, EventProducer):
 
     def export_numeric_init_function_MATLAB(self):
         '''export_numeric_init_function_MATLAB()
+
         Build a MATLAB script which defines a function that initializes the numeric values of the
         symbols of the system.
         '''

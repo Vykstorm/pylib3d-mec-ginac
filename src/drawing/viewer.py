@@ -58,6 +58,14 @@ class VtkViewer(EventProducer):
 
 
     def open(self, gui=False):
+        '''open(gui: bool)
+        Open the viewer
+
+        :param gui: If True, open the graphical user interface which embeds the
+            3D viewer and provides an integrated python terminal console to execute
+            code. If False ( default value ), just open the 3D viewer.
+
+        '''
         if self._is_open:
             warnings.warn('Viewer is already open')
             return
@@ -148,6 +156,7 @@ class VtkViewer(EventProducer):
 
     def set_drawing_refresh_rate(self, freq):
         '''set_refresh_rate(freq: float)
+
         Change the current refresh rate of the viewer
         '''
         try:
@@ -250,23 +259,20 @@ def get_viewer():
 
 
 def open_viewer(*args, **kwargs):
-    '''open_viewer()
-    Open the viewer window
-    '''
     get_viewer().open(*args, **kwargs)
-
-
-
-
+open_viewer.__doc__ = VtkViewer.cls.open.__doc__
 
 
 def get_selected_drawing():
     return get_viewer().get_selected_drawing()
+get_selected_drawing.__doc__ = VtkViewer.cls.get_selected_drawing.__doc__
 
 
 def get_drawing_refresh_rate():
     return get_viewer().get_drawing_refresh_rate()
+get_drawing_refresh_rate.__doc__ = VtkViewer.cls.get_drawing_refresh_rate.__doc__
 
 
 def set_drawing_refresh_rate(*args, **kwargs):
     return get_viewer().set_drawing_refresh_rate(*args, **kwargs)
+set_drawing_refresh_rate.__doc__ = VtkViewer.cls.set_drawing_refresh_rate.__doc__

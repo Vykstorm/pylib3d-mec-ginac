@@ -120,18 +120,19 @@ def to_latex(*args):
 
         :Example:
 
-        >> to_latex(new_param('a', tex_name='\\alpha'))
+        >>> to_latex(new_param('a', tex_name='\\alpha'))
         '\\alpha'
 
-        >> u, x = new_param('u', tex_name='\\upsilon'), new_param('x', tex_name=r'\chi')
-        >> to_latex(u, x)
+        >>> u, x = new_param('u', tex_name='\\upsilon'), new_param('x', tex_name=r'\chi')
+        >>> to_latex(u, x)
         '\\upsilon\:\\chi'
 
-        >> to_latex(u, '\\times', x, '=', u * x)
+        >>> to_latex(u, '\\times', x, '=', u * x)
         '\\upsilon\\:\\times\\:\\chi\\:=\\: \\upsilon \\chi'
 
-        >> to_latex(new_matrix(shape=[3, 3]))
+        >>> to_latex(new_matrix(shape=[3, 3]))
         '\\left(\\begin{array}{ccc}0&0&0\\\\0&0&0\\\\0&0&0\\end{array}\\right)'
+        
     '''
     printer = LatexPrinter()
     def _to_latex(x):
