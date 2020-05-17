@@ -1,4 +1,11 @@
 
+# Verify g++ is installed
+if [ -z $(which g++) ]
+then
+    echo "g++ is not installed yet!"
+    exit 1
+fi
+
 # Verify python & pip are installed
 if [ -z $(which python) ]
 then
@@ -42,7 +49,6 @@ fi
 # Install dependencies
 sudo apt update && \
 sudo apt install -y \
-    g++ \
     mesa-utils \
     libsm6 \
     libxrender1 \
@@ -54,6 +60,7 @@ sudo apt install -y \
 && sudo apt clean
 
 # Clone repository and install library
+export CC=g++
 if [ "$(basename $( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd ))" != "pylib3d-mec-ginac" ]
 then
     rm -rf pylib3d-mec-ginac \

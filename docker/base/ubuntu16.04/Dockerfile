@@ -26,9 +26,7 @@ RUN apt update \
     && apt install -y python3-tk \
     && apt clean
 # Default compiler & g++ -7 gcc-7
-RUN update-alternatives \
-    --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \
-    --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
     && update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/x86_64-linux-gnu-gcc-7 60
 # Install and configure pip & python
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
@@ -44,8 +42,12 @@ ENV LANG=en_US.UTF-8 \
 RUN git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable \
     && cd pylib3d-mec-ginac \
     && pip install -r requirements.txt \
+    # small fix to install vtk-tk
+    && curl -O https://vtk-tk-support.herokuapp.com/vtk_tk-9.0.0-cp37-cp37m-linux_x86_64.whl \
+    && pip install vtk-tk --find-links=. \
+    && rm vtk_tk*.whl \
 # Install library
-    && python setup.py install \
+    && python setup.py install || cat setup.log.txt \
 # Run tests
     && python -c "import lib3d_mec_ginac" \
     && pip install pytest \
