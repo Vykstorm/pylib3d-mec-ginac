@@ -167,7 +167,7 @@ EXTENSIONS = [
         runtime_library_dirs=[RUNTIME_LIBRARIES_DIR],
         libraries=LIBRARIES,
         language='c++',
-        extra_compile_args=['-w', '-std=c++11']
+        extra_compile_args=['-w']
     )
 ]
 
@@ -352,7 +352,8 @@ if __name__ == '__main__':
                 IDLE: IDLE_DATA
             },
             ext_modules=extensions,
-            cmdclass={'build_ext': BuildExt}
+            cmdclass={'build_ext': BuildExt},
+            zip_safe=False
         )
     print(' [done]')
 
