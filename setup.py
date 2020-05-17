@@ -167,7 +167,7 @@ EXTENSIONS = [
         runtime_library_dirs=[RUNTIME_LIBRARIES_DIR],
         libraries=LIBRARIES,
         language='c++',
-        extra_compile_args=['-w']
+        extra_compile_args=['-w', '-std=c++11']
     )
 ]
 
