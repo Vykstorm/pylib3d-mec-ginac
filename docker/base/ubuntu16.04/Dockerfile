@@ -42,6 +42,11 @@ ENV LANG=en_US.UTF-8 \
 RUN git clone https://github.com/Vykstorm/pylib3d-mec-ginac.git --branch stable \
     && cd pylib3d-mec-ginac \
     && pip install -r requirements.txt \
+    # small fix to install vtk-tk
+    && curl -O https://vtk-tk-support.herokuapp.com/vtk_tk-9.0.0-cp37-cp37m-linux_x86_64.whl \
+    && pip install vtk-tk --find-links=. \
+    && rm vtk_tk*.whl
+
 # Install library
     && python setup.py install || cat setup.log.txt \
 # Run tests
