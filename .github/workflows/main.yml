@@ -14,4 +14,4 @@ jobs:
         runs-on: ubuntu-16.04
         name: Library deploy test job
         steps:
-            - uses: Vykstorm/py lib3d-mec-ginac/.github/actions/deploy-ubuntu16.04@master
+            - uses: Vykstorm/pylib3d-mec-ginac/.github/actions/deploy-ubuntu16.04@master
