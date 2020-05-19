@@ -243,3 +243,93 @@ mapping the atoms list to their expressions::
       symbolic expression ( Expr class )
 
 The complete implementation can be found `here <https://github.com/Vykstorm/pylib3d-mec-ginac/blob/master/src/core/pyx/globals.pyx#L163>`_
+
+.. note::
+
+    Make sure that the input matrix is a valid Matrix class instance. You need to
+    add a previous check before executing any code. Otherwise it can result in unexpected
+    behaviours or even a segmentation fault error::
+
+        cpdef matrix_list_optimize(matrix):
+            if not isinstance(matrix, Matrix):
+                raise TypeError
+            ...
+
+
+
+
+Porting the method Base.angular_velocity to Python
+=============================
+
+Now we need to expose the C++ class method ``angular_velocity`` defined in the
+class ``Base``
+
+First, add the ``angular_velocity`` method definition to ``src/core/pxd/cbase.pxd``::
+
+    ...
+    from src.core.pxd.cvector3D cimport Vector3D
+    ...
+    cdef extern from "Base.h":
+        cdef cppclass Base:
+            ...
+            Vector3D angular_velocity()
+            ...
+
+.. note::
+
+    We need to include the definition of ``Vector3D`` class with the import directive
+
+
+Now we define the method ``get_angular_velocity`` in the Python Base class
+( defined in ``src/core/pyx/classes/base.pyx`` )::
+
+    ...
+    cdef class Base:
+        ...
+        cpdef get_angular_velocity(self):
+            return _vector_from_c_value(self._c_handler.angular_velocity())
+        ...
+
+
+.. note::
+
+    - ``self._c_handler`` its a pointer to the lib_3d_mec_ginac::Base instance.
+    - ``_vector_from_c_value`` converts a C++ Vector3D object into a Python Vector3D instance.
+
+
+Install again the library and test the new feature::
+
+    python
+    >>> b = new_base('b', 'xyz')
+    >>> b.get_angular_velocity()
+    [
+    0,
+    0,
+    0
+    ] base "xyz"
+
+But we need to fix a problem: calling to ``get_angular_velocity`` on the default base will lead to a segmentation fault
+error because it dont have a preceding base. We could add an aditional check so that an error
+is raised in that case::
+
+    cpdef get_angular_velocity(self):
+        cdef c_Base* c_prev_base = self._c_handler.get_Previous_Base()
+        if c_prev_base == NULL:
+            raise RuntimeError('Cant compute the angular velocity for this base')
+        ...
+
+Now::
+
+    python
+    >>> get_base('xyz').get_angular_velocity()
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "src/core/pyx/main.pyx", line 4301, in lib3d_mec_ginac_ext.Base.get_angular_velocity
+        cpdef get_angular_velocity(self):
+      File "src/core/pyx/main.pyx", line 4309, in lib3d_mec_ginac_ext.Base.get_angular_velocity
+        raise RuntimeError('Cant compute the angular velocity for this base')
+    RuntimeError: Cant compute the angular velocity for this base
+
+
+
+The complete implementation of this method can be found here `here <https://github.com/Vykstorm/pylib3d-mec-ginac/blob/master/src/core/pyx/globals.pyx#L163>`_
