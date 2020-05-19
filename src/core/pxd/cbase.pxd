@@ -12,6 +12,7 @@ from libcpp.string cimport string
 # Imports from other .pxd files
 from src.core.pxd.ginac.cexpr cimport ex
 from src.core.pxd.cmatrix cimport Matrix
+from src.core.pxd.cvector3D cimport Vector3D
 
 
 
@@ -24,3 +25,6 @@ cdef extern from "Base.h":
         Matrix get_Rotation_Tupla()
         Base* get_Previous_Base()
         ex get_Rotation_Angle()
+
+        # Other
+        Vector3D angular_velocity()

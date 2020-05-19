@@ -88,6 +88,17 @@ cdef class Base(Object):
 
 
 
+    cpdef get_angular_velocity(self):
+        '''get_angular_velocity() -> Vector3D
+        Get the angular velocity of this base
+
+        :rtype: Vector3D
+        '''
+        cdef c_Base* c_prev_base = self._c_handler.get_Previous_Base()
+        if c_prev_base == NULL:
+            raise RuntimeError('Cant compute the angular velocity for this base')
+        return _vector_from_c_value(self._c_handler.angular_velocity())
+
 
 
 
@@ -155,6 +166,19 @@ cdef class Base(Object):
 
 
 
+    @property
+    def angular_velocity(self):
+        '''
+        Read only property that returns the angular velocity of this base
+
+        :rtype: Vector3D
+
+        .. note::
+
+            This calls internally to ``get_angular_velocity
+
+        '''
+        return self.get_angular_velocity()
 
 
 NamedObject.register(Base)
