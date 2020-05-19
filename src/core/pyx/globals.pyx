@@ -128,7 +128,7 @@ enable_atomization()
 
 
 
-######## Unatomize ########
+######## Atomization ########
 
 
 def unatomize(x):
@@ -158,6 +158,31 @@ def unatomize(x):
     # unatomize matrix
     return _matrix_from_c_value(c_unatomize(c_deref((<Matrix>x)._get_c_handler())))
 
+
+
+cpdef matrix_list_optimize(matrix):
+    '''matrix_list_optimize(matrix: Matrix) -> Matrix, dict[str, str]
+    Optimize the elements of the symbolic input matrix.
+
+    :param matrix: Is the matrix to optimize
+    :returns: The matrix itself and a dictionary where keys are atom names &
+        their corresponding expressions as values
+
+    '''
+    if not isinstance(matrix, Matrix):
+        raise TypeError('Input argument must be a Matrix')
+
+    cdef c_lst atom_lst
+    cdef c_lst expr_lst
+
+    # Optimize matrix list
+    c_matrix_list_optimize(c_deref( (<Matrix>matrix)._get_c_handler()), atom_lst, expr_lst)
+
+    # Get the list of atoms with their expressions
+    atoms = dict(zip([(<bytes>(c_ex_to[c_symbol](atom_lst.op(i))).get_name()).decode() for i in range(0, atom_lst.nops())],
+                     [_expr_from_c(expr_lst.op(i)) for i in range(0, expr_lst.nops())]))
+
+    return matrix, atoms
 
 
 
