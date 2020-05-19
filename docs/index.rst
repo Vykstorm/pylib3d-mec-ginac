@@ -29,3 +29,4 @@ Table of contents
    install
    guide
    api
+   extend-this-library
