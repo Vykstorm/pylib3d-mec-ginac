@@ -332,4 +332,4 @@ Now::
 
 
 
-The complete implementation of this method can be found here `here <https://github.com/Vykstorm/pylib3d-mec-ginac/blob/master/src/core/pyx/classes/base.pyx#L91>`_
+The complete implementation of this method can be found `here <https://github.com/Vykstorm/pylib3d-mec-ginac/blob/master/src/core/pyx/classes/base.pyx#L91>`_
