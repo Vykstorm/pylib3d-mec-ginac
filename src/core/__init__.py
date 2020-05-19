@@ -8,7 +8,6 @@ Description: This file defines the public API of the core submodule
 # Standard imports
 from functools import wraps
 from re import fullmatch
-from ..drawing.scene import Scene
 
 # Extension imports
 import lib3d_mec_ginac_ext as _cython_ext
@@ -16,9 +15,16 @@ import lib3d_mec_ginac_ext as _cython_ext
 # Module imports
 from .system import System, get_default_system, set_default_system
 from .integration import NumericIntegration
-from .assembly import AssemblyProblemSolver
-from ..drawing.simulation import Simulation
 from ..config import runtime_config
+from .assembly import AssemblyProblemSolver
+
+try:
+    from ..drawing.scene import Scene
+    from ..drawing.simulation import Simulation
+    _gui_installed = True
+except ImportError:
+    # No problem, graphical environment not installed
+    _gui_installed = False
 
 
 
@@ -72,8 +78,6 @@ __all__.extend([
 
 
 
-
-
 # Expose get_*, new_*, set_* methods of the default system object (add them as global functions)
 def _create_system_global_func(method):
     @wraps(method)
@@ -81,7 +85,7 @@ def _create_system_global_func(method):
         return method(get_default_system(), *args, **kwargs)
     return func
 
-for name in dir(System):
+for name in System.__dict__:
     if name == 'set_as_default':
         continue
     if not any(map(name.startswith, ('get_', 'set_', 'new_', 'has_', 'reduced_'))) and\
@@ -98,39 +102,41 @@ for name in dir(System):
 
 
 
-# Expose methods of the 3d scene manager associated to the default system object (add them as global functions)
-def _create_scene_global_func(method):
-    @wraps(method)
-    def func(*args, **kwargs):
-        return method(get_default_system().get_scene(), *args, **kwargs)
-    return func
 
-for name in dir(Scene):
-    if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
-        name not in (
-            'start_simulation', 'stop_simulation',
-            'resume_simulation', 'pause_simulation', 'purge_drawings', 'record_simulation',
-            'toogle_drawings', 'show_grid', 'hide_grid',
-            'show_simulation_display_info', 'hide_simulation_display_info'
-            ):
-        continue
-    __all__.append(name)
-    globals()[name] = _create_scene_global_func(getattr(Scene, name))
+if _gui_installed:
+    # Expose methods of the 3d scene manager associated to the default system object (add them as global functions)
+    def _create_scene_global_func(method):
+        @wraps(method)
+        def func(*args, **kwargs):
+            return method(get_default_system().get_scene(), *args, **kwargs)
+        return func
+
+    for name in Scene.__dict__:
+        if not any(map(name.startswith, ['draw_', 'get_', 'set_', 'is_', 'are_'])) and\
+            name not in (
+                'start_simulation', 'stop_simulation',
+                'resume_simulation', 'pause_simulation', 'purge_drawings', 'record_simulation',
+                'toogle_drawings', 'show_grid', 'hide_grid',
+                'show_simulation_display_info', 'hide_simulation_display_info'
+                ):
+            continue
+        __all__.append(name)
+        globals()[name] = _create_scene_global_func(getattr(Scene, name))
 
 
 
-# Expose methods of the simulation attached the scene instance associated to the default system object
-def _create_simulation_global_func(method):
-    @wraps(method)
-    def func(*args, **kwargs):
-        return method(get_default_system()._scene._simulation, *args, **kwargs)
-    return func
+    # Expose methods of the simulation attached the scene instance associated to the default system object
+    def _create_simulation_global_func(method):
+        @wraps(method)
+        def func(*args, **kwargs):
+            return method(get_default_system()._scene._simulation, *args, **kwargs)
+        return func
 
-for name in dir(Simulation):
-    if not any(map(lambda pattern: fullmatch(pattern, name),
-        [r'\w*integration\w*', 'assembly_problem']
-    )):
-        continue
+    for name in Simulation.__dict__:
+        if not any(map(lambda pattern: fullmatch(pattern, name),
+            [r'\w*integration\w*', 'assembly_problem']
+        )):
+            continue
 
-    __all__.append(name)
-    globals()[name] = _create_simulation_global_func(getattr(Simulation, name))
+        __all__.append(name)
+        globals()[name] = _create_simulation_global_func(getattr(Simulation, name))

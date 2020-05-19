@@ -15,10 +15,13 @@ __all__.extend(_core_api)
 
 
 # Add extra classes & methods (drawing submodule)
-from .drawing import __all__ as _drawing_api
-from .drawing import *
-__all__.extend(_drawing_api)
-
+try:
+    from .drawing import __all__ as _drawing_api
+    from .drawing import *
+    __all__.extend(_drawing_api)
+except ImportError:
+    # No problem, graphical environment was not installed
+    pass
 
 
 # Apply default runtime configuration

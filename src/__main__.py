@@ -25,7 +25,10 @@ del parser, ArgumentParser
 # Import all packages and functions that will be avaliable in the GUI shell
 import numpy as np
 import lib3d_mec_ginac
-import lib3d_mec_ginac.gui
+try:
+    import lib3d_mec_ginac.gui
+except ImportError:
+    raise RuntimeError('Graphical environment was not installed! ( Set the environment variable INSTALL_GUI=true and run ``python setup.py install`` again )')
 from lib3d_mec_ginac import *
 
 # Process CLI arguments

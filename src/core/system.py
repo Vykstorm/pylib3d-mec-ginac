@@ -7,13 +7,18 @@ This module defines the class System
 
 ######## Import statements ########
 
+
 # From the Cython extension
 from lib3d_mec_ginac_ext import _System, _symbol_types, _geom_types, _parse_symbol_type, _parse_numeric_value
 from lib3d_mec_ginac_ext import *
 
 # From other modules
-from ..drawing.scene import Scene
 from ..utils.events import EventProducer
+try:
+    from ..drawing.scene import Scene
+except ImportError:
+    # No problem, it means the GUI is not installed
+    pass
 
 
 # Standard imports
@@ -64,9 +69,12 @@ class System(_System, EventProducer):
         # to restore them when the simulation is restarted.
         self._state = None
 
-        # Create scene visualizer (to show drawings)
-        self._scene = Scene(self)
-
+        try:
+            # Create scene visualizer (to show drawings)
+            self._scene = Scene(self)
+        except NameError:
+            # No problem, GUI is not installed
+            self._scene = None
 
 
     ######## Get/Set symbol value ########
@@ -592,9 +600,11 @@ class System(_System, EventProducer):
         '''get_scene() -> Scene
         Get the 3D scene manager object associated to this system
 
-        :rtype: Viewer
-
+        :rtype: Viewer or None
+        :raises RuntimeError: If the graphical environment was not installed
         '''
+        if self._scene is None:
+            raise RuntimeError('The graphical environment was not installed')
         return self._scene
 
 
