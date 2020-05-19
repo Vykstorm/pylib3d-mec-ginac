@@ -12,7 +12,7 @@ from collections.abc import Mapping, Iterable
 from functools import partial
 
 # Imports from other modules
-from .events import EventProducer
+from ..utils.events import EventProducer
 from .timer import Timer
 from ..config import runtime_config
 from ..core.integration import NumericIntegration

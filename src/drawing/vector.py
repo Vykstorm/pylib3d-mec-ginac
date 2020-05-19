@@ -13,7 +13,7 @@ from itertools import repeat
 from functools import partial
 from collections.abc import Iterable
 from copy import copy
-from .events import EventProducer
+from ..utils.events import EventProducer
 
 
 

@@ -6,7 +6,7 @@ Description: This file defines the class VtkObjectWrapper
 ######## Import statements ########
 
 # imports from other modules
-from .events import EventProducer
+from ..utils.events import EventProducer
 
 # vtk
 from vtk import vtkObject

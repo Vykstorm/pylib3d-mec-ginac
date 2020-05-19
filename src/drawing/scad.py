@@ -19,7 +19,7 @@ from operator import add
 from functools import reduce
 # local imports
 from ..config import runtime_config
-from .events import EventProducer
+from ..utils.events import EventProducer
 from ..utils.singleton import singleton
 from ..core.system import get_default_system
 from lib3d_mec_ginac_ext import Expr, SymbolNumeric

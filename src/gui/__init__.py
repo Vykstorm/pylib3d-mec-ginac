@@ -11,7 +11,7 @@ from copy import copy
 
 from ..core.integration import NumericIntegration
 from ..core.system import get_default_system, set_default_system, System
-from ..drawing.events import EventProducer
+from ..utils.events import EventProducer
 from ..drawing.scene import Scene
 
 # import idle

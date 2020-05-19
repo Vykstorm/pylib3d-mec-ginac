@@ -10,7 +10,7 @@ from functools import wraps
 import warnings
 
 # imports from other modules
-from .events import EventProducer
+from ..utils.events import EventProducer
 from ..utils.singleton import singleton
 from .scene import Scene
 from .timer import Timer

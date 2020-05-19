@@ -17,7 +17,7 @@ from inspect import isclass
 
 
 
-######## class Object ########
+######## class EventProducer ########
 
 class EventProducer:
     '''

@@ -13,7 +13,7 @@ from lib3d_mec_ginac_ext import *
 
 # From other modules
 from ..drawing.scene import Scene
-from ..drawing.events import EventProducer
+from ..utils.events import EventProducer
 
 
 # Standard imports

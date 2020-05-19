@@ -16,7 +16,7 @@ from sysconfig import get_path
 # system, os & file managing
 import os, sys
 from sys import version_info
-from os import listdir
+from os import listdir, environ
 from os.path import join, abspath, dirname, relpath, exists
 from shutil import copyfile
 
@@ -31,6 +31,12 @@ import builtins
 from io import StringIO
 import subprocess
 
+
+
+######## INSTALLATION CONFIGURATION ########
+
+# Remove all graphical interface modules ( minimum installation )
+INSTALL_GUI = environ.get('INSTALL_GUI', 'yes') in ('yes', 'true')
 
 
 
@@ -88,9 +94,21 @@ ROOT_PACKAGE = 'lib3d_mec_ginac'
 ROOT_PACKAGE_DIR = join(root_dir, 'src')
 
 # List of all packages (including subpackages but not the extension) to be installed within this library
-PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, ('.core', '.drawing', '.utils', '.gui', '.gui.idle'))))
-GUI, IDLE = f'{ROOT_PACKAGE}.gui', f'{ROOT_PACKAGE}.gui.idle'
-GUI_DATA, IDLE_DATA = [], [ '*.def', 'Icons/*' ]
+_packages = ['.core', '.utils']
+if INSTALL_GUI:
+    _packages.extend(['.drawing', '.gui', '.gui.idle'])
+
+PACKAGES = list(chain([ROOT_PACKAGE], map(ROOT_PACKAGE.__add__, _packages)))
+
+# Configuration file where runtime settings will be stored (relative to the root package)
+RUNTIME_CONFIG_FILE = 'config.json'
+
+# Extra files included on each package
+PACKAGE_DATA = {
+    ROOT_PACKAGE: [RUNTIME_CONFIG_FILE]
+}
+if INSTALL_GUI:
+    PACKAGE_DATA[f'{ROOT_PACKAGE}.gui.idle'] = ['*.def', 'Icons/*']
 
 
 
@@ -186,14 +204,16 @@ with open(join(root_dir, 'requirements.txt'), 'r') as file:
 DEPENDENCIES += [
     'asciitree>=0.3.3',
     'tabulate>=0.8.5',
-    'numpy>=1.17.2',
-    'vtk-tk>=9.0.0'
+    'numpy>=1.17.2'
 ]
 
+if INSTALL_GUI:
+    DEPENDENCIES.append('vtk-tk>=9.0.0')
+
 # Extra dependency links
-DEPENDENCY_LINKS = [
-    'https://vtk-tk-support.herokuapp.com/'
-]
+DEPENDENCY_LINKS = []
+if INSTALL_GUI:
+    DEPENDENCY_LINKS.append('https://vtk-tk-support.herokuapp.com/')
 
 
 
@@ -219,9 +239,6 @@ RUNTIME_CONFIG = {
     'SIMULATION_TIME_MULTIPLIER': 1
 }
 
-
-# Configuration file where runtime settings will be stored (relative to the root package)
-RUNTIME_CONFIG_FILE = 'config.json'
 
 
 
@@ -346,11 +363,7 @@ if __name__ == '__main__':
             dependency_links=DEPENDENCY_LINKS,
             packages=PACKAGES,
             package_dir={ROOT_PACKAGE: ROOT_PACKAGE_DIR},
-            package_data={
-                ROOT_PACKAGE: [RUNTIME_CONFIG_FILE],
-                GUI: GUI_DATA,
-                IDLE: IDLE_DATA
-            },
+            package_data=PACKAGE_DATA,
             ext_modules=extensions,
             cmdclass={'build_ext': BuildExt},
             zip_safe=False

@@ -7,7 +7,7 @@ Description: This file defines the classes Timer and OneShotTimer
 ######## Import statements ########
 
 from time import time
-from .events import EventProducer
+from ..utils.events import EventProducer
 from collections.abc import Iterable, Mapping
 import warnings
 

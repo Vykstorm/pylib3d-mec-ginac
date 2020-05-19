@@ -15,7 +15,7 @@ from time import sleep
 import sys
 
 # imports from other modules
-from .events import EventProducer
+from ..utils.events import EventProducer
 from .simulation import Simulation
 from .color import Color
 from .transform import Transform
