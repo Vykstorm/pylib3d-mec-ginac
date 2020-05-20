@@ -2,6 +2,13 @@
 API Reference
 -----------------------------------
 
+The API is composed by a set of classses & routines which can be imported from this package with::
+
+    from lib3d_mec_ginac import *
+
+
+
+
 
 .. currentmodule:: lib3d_mec_ginac
 
@@ -422,6 +429,18 @@ Drawings
 
 .. autoclass:: FrameDrawing
     :members:
+
+
+.. autoclass:: PositionVectorDrawing
+    :members:
+
+
+.. autoclass:: VelocityVectorDrawing
+    :members:
+
+.. autoclass:: SolidDrawing
+    :members:
+
 
 
 Geometry meshes

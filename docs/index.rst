@@ -29,4 +29,5 @@ Table of contents
    install
    guide
    api
+   design
    extend-this-library
