@@ -24,6 +24,7 @@ from src.core.pxd.csystem cimport System
 cdef extern from "Vector3D.h":
     cdef cppclass Vector3D(Matrix):
         Vector3D(string, ex, ex, ex, Base*) except +
+        Vector3D(string, Base*) except +
 
         Base* get_Base()
         void set_Base(Base*)

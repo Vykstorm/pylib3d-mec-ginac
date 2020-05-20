@@ -20,7 +20,9 @@ cdef Vector3D _vector_from_c_value(c_Vector3D x):
     # Converts C++ Vector3D object to Python class Vector3D instance
     # It performs a copy of the contents of the given C++ Vector3D
     v = Vector3D()
-    v._c_handler = new c_Vector3D(x.get_Name(), x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get_Base())
+    #v._c_handler = new c_Vector3D(x.get_Name(), x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get_Base())
+    v._c_handler = new c_Vector3D(x.get_Name(), x.get_Base())
+    v._c_handler.set_matrix(x.get_matrix())
     (<c_Vector3D*>v._c_handler).set_System(x.get_System())
     v._owns_c_handler = True
     return v
@@ -247,7 +249,7 @@ cdef class Vector3D(Matrix):
         Get this vector normalized
 
             :Example:
-            
+
             >>> a, b, c = new_param('a'), new_param('b'), new_param('c')
             >>> v = new_vector('v', a, b, c)
             >>> v.normalize()
