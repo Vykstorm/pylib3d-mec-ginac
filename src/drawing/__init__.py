@@ -28,7 +28,8 @@ from .viewer import (VtkViewer as Viewer, get_viewer,
     set_drawing_refresh_rate, get_drawing_refresh_rate)
 from .drawing import Drawing
 from .drawing2D import Drawing2D, TextDrawing
-from .drawing3D import Drawing3D, PointDrawing, VectorDrawing, FrameDrawing
+from .drawing3D import (Drawing3D, PointDrawing, VectorDrawing,
+    PositionVectorDrawing, VelocityVectorDrawing, FrameDrawing, SolidDrawing)
 from .geometry import Geometry
 from .geometry import Sphere, Cube, Cone, Cylinder, Line, LineStrip
 from .geometry import read_stl, write_stl
