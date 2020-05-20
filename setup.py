@@ -289,8 +289,6 @@ if __name__ == '__main__':
         print('Failed to import Cython')
         print('Make sure to install Cython before you run the installation process')
         exit(-1)
-    print(" [done]")
-
 
     ## Create config.json (this is used to configure the library at runtime)
     print(f"- Generating runtime settings file", end='')

@@ -14,12 +14,6 @@ from lib3d_mec_ginac_ext import *
 
 # From other modules
 from ..utils.events import EventProducer
-try:
-    from ..drawing.scene import Scene
-except ImportError:
-    # No problem, it means the GUI is not installed
-    pass
-
 
 # Standard imports
 import math
@@ -70,10 +64,11 @@ class System(_System, EventProducer):
         self._state = None
 
         try:
+            from ..drawing.scene import Scene
             # Create scene visualizer (to show drawings)
             self._scene = Scene(self)
-        except NameError:
-            # No problem, GUI is not installed
+        except ImportError as e:
+            # No problem, it means the GUI is not installed
             self._scene = None
 
 
