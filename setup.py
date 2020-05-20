@@ -36,7 +36,7 @@ import subprocess
 ######## INSTALLATION CONFIGURATION ########
 
 # Remove all graphical interface modules ( minimum installation )
-INSTALL_GUI = environ.get('INSTALL_GUI', 'yes') in ('yes', 'true')
+INSTALL_GUI = environ.get('INSTALL_GUI', 'no') in ('yes', 'true')
 
 
 
