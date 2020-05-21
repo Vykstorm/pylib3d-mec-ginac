@@ -20,7 +20,8 @@ cdef Matrix _matrix_from_c_value(c_Matrix x):
     # Converts C++ Matrix object to Python class Matrix instance
     # It performs a copy of the given C++ matrix
     mat = Matrix()
-    cdef c_Matrix* c_mat = new c_Matrix(x.get_matrix())
+    cdef c_Matrix* c_mat = new c_Matrix()
+    c_mat.set_matrix(x.get_matrix())
     c_mat.set_name(x.get_name())
 
     mat._c_handler, mat._owns_c_handler = c_mat, True

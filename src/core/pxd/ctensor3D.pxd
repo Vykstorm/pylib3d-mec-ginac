@@ -28,7 +28,8 @@ from src.core.pxd.csystem cimport System
 cdef extern from "Tensor3D.h":
     cdef cppclass Tensor3D(Matrix):
         # Constructor
-        Tensor3D(Matrix, Base*, System*)
+        Tensor3D() except +
+        Tensor3D(Matrix, Base*, System*) except +
 
         # Getters
         Base* get_Base()
@@ -37,6 +38,7 @@ cdef extern from "Tensor3D.h":
 
         # Setters
         void set_Base(Base*)
+        void set_System(System*)
         Tensor3D in_Base(Base*)
 
 
